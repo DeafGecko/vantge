@@ -16,7 +16,7 @@ function App() { // Now the function starts AFTER all imports are finished
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#F8F5ED] flex items-center justify-center p-8">
+    <div className="min-h-screen  bg-cream flex items-center justify-center p-8">
       <div className="max-w-md w-full">
         <h1 className="text-5xl font-extrabold tracking-tight text-[#1A1A18] mb-2">
           vantge
