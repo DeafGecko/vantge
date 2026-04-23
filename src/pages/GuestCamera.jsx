@@ -12,21 +12,29 @@ export default function GuestCamera() {
       const streamRef = useRef(null)
       const [cameraError, setCameraError] = useState(null)
       const [cameraReady, setCameraReady] = useState(false)
+      const [needsTapToStart, setNeedsTapToStart] = useState(false)
       const [capturedPhoto, setCapturedPhoto] = useState(null)
 
       const [uploadState, setUploadState] = useState('idle')
       const [uploadError, setUploadError] = useState(null)
       const [guestName, setGuestName] = useState('')
 
-      // Reusable camera starter — stops any existing stream, then starts fresh
-      const startCamera = useCallback(async () => {
-            // Kill any existing stream first
+      // Fully stop any existing stream
+      const stopStream = useCallback(() => {
             if (streamRef.current) {
                   streamRef.current.getTracks().forEach((track) => track.stop())
                   streamRef.current = null
             }
+            if (videoRef.current) {
+                  videoRef.current.srcObject = null
+            }
+      }, [])
 
+      // Start (or restart) the camera
+      const startCamera = useCallback(async () => {
+            stopStream()
             setCameraReady(false)
+            setCameraError(null)
 
             try {
                   const stream = await navigator.mediaDevices.getUserMedia({
@@ -42,31 +50,39 @@ export default function GuestCamera() {
 
                   if (videoRef.current) {
                         videoRef.current.srcObject = stream
-                        // Wait for metadata, then flag ready
                         videoRef.current.onloadedmetadata = () => {
                               videoRef.current?.play().catch(() => { })
                               setCameraReady(true)
+                              setNeedsTapToStart(false)
                         }
                   }
             } catch (err) {
                   console.error('Camera error:', err)
-                  setCameraError(err.message || 'Could not access camera')
-            }
-      }, [])
-
-      // Start camera when component mounts OR when we return from preview to live view
-      useEffect(() => {
-            // Only start camera when NOT showing a captured photo
-            if (!capturedPhoto) {
-                  startCamera()
-            }
-
-            return () => {
-                  // Cleanup on unmount (navigating away)
-                  if (streamRef.current) {
-                        streamRef.current.getTracks().forEach((track) => track.stop())
-                        streamRef.current = null
+                  // If iOS is being stubborn, show a tap-to-start button instead of an error
+                  if (err.name === 'NotAllowedError' || err.name === 'NotReadableError') {
+                        setNeedsTapToStart(true)
+                  } else {
+                        setCameraError(err.message || 'Could not access camera')
                   }
+            }
+      }, [stopStream])
+
+      // Start camera on mount, clean up on unmount
+      useEffect(() => {
+            startCamera()
+            return () => {
+                  stopStream()
+            }
+      }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+      // When we return from preview to live view, restart camera with a small delay
+      useEffect(() => {
+            if (capturedPhoto === null && streamRef.current === null) {
+                  // Give iOS Safari a ~300ms breather before re-requesting camera
+                  const timer = setTimeout(() => {
+                        startCamera()
+                  }, 300)
+                  return () => clearTimeout(timer)
             }
       }, [capturedPhoto, startCamera])
 
@@ -88,11 +104,8 @@ export default function GuestCamera() {
                               setCapturedPhoto({ blob, url })
                               setUploadState('idle')
                               setUploadError(null)
-                              // Stop the stream while viewing preview — saves battery, releases camera
-                              if (streamRef.current) {
-                                    streamRef.current.getTracks().forEach((track) => track.stop())
-                                    streamRef.current = null
-                              }
+                              // Stop stream — saves battery during preview
+                              stopStream()
                         }
                   },
                   'image/jpeg',
@@ -107,7 +120,6 @@ export default function GuestCamera() {
             setCapturedPhoto(null)
             setUploadState('idle')
             setUploadError(null)
-            // The useEffect will detect capturedPhoto=null and restart the camera
       }
 
       async function handleUpload() {
@@ -127,8 +139,6 @@ export default function GuestCamera() {
                   if (capturedPhoto.url) {
                         URL.revokeObjectURL(capturedPhoto.url)
                   }
-                  // Auto-return to live camera after 2s
-                  // useEffect will restart the camera automatically
                   setTimeout(() => {
                         setCapturedPhoto(null)
                         setUploadState('idle')
@@ -205,8 +215,28 @@ export default function GuestCamera() {
                                     className="w-full h-full object-cover absolute inset-0"
                               />
 
+                              {/* Tap-to-start fallback for iOS Safari */}
+                              {needsTapToStart && (
+                                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black">
+                                          <button
+                                                onClick={startCamera}
+                                                className="bg-[#C84A44] hover:bg-[#B43E39] text-white font-medium rounded-full py-4 px-8 text-base"
+                                          >
+                                                Tap to start camera
+                                          </button>
+                                    </div>
+                              )}
+
+                              {/* Loading state */}
+                              {!needsTapToStart && !cameraReady && (
+                                    <div className="absolute inset-0 z-10 flex items-center justify-center">
+                                          <p className="text-white/70 text-sm">Starting camera...</p>
+                                    </div>
+                              )}
+
+                              {/* Shutter button */}
                               <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 via-black/30 to-transparent pt-20 pb-10 flex flex-col items-center">
-                                    {cameraReady ? (
+                                    {cameraReady && (
                                           <button
                                                 onClick={handleCapture}
                                                 className="w-20 h-20 rounded-full bg-white border-4 border-white/50 active:scale-95 transition-transform shadow-lg flex items-center justify-center"
@@ -214,8 +244,6 @@ export default function GuestCamera() {
                                           >
                                                 <div className="w-16 h-16 rounded-full bg-[#E8615C]"></div>
                                           </button>
-                                    ) : (
-                                          <p className="text-white/70 text-sm">Starting camera...</p>
                                     )}
                               </div>
                         </>
