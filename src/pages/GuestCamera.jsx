@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useEvent } from '../hooks/useEvent'
 import { uploadPhoto } from '../lib/uploadPhoto'
@@ -14,42 +14,61 @@ export default function GuestCamera() {
       const [cameraReady, setCameraReady] = useState(false)
       const [capturedPhoto, setCapturedPhoto] = useState(null)
 
-      // Upload state machine: 'idle' | 'uploading' | 'success' | 'error'
       const [uploadState, setUploadState] = useState('idle')
       const [uploadError, setUploadError] = useState(null)
       const [guestName, setGuestName] = useState('')
 
-      useEffect(() => {
-            async function startCamera() {
-                  try {
-                        const stream = await navigator.mediaDevices.getUserMedia({
-                              video: {
-                                    facingMode: 'environment',
-                                    width: { ideal: 1920 },
-                                    height: { ideal: 1080 },
-                              },
-                              audio: false,
-                        })
+      // Reusable camera starter — stops any existing stream, then starts fresh
+      const startCamera = useCallback(async () => {
+            // Kill any existing stream first
+            if (streamRef.current) {
+                  streamRef.current.getTracks().forEach((track) => track.stop())
+                  streamRef.current = null
+            }
 
-                        if (videoRef.current) {
-                              videoRef.current.srcObject = stream
-                              streamRef.current = stream
+            setCameraReady(false)
+
+            try {
+                  const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                              facingMode: 'environment',
+                              width: { ideal: 1920 },
+                              height: { ideal: 1080 },
+                        },
+                        audio: false,
+                  })
+
+                  streamRef.current = stream
+
+                  if (videoRef.current) {
+                        videoRef.current.srcObject = stream
+                        // Wait for metadata, then flag ready
+                        videoRef.current.onloadedmetadata = () => {
+                              videoRef.current?.play().catch(() => { })
                               setCameraReady(true)
                         }
-                  } catch (err) {
-                        console.error('Camera error:', err)
-                        setCameraError(err.message || 'Could not access camera')
                   }
-            }
-
-            startCamera()
-
-            return () => {
-                  if (streamRef.current) {
-                        streamRef.current.getTracks().forEach(track => track.stop())
-                  }
+            } catch (err) {
+                  console.error('Camera error:', err)
+                  setCameraError(err.message || 'Could not access camera')
             }
       }, [])
+
+      // Start camera when component mounts OR when we return from preview to live view
+      useEffect(() => {
+            // Only start camera when NOT showing a captured photo
+            if (!capturedPhoto) {
+                  startCamera()
+            }
+
+            return () => {
+                  // Cleanup on unmount (navigating away)
+                  if (streamRef.current) {
+                        streamRef.current.getTracks().forEach((track) => track.stop())
+                        streamRef.current = null
+                  }
+            }
+      }, [capturedPhoto, startCamera])
 
       function handleCapture() {
             const video = videoRef.current
@@ -69,6 +88,11 @@ export default function GuestCamera() {
                               setCapturedPhoto({ blob, url })
                               setUploadState('idle')
                               setUploadError(null)
+                              // Stop the stream while viewing preview — saves battery, releases camera
+                              if (streamRef.current) {
+                                    streamRef.current.getTracks().forEach((track) => track.stop())
+                                    streamRef.current = null
+                              }
                         }
                   },
                   'image/jpeg',
@@ -83,6 +107,7 @@ export default function GuestCamera() {
             setCapturedPhoto(null)
             setUploadState('idle')
             setUploadError(null)
+            // The useEffect will detect capturedPhoto=null and restart the camera
       }
 
       async function handleUpload() {
@@ -99,11 +124,11 @@ export default function GuestCamera() {
 
             if (result.success) {
                   setUploadState('success')
-                  // Clean up the blob URL
                   if (capturedPhoto.url) {
                         URL.revokeObjectURL(capturedPhoto.url)
                   }
-                  // Auto-return to live camera after 2 seconds
+                  // Auto-return to live camera after 2s
+                  // useEffect will restart the camera automatically
                   setTimeout(() => {
                         setCapturedPhoto(null)
                         setUploadState('idle')
@@ -113,10 +138,6 @@ export default function GuestCamera() {
                   setUploadError(result.error)
             }
       }
-
-      // -----------------------------
-      // Loading / error / not-found screens (same as Phase 2)
-      // -----------------------------
 
       if (eventLoading) {
             return (
@@ -160,14 +181,8 @@ export default function GuestCamera() {
             )
       }
 
-      // -----------------------------
-      // Main camera UI
-      // -----------------------------
-
       return (
             <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
-
-                  {/* Top bar */}
                   <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/60 to-transparent p-4 flex items-center justify-between">
                         <Link
                               to={`/${eventSlug}`}
@@ -180,7 +195,6 @@ export default function GuestCamera() {
                         </p>
                   </div>
 
-                  {/* LIVE CAMERA MODE */}
                   {!capturedPhoto && (
                         <>
                               <video
@@ -192,7 +206,7 @@ export default function GuestCamera() {
                               />
 
                               <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 via-black/30 to-transparent pt-20 pb-10 flex flex-col items-center">
-                                    {cameraReady && (
+                                    {cameraReady ? (
                                           <button
                                                 onClick={handleCapture}
                                                 className="w-20 h-20 rounded-full bg-white border-4 border-white/50 active:scale-95 transition-transform shadow-lg flex items-center justify-center"
@@ -200,12 +214,13 @@ export default function GuestCamera() {
                                           >
                                                 <div className="w-16 h-16 rounded-full bg-[#E8615C]"></div>
                                           </button>
+                                    ) : (
+                                          <p className="text-white/70 text-sm">Starting camera...</p>
                                     )}
                               </div>
                         </>
                   )}
 
-                  {/* PHOTO PREVIEW MODE */}
                   {capturedPhoto && (
                         <>
                               <img
@@ -214,7 +229,6 @@ export default function GuestCamera() {
                                     className="w-full h-full object-cover absolute inset-0"
                               />
 
-                              {/* Success overlay */}
                               {uploadState === 'success' && (
                                     <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                                           <div className="bg-white rounded-2xl p-6 max-w-xs mx-4 text-center">
@@ -229,7 +243,6 @@ export default function GuestCamera() {
                                     </div>
                               )}
 
-                              {/* Uploading overlay */}
                               {uploadState === 'uploading' && (
                                     <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                                           <div className="bg-white rounded-2xl p-6 max-w-xs mx-4 text-center">
@@ -239,11 +252,8 @@ export default function GuestCamera() {
                                     </div>
                               )}
 
-                              {/* Bottom controls — only visible in idle or error state */}
                               {(uploadState === 'idle' || uploadState === 'error') && (
                                     <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-16 pb-10 px-6">
-
-                                          {/* Guest name input — optional */}
                                           <input
                                                 type="text"
                                                 value={guestName}
@@ -253,14 +263,12 @@ export default function GuestCamera() {
                                                 className="w-full mb-3 bg-white/20 text-white placeholder-white/60 border border-white/30 rounded-full px-5 py-3 text-sm backdrop-blur-sm focus:outline-none focus:border-white/60"
                                           />
 
-                                          {/* Error message */}
                                           {uploadState === 'error' && (
                                                 <div className="mb-3 bg-[#C84A44]/90 text-white text-sm rounded-lg px-4 py-2 text-center">
                                                       Upload failed: {uploadError}. Try again?
                                                 </div>
                                           )}
 
-                                          {/* Action buttons */}
                                           <div className="flex gap-3">
                                                 <button
                                                       onClick={handleRetake}
