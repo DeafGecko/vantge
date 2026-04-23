@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getThumbnailUrl, getFullSizeUrl } from '../lib/cloudinary'
+import { getTheme } from '../lib/themes'
 
 export default function Gallery() {
       const { eventSlug } = useParams()
@@ -15,7 +16,6 @@ export default function Gallery() {
             async function fetchData() {
                   setLoading(true)
 
-                  // Step 1: find the event by slug
                   const { data: eventData, error: eventError } = await supabase
                         .from('events')
                         .select('*')
@@ -30,13 +30,11 @@ export default function Gallery() {
 
                   setEvent(eventData)
 
-                  // Step 2: if the gallery is locked, stop here
                   if (!eventData.gallery_unlocked) {
                         setLoading(false)
                         return
                   }
 
-                  // Step 3: fetch all approved photos (status = 1)
                   const { data: photoData, error: photoError } = await supabase
                         .from('media_queue')
                         .select('*')
@@ -54,14 +52,12 @@ export default function Gallery() {
 
             fetchData()
 
-            // Realtime: when a new photo is approved, add it to the gallery live
             const channel = supabase
                   .channel(`gallery:${eventSlug}`)
                   .on(
                         'postgres_changes',
                         { event: 'UPDATE', schema: 'public', table: 'media_queue' },
                         (payload) => {
-                              // Photo just got approved → add to top of gallery
                               if (payload.new.status === 1 && payload.old.status === 0) {
                                     setPhotos((current) => [payload.new, ...current])
                               }
@@ -74,7 +70,6 @@ export default function Gallery() {
             }
       }, [eventSlug])
 
-      // Loading state
       if (loading) {
             return (
                   <div className="min-h-screen bg-cream flex items-center justify-center p-6">
@@ -83,7 +78,6 @@ export default function Gallery() {
             )
       }
 
-      // Error / not found
       if (error || !event) {
             return (
                   <div className="min-h-screen bg-cream flex items-center justify-center p-6">
@@ -97,28 +91,40 @@ export default function Gallery() {
             )
       }
 
-      // Gallery locked
+      const theme = getTheme(event.theme)
+      const c = theme.colors
+
       if (!event.gallery_unlocked) {
             return (
-                  <div className="min-h-screen bg-cream flex items-center justify-center p-6">
+                  <div
+                        className="min-h-screen flex items-center justify-center p-6"
+                        style={{ backgroundColor: c.bg }}
+                  >
                         <div className="max-w-md text-center">
-                              <div className="w-12 h-12 rounded-full bg-white border border-[#E0D8C6] mx-auto mb-5 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#5A5A52]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <div
+                                    className="w-12 h-12 rounded-full mx-auto mb-5 flex items-center justify-center border"
+                                    style={{
+                                          backgroundColor: c.surface,
+                                          borderColor: c.border,
+                                    }}
+                              >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke={c.textMuted} strokeWidth={2}>
                                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                     </svg>
                               </div>
-                              <p className="text-xs text-[#88887E] tracking-wide uppercase mb-2">
+                              <p className="text-xs tracking-wide uppercase mb-2" style={{ color: c.textSubtle }}>
                                     {event.event_name}
                               </p>
-                              <h1 className="text-3xl font-extrabold tracking-tight text-[#1A1A18] mb-3">
-                                    Gallery opens <span className="text-[#C84A44]">soon</span>.
+                              <h1 className="text-3xl font-extrabold tracking-tight mb-3" style={{ color: c.text }}>
+                                    Gallery opens <span style={{ color: c.accent }}>soon</span>.
                               </h1>
-                              <p className="text-sm text-[#5A5A52] leading-relaxed">
+                              <p className="text-sm leading-relaxed" style={{ color: c.textMuted }}>
                                     The host hasn't opened the gallery yet. Check back after the event — your photos will live here.
                               </p>
                               <Link
                                     to={`/${event.event_slug}`}
-                                    className="inline-block mt-6 text-sm text-[#5A5A52] hover:text-[#C84A44] transition-colors"
+                                    className="inline-block mt-6 text-sm transition-colors"
+                                    style={{ color: c.textMuted }}
                               >
                                     ← Back to event
                               </Link>
@@ -127,23 +133,26 @@ export default function Gallery() {
             )
       }
 
-      // Empty gallery (unlocked but no photos yet)
       if (photos.length === 0) {
             return (
-                  <div className="min-h-screen bg-cream flex items-center justify-center p-6">
+                  <div
+                        className="min-h-screen flex items-center justify-center p-6"
+                        style={{ backgroundColor: c.bg }}
+                  >
                         <div className="max-w-md text-center">
-                              <p className="text-xs text-[#88887E] tracking-wide uppercase mb-2">
+                              <p className="text-xs tracking-wide uppercase mb-2" style={{ color: c.textSubtle }}>
                                     {event.event_name}
                               </p>
-                              <h1 className="text-3xl font-extrabold tracking-tight text-[#1A1A18] mb-3">
-                                    The gallery is <span className="text-[#C84A44]">open</span>.
+                              <h1 className="text-3xl font-extrabold tracking-tight mb-3" style={{ color: c.text }}>
+                                    The gallery is <span style={{ color: c.accent }}>open</span>.
                               </h1>
-                              <p className="text-sm text-[#5A5A52]">
+                              <p className="text-sm" style={{ color: c.textMuted }}>
                                     No photos yet — be the first.
                               </p>
                               <Link
                                     to={`/${event.event_slug}/camera`}
-                                    className="inline-block mt-6 bg-[#C84A44] hover:bg-[#B43E39] text-white font-medium rounded-full py-3 px-6 transition-colors text-sm"
+                                    className="inline-block mt-6 font-medium rounded-full py-3 px-6 transition-colors text-sm text-white"
+                                    style={{ backgroundColor: c.accent }}
                               >
                                     Open camera
                               </Link>
@@ -152,30 +161,43 @@ export default function Gallery() {
             )
       }
 
-      // Populated gallery
       return (
-            <div className="min-h-screen bg-cream">
-                  {/* Header */}
-                  <header className="px-6 pt-10 pb-6 text-center">
-                        <p className="text-xs text-[#88887E] tracking-wide uppercase mb-2">
-                              {event.event_name}
-                        </p>
-                        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-[#1A1A18] mb-2">
-                              The <span className="text-[#C84A44]">gallery</span>.
-                        </h1>
-                        <p className="text-sm text-[#5A5A52]">
-                              {photos.length} {photos.length === 1 ? 'photo' : 'photos'} from your guests
-                        </p>
+            <div className="min-h-screen" style={{ backgroundColor: c.bg }}>
+                  <header className="px-6 pt-10 pb-6">
+                        <div className="max-w-6xl mx-auto">
+                              <Link
+                                    to={`/${event.event_slug}`}
+                                    className="inline-flex items-center gap-1 text-sm font-medium transition-colors mb-6"
+                                    style={{ color: c.textMuted }}
+                              >
+                                    ← Back
+                              </Link>
+
+                              <div className="text-center">
+                                    <p className="text-xs tracking-wide uppercase mb-2" style={{ color: c.textSubtle }}>
+                                          {event.event_name}
+                                    </p>
+                                    <h1
+                                          className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2"
+                                          style={{ color: c.text }}
+                                    >
+                                          The <span style={{ color: c.accent }}>gallery</span>.
+                                    </h1>
+                                    <p className="text-sm" style={{ color: c.textMuted }}>
+                                          {photos.length} {photos.length === 1 ? 'photo' : 'photos'} from your guests
+                                    </p>
+                              </div>
+                        </div>
                   </header>
 
-                  {/* Photo grid */}
                   <div className="px-4 sm:px-6 pb-16">
                         <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
                               {photos.map((photo, index) => (
                                     <button
                                           key={photo.id}
                                           onClick={() => setLightboxIndex(index)}
-                                          className="aspect-square bg-[#F4F3F0] overflow-hidden rounded-lg hover:opacity-90 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-[#C84A44]"
+                                          className="aspect-square overflow-hidden rounded-lg hover:opacity-90 active:scale-[0.98] transition-all focus:outline-none"
+                                          style={{ backgroundColor: c.surfaceMuted }}
                                     >
                                           <img
                                                 src={getThumbnailUrl(photo.original_url)}
@@ -188,18 +210,17 @@ export default function Gallery() {
                         </div>
                   </div>
 
-                  {/* Footer */}
                   <footer className="text-center pb-8">
                         <Link
                               to={`/${event.event_slug}/camera`}
-                              className="inline-block bg-[#C84A44] hover:bg-[#B43E39] text-white font-medium rounded-full py-3 px-6 transition-colors text-sm"
+                              className="inline-block font-medium rounded-full py-3 px-6 transition-colors text-sm text-white"
+                              style={{ backgroundColor: c.accent }}
                         >
                               Add your photo
                         </Link>
-                        <p className="text-xs text-[#88887E] mt-4">powered by vantge</p>
+                        <p className="text-xs mt-4" style={{ color: c.textSubtle }}>powered by vantge</p>
                   </footer>
 
-                  {/* Lightbox overlay */}
                   {lightboxIndex !== null && (
                         <Lightbox
                               photos={photos}
@@ -211,9 +232,6 @@ export default function Gallery() {
       )
 }
 
-/**
- * Full-screen photo viewer.
- */
 function Lightbox({ photos, initialIndex, onClose }) {
       const [index, setIndex] = useState(initialIndex)
       const photo = photos[index]
@@ -226,7 +244,6 @@ function Lightbox({ photos, initialIndex, onClose }) {
             setIndex((i) => (i - 1 + photos.length) % photos.length)
       }
 
-      // Keyboard navigation
       useEffect(() => {
             function handleKey(e) {
                   if (e.key === 'Escape') onClose()
@@ -242,7 +259,6 @@ function Lightbox({ photos, initialIndex, onClose }) {
                   className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
                   onClick={onClose}
             >
-                  {/* Close button */}
                   <button
                         onClick={onClose}
                         className="absolute top-4 right-4 text-white/70 hover:text-white text-3xl font-light w-12 h-12 flex items-center justify-center"
@@ -251,12 +267,10 @@ function Lightbox({ photos, initialIndex, onClose }) {
                         ×
                   </button>
 
-                  {/* Counter */}
                   <p className="absolute top-4 left-4 text-white/70 text-sm">
                         {index + 1} / {photos.length}
                   </p>
 
-                  {/* Photo */}
                   <img
                         src={getFullSizeUrl(photo.original_url)}
                         alt=""
@@ -264,7 +278,6 @@ function Lightbox({ photos, initialIndex, onClose }) {
                         className="max-w-full max-h-[85vh] object-contain"
                   />
 
-                  {/* Prev button */}
                   {photos.length > 1 && (
                         <button
                               onClick={(e) => { e.stopPropagation(); prev() }}
@@ -275,7 +288,6 @@ function Lightbox({ photos, initialIndex, onClose }) {
                         </button>
                   )}
 
-                  {/* Next button */}
                   {photos.length > 1 && (
                         <button
                               onClick={(e) => { e.stopPropagation(); next() }}
@@ -286,7 +298,6 @@ function Lightbox({ photos, initialIndex, onClose }) {
                         </button>
                   )}
 
-                  {/* Guest name caption */}
                   {photo.guest_name && (
                         <p className="absolute bottom-6 left-0 right-0 text-center text-white/70 text-sm">
                               {photo.guest_name}

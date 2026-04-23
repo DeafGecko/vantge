@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useEvent } from '../hooks/useEvent'
 import { uploadPhoto } from '../lib/uploadPhoto'
+import { getTheme } from '../lib/themes'
 
 export default function GuestCamera() {
       const { eventSlug } = useParams()
@@ -19,7 +20,6 @@ export default function GuestCamera() {
       const [uploadError, setUploadError] = useState(null)
       const [guestName, setGuestName] = useState('')
 
-      // Fully stop any existing stream
       const stopStream = useCallback(() => {
             if (streamRef.current) {
                   streamRef.current.getTracks().forEach((track) => track.stop())
@@ -30,7 +30,6 @@ export default function GuestCamera() {
             }
       }, [])
 
-      // Start (or restart) the camera
       const startCamera = useCallback(async () => {
             stopStream()
             setCameraReady(false)
@@ -58,7 +57,6 @@ export default function GuestCamera() {
                   }
             } catch (err) {
                   console.error('Camera error:', err)
-                  // If iOS is being stubborn, show a tap-to-start button instead of an error
                   if (err.name === 'NotAllowedError' || err.name === 'NotReadableError') {
                         setNeedsTapToStart(true)
                   } else {
@@ -67,7 +65,6 @@ export default function GuestCamera() {
             }
       }, [stopStream])
 
-      // Start camera on mount, clean up on unmount
       useEffect(() => {
             startCamera()
             return () => {
@@ -75,10 +72,8 @@ export default function GuestCamera() {
             }
       }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-      // When we return from preview to live view, restart camera with a small delay
       useEffect(() => {
             if (capturedPhoto === null && streamRef.current === null) {
-                  // Give iOS Safari a ~300ms breather before re-requesting camera
                   const timer = setTimeout(() => {
                         startCamera()
                   }, 300)
@@ -104,7 +99,6 @@ export default function GuestCamera() {
                               setCapturedPhoto({ blob, url })
                               setUploadState('idle')
                               setUploadError(null)
-                              // Stop stream — saves battery during preview
                               stopStream()
                         }
                   },
@@ -170,19 +164,30 @@ export default function GuestCamera() {
             )
       }
 
+      // Apply theme
+      const theme = getTheme(event.theme)
+      const c = theme.colors
+
       if (cameraError) {
             return (
-                  <div className="min-h-screen bg-cream flex items-center justify-center p-8">
+                  <div
+                        className="min-h-screen flex items-center justify-center p-8"
+                        style={{ backgroundColor: c.bg }}
+                  >
                         <div className="max-w-sm w-full text-center">
-                              <h1 className="text-2xl font-extrabold tracking-tight text-[#1A1A18] mb-3">
+                              <h1
+                                    className="text-2xl font-extrabold tracking-tight mb-3"
+                                    style={{ color: c.text }}
+                              >
                                     Camera access needed
                               </h1>
-                              <p className="text-sm text-[#5A5A52] mb-6">
+                              <p className="text-sm mb-6" style={{ color: c.textMuted }}>
                                     {cameraError}. To upload photos, tap the AA icon in Safari's address bar, choose Website Settings, and allow Camera access.
                               </p>
                               <Link
                                     to={`/${eventSlug}`}
-                                    className="inline-block text-sm text-[#C84A44] font-medium"
+                                    className="inline-block text-sm font-medium"
+                                    style={{ color: c.accent }}
                               >
                                     ← Back to event
                               </Link>
@@ -220,7 +225,10 @@ export default function GuestCamera() {
                                     <div className="absolute inset-0 z-20 flex items-center justify-center bg-black">
                                           <button
                                                 onClick={startCamera}
-                                                className="bg-[#C84A44] hover:bg-[#B43E39] text-white font-medium rounded-full py-4 px-8 text-base"
+                                                className="font-medium rounded-full py-4 px-8 text-base text-white transition-colors"
+                                                style={{ backgroundColor: c.accent }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = c.accentHover }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = c.accent }}
                                           >
                                                 Tap to start camera
                                           </button>
@@ -242,7 +250,10 @@ export default function GuestCamera() {
                                                 className="w-20 h-20 rounded-full bg-white border-4 border-white/50 active:scale-95 transition-transform shadow-lg flex items-center justify-center"
                                                 aria-label="Take photo"
                                           >
-                                                <div className="w-16 h-16 rounded-full bg-[#E8615C]"></div>
+                                                <div
+                                                      className="w-16 h-16 rounded-full"
+                                                      style={{ backgroundColor: c.accentSoft }}
+                                                ></div>
                                           </button>
                                     )}
                               </div>
@@ -265,8 +276,8 @@ export default function GuestCamera() {
                                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                       </svg>
                                                 </div>
-                                                <h2 className="text-lg font-extrabold text-[#1A1A18] mb-1">Sent to host</h2>
-                                                <p className="text-sm text-[#5A5A52]">The host will approve it shortly.</p>
+                                                <h2 className="text-lg font-extrabold mb-1" style={{ color: c.text }}>Sent to host</h2>
+                                                <p className="text-sm" style={{ color: c.textMuted }}>The host will approve it shortly.</p>
                                           </div>
                                     </div>
                               )}
@@ -274,8 +285,14 @@ export default function GuestCamera() {
                               {uploadState === 'uploading' && (
                                     <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                                           <div className="bg-white rounded-2xl p-6 max-w-xs mx-4 text-center">
-                                                <div className="w-16 h-16 rounded-full border-4 border-[#E0D8C6] border-t-[#C84A44] mx-auto mb-3 animate-spin"></div>
-                                                <p className="text-sm text-[#5A5A52]">Uploading...</p>
+                                                <div
+                                                      className="w-16 h-16 rounded-full border-4 mx-auto mb-3 animate-spin"
+                                                      style={{
+                                                            borderColor: c.border,
+                                                            borderTopColor: c.accent,
+                                                      }}
+                                                ></div>
+                                                <p className="text-sm" style={{ color: c.textMuted }}>Uploading...</p>
                                           </div>
                                     </div>
                               )}
@@ -292,7 +309,10 @@ export default function GuestCamera() {
                                           />
 
                                           {uploadState === 'error' && (
-                                                <div className="mb-3 bg-[#C84A44]/90 text-white text-sm rounded-lg px-4 py-2 text-center">
+                                                <div
+                                                      className="mb-3 text-white text-sm rounded-lg px-4 py-2 text-center"
+                                                      style={{ backgroundColor: c.accent + 'E6' }}
+                                                >
                                                       Upload failed: {uploadError}. Try again?
                                                 </div>
                                           )}
@@ -306,7 +326,8 @@ export default function GuestCamera() {
                                                 </button>
                                                 <button
                                                       onClick={handleUpload}
-                                                      className="flex-1 bg-[#C84A44] text-white font-medium rounded-full py-4 px-6 active:scale-[0.98] transition-transform"
+                                                      className="flex-1 text-white font-medium rounded-full py-4 px-6 active:scale-[0.98] transition-transform"
+                                                      style={{ backgroundColor: c.accent }}
                                                 >
                                                       {uploadState === 'error' ? 'Try again' : 'Use this photo'}
                                                 </button>
