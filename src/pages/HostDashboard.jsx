@@ -5,18 +5,14 @@ import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
 import PhotoManager from '../components/PhotoManager'
 import { getAllThemes, getTheme } from '../lib/themes'
+import { eventFonts, getFontsByCategory, DEFAULT_FONT_ID } from '../lib/fonts'
 
-const eventFonts = [
-      { id: 'serif_playfair', name: 'Editorial Serif', family: "'Playfair Display', serif" },
-      { id: 'serif_lora', name: 'Classic Elegance', family: "'Lora', serif" },
-      { id: 'sans_inter', name: 'Minimalist Zen', family: "'Inter', sans-serif" },
-      { id: 'sans_montserrat', name: 'Modern Bold', family: "'Montserrat', sans-serif" },
-      { id: 'sans_outfit', name: 'Clean & Friendly', family: "'Outfit', sans-serif" },
-      // NEW TRENDS 2025/2026
-      { id: 'pixel_silk', name: 'Silkscreen', family: "'Silkscreen', cursive" },
-      { id: 'serif_news', name: 'Newsreader', family: "'Newsreader', serif" },
-      { id: 'sans_ubuntu', name: 'Ubuntu', family: "'Ubuntu', sans-serif" },   
-];
+const fontCategories = getFontsByCategory()
+const categoryLabels = {
+      elegant: 'Elegant & Script',
+      modern:  'Modern & Clean',
+      display: 'Display & Tech',
+}
 
 export default function HostDashboard() {
       const { user, signOut } = useAuth()
@@ -33,7 +29,7 @@ export default function HostDashboard() {
       const currentThemeId = localTheme || event?.theme || 'warm_editorial'
       const currentTheme = getTheme(currentThemeId)
 
-      const currentFontId = localFont || event?.font_family || 'serif_playfair'
+      const currentFontId = localFont || event?.font_family || DEFAULT_FONT_ID
       const currentFont = eventFonts.find(f => f.id === currentFontId) || eventFonts[0]
 
       async function toggleGallery() {
@@ -136,20 +132,29 @@ export default function HostDashboard() {
                                     </div>
 
                                     <div className="lg:col-span-8 flex flex-col gap-8">
-                                          {/* FONT SELECTION */}
+                                          {/* FONT SELECTION — 3 rows by category */}
                                           <div>
                                                 <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Title Font</p>
-                                                <div className="flex flex-wrap gap-2">
-                                                      {eventFonts.map((font) => (
-                                                            <button
-                                                                  key={font.id}
-                                                                  onClick={() => { setLocalFont(font.id); updateEventSettings({ font_family: font.id }); }}
-                                                                  className={"px-4 py-2 rounded-lg border text-xs transition-all " +
-                                                                        (currentFontId === font.id ? "border-[#1A1A18] bg-white ring-1 ring-[#1A1A18]" : "border-[#E0D8C6] bg-white hover:border-[#88887E]")}
-                                                                  style={{ fontFamily: font.family }}
-                                                            >
-                                                                  {font.name}
-                                                            </button>
+                                                <div className="flex flex-col gap-5">
+                                                      {Object.entries(fontCategories).map(([catKey, fonts]) => (
+                                                            <div key={catKey}>
+                                                                  <p className="text-[9px] font-bold text-[#B0AFA5] uppercase tracking-widest mb-2">
+                                                                        {categoryLabels[catKey]}
+                                                                  </p>
+                                                                  <div className="flex flex-wrap gap-2">
+                                                                        {fonts.map((font) => (
+                                                                              <button
+                                                                                    key={font.id}
+                                                                                    onClick={() => { setLocalFont(font.id); updateEventSettings({ font_family: font.id }); }}
+                                                                                    className={"px-4 py-2 rounded-lg border text-xs transition-all " +
+                                                                                          (currentFontId === font.id ? "border-[#1A1A18] bg-white ring-1 ring-[#1A1A18]" : "border-[#E0D8C6] bg-white hover:border-[#88887E]")}
+                                                                                    style={{ fontFamily: font.family }}
+                                                                              >
+                                                                                    {font.label}
+                                                                              </button>
+                                                                        ))}
+                                                                  </div>
+                                                            </div>
                                                       ))}
                                                 </div>
                                           </div>

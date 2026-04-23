@@ -3,20 +3,9 @@ import { useParams, Link } from 'react-router-dom'
 import { useEvent } from '../hooks/useEvent'
 import { uploadPhoto } from '../lib/uploadPhoto'
 import { getTheme } from '../lib/themes'
+import { resolveFontFamily } from '../lib/fonts'
 
 const MAX_FILES = 10
-
-// Add this mapping object at the top of the file
-const fontMap = {
-      'serif_playfair': "'Playfair Display', serif",
-      'serif_lora': "'Lora', serif",
-      'sans_inter': "'Inter', sans-serif",
-      'sans_montserrat': "'Montserrat', sans-serif",
-      'script_dancing': "'Dancing Script', cursive",
-      'script_greatvibes': "'Great Vibes', cursive",
-      'serif_instrument': "'Instrument Serif', serif",
-      'sans_outfit': "'Outfit', sans-serif"
-};
 
 export default function GuestUploader() {
       const { eventSlug } = useParams()
@@ -126,7 +115,7 @@ export default function GuestUploader() {
       // Apply theme
       const theme = getTheme(event.theme)
       const c = theme.colors
-      const selectedFontFamily = fontMap[event.font_family] || fontMap['serif_playfair'];
+      const selectedFontFamily = resolveFontFamily(event.font_family)
 
       // Success state
       if (uploadState === 'success') {
