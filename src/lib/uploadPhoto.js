@@ -2,28 +2,23 @@ import { supabase } from './supabase'
 
 /**
  * Uploads a photo to Supabase Storage and creates a media_queue row.
- *
- * Works with both Blob (from canvas.toBlob) and File (from <input type="file">) 
- * because File extends Blob.
+ * Also captures device/browser info for beta testing analytics.
  *
  * @param {Object} params
  * @param {Blob|File} params.blob - The image blob or File object
  * @param {string} params.eventId - UUID of the event
- * @param {string} params.guestName - Optional guest name (or '')
+ * @param {string} params.guestName - Optional guest name
  * @returns {Promise<Object>} - { success, storagePath?, originalUrl?, error? }
  */
 export async function uploadPhoto({ blob, eventId, guestName = '' }) {
       try {
-            // Detect file extension from the blob's type (or default to jpg)
             const mimeType = blob.type || 'image/jpeg'
             const extension = getExtensionFromMime(mimeType)
 
-            // Generate unique file path
             const timestamp = Date.now()
             const random = Math.random().toString(36).substring(2, 8)
             const storagePath = `${eventId}/${timestamp}-${random}.${extension}`
 
-            // Upload to Supabase Storage
             const { error: uploadError } = await supabase.storage
                   .from('event-media')
                   .upload(storagePath, blob, {
@@ -37,14 +32,15 @@ export async function uploadPhoto({ blob, eventId, guestName = '' }) {
                   return { success: false, error: uploadError.message }
             }
 
-            // Get public URL
             const { data: urlData } = supabase.storage
                   .from('event-media')
                   .getPublicUrl(storagePath)
 
             const originalUrl = urlData.publicUrl
 
-            // Insert media_queue row
+            // Capture device info for beta testing analytics
+            const deviceInfo = getDeviceInfo()
+
             const { error: insertError } = await supabase
                   .from('media_queue')
                   .insert({
@@ -54,6 +50,10 @@ export async function uploadPhoto({ blob, eventId, guestName = '' }) {
                         guest_name: guestName.trim() || null,
                         status: 0,
                         is_video: false,
+                        user_agent: deviceInfo.user_agent,
+                        device_type: deviceInfo.device_type,
+                        viewport: deviceInfo.viewport,
+                        file_size_bytes: blob.size || null,
                   })
 
             if (insertError) {
@@ -84,4 +84,31 @@ function getExtensionFromMime(mimeType) {
             'image/gif': 'gif',
       }
       return map[mimeType.toLowerCase()] || 'jpg'
+}
+
+function getDeviceInfo() {
+      try {
+            const ua = navigator.userAgent
+            const viewport = `${window.innerWidth}×${window.innerHeight}`
+
+            let deviceType = 'Unknown'
+            if (/iPhone/i.test(ua)) deviceType = 'iPhone'
+            else if (/iPad/i.test(ua)) deviceType = 'iPad'
+            else if (/Android/i.test(ua)) deviceType = 'Android'
+            else if (/Macintosh/i.test(ua)) deviceType = 'Mac'
+            else if (/Windows/i.test(ua)) deviceType = 'Windows'
+            else if (/Linux/i.test(ua)) deviceType = 'Linux'
+
+            return {
+                  user_agent: ua,
+                  device_type: deviceType,
+                  viewport: viewport,
+            }
+      } catch (err) {
+            return {
+                  user_agent: null,
+                  device_type: null,
+                  viewport: null,
+            }
+      }
 }
