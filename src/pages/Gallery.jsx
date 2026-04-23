@@ -4,6 +4,18 @@ import { supabase } from '../lib/supabase'
 import { getThumbnailUrl, getFullSizeUrl } from '../lib/cloudinary'
 import { getTheme } from '../lib/themes'
 
+// Add this mapping object at the top of the file
+const fontMap = {
+      'serif_playfair': "'Playfair Display', serif",
+      'serif_lora': "'Lora', serif",
+      'sans_inter': "'Inter', sans-serif",
+      'sans_montserrat': "'Montserrat', sans-serif",
+      'script_dancing': "'Dancing Script', cursive",
+      'script_greatvibes': "'Great Vibes', cursive",
+      'serif_instrument': "'Instrument Serif', serif",
+      'sans_outfit': "'Outfit', sans-serif"
+};
+
 export default function Gallery() {
       const { eventSlug } = useParams()
       const [event, setEvent] = useState(null)
@@ -93,6 +105,8 @@ export default function Gallery() {
 
       const theme = getTheme(event.theme)
       const c = theme.colors
+      const selectedFontFamily = fontMap[event.font_family] || fontMap['serif_playfair'];
+
 
       if (!event.gallery_unlocked) {
             return (
@@ -132,6 +146,8 @@ export default function Gallery() {
                   </div>
             )
       }
+
+      // ...existing code...
 
       if (photos.length === 0) {
             return (
@@ -179,7 +195,7 @@ export default function Gallery() {
                                     </p>
                                     <h1
                                           className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2"
-                                          style={{ color: c.text }}
+                                          style={{ color: c.text, fontFamily: selectedFontFamily }}
                                     >
                                           The <span style={{ color: c.accent }}>gallery</span>.
                                     </h1>

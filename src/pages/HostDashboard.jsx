@@ -6,6 +6,18 @@ import { supabase } from '../lib/supabase'
 import PhotoManager from '../components/PhotoManager'
 import { getAllThemes, getTheme } from '../lib/themes'
 
+const eventFonts = [
+      { id: 'serif_playfair', name: 'Editorial Serif', family: "'Playfair Display', serif" },
+      { id: 'serif_lora', name: 'Classic Elegance', family: "'Lora', serif" },
+      { id: 'sans_inter', name: 'Minimalist Zen', family: "'Inter', sans-serif" },
+      { id: 'sans_montserrat', name: 'Modern Bold', family: "'Montserrat', sans-serif" },
+      { id: 'sans_outfit', name: 'Clean & Friendly', family: "'Outfit', sans-serif" },
+      // NEW TRENDS 2025/2026
+      { id: 'pixel_silk', name: 'Silkscreen', family: "'Silkscreen', cursive" },
+      { id: 'serif_news', name: 'Newsreader', family: "'Newsreader', serif" },
+      { id: 'sans_ubuntu', name: 'Ubuntu', family: "'Ubuntu', sans-serif" },   
+];
+
 export default function HostDashboard() {
       const { user, signOut } = useAuth()
       const { event, loading: eventLoading } = useHostEvent()
@@ -14,11 +26,15 @@ export default function HostDashboard() {
       const [showQR, setShowQR] = useState(false)
       const [activeTab, setActiveTab] = useState(0)
       const [localTheme, setLocalTheme] = useState(null)
-      const [savingTheme, setSavingTheme] = useState(false)
+      const [localFont, setLocalFont] = useState(null)
+      const [savingSettings, setSavingSettings] = useState(false)
 
       const isUnlocked = localUnlocked !== null ? localUnlocked : event?.gallery_unlocked
       const currentThemeId = localTheme || event?.theme || 'warm_editorial'
       const currentTheme = getTheme(currentThemeId)
+
+      const currentFontId = localFont || event?.font_family || 'serif_playfair'
+      const currentFont = eventFonts.find(f => f.id === currentFontId) || eventFonts[0]
 
       async function toggleGallery() {
             if (!event) return
@@ -36,132 +52,131 @@ export default function HostDashboard() {
             setToggling(false)
       }
 
-      async function handleThemeChange(themeId) {
-            if (!event || themeId === currentThemeId) return
-
-            const previousTheme = currentThemeId
-            setLocalTheme(themeId)
-            setSavingTheme(true)
+      async function updateEventSettings(updates) {
+            if (!event) return
+            setSavingSettings(true)
 
             const { error } = await supabase
                   .from('events')
-                  .update({ theme: themeId })
+                  .update(updates)
                   .eq('id', event.id)
 
             if (error) {
-                  setLocalTheme(previousTheme)
-                  alert("Couldn't save theme: " + error.message)
+                  alert("Error saving settings: " + error.message)
             }
-            setSavingTheme(false)
+            setSavingSettings(false)
       }
 
-      if (eventLoading) {
-            return (
-                  <div className="min-h-screen bg-cream p-6">
-                        <p className="text-sm text-[#5A5A52]">Loading event...</p>
-                  </div>
-            )
-      }
+      if (eventLoading) return <div className="min-h-screen bg-cream p-6 text-center">Loading...</div>
 
       if (!event) {
             return (
-                  <div className="min-h-screen bg-cream p-6">
-                        <div className="max-w-5xl mx-auto">
-                              <div className="bg-white rounded-2xl border border-[#E0D8C6] p-6">
-                                    <p className="text-sm text-[#5A5A52]">No event found for this account.</p>
-                              </div>
-                        </div>
+                  <div className="min-h-screen bg-cream p-6 text-center">
+                        <p className="text-sm text-[#5A5A52]">No event found.</p>
                   </div>
             )
       }
 
       return (
-            <div className="min-h-screen bg-cream p-6">
-                  <div className="max-w-5xl mx-auto">
-                        <header className="flex items-center justify-between mb-8">
-                              <div>
-                                    <h1 className="text-2xl font-extrabold tracking-tight text-[#1A1A18]">vantge</h1>
-                                    <p className="text-xs text-[#88887E] tracking-wide uppercase mt-0.5">Host dashboard</p>
+            <div className="min-h-screen bg-cream px-6 py-8">
+                  <div className="max-w-6xl mx-auto">
+
+                        {/* INTEGRATED HEADER - REMOVED CARD STRUCTURE */}
+                        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 pb-8 border-b border-[#E0D8C6]">
+                              <div className="flex flex-col gap-1">
+                                    <div className="flex items-center gap-3">
+                                          <h1 className="text-2xl font-black tracking-tighter text-[#1A1A18]">vantge</h1>
+                                          <span className="w-[1px] h-4 bg-[#E0D8C6]"></span>
+                                          <div className="flex items-center gap-2">
+                                                <h2
+                                                      className="text-xl font-bold text-[#1A1A18] leading-tight"
+                                                      style={{ fontFamily: currentFont.family }}
+                                                >
+                                                      {event.event_name}
+                                                </h2>
+                                                <span className={"w-2 h-2 rounded-full " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#88887E]")}></span>
+                                          </div>
+                                    </div>
+                                    <p className="text-xs text-[#88887E] font-medium tracking-wide">
+                                          /{event.event_slug} · {user?.email}
+                                    </p>
                               </div>
-                              <button onClick={signOut} className="text-sm text-[#5A5A52] hover:text-[#C84A44] font-medium transition-colors">
-                                    Sign out
-                              </button>
+
+                              <div className="flex flex-wrap items-center gap-4">
+                                    <button onClick={() => setShowQR(!showQR)} className="text-sm font-bold text-[#C84A44] hover:text-[#B43E39] transition-colors">
+                                          {showQR ? "Hide QR code" : "Show QR code"}
+                                    </button>
+                                    <button
+                                          onClick={toggleGallery}
+                                          disabled={toggling}
+                                          className={"px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all " +
+                                                (isUnlocked ? "bg-transparent border border-[#E0D8C6] text-[#5A5A52]" : "bg-[#1A1A18] text-white")}
+                                    >
+                                          {toggling ? "..." : isUnlocked ? "Lock Gallery" : "Open Gallery"}
+                                    </button>
+                                    <button onClick={signOut} className="text-xs font-bold text-[#88887E] hover:text-[#1A1A18] uppercase tracking-widest ml-2">
+                                          Sign out
+                                    </button>
+                              </div>
                         </header>
 
-                        {/* Event card */}
-                        <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5 mb-6">
-                              <div className="flex items-baseline justify-between mb-2">
-                                    <h2 className="text-xl font-extrabold text-[#1A1A18]">{event.event_name}</h2>
-                                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5A5A52]">
-                                          <span className={"w-2 h-2 rounded-full " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#88887E]")}></span>
-                                          Gallery {isUnlocked ? "open" : "locked"}
-                                    </span>
+                        {showQR && <QRCodeSection eventSlug={event.event_slug} eventName={event.event_name} />}
+
+                        {/* DESIGN CUSTOMIZATION SECTION */}
+                        <div className="mb-12">
+                              <div className="flex items-baseline justify-between mb-6">
+                                    <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[#1A1A18]">Event Branding</h3>
+                                    {savingSettings && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse">Saving...</span>}
                               </div>
-                              <p className="text-xs text-[#88887E] mb-4">
-                                    /{event.event_slug} · Signed in as {user?.email}
-                              </p>
 
-                              <button
-                                    onClick={toggleGallery}
-                                    disabled={toggling}
-                                    className={"inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 " + (isUnlocked ? "bg-[#F4F3F0] hover:bg-[#E8E5DC] text-[#5A5A52] border border-[#E0D8C6]" : "bg-[#C84A44] hover:bg-[#B43E39] text-white")}
-                              >
-                                    {toggling ? "Updating..." : isUnlocked ? "Lock gallery" : "Open gallery to guests"}
-                              </button>
+                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                                    <div className="lg:col-span-4">
+                                          <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Live Preview</p>
+                                          <ThemePreview theme={currentTheme} eventName={event.event_name} font={currentFont} />
+                                    </div>
 
-                              {isUnlocked ? (
-                                    <p className="text-xs text-[#88887E] mt-3">
-                                          Guests can see photos at /gallery/{event.event_slug}
-                                    </p>
-                              ) : null}
+                                    <div className="lg:col-span-8 flex flex-col gap-8">
+                                          {/* FONT SELECTION */}
+                                          <div>
+                                                <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Title Font</p>
+                                                <div className="flex flex-wrap gap-2">
+                                                      {eventFonts.map((font) => (
+                                                            <button
+                                                                  key={font.id}
+                                                                  onClick={() => { setLocalFont(font.id); updateEventSettings({ font_family: font.id }); }}
+                                                                  className={"px-4 py-2 rounded-lg border text-xs transition-all " +
+                                                                        (currentFontId === font.id ? "border-[#1A1A18] bg-white ring-1 ring-[#1A1A18]" : "border-[#E0D8C6] bg-white hover:border-[#88887E]")}
+                                                                  style={{ fontFamily: font.family }}
+                                                            >
+                                                                  {font.name}
+                                                            </button>
+                                                      ))}
+                                                </div>
+                                          </div>
 
-                              <button
-                                    onClick={() => setShowQR(!showQR)}
-                                    className="block mt-4 text-sm text-[#C84A44] hover:underline font-medium"
-                              >
-                                    {showQR ? "Hide QR code" : "Show QR code for guests"}
-                              </button>
-
-                              {showQR ? (
-                                    <QRCodeSection eventSlug={event.event_slug} eventName={event.event_name} />
-                              ) : null}
-                        </div>
-
-                        {/* Theme picker card */}
-                        <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5 mb-6">
-                              <div className="flex items-baseline justify-between mb-1">
-                                    <h2 className="text-lg font-extrabold text-[#1A1A18]">Gallery theme</h2>
-                                    {savingTheme ? (
-                                          <span className="text-xs text-[#88887E]">Saving...</span>
-                                    ) : null}
-                              </div>
-                              <p className="text-xs text-[#88887E] mb-5">
-                                    Pick colors that match the wedding. Changes apply to the event page and gallery guests see.
-                              </p>
-
-                              {/* Live preview card */}
-                              <ThemePreview theme={currentTheme} eventName={event.event_name} />
-
-                              {/* Theme grid */}
-                              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-5">
-                                    {getAllThemes().map((theme) => (
-                                          <ThemeOption
-                                                key={theme.id}
-                                                theme={theme}
-                                                isActive={theme.id === currentThemeId}
-                                                onClick={() => handleThemeChange(theme.id)}
-                                          />
-                                    ))}
+                                          {/* THEME SELECTION */}
+                                          <div>
+                                                <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Color Palette</p>
+                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                                      {getAllThemes().map((theme) => (
+                                                            <ThemeOption
+                                                                  key={theme.id}
+                                                                  theme={theme}
+                                                                  isActive={theme.id === currentThemeId}
+                                                                  onClick={() => { setLocalTheme(theme.id); updateEventSettings({ theme: theme.id }); }}
+                                                            />
+                                                      ))}
+                                                </div>
+                                          </div>
+                                    </div>
                               </div>
                         </div>
 
-                        {/* Tab navigation */}
-                        <div className="mb-5 flex justify-end">
-                              <div className="flex gap-1 p-1 bg-white rounded-full border border-[#E0D8C6] w-fit">
-                                    <TabButton label="Pending" isActive={activeTab === 0} onClick={() => setActiveTab(0)} />
-                                    <TabButton label="Live gallery" isActive={activeTab === 1} onClick={() => setActiveTab(1)} />
-                                    <TabButton label="Trash" isActive={activeTab === 2} onClick={() => setActiveTab(2)} />
-                              </div>
+                        {/* TAB NAVIGATION */}
+                        <div className="mb-8 flex gap-8 border-b border-[#E0D8C6]">
+                              <SimpleTab label="Pending" isActive={activeTab === 0} onClick={() => setActiveTab(0)} />
+                              <SimpleTab label="Live Gallery" isActive={activeTab === 1} onClick={() => setActiveTab(1)} />
+                              <SimpleTab label="Trash" isActive={activeTab === 2} onClick={() => setActiveTab(2)} />
                         </div>
 
                         <PhotoManager key={activeTab} eventId={event.id} status={activeTab} />
@@ -170,114 +185,38 @@ export default function HostDashboard() {
       )
 }
 
-function ThemeOption({ theme, isActive, onClick }) {
-      const { colors } = theme
+function SimpleTab({ label, isActive, onClick }) {
       return (
-            <button
-                  onClick={onClick}
-                  className={
-                        "text-left p-3 rounded-xl border-2 transition-all " +
-                        (isActive
-                              ? "border-[#1A1A18] bg-[#F4F3F0]"
-                              : "border-[#E0D8C6] hover:border-[#88887E] bg-white")
-                  }
-            >
-                  <div className="flex items-center gap-1.5 mb-2">
-                        <span
-                              className="w-5 h-5 rounded-full border border-black/10"
-                              style={{ backgroundColor: colors.accent }}
-                        />
-                        <span
-                              className="w-5 h-5 rounded-full border border-black/10"
-                              style={{ backgroundColor: colors.bg }}
-                        />
-                        <span
-                              className="w-5 h-5 rounded-full border border-black/10"
-                              style={{ backgroundColor: colors.accentSoft }}
-                        />
-                  </div>
-                  <p className="text-xs font-bold text-[#1A1A18] truncate">{theme.name}</p>
-                  <p className="text-[10px] text-[#88887E] truncate">{theme.vibe}</p>
+            <button onClick={onClick} className={"pb-3 text-sm font-bold transition-all relative " + (isActive ? "text-[#1A1A18]" : "text-[#88887E]")}>
+                  {label}
+                  {isActive && <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-[#1A1A18]"></div>}
             </button>
       )
 }
 
-function ThemePreview({ theme, eventName }) {
-      const { colors } = theme
+function ThemeOption({ theme, isActive, onClick }) {
       return (
-            <div
-                  className="rounded-xl border p-6 text-center"
-                  style={{
-                        backgroundColor: colors.bg,
-                        borderColor: colors.border,
-                  }}
-            >
-                  <div
-                        className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-4 border"
-                        style={{
-                              backgroundColor: colors.surface,
-                              borderColor: colors.border,
-                        }}
-                  >
-                        <span
-                              className="w-2 h-2 rounded-full"
-                              style={{ backgroundColor: colors.accentSoft }}
-                        />
-                        <span
-                              className="text-xs font-medium"
-                              style={{ color: colors.text }}
-                        >
-                              Event gallery
-                        </span>
+            <button onClick={onClick} className={"p-3 rounded-xl border text-left transition-all " + (isActive ? "border-[#1A1A18] bg-white ring-1 ring-[#1A1A18]" : "border-[#E0D8C6] bg-white")}>
+                  <div className="flex gap-1 mb-2">
+                        <span className="w-3 h-3 rounded-full border border-black/5" style={{ backgroundColor: theme.colors.accent }} />
+                        <span className="w-3 h-3 rounded-full border border-black/5" style={{ backgroundColor: theme.colors.bg }} />
                   </div>
+                  <p className="text-[10px] font-black uppercase tracking-tight text-[#1A1A18]">{theme.name}</p>
+            </button>
+      )
+}
 
-                  <h3
-                        className="text-2xl font-extrabold tracking-tight mb-4"
-                        style={{ color: colors.text }}
-                  >
+function ThemePreview({ theme, eventName, font }) {
+      return (
+            <div className="rounded-2xl border p-10 text-center transition-all duration-500 shadow-sm" style={{ backgroundColor: theme.colors.bg, borderColor: theme.colors.border }}>
+                  <h3 className="text-2xl font-bold mb-6" style={{ color: theme.colors.text, fontFamily: font.family }}>
                         {eventName}
                   </h3>
-
                   <div className="flex gap-2 justify-center">
-                        <span
-                              className="inline-flex items-center rounded-full px-5 py-2 text-xs font-medium text-white"
-                              style={{ backgroundColor: colors.accent }}
-                        >
-                              Take photo
-                        </span>
-                        <span
-                              className="inline-flex items-center rounded-full px-5 py-2 text-xs font-medium border"
-                              style={{
-                                    backgroundColor: colors.surface,
-                                    borderColor: colors.border,
-                                    color: colors.text,
-                              }}
-                        >
-                              Choose photos
-                        </span>
+                        <span className="px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-white rounded-full" style={{ backgroundColor: theme.colors.accent }}>Take Photo</span>
+                        <span className="px-5 py-2 text-[10px] font-bold uppercase tracking-widest border rounded-full" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.text }}>Gallery</span>
                   </div>
-
-                  <p
-                        className="text-[10px] tracking-wide mt-4"
-                        style={{ color: colors.textSubtle }}
-                  >
-                        PREVIEW OF WHAT GUESTS SEE
-                  </p>
             </div>
-      )
-}
-
-function TabButton({ label, isActive, onClick }) {
-      return (
-            <button
-                  onClick={onClick}
-                  className={
-                        "px-5 py-2 rounded-full text-sm font-medium transition-colors " +
-                        (isActive ? "bg-[#1A1A18] text-white" : "text-[#5A5A52] hover:text-[#1A1A18]")
-                  }
-            >
-                  {label}
-            </button>
       )
 }
 
@@ -288,68 +227,36 @@ function QRCodeSection({ eventSlug, eventName }) {
       function downloadQR() {
             const svg = qrRef.current?.querySelector('svg')
             if (!svg) return
-
             const svgData = new XMLSerializer().serializeToString(svg)
             const canvas = document.createElement('canvas')
             const ctx = canvas.getContext('2d')
             const img = new Image()
-
             img.onload = () => {
-                  canvas.width = 800
-                  canvas.height = 800
-                  ctx.fillStyle = '#FFFFFF'
-                  ctx.fillRect(0, 0, 800, 800)
+                  canvas.width = 800; canvas.height = 800
+                  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 800, 800)
                   ctx.drawImage(img, 100, 100, 600, 600)
-
                   canvas.toBlob((blob) => {
                         const url = URL.createObjectURL(blob)
                         const a = document.createElement('a')
-                        a.href = url
-                        a.download = `${eventSlug}-qr-code.png`
-                        a.click()
+                        a.href = url; a.download = `${eventSlug}-qr-code.png`; a.click()
                         URL.revokeObjectURL(url)
                   })
             }
-
             img.src = 'data:image/svg+xml;base64,' + btoa(svgData)
       }
 
       return (
-            <div className="mt-5 pt-5 border-t border-[#E0D8C6]">
-                  <div className="flex flex-col sm:flex-row gap-5 items-start">
-                        <div ref={qrRef} className="bg-white p-4 rounded-xl border border-[#E0D8C6] flex-shrink-0">
-                              <QRCodeSVG
-                                    value={guestUrl}
-                                    size={180}
-                                    level="M"
-                                    marginSize={0}
-                                    fgColor="#1A1A18"
-                                    bgColor="#FFFFFF"
-                              />
-                        </div>
-
-                        <div className="flex-1">
-                              <p className="text-xs text-[#88887E] tracking-wide uppercase mb-1">
-                                    Scan to join
-                              </p>
-                              <h3 className="text-lg font-extrabold text-[#1A1A18] mb-2">
-                                    {eventName}
-                              </h3>
-                              <p className="text-xs text-[#5A5A52] mb-4 break-all">
-                                    {guestUrl}
-                              </p>
-
-                              <button
-                                    onClick={downloadQR}
-                                    className="inline-flex items-center gap-2 bg-[#1A1A18] hover:bg-[#333333] text-white text-sm font-medium rounded-full px-5 py-2.5 transition-colors"
-                              >
-                                    Download PNG
-                              </button>
-
-                              <p className="text-xs text-[#88887E] mt-3">
-                                    Print and display at the event. Guests scan with their phone camera to join.
-                              </p>
-                        </div>
+            <div className="mb-12 bg-white rounded-2xl border border-[#E0D8C6] p-8 flex flex-col md:flex-row gap-8 items-center">
+                  <div ref={qrRef} className="bg-white p-4 rounded-xl border border-[#E0D8C6]">
+                        <QRCodeSVG value={guestUrl} size={160} level="M" fgColor="#1A1A18" />
+                  </div>
+                  <div className="text-center md:text-left flex-1">
+                        <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest mb-1">Guest Entry Link</p>
+                        <h3 className="text-xl font-bold text-[#1A1A18] mb-2">{eventName}</h3>
+                        <p className="text-sm text-[#5A5A52] mb-6">{guestUrl}</p>
+                        <button onClick={downloadQR} className="bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full px-10 py-4 hover:bg-black transition-all">
+                              Download PNG for Signage
+                        </button>
                   </div>
             </div>
       )

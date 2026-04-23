@@ -6,6 +6,18 @@ import { getTheme } from '../lib/themes'
 
 const MAX_FILES = 10
 
+// Add this mapping object at the top of the file
+const fontMap = {
+      'serif_playfair': "'Playfair Display', serif",
+      'serif_lora': "'Lora', serif",
+      'sans_inter': "'Inter', sans-serif",
+      'sans_montserrat': "'Montserrat', sans-serif",
+      'script_dancing': "'Dancing Script', cursive",
+      'script_greatvibes': "'Great Vibes', cursive",
+      'serif_instrument': "'Instrument Serif', serif",
+      'sans_outfit': "'Outfit', sans-serif"
+};
+
 export default function GuestUploader() {
       const { eventSlug } = useParams()
       const { event, loading, error } = useEvent(eventSlug)
@@ -114,21 +126,20 @@ export default function GuestUploader() {
       // Apply theme
       const theme = getTheme(event.theme)
       const c = theme.colors
+      const selectedFontFamily = fontMap[event.font_family] || fontMap['serif_playfair'];
 
       // Success state
       if (uploadState === 'success') {
             return (
-                  <div
-                        className="min-h-screen flex items-center justify-center p-6"
-                        style={{ backgroundColor: c.bg }}
-                  >
-                        <div className="max-w-sm text-center">
-                              <div className="w-16 h-16 rounded-full mx-auto mb-5 flex items-center justify-center bg-[#16A34A]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                    </svg>
+                  <div className="min-h-screen p-6" style={{ backgroundColor: c.bg }}>
+                        <div className="max-w-md mx-auto">
+                              <div className="mb-8 pt-4">
+                                    <p className="text-xs tracking-wide uppercase mt-5 mb-1" style={{ color: c.textSubtle }}>{event.event_name}</p>
+                                    <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: c.text, fontFamily: selectedFontFamily }}>
+                                          Share your <span style={{ color: c.accent }}>photos</span>.
+                                    </h1>
                               </div>
-                              <h1 className="text-3xl font-extrabold tracking-tight mb-3" style={{ color: c.text }}>
+                              <h1 className="text-3xl font-extrabold tracking-tight mb-3" style={{ color: c.text, fontFamily: selectedFontFamily }}>
                                     {successCount === 1 ? 'Photo sent' : `${successCount} photos sent`}
                               </h1>
                               <p className="text-sm mb-6" style={{ color: c.textMuted }}>
@@ -165,7 +176,7 @@ export default function GuestUploader() {
                         style={{ backgroundColor: c.bg }}
                   >
                         <div className="max-w-sm text-center">
-                              <h1 className="text-2xl font-extrabold mb-2" style={{ color: c.text }}>
+                              <h1 className="text-2xl font-extrabold mb-2" style={{ color: c.text, fontFamily: selectedFontFamily }}>
                                     {successCount} of {files.length} sent
                               </h1>
                               <p className="text-sm mb-6" style={{ color: c.textMuted }}>
@@ -196,7 +207,7 @@ export default function GuestUploader() {
                         style={{ backgroundColor: c.bg }}
                   >
                         <div className="max-w-sm text-center">
-                              <h1 className="text-2xl font-extrabold mb-2" style={{ color: c.text }}>Upload failed</h1>
+                              <h1 className="text-2xl font-extrabold mb-2" style={{ color: c.text, fontFamily: selectedFontFamily }}>Upload failed</h1>
                               <p className="text-sm mb-6" style={{ color: c.textMuted }}>
                                     Something went wrong. Check your connection and try again.
                               </p>
@@ -221,7 +232,7 @@ export default function GuestUploader() {
                         style={{ backgroundColor: c.bg }}
                   >
                         <div className="max-w-sm w-full text-center">
-                              <h1 className="text-2xl font-extrabold mb-2" style={{ color: c.text }}>
+                              <h1 className="text-2xl font-extrabold mb-2" style={{ color: c.text, fontFamily: selectedFontFamily }}>
                                     Uploading {currentIndex + 1} of {files.length}
                               </h1>
                               <p className="text-sm mb-6" style={{ color: c.textMuted }}>
@@ -267,7 +278,7 @@ export default function GuestUploader() {
                               </p>
                               <h1
                                     className="text-3xl font-extrabold tracking-tight"
-                                    style={{ color: c.text }}
+                                    style={{ color: c.text, fontFamily: selectedFontFamily }}
                               >
                                     Share your <span style={{ color: c.accent }}>photos</span>.
                               </h1>

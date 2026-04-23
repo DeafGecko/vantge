@@ -1,18 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
-import { useEvent } from '../hooks/useEvent'
-import { getTheme } from '../lib/themes'
-
-// Font mapping to match your Host Dashboard
-const fontMap = {
-      'serif_playfair': "'Playfair Display', serif",
-      'serif_lora': "'Lora', serif",
-      'sans_inter': "'Inter', sans-serif",
-      'sans_montserrat': "'Montserrat', sans-serif",
-      'script_dancing': "'Dancing Script', cursive",
-      'script_greatvibes': "'Great Vibes', cursive",
-      'serif_instrument': "'Instrument Serif', serif",
-      'sans_outfit': "'Outfit', sans-serif"
-};
+import { useEvent } from './src/hooks/useEvent'
+import { getTheme } from './src/lib/themes'
 
 export default function EventGateway() {
       const { eventSlug } = useParams()
@@ -63,7 +51,6 @@ export default function EventGateway() {
       // Apply the event's theme
       const theme = getTheme(event.theme)
       const c = theme.colors
-      const selectedFontFamily = fontMap[event.font_family] || fontMap['serif_playfair'];
 
       return (
             <div
@@ -93,10 +80,9 @@ export default function EventGateway() {
                         </div>
 
                         {/* Event name */}
-                        {/* FONT APPLIED HERE */}
                         <h1
                               className="text-5xl font-extrabold tracking-tight leading-[1.05] mb-4"
-                              style={{ color: c.text, fontFamily: selectedFontFamily }}
+                              style={{ color: c.text }}
                         >
                               {event.event_name}
                         </h1>
