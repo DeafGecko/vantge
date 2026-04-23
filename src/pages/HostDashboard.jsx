@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
 import PhotoManager from '../components/PhotoManager'
+import { getAllThemes, getTheme } from '../lib/themes'
 
 export default function HostDashboard() {
       const { user, signOut } = useAuth()
@@ -11,9 +12,13 @@ export default function HostDashboard() {
       const [toggling, setToggling] = useState(false)
       const [localUnlocked, setLocalUnlocked] = useState(null)
       const [showQR, setShowQR] = useState(false)
-      const [activeTab, setActiveTab] = useState(0) // 0=pending, 1=live, 2=trash
+      const [activeTab, setActiveTab] = useState(0)
+      const [localTheme, setLocalTheme] = useState(null)
+      const [savingTheme, setSavingTheme] = useState(false)
 
       const isUnlocked = localUnlocked !== null ? localUnlocked : event?.gallery_unlocked
+      const currentThemeId = localTheme || event?.theme || 'warm_editorial'
+      const currentTheme = getTheme(currentThemeId)
 
       async function toggleGallery() {
             if (!event) return
@@ -29,6 +34,25 @@ export default function HostDashboard() {
                   alert("Couldn't update gallery: " + error.message)
             }
             setToggling(false)
+      }
+
+      async function handleThemeChange(themeId) {
+            if (!event || themeId === currentThemeId) return
+
+            const previousTheme = currentThemeId
+            setLocalTheme(themeId)
+            setSavingTheme(true)
+
+            const { error } = await supabase
+                  .from('events')
+                  .update({ theme: themeId })
+                  .eq('id', event.id)
+
+            if (error) {
+                  setLocalTheme(previousTheme)
+                  alert("Couldn't save theme: " + error.message)
+            }
+            setSavingTheme(false)
       }
 
       if (eventLoading) {
@@ -103,30 +127,142 @@ export default function HostDashboard() {
                               ) : null}
                         </div>
 
-                        {/* Tab navigation */}
-                        <div className="mb-5 flex justify-end">
-                              <div className="flex gap-1 p-1 bg-white rounded-full border border-[#E0D8C6] w-fit">
-                                    <TabButton
-                                          label="Pending"
-                                          isActive={activeTab === 0}
-                                          onClick={() => setActiveTab(0)}
-                                    />
-                                    <TabButton
-                                          label="Live gallery"
-                                          isActive={activeTab === 1}
-                                          onClick={() => setActiveTab(1)}
-                                    />
-                                    <TabButton
-                                          label="Trash"
-                                          isActive={activeTab === 2}
-                                          onClick={() => setActiveTab(2)}
-                                    />
+                        {/* Theme picker card */}
+                        <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5 mb-6">
+                              <div className="flex items-baseline justify-between mb-1">
+                                    <h2 className="text-lg font-extrabold text-[#1A1A18]">Gallery theme</h2>
+                                    {savingTheme ? (
+                                          <span className="text-xs text-[#88887E]">Saving...</span>
+                                    ) : null}
+                              </div>
+                              <p className="text-xs text-[#88887E] mb-5">
+                                    Pick colors that match the wedding. Changes apply to the event page and gallery guests see.
+                              </p>
+
+                              {/* Live preview card */}
+                              <ThemePreview theme={currentTheme} eventName={event.event_name} />
+
+                              {/* Theme grid */}
+                              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-5">
+                                    {getAllThemes().map((theme) => (
+                                          <ThemeOption
+                                                key={theme.id}
+                                                theme={theme}
+                                                isActive={theme.id === currentThemeId}
+                                                onClick={() => handleThemeChange(theme.id)}
+                                          />
+                                    ))}
                               </div>
                         </div>
 
-                        {/* Active tab content */}
+                        {/* Tab navigation */}
+                        <div className="mb-5 flex justify-end">
+                              <div className="flex gap-1 p-1 bg-white rounded-full border border-[#E0D8C6] w-fit">
+                                    <TabButton label="Pending" isActive={activeTab === 0} onClick={() => setActiveTab(0)} />
+                                    <TabButton label="Live gallery" isActive={activeTab === 1} onClick={() => setActiveTab(1)} />
+                                    <TabButton label="Trash" isActive={activeTab === 2} onClick={() => setActiveTab(2)} />
+                              </div>
+                        </div>
+
                         <PhotoManager key={activeTab} eventId={event.id} status={activeTab} />
                   </div>
+            </div>
+      )
+}
+
+function ThemeOption({ theme, isActive, onClick }) {
+      const { colors } = theme
+      return (
+            <button
+                  onClick={onClick}
+                  className={
+                        "text-left p-3 rounded-xl border-2 transition-all " +
+                        (isActive
+                              ? "border-[#1A1A18] bg-[#F4F3F0]"
+                              : "border-[#E0D8C6] hover:border-[#88887E] bg-white")
+                  }
+            >
+                  <div className="flex items-center gap-1.5 mb-2">
+                        <span
+                              className="w-5 h-5 rounded-full border border-black/10"
+                              style={{ backgroundColor: colors.accent }}
+                        />
+                        <span
+                              className="w-5 h-5 rounded-full border border-black/10"
+                              style={{ backgroundColor: colors.bg }}
+                        />
+                        <span
+                              className="w-5 h-5 rounded-full border border-black/10"
+                              style={{ backgroundColor: colors.accentSoft }}
+                        />
+                  </div>
+                  <p className="text-xs font-bold text-[#1A1A18] truncate">{theme.name}</p>
+                  <p className="text-[10px] text-[#88887E] truncate">{theme.vibe}</p>
+            </button>
+      )
+}
+
+function ThemePreview({ theme, eventName }) {
+      const { colors } = theme
+      return (
+            <div
+                  className="rounded-xl border p-6 text-center"
+                  style={{
+                        backgroundColor: colors.bg,
+                        borderColor: colors.border,
+                  }}
+            >
+                  <div
+                        className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-4 border"
+                        style={{
+                              backgroundColor: colors.surface,
+                              borderColor: colors.border,
+                        }}
+                  >
+                        <span
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: colors.accentSoft }}
+                        />
+                        <span
+                              className="text-xs font-medium"
+                              style={{ color: colors.text }}
+                        >
+                              Event gallery
+                        </span>
+                  </div>
+
+                  <h3
+                        className="text-2xl font-extrabold tracking-tight mb-4"
+                        style={{ color: colors.text }}
+                  >
+                        {eventName}
+                  </h3>
+
+                  <div className="flex gap-2 justify-center">
+                        <span
+                              className="inline-flex items-center rounded-full px-5 py-2 text-xs font-medium text-white"
+                              style={{ backgroundColor: colors.accent }}
+                        >
+                              Take photo
+                        </span>
+                        <span
+                              className="inline-flex items-center rounded-full px-5 py-2 text-xs font-medium border"
+                              style={{
+                                    backgroundColor: colors.surface,
+                                    borderColor: colors.border,
+                                    color: colors.text,
+                              }}
+                        >
+                              Choose photos
+                        </span>
+                  </div>
+
+                  <p
+                        className="text-[10px] tracking-wide mt-4"
+                        style={{ color: colors.textSubtle }}
+                  >
+                        PREVIEW OF WHAT GUESTS SEE
+                  </p>
             </div>
       )
 }
@@ -137,9 +273,7 @@ function TabButton({ label, isActive, onClick }) {
                   onClick={onClick}
                   className={
                         "px-5 py-2 rounded-full text-sm font-medium transition-colors " +
-                        (isActive
-                              ? "bg-[#1A1A18] text-white"
-                              : "text-[#5A5A52] hover:text-[#1A1A18]")
+                        (isActive ? "bg-[#1A1A18] text-white" : "text-[#5A5A52] hover:text-[#1A1A18]")
                   }
             >
                   {label}
