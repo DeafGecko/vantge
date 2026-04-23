@@ -1,29 +1,33 @@
 import { supabase } from './supabase'
 
 /**
- * Uploads a photo blob to Supabase Storage and creates a media_queue row.
+ * Uploads a photo to Supabase Storage and creates a media_queue row.
+ *
+ * Works with both Blob (from canvas.toBlob) and File (from <input type="file">) 
+ * because File extends Blob.
  *
  * @param {Object} params
- * @param {Blob} params.blob - The JPEG blob from canvas.toBlob()
- * @param {string} params.eventId - UUID of the event (from events.id)
- * @param {string} params.guestName - Optional name the guest entered (or '')
- * @returns {Promise<Object>} - Success: { success: true, mediaId, storagePath }
- *                              Failure: { success: false, error }
+ * @param {Blob|File} params.blob - The image blob or File object
+ * @param {string} params.eventId - UUID of the event
+ * @param {string} params.guestName - Optional guest name (or '')
+ * @returns {Promise<Object>} - { success, storagePath?, originalUrl?, error? }
  */
 export async function uploadPhoto({ blob, eventId, guestName = '' }) {
       try {
-            // Step 1: generate a unique file path
-            // Format: {eventId}/{timestamp}-{random}.jpg
-            // Using timestamp + random to avoid collisions even with very fast uploads
+            // Detect file extension from the blob's type (or default to jpg)
+            const mimeType = blob.type || 'image/jpeg'
+            const extension = getExtensionFromMime(mimeType)
+
+            // Generate unique file path
             const timestamp = Date.now()
             const random = Math.random().toString(36).substring(2, 8)
-            const storagePath = `${eventId}/${timestamp}-${random}.jpg`
+            const storagePath = `${eventId}/${timestamp}-${random}.${extension}`
 
-            // Step 2: upload the blob to Supabase Storage
-            const { data: uploadData, error: uploadError } = await supabase.storage
+            // Upload to Supabase Storage
+            const { error: uploadError } = await supabase.storage
                   .from('event-media')
                   .upload(storagePath, blob, {
-                        contentType: 'image/jpeg',
+                        contentType: mimeType,
                         cacheControl: '3600',
                         upsert: false,
                   })
@@ -33,14 +37,14 @@ export async function uploadPhoto({ blob, eventId, guestName = '' }) {
                   return { success: false, error: uploadError.message }
             }
 
-            // Step 3: get the public URL for the uploaded file
+            // Get public URL
             const { data: urlData } = supabase.storage
                   .from('event-media')
                   .getPublicUrl(storagePath)
 
             const originalUrl = urlData.publicUrl
 
-            // Step 4: insert a row in media_queue so the host sees this upload
+            // Insert media_queue row
             const { error: insertError } = await supabase
                   .from('media_queue')
                   .insert({
@@ -53,7 +57,6 @@ export async function uploadPhoto({ blob, eventId, guestName = '' }) {
                   })
 
             if (insertError) {
-                  // If the DB insert failed, try to clean up the orphaned file
                   console.error('Database insert failed:', insertError)
                   await supabase.storage.from('event-media').remove([storagePath])
                   return { success: false, error: insertError.message }
@@ -64,9 +67,21 @@ export async function uploadPhoto({ blob, eventId, guestName = '' }) {
                   storagePath,
                   originalUrl,
             }
-            
       } catch (err) {
             console.error('Unexpected upload error:', err)
             return { success: false, error: err.message || 'Upload failed' }
       }
+}
+
+function getExtensionFromMime(mimeType) {
+      const map = {
+            'image/jpeg': 'jpg',
+            'image/jpg': 'jpg',
+            'image/png': 'png',
+            'image/webp': 'webp',
+            'image/heic': 'heic',
+            'image/heif': 'heif',
+            'image/gif': 'gif',
+      }
+      return map[mimeType.toLowerCase()] || 'jpg'
 }

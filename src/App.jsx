@@ -5,6 +5,7 @@ import HostLogin from './pages/HostLogin'
 import HostDashboard from './pages/HostDashboard'
 import Gallery from './pages/Gallery'
 import GuestCamera from './pages/GuestCamera'
+import GuestUploader from './pages/GuestUploader'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         }
       />
       <Route path="/gallery/:eventSlug" element={<Gallery />} />
+      <Route path="/:eventSlug/upload" element={<GuestUploader />} />
       <Route path="/:eventSlug/camera" element={<GuestCamera />} />
       <Route path="/:eventSlug" element={<EventGateway />} />
     </Routes>

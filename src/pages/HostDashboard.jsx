@@ -3,7 +3,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
-import ApprovalQueue from '../components/ApprovalQueue'
+import PhotoManager from '../components/PhotoManager'
 
 export default function HostDashboard() {
       const { user, signOut } = useAuth()
@@ -11,6 +11,7 @@ export default function HostDashboard() {
       const [toggling, setToggling] = useState(false)
       const [localUnlocked, setLocalUnlocked] = useState(null)
       const [showQR, setShowQR] = useState(false)
+      const [activeTab, setActiveTab] = useState(0) // 0=pending, 1=live, 2=trash
 
       const isUnlocked = localUnlocked !== null ? localUnlocked : event?.gallery_unlocked
 
@@ -63,6 +64,7 @@ export default function HostDashboard() {
                               </button>
                         </header>
 
+                        {/* Event card */}
                         <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5 mb-6">
                               <div className="flex items-baseline justify-between mb-2">
                                     <h2 className="text-xl font-extrabold text-[#1A1A18]">{event.event_name}</h2>
@@ -101,31 +103,64 @@ export default function HostDashboard() {
                               ) : null}
                         </div>
 
-                        <ApprovalQueue eventId={event.id} />
+                        {/* Tab navigation */}
+                        <div className="mb-5 flex justify-end">
+                              <div className="flex gap-1 p-1 bg-white rounded-full border border-[#E0D8C6] w-fit">
+                                    <TabButton
+                                          label="Pending"
+                                          isActive={activeTab === 0}
+                                          onClick={() => setActiveTab(0)}
+                                    />
+                                    <TabButton
+                                          label="Live gallery"
+                                          isActive={activeTab === 1}
+                                          onClick={() => setActiveTab(1)}
+                                    />
+                                    <TabButton
+                                          label="Trash"
+                                          isActive={activeTab === 2}
+                                          onClick={() => setActiveTab(2)}
+                                    />
+                              </div>
+                        </div>
+
+                        {/* Active tab content */}
+                        <PhotoManager key={activeTab} eventId={event.id} status={activeTab} />
                   </div>
             </div>
       )
 }
 
+function TabButton({ label, isActive, onClick }) {
+      return (
+            <button
+                  onClick={onClick}
+                  className={
+                        "px-5 py-2 rounded-full text-sm font-medium transition-colors " +
+                        (isActive
+                              ? "bg-[#1A1A18] text-white"
+                              : "text-[#5A5A52] hover:text-[#1A1A18]")
+                  }
+            >
+                  {label}
+            </button>
+      )
+}
+
 function QRCodeSection({ eventSlug, eventName }) {
       const qrRef = useRef(null)
-
-      // Build the URL guests will land on when they scan
-      // In production, this will use your actual domain
       const guestUrl = `${window.location.origin}/${eventSlug}`
 
       function downloadQR() {
             const svg = qrRef.current?.querySelector('svg')
             if (!svg) return
 
-            // Convert SVG to downloadable PNG
             const svgData = new XMLSerializer().serializeToString(svg)
             const canvas = document.createElement('canvas')
             const ctx = canvas.getContext('2d')
             const img = new Image()
 
             img.onload = () => {
-                  // Create a high-res canvas for print quality
                   canvas.width = 800
                   canvas.height = 800
                   ctx.fillStyle = '#FFFFFF'
@@ -148,8 +183,6 @@ function QRCodeSection({ eventSlug, eventName }) {
       return (
             <div className="mt-5 pt-5 border-t border-[#E0D8C6]">
                   <div className="flex flex-col sm:flex-row gap-5 items-start">
-
-                        {/* QR code */}
                         <div ref={qrRef} className="bg-white p-4 rounded-xl border border-[#E0D8C6] flex-shrink-0">
                               <QRCodeSVG
                                     value={guestUrl}
@@ -161,7 +194,6 @@ function QRCodeSection({ eventSlug, eventName }) {
                               />
                         </div>
 
-                        {/* Info + download */}
                         <div className="flex-1">
                               <p className="text-xs text-[#88887E] tracking-wide uppercase mb-1">
                                     Scan to join
