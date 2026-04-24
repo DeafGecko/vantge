@@ -3,6 +3,8 @@ import { useEvent } from '../hooks/useEvent'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
 
+
+
 export default function EventGateway() {
       const { eventSlug } = useParams()
       const { event, loading, error } = useEvent(eventSlug)

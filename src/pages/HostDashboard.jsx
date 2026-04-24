@@ -5,12 +5,12 @@ import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
 import PhotoManager from '../components/PhotoManager'
 import { getAllThemes, getTheme } from '../lib/themes'
-import { eventFonts, getFontsByCategory, DEFAULT_FONT_ID } from '../lib/fonts'
+import { getAllFonts, getFontsByCategory, getFont, DEFAULT_FONT_ID } from '../lib/fonts'
 
 const fontCategories = getFontsByCategory()
 const categoryLabels = {
       elegant: 'Elegant & Script',
-      modern:  'Modern & Clean',
+      modern: 'Modern & Clean',
       display: 'Display & Tech',
 }
 
@@ -30,7 +30,7 @@ export default function HostDashboard() {
       const currentTheme = getTheme(currentThemeId)
 
       const currentFontId = localFont || event?.font_family || DEFAULT_FONT_ID
-      const currentFont = eventFonts.find(f => f.id === currentFontId) || eventFonts[0]
+      const currentFont = getFont(currentFontId)
 
       async function toggleGallery() {
             if (!event) return
@@ -77,7 +77,7 @@ export default function HostDashboard() {
             <div className="min-h-screen bg-cream px-6 py-8">
                   <div className="max-w-6xl mx-auto">
 
-                        {/* INTEGRATED HEADER - REMOVED CARD STRUCTURE */}
+                        {/* INTEGRATED HEADER */}
                         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 pb-8 border-b border-[#E0D8C6]">
                               <div className="flex flex-col gap-1">
                                     <div className="flex items-center gap-3">
@@ -86,7 +86,7 @@ export default function HostDashboard() {
                                           <div className="flex items-center gap-2">
                                                 <h2
                                                       className="text-xl font-bold text-[#1A1A18] leading-tight"
-                                                      style={{ fontFamily: currentFont.family }}
+                                                      style={{ fontFamily: currentFont.cssFamily }}
                                                 >
                                                       {event.event_name}
                                                 </h2>
@@ -148,9 +148,9 @@ export default function HostDashboard() {
                                                                                     onClick={() => { setLocalFont(font.id); updateEventSettings({ font_family: font.id }); }}
                                                                                     className={"px-4 py-2 rounded-lg border text-xs transition-all " +
                                                                                           (currentFontId === font.id ? "border-[#1A1A18] bg-white ring-1 ring-[#1A1A18]" : "border-[#E0D8C6] bg-white hover:border-[#88887E]")}
-                                                                                    style={{ fontFamily: font.family }}
+                                                                                    style={{ fontFamily: font.cssFamily }}
                                                                               >
-                                                                                    {font.label}
+                                                                                    {font.name}
                                                                               </button>
                                                                         ))}
                                                                   </div>
@@ -214,7 +214,7 @@ function ThemeOption({ theme, isActive, onClick }) {
 function ThemePreview({ theme, eventName, font }) {
       return (
             <div className="rounded-2xl border p-10 text-center transition-all duration-500 shadow-sm" style={{ backgroundColor: theme.colors.bg, borderColor: theme.colors.border }}>
-                  <h3 className="text-2xl font-bold mb-6" style={{ color: theme.colors.text, fontFamily: font.family }}>
+                  <h3 className="text-2xl font-bold mb-6" style={{ color: theme.colors.text, fontFamily: font.cssFamily }}>
                         {eventName}
                   </h3>
                   <div className="flex gap-2 justify-center">

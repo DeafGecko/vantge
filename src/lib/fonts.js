@@ -1,69 +1,134 @@
-// ─────────────────────────────────────────────
-// fonts.js — Single source of truth for VANTGE event fonts
-// Import this everywhere instead of duplicating fontMap objects.
-// ─────────────────────────────────────────────
-
 /**
- * Each font has:
- *   id       → stored in Supabase (event.font_family)
- *   label    → human-friendly name shown in the picker
- *   family   → CSS font-family string (must match Google Fonts import)
- *   category → used to group fonts into rows in the Host Dashboard
+ * VANTGE font system.
+ * 10 curated Google Fonts organized into 3 style categories for any event type.
  */
 
-export const eventFonts = [
-      // ── ROW 1 · Elegant & Script  (weddings, galas, formal) ──
-      { id: 'serif_playfair', label: 'Playfair Display', family: "'Playfair Display', serif", category: 'elegant' },
-      { id: 'serif_lora', label: 'Lora', family: "'Lora', serif", category: 'elegant' },
-      { id: 'serif_newsreader', label: 'Newsreader', family: "'Newsreader', serif", category: 'elegant' },
-      { id: 'script_greatvibes', label: 'Great Vibes', family: "'Great Vibes', cursive", category: 'elegant' },
-      { id: 'script_alexbrush', label: 'Alex Brush', family: "'Alex Brush', cursive", category: 'elegant' },
-      { id: 'script_imperial', label: 'Imperial Script', family: "'Imperial Script', cursive", category: 'elegant' },
-      { id: 'script_style', label: 'Style Script', family: "'Style Script', cursive", category: 'elegant' },
+export const FONTS = {
+      // ELEGANT & SCRIPT — weddings, formal events, romantic
+      great_vibes: {
+            id: 'great_vibes',
+            name: 'Great Vibes',
+            googleFontName: 'Great Vibes',
+            cssFamily: "'Great Vibes', cursive",
+            category: 'elegant',
+            vibe: 'Flowing wedding classic',
+            weight: 400,
+      },
+      imperial_script: {
+            id: 'imperial_script',
+            name: 'Imperial Script',
+            googleFontName: 'Imperial Script',
+            cssFamily: "'Imperial Script', cursive",
+            category: 'elegant',
+            vibe: 'Refined calligraphy',
+            weight: 400,
+      },
+      alex_brush: {
+            id: 'alex_brush',
+            name: 'Alex Brush',
+            googleFontName: 'Alex Brush',
+            cssFamily: "'Alex Brush', cursive",
+            category: 'elegant',
+            vibe: 'Casual romantic',
+            weight: 400,
+      },
+      monte_carlo: {
+            id: 'monte_carlo',
+            name: 'Monte Carlo',
+            googleFontName: 'MonteCarlo',
+            cssFamily: "'MonteCarlo', cursive",
+            category: 'elegant',
+            vibe: 'Elegant formal script',
+            weight: 400,
+      },
 
-      // ── ROW 2 · Modern & Clean  (birthdays, reunions, corporate) ──
-      { id: 'sans_inter', label: 'Inter', family: "'Inter', sans-serif", category: 'modern' },
-      { id: 'sans_montserrat', label: 'Montserrat', family: "'Montserrat', sans-serif", category: 'modern' },
-      { id: 'sans_outfit', label: 'Outfit', family: "'Outfit', sans-serif", category: 'modern' },
-      { id: 'sans_ubuntu', label: 'Ubuntu', family: "'Ubuntu', sans-serif", category: 'modern' },
-      { id: 'serif_quattrocento', label: 'Quattrocento', family: "'Quattrocento', serif", category: 'modern' },
-      { id: 'display_pacifico', label: 'Pacifico', family: "'Pacifico', cursive", category: 'modern' },
+      // MODERN & CLEAN — birthdays, reunions, corporate, minimalist
+      sans_outfit: {
+            id: 'sans_outfit',
+            name: 'Outfit',
+            googleFontName: 'Outfit',
+            cssFamily: "'Outfit', sans-serif",
+            category: 'modern',
+            vibe: 'Clean & friendly',
+            weight: 800,
+      },
+      lora: {
+            id: 'lora',
+            name: 'Lora',
+            googleFontName: 'Lora',
+            cssFamily: "'Lora', serif",
+            category: 'modern',
+            vibe: 'Warm reading serif',
+            weight: 700,
+      },
+      playfair_display: {
+            id: 'playfair_display',
+            name: 'Playfair Display',
+            googleFontName: 'Playfair Display',
+            cssFamily: "'Playfair Display', serif",
+            category: 'modern',
+            vibe: 'Magazine editorial',
+            weight: 800,
+      },
 
-      // ── ROW 3 · Display & Tech  (tech meetups, creative, themed) ──
-      { id: 'display_cinzel', label: 'Cinzel Decorative', family: "'Cinzel Decorative', serif", category: 'display' },
-      { id: 'display_zendots', label: 'Zen Dots', family: "'Zen Dots', sans-serif", category: 'display' },
-      { id: 'pixel_silk', label: 'Silkscreen', family: "'Silkscreen', monospace", category: 'display' },
-      { id: 'tech_spacegrotesk', label: 'Space Grotesk', family: "'Space Grotesk', sans-serif", category: 'display' },
-]
-
-/** Quick lookup: fontId → CSS font-family string */
-export const fontMap = Object.fromEntries(
-      eventFonts.map((f) => [f.id, f.family])
-)
-
-/** Default font used when event has no font_family set */
-export const DEFAULT_FONT_ID = 'serif_playfair'
-
-/** Resolve a font_family id to its CSS family string */
-export function resolveFontFamily(fontId) {
-      return fontMap[fontId] || fontMap[DEFAULT_FONT_ID]
+      // DISPLAY & TECH — unique, memorable, playful, futuristic
+      cinzel_decorative: {
+            id: 'cinzel_decorative',
+            name: 'Cinzel Decorative',
+            googleFontName: 'Cinzel Decorative',
+            cssFamily: "'Cinzel Decorative', serif",
+            category: 'display',
+            vibe: 'Historic & engraved',
+            weight: 700,
+      },
+      pacifico: {
+            id: 'pacifico',
+            name: 'Pacifico',
+            googleFontName: 'Pacifico',
+            cssFamily: "'Pacifico', cursive",
+            category: 'display',
+            vibe: 'Playful handwritten',
+            weight: 400,
+      },
+      zen_dots: {
+            id: 'zen_dots',
+            name: 'Zen Dots',
+            googleFontName: 'Zen Dots',
+            cssFamily: "'Zen Dots', sans-serif",
+            category: 'display',
+            vibe: 'Futuristic tech',
+            weight: 400,
+      },
 }
 
-/** Get fonts grouped by category (for the 3-row picker) */
+export const DEFAULT_FONT_ID = 'sans_outfit'
+
+export function getFont(fontId) {
+      return FONTS[fontId] || FONTS[DEFAULT_FONT_ID]
+}
+
+export function getAllFonts() {
+      return Object.values(FONTS)
+}
+
 export function getFontsByCategory() {
       return {
-            elegant: eventFonts.filter((f) => f.category === 'elegant'),
-            modern: eventFonts.filter((f) => f.category === 'modern'),
-            display: eventFonts.filter((f) => f.category === 'display'),
+            elegant: Object.values(FONTS).filter((f) => f.category === 'elegant'),
+            modern: Object.values(FONTS).filter((f) => f.category === 'modern'),
+            display: Object.values(FONTS).filter((f) => f.category === 'display'),
       }
 }
 
+export function getGoogleFontsUrl(fontId) {
+      const font = getFont(fontId)
+      const name = font.googleFontName.replace(/ /g, '+')
+      return `https://fonts.googleapis.com/css2?family=${name}:wght@${font.weight}&display=swap`
+}
+
 /**
- * Google Fonts URL — add this to your index.html <head>:
- *
- * <link rel="preconnect" href="https://fonts.googleapis.com" />
- * <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
- * <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel+Decorative:wght@400;700&family=Great+Vibes&family=Imperial+Script&family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Luxurious+Script&family=Montserrat:wght@400;500;600;700;800&family=Monte+Carlo&family=Newsreader:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Pacifico&family=Playfair+Display:wght@400;500;600;700;800&family=Quattrocento:wght@400;700&family=Silkscreen&family=Space+Grotesk:wght@400;500;600;700&family=Style+Script&family=Ubuntu:wght@400;500;700&family=Zen+Dots&display=swap" rel="stylesheet" />
+ * Resolve a font ID to its CSS font-family string.
+ * Use in inline styles: style={{ fontFamily: resolveFontFamily(event.font) }}
  */
-export const GOOGLE_FONTS_URL =
-      'https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel+Decorative:wght@400;700&family=Great+Vibes&family=Imperial+Script&family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Luxurious+Script&family=Montserrat:wght@400;500;600;700;800&family=Monte+Carlo&family=Newsreader:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Pacifico&family=Playfair+Display:wght@400;500;600;700;800&family=Quattrocento:wght@400;700&family=Silkscreen&family=Space+Grotesk:wght@400;500;600;700&family=Style+Script&family=Ubuntu:wght@400;500;700&family=Zen+Dots&display=swap'
+export function resolveFontFamily(fontId) {
+      return getFont(fontId).cssFamily
+}

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useEvent } from '../hooks/useEvent'
 import { uploadPhoto } from '../lib/uploadPhoto'
 import { getTheme } from '../lib/themes'
+import { resolveFontFamily } from '../lib/fonts'
 
 export default function GuestCamera() {
       const { eventSlug } = useParams()
@@ -164,9 +165,10 @@ export default function GuestCamera() {
             )
       }
 
-      // Apply theme
+      // Apply theme + font
       const theme = getTheme(event.theme)
       const c = theme.colors
+      const selectedFontFamily = resolveFontFamily(event.font_family)
 
       if (cameraError) {
             return (
@@ -177,7 +179,7 @@ export default function GuestCamera() {
                         <div className="max-w-sm w-full text-center">
                               <h1
                                     className="text-2xl font-extrabold tracking-tight mb-3"
-                                    style={{ color: c.text }}
+                                    style={{ color: c.text, fontFamily: selectedFontFamily }}
                               >
                                     Camera access needed
                               </h1>
@@ -205,7 +207,10 @@ export default function GuestCamera() {
                         >
                               ← Back
                         </Link>
-                        <p className="text-white text-sm font-medium truncate max-w-[60%]">
+                        <p
+                              className="text-white text-sm font-medium truncate max-w-[60%]"
+                              style={{ fontFamily: selectedFontFamily }}
+                        >
                               {event.event_name}
                         </p>
                   </div>
@@ -220,15 +225,17 @@ export default function GuestCamera() {
                                     className="w-full h-full object-cover absolute inset-0"
                               />
 
-                              {/* Tap-to-start fallback for iOS Safari */}
+                              {/* Tap-to-start fallback — shown when camera can't auto-start */}
                               {needsTapToStart && (
-                                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black">
+                                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black p-8 text-center">
+                                          <p className="text-white text-base mb-2">Camera unavailable</p>
+                                          <p className="text-white/70 text-sm mb-8 max-w-xs">
+                                                Make sure no other app or browser tab is using your camera, then tap below.
+                                          </p>
                                           <button
                                                 onClick={startCamera}
                                                 className="font-medium rounded-full py-4 px-8 text-base text-white transition-colors"
                                                 style={{ backgroundColor: c.accent }}
-                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = c.accentHover }}
-                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = c.accent }}
                                           >
                                                 Tap to start camera
                                           </button>
@@ -276,7 +283,7 @@ export default function GuestCamera() {
                                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                       </svg>
                                                 </div>
-                                                <h2 className="text-lg font-extrabold mb-1" style={{ color: c.text }}>Sent to host</h2>
+                                                <h2 className="text-lg font-extrabold mb-1" style={{ color: c.text, fontFamily: selectedFontFamily }}>Sent to host</h2>
                                                 <p className="text-sm" style={{ color: c.textMuted }}>The host will approve it shortly.</p>
                                           </div>
                                     </div>

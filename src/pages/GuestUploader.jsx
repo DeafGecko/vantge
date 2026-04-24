@@ -5,6 +5,7 @@ import { uploadPhoto } from '../lib/uploadPhoto'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
 
+
 const MAX_FILES = 10
 
 export default function GuestUploader() {
@@ -125,7 +126,7 @@ export default function GuestUploader() {
                               <div className="mb-8 pt-4">
                                     <p className="text-xs tracking-wide uppercase mt-5 mb-1" style={{ color: c.textSubtle }}>{event.event_name}</p>
                                     <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: c.text, fontFamily: selectedFontFamily }}>
-                                          Share your <span style={{ color: c.accent }}>photos</span>.
+                                          Share your <span style={{ color: c.accent }}>Photos</span>.
                                     </h1>
                               </div>
                               <h1 className="text-3xl font-extrabold tracking-tight mb-3" style={{ color: c.text, fontFamily: selectedFontFamily }}>

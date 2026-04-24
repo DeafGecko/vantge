@@ -5,6 +5,7 @@ import { getThumbnailUrl, getFullSizeUrl } from '../lib/cloudinary'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
 
+
 export default function Gallery() {
       const { eventSlug } = useParams()
       const [event, setEvent] = useState(null)
@@ -186,7 +187,7 @@ export default function Gallery() {
                                           className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2"
                                           style={{ color: c.text, fontFamily: selectedFontFamily }}
                                     >
-                                          The <span style={{ color: c.accent }}>gallery</span>.
+                                          The <span style={{ color: c.accent }}>Gallery</span>.
                                     </h1>
                                     <p className="text-sm" style={{ color: c.textMuted }}>
                                           {photos.length} {photos.length === 1 ? 'photo' : 'photos'} from your guests
