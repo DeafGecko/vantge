@@ -4,6 +4,8 @@ import { useEvent } from '../hooks/useEvent'
 import { uploadPhoto } from '../lib/uploadPhoto'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
+import FontLoader from '../components/FontLoader'
+
 
 
 const MAX_FILES = 10
@@ -246,6 +248,8 @@ export default function GuestUploader() {
 
       // Idle — file picker + preview
       return (
+            <>
+                  <FontLoader fontId={event.font_family} />
             <div
                   className="min-h-screen p-6"
                   style={{ backgroundColor: c.bg }}
@@ -403,5 +407,6 @@ export default function GuestUploader() {
                         )}
                   </div>
             </div>
+            </>
       )
 }

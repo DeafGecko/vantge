@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase'
 import { getThumbnailUrl, getFullSizeUrl } from '../lib/cloudinary'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
+import FontLoader from '../components/FontLoader'
+
 
 
 export default function Gallery() {
@@ -168,6 +170,8 @@ export default function Gallery() {
       }
 
       return (
+            <>
+            <FontLoader fontId={event.font_family} />
             <div className="min-h-screen" style={{ backgroundColor: c.bg }}>
                   <header className="px-6 pt-10 pb-6">
                         <div className="max-w-6xl mx-auto">
@@ -235,6 +239,7 @@ export default function Gallery() {
                         />
                   )}
             </div>
+            </>
       )
 }
 

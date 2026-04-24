@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase'
 import PhotoManager from '../components/PhotoManager'
 import { getAllThemes, getTheme } from '../lib/themes'
 import { getAllFonts, getFontsByCategory, getFont, DEFAULT_FONT_ID } from '../lib/fonts'
+import FontLoader from '../components/FontLoader'
+
 
 const fontCategories = getFontsByCategory()
 const categoryLabels = {
@@ -67,12 +69,14 @@ export default function HostDashboard() {
 
       if (!event) {
             return (
+                  <>
+                  <FontLoader fontId={currentFontId} />
                   <div className="min-h-screen bg-cream p-6 text-center">
                         <p className="text-sm text-[#5A5A52]">No event found.</p>
                   </div>
+                  </>
             )
       }
-
       return (
             <div className="min-h-screen bg-cream px-6 py-8">
                   <div className="max-w-6xl mx-auto">
@@ -187,6 +191,7 @@ export default function HostDashboard() {
                         <PhotoManager key={activeTab} eventId={event.id} status={activeTab} />
                   </div>
             </div>
+            </>
       )
 }
 
@@ -265,4 +270,4 @@ function QRCodeSection({ eventSlug, eventName }) {
                   </div>
             </div>
       )
-}
+}}

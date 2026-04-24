@@ -4,6 +4,7 @@ import { useEvent } from '../hooks/useEvent'
 import { uploadPhoto } from '../lib/uploadPhoto'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
+import FontLoader from '../components/FontLoader'
 
 export default function GuestCamera() {
       const { eventSlug } = useParams()
@@ -199,6 +200,8 @@ export default function GuestCamera() {
       }
 
       return (
+            <>
+            <FontLoader fontId={event.font_family} />
             <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
                   <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/60 to-transparent p-4 flex items-center justify-between">
                         <Link
@@ -346,5 +349,6 @@ export default function GuestCamera() {
 
                   <canvas ref={canvasRef} className="hidden" />
             </div>
+            </>
       )
 }
