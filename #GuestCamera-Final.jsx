@@ -257,7 +257,7 @@ export default function GuestCamera() {
                                     {showGrid && (
                                           <div className="absolute inset-0 z-10 pointer-events-none grid grid-cols-3 grid-rows-3">
                                                 {[...Array(9)].map((_, i) => (
-                                                      <div key={i} className="border-[0.5px] border-white/10"></div>
+                                                      <div key={i} className="border-[12px] border-white"></div>
                                                 ))}
                                           </div>
                                     )}
@@ -275,7 +275,7 @@ export default function GuestCamera() {
                                                       </button>
                                                 ))}
                                           </div>
-                                          {}
+                                          { }
                                           <div className="w-2 h-52 mr-6 bg-black/50 rounded-full relative overflow-hidden">
                                                 <div
                                                       className="absolute w-full bg-red-500 rounded-full transition-all duration-300"

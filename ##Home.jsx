@@ -1,54 +1,13 @@
 // src/pages/HomePage.jsx
 import { Link } from 'react-router-dom';
-import {
-      Sparkles,
-      Palette,
-      CheckCircle,
-      ArrowRight,
-      Camera,
-      Zap,
-      Shield,
-      Eye,
-      LogIn,
-      Menu,
-      X,
-      Star,
-      Check,
-      ChevronRight
-} from 'lucide-react';
 
 export default function HomePage() {
       return (
             <div className="bg-[#FAFAF8] text-[#1A1A18] font-['Inter']">
-                  {/* Header */}
-                  <header className="sticky top-0 z-50 bg-[#FAFAF8]/95 backdrop-blur-sm border-b border-[#E5E4E0]">
-                        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-                              <Link to="/" className="font-['Inter'] font-bold text-2xl text-[#1A1A18]">
-                                    vantge
-                              </Link>
-                              <nav className="hidden md:flex items-center gap-8">
-                                    <a href="#features" className="text-[#4A4A46] hover:text-[#B91C1C] transition">Features</a>
-                                    <a href="#pricing" className="text-[#4A4A46] hover:text-[#B91C1C] transition">Pricing</a>
-                                    <a href="#how-it-works" className="text-[#4A4A46] hover:text-[#B91C1C] transition">How it works</a>
-                              </nav>
-                              <div className="flex items-center gap-4">
-                                    <Link to="/login" className="text-[#4A4A46] hover:text-[#1A1A18] transition flex items-center gap-1">
-                                          <LogIn size={16} />
-                                          Log in
-                                    </Link>
-                                    <Link
-                                          to="/beta"
-                                          className="bg-[#B91C1C] hover:bg-red-800 text-white px-4 py-2 rounded text-sm font-medium transition"
-                                    >
-                                          Request Beta
-                                    </Link>
-                              </div>
-                        </div>
-                  </header>
-
-                  {/* Hero Section */}
+                  {/* Hero Section - matches the uploaded mockup */}
                   <section className="max-w-7xl mx-auto px-6 py-20 md:py-28">
                         <div className="grid md:grid-cols-2 gap-12 items-start">
+                              {/* Left column: text content */}
                               <div>
                                     <div className="inline-flex items-center gap-2 bg-red-50 px-3 py-1 rounded-full text-sm text-[#B91C1C] mb-6">
                                           <span className="relative flex h-2 w-2">
@@ -57,7 +16,7 @@ export default function HomePage() {
                                           </span>
                                           Beta launching May 2026
                                     </div>
-                                    <h1 className="font-['Inter'] font-bold text-5xl md:text-6xl leading-tight mb-4">
+                                    <h1 className="font-['Inter_Tight'] font-bold text-5xl md:text-6xl leading-tight mb-4">
                                           Every Shot. <span className="text-[#B91C1C]">Perfected.</span>
                                     </h1>
                                     <p className="text-[#4A4A46] text-lg leading-relaxed mb-8">
@@ -80,6 +39,7 @@ export default function HomePage() {
                                     </div>
                               </div>
 
+                              {/* Right column: feature panels stacked vertically */}
                               <div className="space-y-5">
                                     <FeaturePanel
                                           number="01"
@@ -100,12 +60,12 @@ export default function HomePage() {
                         </div>
                   </section>
 
-                  {/* Feature Deep Dive Section */}
+                  {/* Feature Deep Dive Section (Magic Brush, Auto-HDR, Approval Queue) */}
                   <section id="features" className="bg-white border-y border-[#E5E4E0] py-20">
                         <div className="max-w-7xl mx-auto px-6">
                               <div className="text-center max-w-2xl mx-auto mb-16">
                                     <span className="text-[#B91C1C] text-sm uppercase tracking-wider">The difference</span>
-                                    <h2 className="font-['Inter'] text-4xl font-bold mt-2">Not just another photo dump</h2>
+                                    <h2 className="font-['Inter_Tight'] text-4xl font-bold mt-2">Not just another photo dump</h2>
                                     <p className="text-[#4A4A46] mt-4">
                                           Generic apps accept every blurry, embarrassing upload. VANTGE gives you
                                           professional tools to curate and perfect every memory.
@@ -113,19 +73,19 @@ export default function HomePage() {
                               </div>
                               <div className="grid md:grid-cols-3 gap-8">
                                     <DetailCard
-                                          icon={<Sparkles className="w-8 h-8 text-[#B91C1C]" />}
+                                          icon="✨"
                                           title="Magic Brush"
                                           description="Remove people, objects, or text from any photo with a few brush strokes. AI inpaints the background perfectly."
                                           extra="Works on photos already uploaded – no need to retake."
                                     />
                                     <DetailCard
-                                          icon={<Palette className="w-8 h-8 text-[#B91C1C]" />}
+                                          icon="🎨"
                                           title="Auto-HDR"
                                           description="Automatic color grading, noise reduction, and dynamic range adjustment for every guest photo."
                                           extra="Supports JPEG, PNG, HEIC, and WebP. Delivers next-gen AVIF when supported."
                                     />
                                     <DetailCard
-                                          icon={<CheckCircle className="w-8 h-8 text-[#B91C1C]" />}
+                                          icon="✅"
                                           title="Approval Queue"
                                           description="See every upload in a private dashboard. Approve with one click, reject with another. Real‑time updates."
                                           extra="Bulk approve, sort by guest name, and reveal the public gallery only when you're ready."
@@ -134,50 +94,50 @@ export default function HomePage() {
                         </div>
                   </section>
 
-                  {/* How It Works */}
-                  <section id="how-it-works" className="py-20">
+                  {/* How It Works – Simple steps */}
+                  <section className="py-20">
                         <div className="max-w-7xl mx-auto px-6">
                               <div className="text-center max-w-2xl mx-auto mb-16">
                                     <span className="text-[#B91C1C] text-sm uppercase tracking-wider">Two sides, one gallery</span>
-                                    <h2 className="font-['Inter'] text-4xl font-bold mt-2">How VANTGE works</h2>
+                                    <h2 className="font-['Inter_Tight'] text-4xl font-bold mt-2">How VANTGE works</h2>
                               </div>
                               <div className="grid md:grid-cols-2 gap-16">
                                     <div>
-                                          <h3 className="font-['Inter'] text-2xl font-bold mb-4 flex items-center gap-2">
+                                          <h3 className="font-['Inter_Tight'] text-2xl font-bold mb-4 flex items-center gap-2">
                                                 <span className="bg-[#B91C1C] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
                                                 For the host
                                           </h3>
                                           <ul className="space-y-4 text-[#4A4A46]">
-                                                <li className="flex gap-3"><ArrowRight className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5" /> Create an event – get a QR code and link</li>
-                                                <li className="flex gap-3"><ArrowRight className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5" /> Share with guests (print cards, email, text)</li>
-                                                <li className="flex gap-3"><ArrowRight className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5" /> Review every photo in the approval queue</li>
-                                                <li className="flex gap-3"><ArrowRight className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5" /> Use Magic Brush to fix imperfect shots</li>
-                                                <li className="flex gap-3"><ArrowRight className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5" /> Flip the switch – gallery goes public to all guests</li>
+                                                <li className="flex gap-3"><span className="text-[#B91C1C]">→</span> Create an event – get a QR code and link</li>
+                                                <li className="flex gap-3"><span className="text-[#B91C1C]">→</span> Share with guests (print cards, email, text)</li>
+                                                <li className="flex gap-3"><span className="text-[#B91C1C]">→</span> Review every photo in the approval queue</li>
+                                                <li className="flex gap-3"><span className="text-[#B91C1C]">→</span> Use Magic Brush to fix imperfect shots</li>
+                                                <li className="flex gap-3"><span className="text-[#B91C1C]">→</span> Flip the switch – gallery goes public to all guests</li>
                                           </ul>
                                     </div>
                                     <div>
-                                          <h3 className="font-['Inter'] text-2xl font-bold mb-4 flex items-center gap-2">
+                                          <h3 className="font-['Inter_Tight'] text-2xl font-bold mb-4 flex items-center gap-2">
                                                 <span className="bg-[#B91C1C] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
                                                 For the guest
                                           </h3>
                                           <ul className="space-y-4 text-[#4A4A46]">
-                                                <li className="flex gap-3"><ArrowRight className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5" /> Scan QR code with phone camera</li>
-                                                <li className="flex gap-3"><ArrowRight className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5" /> Take a photo or choose from camera roll</li>
-                                                <li className="flex gap-3"><ArrowRight className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5" /> Tap upload – no account, no app download</li>
-                                                <li className="flex gap-3"><ArrowRight className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5" /> Done. Photo goes to host for approval</li>
-                                                <li className="flex gap-3"><ArrowRight className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5" /> Later, visit the same link to see the full approved gallery</li>
+                                                <li className="flex gap-3"><span className="text-[#B91C1C]">→</span> Scan QR code with phone camera</li>
+                                                <li className="flex gap-3"><span className="text-[#B91C1C]">→</span> Take a photo or choose from camera roll</li>
+                                                <li className="flex gap-3"><span className="text-[#B91C1C]">→</span> Tap upload – no account, no app download</li>
+                                                <li className="flex gap-3"><span className="text-[#B91C1C]">→</span> Done. Photo goes to host for approval</li>
+                                                <li className="flex gap-3"><span className="text-[#B91C1C]">→</span> Later, visit the same link to see the full approved gallery</li>
                                           </ul>
                                     </div>
                               </div>
                         </div>
                   </section>
 
-                  {/* Pricing */}
-                  <section id="pricing" className="bg-white border-y border-[#E5E4E0] py-20">
+                  {/* Pricing Summary – from PDF */}
+                  <section className="bg-white border-y border-[#E5E4E0] py-20">
                         <div className="max-w-7xl mx-auto px-6">
                               <div className="text-center max-w-2xl mx-auto mb-12">
                                     <span className="text-[#B91C1C] text-sm uppercase tracking-wider">Simple, transparent</span>
-                                    <h2 className="font-['Inter'] text-4xl font-bold mt-2">One event, one price</h2>
+                                    <h2 className="font-['Inter_Tight'] text-4xl font-bold mt-2">One event, one price</h2>
                               </div>
                               <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                                     <PricingTier name="Sprint" price="$39" duration="30 days" features={["Up to 500 photos", "Auto-HDR", "Approval queue", "Basic support"]} />
@@ -191,7 +151,7 @@ export default function HomePage() {
                   {/* Final CTA */}
                   <section className="py-20">
                         <div className="max-w-3xl mx-auto text-center px-6">
-                              <h2 className="font-['Inter'] text-4xl font-bold mb-4">Ready to control your gallery?</h2>
+                              <h2 className="font-['Inter_Tight'] text-4xl font-bold mb-4">Ready to control your gallery?</h2>
                               <p className="text-[#4A4A46] mb-8">Be among the first to use VANTGE at your wedding, birthday, or corporate event.</p>
                               <Link
                                     to="/beta"
@@ -205,7 +165,7 @@ export default function HomePage() {
                   {/* Footer */}
                   <footer className="border-t border-[#E5E4E0] py-8 text-center text-sm text-[#4A4A46]">
                         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                              <span className="font-['Inter'] font-bold text-[#1A1A18]">VANTGE</span>
+                              <span className="font-['Inter_Tight'] font-bold text-[#1A1A18]">VANTGE</span>
                               <span>© 2026 09 Labs – Event Memory Studio</span>
                               <div className="flex gap-4">
                                     <a href="#" className="hover:text-[#B91C1C]">Privacy</a>
@@ -223,7 +183,7 @@ function FeaturePanel({ number, title, description }) {
       return (
             <div className="bg-white border border-[#E5E4E0] rounded-lg p-5 shadow-sm">
                   <div className="text-xs text-[#B91C1C] uppercase tracking-wider mb-1">Core feature / {number}</div>
-                  <h3 className="font-['Inter'] font-bold text-xl mb-2">{title}</h3>
+                  <h3 className="font-['Inter_Tight'] font-bold text-xl mb-2">{title}</h3>
                   <p className="text-[#4A4A46] text-sm leading-relaxed">{description}</p>
             </div>
       );
@@ -232,8 +192,8 @@ function FeaturePanel({ number, title, description }) {
 function DetailCard({ icon, title, description, extra }) {
       return (
             <div className="p-6 border border-[#E5E4E0] rounded-xl bg-[#FAFAF8]">
-                  <div className="mb-3">{icon}</div>
-                  <h3 className="font-['Inter'] font-bold text-xl mb-2">{title}</h3>
+                  <div className="text-3xl mb-3">{icon}</div>
+                  <h3 className="font-['Inter_Tight'] font-bold text-xl mb-2">{title}</h3>
                   <p className="text-[#4A4A46] text-sm leading-relaxed mb-3">{description}</p>
                   <p className="text-xs text-[#4A4A46] border-t border-[#E5E4E0] pt-3 mt-2">{extra}</p>
             </div>
@@ -256,7 +216,7 @@ function PricingTier({ name, price, duration, features, popular = false }) {
                   <ul className="mt-6 space-y-2 text-sm">
                         {features.map((f, i) => (
                               <li key={i} className="flex items-center gap-2">
-                                    <Check className="w-4 h-4 text-[#B91C1C]" /> {f}
+                                    <span className="text-[#B91C1C]">✓</span> {f}
                               </li>
                         ))}
                   </ul>

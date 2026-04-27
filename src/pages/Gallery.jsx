@@ -188,10 +188,10 @@ export default function Gallery() {
                                           {event.event_name}
                                     </p>
                                     <h1
-                                          className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2"
+                                          className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4"
                                           style={{ color: c.text, fontFamily: selectedFontFamily }}
                                     >
-                                          The <span style={{ color: c.accent }}>Gallery</span>.
+                                          The <span style={{ color: c.accent }}>Gallery</span>
                                     </h1>
                                     <p className="text-sm" style={{ color: c.textMuted }}>
                                           {photos.length} {photos.length === 1 ? 'photo' : 'photos'} from your guests

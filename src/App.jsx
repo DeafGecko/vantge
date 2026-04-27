@@ -1,32 +1,29 @@
-import { Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
-import EventGateway from './pages/EventGateway'
-import HostLogin from './pages/HostLogin'
-import HostDashboard from './pages/HostDashboard'
-import Gallery from './pages/Gallery'
-import GuestCamera from './pages/GuestCamera'
-import GuestUploader from './pages/GuestUploader'
-import ProtectedRoute from './components/ProtectedRoute'
+// src/App.jsx
+import { Routes, Route, Navigate } from 'react-router-dom'
 
-function App() {
+import EventGateway   from './pages/EventGateway'
+import GuestCamera    from './pages/GuestCamera'
+import GuestUploader  from './pages/GuestUploader'
+import Gallery        from './pages/Gallery'
+import HostLogin      from './pages/HostLogin'
+import HostDashboard  from './pages/HostDashboard'
+
+export default function App() {
   return (
+    // Removed the <BrowserRouter> from here to fix the conflict
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/host/login" element={<HostLogin />} />
-      <Route
-        path="/host/dashboard"
-        element={
-          <ProtectedRoute>
-            <HostDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/gallery/:eventSlug" element={<Gallery />} />
-      <Route path="/:eventSlug/upload" element={<GuestUploader />} />
-      <Route path="/:eventSlug/camera" element={<GuestCamera />} />
-      <Route path="/:eventSlug" element={<EventGateway />} />
+      {/* ── Host routes ──────────────────────────────────────── */}
+      <Route path="/host/login"     element={<HostLogin />} />
+      <Route path="/host/dashboard" element={<HostDashboard />} />
+
+      {/* ── Guest routes (all scoped to /:eventSlug) ─────────── */}
+      <Route path="/:eventSlug"          element={<EventGateway />} />
+      <Route path="/:eventSlug/camera"   element={<GuestCamera />} />
+      <Route path="/:eventSlug/upload"   element={<GuestUploader />} />
+      <Route path="/:eventSlug/gallery"  element={<Gallery />} />
+
+      {/* ── Fallback ─────────────────────────────────────────── */}
+      <Route path="*" element={<Navigate to="/host/login" replace />} />
     </Routes>
   )
 }
-
-export default App
