@@ -1,15 +1,27 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
 import PhotoManager from '../components/PhotoManager'
 import { getAllThemes, getTheme } from '../lib/themes'
-import { getAllFonts, getFontsByCategory, getFont, DEFAULT_FONT_ID } from '../lib/fonts'
+import { getFontsByCategory, getFont, getAllFonts, getGoogleFontsUrl, DEFAULT_FONT_ID } from '../lib/fonts'
 import FontLoader from '../components/FontLoader'
+import BackgroundUploader from '../components/BackgroundUploader'
 
 
 const fontCategories = getFontsByCategory()
+
+// Preload all Google Fonts so the picker buttons render correctly
+getAllFonts().forEach((font) => {
+      const id = `font-loader-${font.id}`
+      if (document.getElementById(id)) return
+      const link = document.createElement('link')
+      link.id = id
+      link.rel = 'stylesheet'
+      link.href = getGoogleFontsUrl(font.id)
+      document.head.appendChild(link)
+})
 const categoryLabels = {
       elegant: 'Elegant & Script',
       modern: 'Modern & Clean',
@@ -25,6 +37,9 @@ export default function HostDashboard() {
       const [activeTab, setActiveTab] = useState(0)
       const [localTheme, setLocalTheme] = useState(null)
       const [localFont, setLocalFont] = useState(null)
+      const [localBgImage, setLocalBgImage] = useState(null)
+      const [localEventName, setLocalEventName] = useState(null)
+      const [savingName, setSavingName] = useState(false)
       const [savingSettings, setSavingSettings] = useState(false)
 
       const isUnlocked = localUnlocked !== null ? localUnlocked : event?.gallery_unlocked
@@ -33,6 +48,10 @@ export default function HostDashboard() {
 
       const currentFontId = localFont || event?.font_family || DEFAULT_FONT_ID
       const currentFont = getFont(currentFontId)
+      const currentBgImage = localBgImage !== null ? localBgImage : event?.background_image ?? null
+      const currentEventName = localEventName !== null ? localEventName : event?.event_name ?? ''
+      const [localBgPosition, setLocalBgPosition] = useState(null)
+      const currentBgPosition = localBgPosition !== null ? localBgPosition : event?.background_position ?? '50% 50%'
 
       async function toggleGallery() {
             if (!event) return
@@ -78,6 +97,8 @@ export default function HostDashboard() {
             )
       }
       return (
+            <>
+            <FontLoader fontId={currentFontId} />
             <div className="min-h-screen bg-cream px-6 py-8">
                   <div className="max-w-6xl mx-auto">
 
@@ -132,10 +153,32 @@ export default function HostDashboard() {
                               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                                     <div className="lg:col-span-4">
                                           <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Live Preview</p>
-                                          <ThemePreview theme={currentTheme} eventName={event.event_name} font={currentFont} />
+                                          <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} />
                                     </div>
 
                                     <div className="lg:col-span-8 flex flex-col gap-8">
+                                          {/* EVENT NAME */}
+                                          <div>
+                                                <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Display Name</p>
+                                                <div className="flex gap-2">
+                                                      <input
+                                                            type="text"
+                                                            value={currentEventName}
+                                                            onChange={(e) => setLocalEventName(e.target.value)}
+                                                            onBlur={async () => {
+                                                                  if (currentEventName === event.event_name) return
+                                                                  setSavingName(true)
+                                                                  await updateEventSettings({ event_name: currentEventName })
+                                                                  setSavingName(false)
+                                                            }}
+                                                            placeholder="e.g. Rogers & Bottrell Wedding"
+                                                            className="flex-1 bg-white border border-[#E0D8C6] rounded-lg px-4 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C84A44] transition-colors"
+                                                      />
+                                                      {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse self-center">Saving...</span>}
+                                                </div>
+                                                <p className="text-[10px] text-[#88887E] mt-1.5">This is what guests see on their screen.</p>
+                                          </div>
+
                                           {/* FONT SELECTION — 3 rows by category */}
                                           <div>
                                                 <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Title Font</p>
@@ -162,6 +205,15 @@ export default function HostDashboard() {
                                                       ))}
                                                 </div>
                                           </div>
+
+                                          {/* BACKGROUND IMAGE */}
+                                          <BackgroundUploader
+                                                eventId={event.id}
+                                                currentImageUrl={currentBgImage}
+                                                currentPosition={currentBgPosition}
+                                                accentColor={currentTheme.colors.accent}
+                                                onSaved={(url, pos) => { setLocalBgImage(url); setLocalBgPosition(pos) }}
+                                          />
 
                                           {/* THEME SELECTION */}
                                           <div>
@@ -191,6 +243,7 @@ export default function HostDashboard() {
                         <PhotoManager key={activeTab} eventId={event.id} status={activeTab} />
                   </div>
             </div>
+            </>
       )
 }
 

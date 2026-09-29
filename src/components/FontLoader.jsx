@@ -15,17 +15,18 @@ export default function FontLoader({ fontId }) {
             const url = getGoogleFontsUrl(fontId)
             const linkId = `font-loader-${fontId}`
 
-            // Already loaded? Skip.
-            if (document.getElementById(linkId)) return
+            // Remove stale link if URL doesn't match (e.g. after a fix to getGoogleFontsUrl)
+            const existing = document.getElementById(linkId)
+            if (existing) {
+                  if (existing.href === url) return
+                  existing.remove()
+            }
 
             const link = document.createElement('link')
             link.id = linkId
             link.rel = 'stylesheet'
             link.href = url
             document.head.appendChild(link)
-
-            // Don't remove on unmount — keep loaded fonts cached.
-            // Browser handles cleanup when the page is torn down.
       }, [fontId])
 
       return null

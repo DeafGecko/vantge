@@ -34,9 +34,9 @@ export const FONTS = {
       },
       monte_carlo: {
             id: 'monte_carlo',
-            name: 'Monte Carlo',
-            googleFontName: 'MonteCarlo',
-            cssFamily: "'MonteCarlo', cursive",
+            name: 'Charm',
+            googleFontName: 'Charm',
+            cssFamily: "'Charm', cursive",
             category: 'elegant',
             vibe: 'Elegant formal script',
             weight: 400,
@@ -122,7 +122,10 @@ export function getFontsByCategory() {
 export function getGoogleFontsUrl(fontId) {
       const font = getFont(fontId)
       const name = font.googleFontName.replace(/ /g, '+')
-      return `https://fonts.googleapis.com/css2?family=${name}:wght@${font.weight}&display=swap`
+      // Script/cursive fonts like MonteCarlo don't support wght axis — load without weight param
+      const isScript = font.cssFamily.includes('cursive')
+      const weightParam = isScript ? '' : `:wght@${font.weight}`
+      return `https://fonts.googleapis.com/css2?family=${name}${weightParam}&display=swap`
 }
 
 /**
