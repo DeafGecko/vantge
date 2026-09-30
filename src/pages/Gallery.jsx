@@ -321,13 +321,29 @@ export default function Gallery() {
                                                 className="aspect-square overflow-hidden rounded-md transition-all focus:outline-none relative"
                                                 style={{ backgroundColor: c.surfaceMuted }}
                                           >
-                                                <img
-                                                      src={getThumbnailUrl(photo.original_url)}
-                                                      alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'}
-                                                      className="w-full h-full object-cover"
-                                                      style={{ opacity: selectMode && !isSelected ? 0.5 : 1 }}
-                                                      loading="lazy"
-                                                />
+                                                {photo.is_video ? (
+                                                      <>
+                                                            <video
+                                                                  src={photo.original_url}
+                                                                  className="w-full h-full object-cover"
+                                                                  style={{ opacity: selectMode && !isSelected ? 0.5 : 1 }}
+                                                                  muted playsInline preload="metadata"
+                                                            />
+                                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                                  <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center">
+                                                                        <svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                  </div>
+                                                            </div>
+                                                      </>
+                                                ) : (
+                                                      <img
+                                                            src={getThumbnailUrl(photo.original_url)}
+                                                            alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'}
+                                                            className="w-full h-full object-cover"
+                                                            style={{ opacity: selectMode && !isSelected ? 0.5 : 1 }}
+                                                            loading="lazy"
+                                                      />
+                                                )}
                                                 {selectMode && (
                                                       <div className={`absolute top-1.5 right-1.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-white' : 'border-white/60'}`}
                                                             style={{ backgroundColor: isSelected ? c.accent : 'transparent' }}>
@@ -422,12 +438,23 @@ function Lightbox({ photos, initialIndex, onClose }) {
                         </div>
                   </div>
 
-                  <img
-                        src={getFullSizeUrl(photo.original_url)}
-                        alt=""
-                        onClick={(e) => e.stopPropagation()}
-                        className="max-w-full max-h-[85vh] object-contain"
-                  />
+                  {photo.is_video ? (
+                        <video
+                              src={photo.original_url}
+                              controls
+                              autoPlay
+                              playsInline
+                              onClick={(e) => e.stopPropagation()}
+                              className="max-w-full max-h-[85vh] rounded-lg"
+                        />
+                  ) : (
+                        <img
+                              src={getFullSizeUrl(photo.original_url)}
+                              alt=""
+                              onClick={(e) => e.stopPropagation()}
+                              className="max-w-full max-h-[85vh] object-contain"
+                        />
+                  )}
 
                   {photos.length > 1 && (
                         <button

@@ -245,14 +245,36 @@ function PhotoCard({ photo, status, onApprove, onReject, onRemoveFromGallery, on
 
       return (
             <div className="bg-white rounded-2xl border border-[#E8E4DA] overflow-hidden shadow-sm group">
-                  {/* Photo */}
+                  {/* Photo or Video */}
                   <div className="aspect-[4/5] bg-[#F4F3F0] relative overflow-hidden">
-                        <img
-                              src={getThumbnailUrl(photo.original_url)}
-                              alt="Event photo"
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                              loading="lazy"
-                        />
+                        {photo.is_video ? (
+                              <>
+                                    <video
+                                          src={photo.original_url}
+                                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                                          muted
+                                          playsInline
+                                          preload="metadata"
+                                    />
+                                    {/* Play badge */}
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                          <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center">
+                                                <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                          </div>
+                                    </div>
+                                    {/* Video label */}
+                                    <div className="absolute top-2 left-2 bg-black/50 text-white text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">
+                                          Video
+                                    </div>
+                              </>
+                        ) : (
+                              <img
+                                    src={getThumbnailUrl(photo.original_url)}
+                                    alt="Event photo"
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                                    loading="lazy"
+                              />
+                        )}
                         {processing && (
                               <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
                                     <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A18" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".2"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
