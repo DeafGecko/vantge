@@ -144,7 +144,7 @@ export default function HostDashboard() {
                                           </div>
                                     </div>
                                     <p className="text-xs text-[#88887E] font-medium tracking-wide">
-                                          /{event.event_slug} · {user?.email}
+                                          {user?.email}
                                     </p>
                               </div>
 
