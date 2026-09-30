@@ -5,8 +5,8 @@ import { useAuth } from '../hooks/useAuth'
 const PHOTO_COLLAGE = [
       'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80', // wedding couple
       'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=80', // party balloons
-      'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&q=80', // wedding table
-      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&q=80', // birthday cake
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80', // conference keynote stage
+      'https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=600&q=80', // conference audience
       'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&q=80', // celebration
       'https://images.unsplash.com/photo-1510076857177-7470076d4098?w=600&q=80', // wedding flowers
 ]
