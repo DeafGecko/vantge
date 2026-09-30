@@ -131,21 +131,41 @@ export default function HostDashboard() {
 
                         {/* HEADER */}
                         <header className="flex items-center justify-between gap-3 mb-8 pb-6 border-b border-[#E0D8C6]">
-                              {/* Brand + event name */}
-                              <div className="flex items-center gap-2 min-w-0">
+                              {/* Brand only */}
+                              <div className="flex items-center gap-2">
                                     <Camera size={20} className="text-[#1A1A18] shrink-0" />
-                                    <h1 className="text-lg font-black tracking-tighter text-[#1A1A18] shrink-0">vantge</h1>
-                                    <span className="w-[1px] h-4 bg-[#E0D8C6] shrink-0"></span>
-                                    <div className="flex items-center gap-1.5 min-w-0">
-                                          <h2 className="text-sm font-bold text-[#1A1A18] truncate" style={{ fontFamily: currentFont.cssFamily }}>
-                                                {event.event_name}
-                                          </h2>
-                                          <span className={"w-2 h-2 rounded-full shrink-0 " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#88887E]")}></span>
-                                    </div>
+                                    <h1 className="text-lg font-black tracking-tighter text-[#1A1A18]">vantge</h1>
+                                    <span className={"w-2 h-2 rounded-full shrink-0 ml-1 " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#88887E]")}></span>
                               </div>
 
-                              {/* Burger menu */}
-                              <div className="relative shrink-0">
+                              {/* Desktop: inline buttons */}
+                              <div className="hidden md:flex items-center gap-3">
+                                    <button
+                                          onClick={() => { setActiveTab(0); setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }}
+                                          className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors"
+                                    >
+                                          <Images size={20} className="text-[#1A1A18]" />
+                                          {pendingCount > 0 && (
+                                                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#C84A44] text-white text-[10px] font-bold flex items-center justify-center px-1">
+                                                      {pendingCount > 99 ? '99+' : pendingCount}
+                                                </span>
+                                          )}
+                                    </button>
+                                    <button
+                                          onClick={toggleGallery}
+                                          disabled={toggling}
+                                          className={"px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all " +
+                                                (isUnlocked ? "bg-transparent border border-[#E0D8C6] text-[#5A5A52]" : "bg-[#1A1A18] text-white")}
+                                    >
+                                          {toggling ? "..." : isUnlocked ? "Lock Gallery" : "Open Gallery"}
+                                    </button>
+                                    <button onClick={async () => { await signOut(); navigate('/host/login') }} title="Sign out" className="p-2 rounded-full hover:bg-[#F4F3F0] transition-colors text-[#88887E] hover:text-[#1A1A18]">
+                                          <LogOut size={20} />
+                                    </button>
+                              </div>
+
+                              {/* Mobile: burger menu */}
+                              <div className="relative md:hidden shrink-0">
                                     <button onClick={() => setMenuOpen(o => !o)} className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors text-[#1A1A18]">
                                           {menuOpen ? <X size={22} /> : <Menu size={22} />}
                                           {!menuOpen && pendingCount > 0 && (
@@ -154,12 +174,9 @@ export default function HostDashboard() {
                                                 </span>
                                           )}
                                     </button>
-
                                     {menuOpen && (
                                           <>
-                                                {/* Backdrop */}
                                                 <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
-                                                {/* Dropdown */}
                                                 <div className="absolute right-0 top-12 z-40 w-56 bg-white rounded-2xl border border-[#E0D8C6] shadow-xl overflow-hidden">
                                                       <button
                                                             onClick={() => { toggleGallery(); setMenuOpen(false) }}
