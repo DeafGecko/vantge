@@ -192,7 +192,7 @@ export default function HostDashboard() {
                                                                   className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-[#1A1A18] hover:bg-[#F7F5F0] transition-colors border-b border-[#E8E4DA]"
                                                             >
                                                                   <span className={"w-2 h-2 rounded-full shrink-0 " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#B0AFA5]")} />
-                                                                  {toggling ? "Updating..." : isUnlocked ? "Hide Gallery" : "Go Live"}
+                                                                  {toggling ? "Updating..." : isUnlocked ? "Hide Gallery" : "Live Gallery"}
                                                             </button>
                                                             <button
                                                                   onClick={() => { scrollToPhotos(); setMenuOpen(false) }}
