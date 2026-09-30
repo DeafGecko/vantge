@@ -257,19 +257,24 @@ export default function HostDashboard() {
                                     {/* RIGHT — controls */}
                                     <div className="md:col-span-8 flex flex-col gap-4">
 
-                                          {/* Logo | Display Name | Event Type — all in one row */}
+                                          {/* Logo | Display Name | Event Type */}
                                           <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
-                                                <div className="flex items-start gap-4">
+                                                <div className="flex items-center gap-4">
 
-                                                      {/* Display Name with logo inline on the left */}
+                                                      {/* 1. Logo tile */}
+                                                      <div className="shrink-0 flex flex-col items-center gap-1">
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Logo</p>
+                                                            <LogoUploader
+                                                                  eventId={event.id}
+                                                                  currentLogoUrl={currentLogoUrl}
+                                                                  onSaved={(url) => setLocalLogoUrl(url)}
+                                                            />
+                                                      </div>
+
+                                                      {/* 2. Display Name — grows */}
                                                       <div className="flex-1 min-w-0">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Display Name</p>
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2">Display Name</p>
                                                             <div className="flex gap-2 items-center">
-                                                                  <LogoUploader
-                                                                        eventId={event.id}
-                                                                        currentLogoUrl={currentLogoUrl}
-                                                                        onSaved={(url) => setLocalLogoUrl(url)}
-                                                                  />
                                                                   <input
                                                                         type="text"
                                                                         value={currentEventName}
@@ -285,11 +290,10 @@ export default function HostDashboard() {
                                                                   />
                                                                   {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse shrink-0">Saving…</span>}
                                                             </div>
-                                                            <p className="text-[10px] text-[#B0AFA5] mt-2">Shown to guests on the event page.</p>
                                                       </div>
 
                                                       {/* 3. Event Type dropdown */}
-                                                      <div className="shrink-0 w-40">
+                                                      <div className="shrink-0 w-36">
                                                             <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Event Type</p>
                                                             <div className="relative">
                                                                   <select
