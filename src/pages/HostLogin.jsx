@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import VantgeLogo from '../components/VantgeLogo'
 
 const HERO_PHOTOS = [
       'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80',
@@ -55,14 +56,8 @@ export default function HostLogin() {
 
                         {/* Brand mark */}
                         <div className="flex flex-col items-center mb-10">
-                              <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center mb-4 shadow-xl">
-                                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                                          <path d="M8 14a2 2 0 012-2h4l2-4 2 4h0a2 2 0 012 2v4a2 2 0 01-2 2H10a2 2 0 01-2-2v-4z" fill="none" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
-                                          <circle cx="14" cy="14" r="2" fill="white" />
-                                    </svg>
-                              </div>
-                              <span className="text-2xl font-black tracking-tighter text-white">vantge</span>
-                              <p className="text-[11px] text-white/40 tracking-[0.2em] uppercase mt-1">Event Photo Sharing</p>
+                              <VantgeLogo size="lg" variant="dark" />
+                              <p className="text-[11px] text-white/40 tracking-[0.2em] uppercase mt-2">Event Photo Sharing</p>
                         </div>
 
                         {/* Form card */}

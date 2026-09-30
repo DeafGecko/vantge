@@ -13,6 +13,7 @@ import FontLoader from '../components/FontLoader'
 import BackgroundUploader from '../components/BackgroundUploader'
 import HostUploader from '../components/HostUploader'
 import LogoUploader from '../components/LogoUploader'
+import VantgeLogo from '../components/VantgeLogo'
 
 const fontCategories = getFontsByCategory()
 
@@ -131,13 +132,8 @@ export default function HostDashboard() {
                               <div className="max-w-6xl mx-auto px-5 md:px-8 h-14 flex items-center justify-between gap-4">
 
                                     {/* Brand */}
-                                    <div className="flex items-center gap-2.5 shrink-0">
-                                          <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
-                                                <circle cx="14" cy="14" r="14" fill="white" fillOpacity=".12" />
-                                                <path d="M8 14a2 2 0 012-2h4l2-4 2 4h0a2 2 0 012 2v4a2 2 0 01-2 2H10a2 2 0 01-2-2v-4z" fill="none" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
-                                                <circle cx="14" cy="14" r="2" fill="white" />
-                                          </svg>
-                                          <span className="text-base font-black tracking-tighter text-white">vantge</span>
+                                    <div className="shrink-0">
+                                          <VantgeLogo size="sm" variant="dark" />
                                     </div>
 
                                     {/* Desktop controls */}
