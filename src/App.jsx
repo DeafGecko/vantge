@@ -13,8 +13,8 @@ export default function App() {
     // Removed the <BrowserRouter> from here to fix the conflict
     <Routes>
       {/* ── Host routes ──────────────────────────────────────── */}
-      <Route path="/host/login"     element={<HostLogin />} />
-      <Route path="/host/dashboard" element={<HostDashboard />} />
+      <Route path="/login"     element={<HostLogin />} />
+      <Route path="/dashboard" element={<HostDashboard />} />
 
       {/* ── Guest routes (all scoped to /:eventSlug) ─────────── */}
       <Route path="/:eventSlug"          element={<EventGateway />} />
@@ -23,7 +23,7 @@ export default function App() {
       <Route path="/:eventSlug/gallery"  element={<Gallery />} />
 
       {/* ── Fallback ─────────────────────────────────────────── */}
-      <Route path="*" element={<Navigate to="/host/login" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }

@@ -15,7 +15,7 @@ export default function ProtectedRoute({ children }) {
 
       // Not logged in? Kick them to login
       if (!user) {
-            return <Navigate to="/host/login" replace />
+            return <Navigate to="/login" replace />
       }
 
       // Logged in — render whatever was inside <ProtectedRoute>

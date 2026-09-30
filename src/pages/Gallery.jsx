@@ -173,40 +173,39 @@ export default function Gallery() {
             <>
             <FontLoader fontId={event.font_family} />
             <div className="min-h-screen" style={{ backgroundColor: c.bg }}>
-                  <header className="px-6 pt-10 pb-6">
+                  <header className="px-4 sm:px-6 pt-5 pb-4">
                         <div className="max-w-6xl mx-auto">
-                              <Link
-                                    to={`/${event.event_slug}`}
-                                    className="inline-flex items-center gap-1 text-sm font-medium transition-colors mb-6"
-                                    style={{ color: c.textMuted }}
-                              >
-                                    ← Back
-                              </Link>
+                              <div className="flex items-center justify-between mb-3">
+                                    <Link
+                                          to={`/${event.event_slug}`}
+                                          className="inline-flex items-center gap-1 text-sm font-medium transition-colors"
+                                          style={{ color: c.textMuted }}
+                                    >
+                                          ← Back
+                                    </Link>
+                                    <p className="text-xs font-bold tracking-widest uppercase" style={{ color: c.textSubtle }}>
+                                          {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+                                    </p>
+                              </div>
 
                               <div className="text-center">
-                                    <p className="text-xs tracking-wide uppercase mb-2" style={{ color: c.textSubtle }}>
-                                          {event.event_name}
-                                    </p>
                                     <h1
-                                          className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4"
+                                          className="text-2xl sm:text-3xl font-extrabold tracking-tight"
                                           style={{ color: c.text, fontFamily: selectedFontFamily }}
                                     >
-                                          The <span style={{ color: c.accent }}>Gallery</span>
+                                          {event.event_name} — <span style={{ color: c.accent }}>Gallery</span>
                                     </h1>
-                                    <p className="text-sm" style={{ color: c.textMuted }}>
-                                          {photos.length} {photos.length === 1 ? 'photo' : 'photos'} from your guests
-                                    </p>
                               </div>
                         </div>
                   </header>
 
-                  <div className="px-4 sm:px-6 pb-16">
-                        <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+                  <div className="px-2 sm:px-4 pb-12">
+                        <div className="max-w-6xl mx-auto grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1 sm:gap-1.5">
                               {photos.map((photo, index) => (
                                     <button
                                           key={photo.id}
                                           onClick={() => setLightboxIndex(index)}
-                                          className="aspect-square overflow-hidden rounded-lg hover:opacity-90 active:scale-[0.98] transition-all focus:outline-none"
+                                          className="aspect-square overflow-hidden rounded-md hover:opacity-90 active:scale-[0.98] transition-all focus:outline-none"
                                           style={{ backgroundColor: c.surfaceMuted }}
                                     >
                                           <img
@@ -220,15 +219,15 @@ export default function Gallery() {
                         </div>
                   </div>
 
-                  <footer className="text-center pb-8">
+                  <footer className="text-center pb-6">
                         <Link
                               to={`/${event.event_slug}/camera`}
-                              className="inline-block font-medium rounded-full py-3 px-6 transition-colors text-sm text-white"
+                              className="inline-block font-medium rounded-full py-2.5 px-5 transition-colors text-sm text-white"
                               style={{ backgroundColor: c.accent }}
                         >
                               Add your photo
                         </Link>
-                        <p className="text-xs mt-4" style={{ color: c.textSubtle }}>powered by vantge</p>
+                        <p className="text-xs mt-3" style={{ color: c.textSubtle }}>powered by vantge</p>
                   </footer>
 
                   {lightboxIndex !== null && (

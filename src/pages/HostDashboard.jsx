@@ -168,7 +168,7 @@ export default function HostDashboard() {
                                           </button>
 
                                           <button
-                                                onClick={async () => { await signOut(); navigate('/host/login') }}
+                                                onClick={async () => { await signOut(); navigate('/login') }}
                                                 title="Sign out"
                                                 className="p-2 rounded-full hover:bg-white/10 transition-colors text-white/50 hover:text-white"
                                           >
@@ -214,7 +214,7 @@ export default function HostDashboard() {
                                                                   {pendingCount > 0 && <span className="ml-auto text-[#C84A44] text-xs font-bold">{pendingCount}</span>}
                                                             </button>
                                                             <button
-                                                                  onClick={async () => { await signOut(); navigate('/host/login') }}
+                                                                  onClick={async () => { await signOut(); navigate('/login') }}
                                                                   className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-medium text-[#88887E] hover:bg-[#F7F5F0] transition-colors"
                                                             >
                                                                   <LogOut size={16} />
@@ -227,13 +227,13 @@ export default function HostDashboard() {
                               </div>
                         </header>
 
-                        <div className="max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-10">
+                        <div className="max-w-6xl mx-auto px-4 md:px-6 py-5 md:py-7">
 
                               {/* PAGE TITLE */}
-                              <div className="mb-8 flex items-end justify-between">
+                              <div className="mb-5 flex items-end justify-between">
                                     <div>
-                                          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#B0AFA5] mb-1">Event Dashboard</p>
-                                          <h2 className="text-2xl md:text-3xl font-black tracking-tight text-[#1A1A18]">{event.event_name}</h2>
+                                          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#B0AFA5] mb-0.5">Event Dashboard</p>
+                                          <h2 className="text-xl md:text-2xl font-black tracking-tight text-[#1A1A18]">{event.event_name}</h2>
                                     </div>
                                     {savingSettings && (
                                           <span className="text-[10px] font-bold text-[#C84A44] animate-pulse tracking-widest uppercase">Saving…</span>
@@ -241,14 +241,14 @@ export default function HostDashboard() {
                               </div>
 
                               {/* BENTO GRID */}
-                              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-10">
+                              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mb-7">
 
                                     {/* LEFT — phone preview + QR */}
-                                    <div className="md:col-span-4 flex flex-col gap-4">
+                                    <div className="md:col-span-4 flex flex-col gap-3">
 
                                           {/* Phone preview */}
-                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
-                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-5">Live Preview</p>
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Live Preview</p>
                                                 <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} />
                                           </div>
 
@@ -257,10 +257,10 @@ export default function HostDashboard() {
                                     </div>
 
                                     {/* RIGHT — controls */}
-                                    <div className="md:col-span-8 flex flex-col gap-4">
+                                    <div className="md:col-span-8 flex flex-col gap-3">
 
                                           {/* Logo | Display Name | Event Type */}
-                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
                                                 {/* Row 1 — controls all on same baseline */}
                                                 <div className="flex items-end gap-3">
 
@@ -289,7 +289,7 @@ export default function HostDashboard() {
                                                                               setSavingName(false)
                                                                         }}
                                                                         placeholder="e.g. Rogers & Bottrell Wedding"
-                                                                        className="flex-1 min-w-0 bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal"
+                                                                        className="flex-1 min-w-0 bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal"
                                                                   />
                                                                   {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse shrink-0">Saving…</span>}
                                                             </div>
@@ -306,7 +306,7 @@ export default function HostDashboard() {
                                                                               setLocalEventType(val)
                                                                               await updateEventSettings({ event_type: val })
                                                                         }}
-                                                                        className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-3 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
+                                                                        className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
                                                                   >
                                                                         {EVENT_TYPES.map((t) => (
                                                                               <option key={t.id} value={t.id}>
@@ -320,12 +320,9 @@ export default function HostDashboard() {
                                                 </div>
 
                                                 {/* Row 2 — motto aligned under Event Type only */}
-                                                <div className="flex gap-3 mt-2">
-                                                      {/* spacer matching logo width */}
+                                                <div className="flex gap-3 mt-1.5">
                                                       <div className="shrink-0 w-11" />
-                                                      {/* spacer matching display name */}
                                                       <div className="flex-1 min-w-0" />
-                                                      {/* motto under dropdown */}
                                                       <p className="shrink-0 w-36 text-[10px] text-[#B0AFA5] text-center">{currentEventType.tagline}</p>
                                                 </div>
                                           </div>
@@ -334,14 +331,14 @@ export default function HostDashboard() {
                                           <HostUploader eventId={event.id} />
 
                                           {/* Font + Color side by side */}
-                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-                                                <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
-                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Title Font</p>
-                                                      <div className="flex flex-col gap-4">
+                                                <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Title Font</p>
+                                                      <div className="flex flex-col gap-3">
                                                             {Object.entries(fontCategories).map(([catKey, fonts]) => (
                                                                   <div key={catKey}>
-                                                                        <p className="text-[8px] font-bold text-[#C0BFB5] uppercase tracking-widest mb-2">
+                                                                        <p className="text-[8px] font-bold text-[#C0BFB5] uppercase tracking-widest mb-1.5">
                                                                               {categoryLabels[catKey]}
                                                                         </p>
                                                                         <div className="flex flex-wrap gap-1.5">
@@ -349,7 +346,7 @@ export default function HostDashboard() {
                                                                                     <button
                                                                                           key={font.id}
                                                                                           onClick={() => { setLocalFont(font.id); updateEventSettings({ font_family: font.id }) }}
-                                                                                          className={"px-3 py-1.5 rounded-lg border text-xs transition-all " +
+                                                                                          className={"px-2.5 py-1 rounded-lg border text-xs transition-all " +
                                                                                                 (currentFontId === font.id
                                                                                                       ? "border-[#1A1A18] bg-[#1A1A18] text-white"
                                                                                                       : "border-[#E8E4DA] bg-white text-[#5A5A52] hover:border-[#1A1A18] hover:text-[#1A1A18]")}
@@ -364,8 +361,8 @@ export default function HostDashboard() {
                                                       </div>
                                                 </div>
 
-                                                <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
-                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Color Palette</p>
+                                                <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Color Palette</p>
                                                       <div className="grid grid-cols-2 gap-2">
                                                             {getAllThemes().map((theme) => (
                                                                   <ThemeOption
@@ -380,7 +377,7 @@ export default function HostDashboard() {
                                           </div>
 
                                           {/* Background photo */}
-                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
                                                 <BackgroundUploader
                                                       eventId={event.id}
                                                       currentImageUrl={currentBgImage}
@@ -394,9 +391,9 @@ export default function HostDashboard() {
                               </div>
 
                               {/* PHOTO MANAGEMENT */}
-                              <div ref={photoSectionRef} className="bg-white rounded-3xl border border-[#E8E4DA] shadow-sm overflow-hidden">
+                              <div ref={photoSectionRef} className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm overflow-hidden">
                                     {/* Tab bar */}
-                                    <div className="flex border-b border-[#E8E4DA] px-6">
+                                    <div className="flex border-b border-[#E8E4DA] px-5">
                                           {[
                                                 { label: 'Pending', count: pendingCount },
                                                 { label: 'Live Gallery', count: null },
@@ -405,7 +402,7 @@ export default function HostDashboard() {
                                                 <button
                                                       key={i}
                                                       onClick={() => setActiveTab(i)}
-                                                      className={"pb-3.5 pt-4 mr-6 text-sm font-bold transition-all relative whitespace-nowrap " +
+                                                      className={"pb-3 pt-3.5 mr-5 text-sm font-bold transition-all relative whitespace-nowrap " +
                                                             (activeTab === i ? "text-[#1A1A18]" : "text-[#B0AFA5] hover:text-[#5A5A52]")}
                                                 >
                                                       {label}
@@ -418,7 +415,7 @@ export default function HostDashboard() {
                                                 </button>
                                           ))}
                                     </div>
-                                    <div className="p-6">
+                                    <div className="p-4">
                                           <PhotoManager key={activeTab} eventId={event.id} status={activeTab} />
                                     </div>
                               </div>
