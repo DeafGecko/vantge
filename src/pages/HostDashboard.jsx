@@ -135,11 +135,18 @@ export default function HostDashboard() {
                               <div className="flex items-center gap-2">
                                     <Camera size={20} className="text-[#1A1A18] shrink-0" />
                                     <h1 className="text-lg font-black tracking-tighter text-[#1A1A18]">vantge</h1>
-                                    <span className={"w-2 h-2 rounded-full shrink-0 ml-1 " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#88887E]")}></span>
                               </div>
 
                               {/* Desktop: inline buttons */}
                               <div className="hidden md:flex items-center gap-3">
+                                    <button
+                                          onClick={toggleGallery}
+                                          disabled={toggling}
+                                          className={"px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all " +
+                                                (isUnlocked ? "bg-transparent border border-[#E0D8C6] text-[#5A5A52]" : "bg-[#1A1A18] text-white")}
+                                    >
+                                          {toggling ? "..." : isUnlocked ? "Lock Gallery" : "Open Gallery"}
+                                    </button>
                                     <button
                                           onClick={() => { setActiveTab(0); setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }}
                                           className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors"
@@ -150,14 +157,6 @@ export default function HostDashboard() {
                                                       {pendingCount > 99 ? '99+' : pendingCount}
                                                 </span>
                                           )}
-                                    </button>
-                                    <button
-                                          onClick={toggleGallery}
-                                          disabled={toggling}
-                                          className={"px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all " +
-                                                (isUnlocked ? "bg-transparent border border-[#E0D8C6] text-[#5A5A52]" : "bg-[#1A1A18] text-white")}
-                                    >
-                                          {toggling ? "..." : isUnlocked ? "Lock Gallery" : "Open Gallery"}
                                     </button>
                                     <button onClick={async () => { await signOut(); navigate('/host/login') }} title="Sign out" className="p-2 rounded-full hover:bg-[#F4F3F0] transition-colors text-[#88887E] hover:text-[#1A1A18]">
                                           <LogOut size={20} />
