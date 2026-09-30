@@ -284,10 +284,11 @@ function PhotoCard({ photo, status, onApprove, onReject, onRemoveFromGallery, on
                                     <button
                                           onClick={() => run(onReject)}
                                           disabled={processing}
-                                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#F7F5F0] hover:bg-[#EFEDE7] text-[#5A5A52] text-[11px] font-bold tracking-wide rounded-xl py-2.5 border border-[#E8E4DA] transition-all active:scale-[0.97] disabled:opacity-40"
+                                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#F7F5F0] hover:bg-[#FEF2F2] text-[#5A5A52] hover:text-[#C84A44] text-[11px] font-bold tracking-wide rounded-xl py-2.5 border border-[#E8E4DA] hover:border-[#FECACA] transition-all active:scale-[0.97] disabled:opacity-40 group/reject"
                                     >
                                           <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
-                                          Reject
+                                          <span className="group-hover/reject:hidden">Reject</span>
+                                          <span className="hidden group-hover/reject:inline">Will hide from gallery</span>
                                     </button>
                               </div>
                         )}
