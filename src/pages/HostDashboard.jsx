@@ -146,7 +146,7 @@ export default function HostDashboard() {
                                                             ? "border-white/20 text-white/60 hover:border-white/40 hover:text-white"
                                                             : "bg-white text-[#1A1A18] border-white hover:bg-white/90")}
                                           >
-                                                {toggling ? "..." : isUnlocked ? "Hide" : "Live"}
+                                                {toggling ? "..." : isUnlocked ? "Hide Gallery" : "Live Gallery"}
                                           </button>
 
                                           {/* Notification badge */}
