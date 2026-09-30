@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
@@ -30,6 +31,7 @@ const categoryLabels = {
 
 export default function HostDashboard() {
       const { user, signOut } = useAuth()
+      const navigate = useNavigate()
       const { event, loading: eventLoading } = useHostEvent()
       const [toggling, setToggling] = useState(false)
       const [localUnlocked, setLocalUnlocked] = useState(null)
@@ -131,7 +133,7 @@ export default function HostDashboard() {
                                     >
                                           {toggling ? "..." : isUnlocked ? "Lock Gallery" : "Open Gallery"}
                                     </button>
-                                    <button onClick={signOut} className="text-xs font-bold text-[#88887E] hover:text-[#1A1A18] uppercase tracking-widest ml-2">
+                                    <button onClick={async () => { await signOut(); navigate('/host/login') }} className="text-xs font-bold text-[#88887E] hover:text-[#1A1A18] uppercase tracking-widest ml-2">
                                           Sign out
                                     </button>
                               </div>
