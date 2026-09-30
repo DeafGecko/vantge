@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
+import { Bell } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
@@ -42,6 +43,7 @@ export default function HostDashboard() {
       const [localEventName, setLocalEventName] = useState(null)
       const [savingName, setSavingName] = useState(false)
       const [savingSettings, setSavingSettings] = useState(false)
+      const [pendingCount, setPendingCount] = useState(0)
 
       const isUnlocked = localUnlocked !== null ? localUnlocked : event?.gallery_unlocked
       const currentThemeId = localTheme || event?.theme || 'warm_editorial'
@@ -53,6 +55,18 @@ export default function HostDashboard() {
       const currentEventName = localEventName !== null ? localEventName : event?.event_name ?? ''
       const [localBgPosition, setLocalBgPosition] = useState(null)
       const currentBgPosition = localBgPosition !== null ? localBgPosition : event?.background_position ?? '50% 50%'
+
+      useEffect(() => {
+            if (!event?.id) return
+            supabase.from('media_queue').select('id', { count: 'exact', head: true }).eq('event_id', event.id).eq('status', 0)
+                  .then(({ count }) => setPendingCount(count ?? 0))
+            const channel = supabase.channel(`pending-count-${event.id}`)
+                  .on('postgres_changes', { event: '*', schema: 'public', table: 'media_queue', filter: `event_id=eq.${event.id}` }, () => {
+                        supabase.from('media_queue').select('id', { count: 'exact', head: true }).eq('event_id', event.id).eq('status', 0)
+                              .then(({ count }) => setPendingCount(count ?? 0))
+                  }).subscribe()
+            return () => supabase.removeChannel(channel)
+      }, [event?.id])
 
       async function toggleGallery() {
             if (!event) return
@@ -125,6 +139,15 @@ export default function HostDashboard() {
                               </div>
 
                               <div className="flex flex-wrap items-center gap-4">
+                                    {/* Pending notification bell */}
+                                    <button onClick={() => setActiveTab(0)} className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors">
+                                          <Bell size={20} className="text-[#1A1A18]" />
+                                          {pendingCount > 0 && (
+                                                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#C84A44] text-white text-[10px] font-bold flex items-center justify-center px-1">
+                                                      {pendingCount > 99 ? '99+' : pendingCount}
+                                                </span>
+                                          )}
+                                    </button>
                                     <button
                                           onClick={toggleGallery}
                                           disabled={toggling}
