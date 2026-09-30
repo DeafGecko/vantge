@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
@@ -33,7 +33,6 @@ export default function HostDashboard() {
       const { event, loading: eventLoading } = useHostEvent()
       const [toggling, setToggling] = useState(false)
       const [localUnlocked, setLocalUnlocked] = useState(null)
-      const [showQR, setShowQR] = useState(false)
       const [activeTab, setActiveTab] = useState(0)
       const [localTheme, setLocalTheme] = useState(null)
       const [localFont, setLocalFont] = useState(null)
@@ -124,9 +123,6 @@ export default function HostDashboard() {
                               </div>
 
                               <div className="flex flex-wrap items-center gap-4">
-                                    <button onClick={() => setShowQR(!showQR)} className="text-sm font-bold text-[#C84A44] hover:text-[#B43E39] transition-colors">
-                                          {showQR ? "Hide QR code" : "Show QR code"}
-                                    </button>
                                     <button
                                           onClick={toggleGallery}
                                           disabled={toggling}
@@ -141,8 +137,6 @@ export default function HostDashboard() {
                               </div>
                         </header>
 
-                        {showQR && <QRCodeSection eventSlug={event.event_slug} eventName={event.event_name} />}
-
                         {/* DESIGN CUSTOMIZATION SECTION */}
                         <div className="mb-12">
                               <div className="flex items-baseline justify-between mb-6">
@@ -151,9 +145,12 @@ export default function HostDashboard() {
                               </div>
 
                               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                                    <div className="lg:col-span-4">
-                                          <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Live Preview</p>
-                                          <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} />
+                                    <div className="lg:col-span-4 flex flex-col gap-6">
+                                          <div>
+                                                <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Live Preview</p>
+                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} />
+                                          </div>
+                                          <QRCodeSection eventSlug={event.event_slug} eventName={event.event_name} />
                                     </div>
 
                                     <div className="lg:col-span-8 flex flex-col gap-8">
@@ -365,18 +362,18 @@ function QRCodeSection({ eventSlug, eventName }) {
       }
 
       return (
-            <div className="mb-12 bg-white rounded-2xl border border-[#E0D8C6] p-8 flex flex-col md:flex-row gap-8 items-center">
-                  <div ref={qrRef} className="bg-white p-4 rounded-xl border border-[#E0D8C6]">
-                        <QRCodeSVG value={guestUrl} size={160} level="M" fgColor="#1A1A18" />
+            <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5 flex flex-col items-center text-center gap-4">
+                  <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest self-start">Scan to Test / Share</p>
+                  <div ref={qrRef} className="bg-white p-3 rounded-xl border border-[#E0D8C6]">
+                        <QRCodeSVG value={guestUrl} size={140} level="M" fgColor="#1A1A18" />
                   </div>
-                  <div className="text-center md:text-left flex-1">
-                        <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest mb-1">Guest Entry Link</p>
-                        <h3 className="text-xl font-bold text-[#1A1A18] mb-2">{eventName}</h3>
-                        <p className="text-sm text-[#5A5A52] mb-6">{guestUrl}</p>
-                        <button onClick={downloadQR} className="bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full px-10 py-4 hover:bg-black transition-all">
-                              Download PNG for Signage
-                        </button>
-                  </div>
+                  <p className="text-[10px] text-[#5A5A52] break-all">{guestUrl}</p>
+                  <button
+                        onClick={downloadQR}
+                        className="w-full bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-3 hover:bg-black transition-all"
+                  >
+                        Download QR PNG
+                  </button>
             </div>
       )
 }
