@@ -64,6 +64,9 @@ export default function EventGateway() {
 
                               {/* Event name — large cinematic heading */}
                               <div className="mb-8">
+                                    <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50 mb-4">
+                                          {eventType.tagline}
+                                    </p>
                                     {event.logo_url && (
                                           <img
                                                 src={event.logo_url}
@@ -71,9 +74,6 @@ export default function EventGateway() {
                                                 className="mx-auto mb-5 max-h-20 max-w-[180px] object-contain drop-shadow-lg"
                                           />
                                     )}
-                                    <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50 mb-4">
-                                          {eventType.tagline}
-                                    </p>
                                     <h1
                                           className="font-extrabold leading-tight text-white drop-shadow-lg"
                                           style={{
