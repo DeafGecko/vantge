@@ -125,40 +125,34 @@ export default function HostDashboard() {
       return (
             <>
             <FontLoader fontId={currentFontId} />
-            <div className="min-h-screen bg-cream px-6 py-8">
+            <div className="min-h-screen bg-cream px-4 md:px-6 py-6 md:py-8">
                   <div className="max-w-6xl mx-auto">
 
-                        {/* INTEGRATED HEADER */}
-                        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 pb-8 border-b border-[#E0D8C6]">
-                              <div className="flex flex-col gap-1">
-                                    <div className="flex items-center gap-3">
-                                          <div className="flex items-center gap-2">
-                                                <Camera size={22} className="text-[#1A1A18]" />
-                                                <h1 className="text-2xl font-black tracking-tighter text-[#1A1A18]">vantge</h1>
-                                          </div>
-                                          <span className="w-[1px] h-4 bg-[#E0D8C6]"></span>
-                                          <div className="flex items-center gap-2">
-                                                <h2
-                                                      className="text-xl font-bold text-[#1A1A18] leading-tight"
-                                                      style={{ fontFamily: currentFont.cssFamily }}
-                                                >
-                                                      {event.event_name}
-                                                </h2>
-                                                <span className={"w-2 h-2 rounded-full " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#88887E]")}></span>
-                                          </div>
+                        {/* HEADER */}
+                        <header className="flex items-center justify-between gap-3 mb-8 pb-6 border-b border-[#E0D8C6]">
+                              {/* Brand + event name */}
+                              <div className="flex items-center gap-2 min-w-0">
+                                    <Camera size={20} className="text-[#1A1A18] shrink-0" />
+                                    <h1 className="text-lg font-black tracking-tighter text-[#1A1A18] shrink-0">vantge</h1>
+                                    <span className="w-[1px] h-4 bg-[#E0D8C6] shrink-0"></span>
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                          <h2 className="text-sm font-bold text-[#1A1A18] truncate" style={{ fontFamily: currentFont.cssFamily }}>
+                                                {event.event_name}
+                                          </h2>
+                                          <span className={"w-2 h-2 rounded-full shrink-0 " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#88887E]")}></span>
                                     </div>
                               </div>
 
-                              <div className="flex flex-wrap items-center gap-4">
+                              {/* Actions */}
+                              <div className="flex items-center gap-2 shrink-0">
                                     <button
                                           onClick={toggleGallery}
                                           disabled={toggling}
-                                          className={"px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all " +
+                                          className={"px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap " +
                                                 (isUnlocked ? "bg-transparent border border-[#E0D8C6] text-[#5A5A52]" : "bg-[#1A1A18] text-white")}
                                     >
-                                          {toggling ? "..." : isUnlocked ? "Lock Gallery" : "Open Gallery"}
+                                          {toggling ? "..." : isUnlocked ? "Lock" : "Open Gallery"}
                                     </button>
-                                    {/* Pending notification icon */}
                                     <button onClick={() => { setActiveTab(0); setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors">
                                           <Images size={20} className="text-[#1A1A18]" />
                                           {pendingCount > 0 && (
@@ -180,10 +174,10 @@ export default function HostDashboard() {
                                     {savingSettings && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse">Saving...</span>}
                               </div>
 
-                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
 
                                     {/* LEFT COLUMN — Phone + QR */}
-                                    <div className="lg:col-span-4 flex flex-col gap-4">
+                                    <div className="md:col-span-4 flex flex-col gap-4">
                                           {/* Phone preview card */}
                                           <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5">
                                                 <p className="text-[10px] font-bold text-[#88887E] uppercase mb-4">Live Preview</p>
@@ -194,7 +188,7 @@ export default function HostDashboard() {
                                     </div>
 
                                     {/* RIGHT COLUMN — Bento grid of controls */}
-                                    <div className="lg:col-span-8 flex flex-col gap-4">
+                                    <div className="md:col-span-8 flex flex-col gap-4">
 
                                           {/* ROW 1: Display Name (full width) */}
                                           <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5">
@@ -283,7 +277,7 @@ export default function HostDashboard() {
                         </div>
 
                         {/* TAB NAVIGATION */}
-                        <div ref={photoSectionRef} className="mb-8 flex gap-8 border-b border-[#E0D8C6]">
+                        <div ref={photoSectionRef} className="mb-8 flex gap-6 border-b border-[#E0D8C6] overflow-x-auto scrollbar-hide">
                               <SimpleTab label="Pending" isActive={activeTab === 0} onClick={() => setActiveTab(0)} />
                               <SimpleTab label="Live Gallery" isActive={activeTab === 1} onClick={() => setActiveTab(1)} />
                               <SimpleTab label="Trash" isActive={activeTab === 2} onClick={() => setActiveTab(2)} />
