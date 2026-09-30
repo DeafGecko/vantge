@@ -315,11 +315,9 @@ export default function HostDashboard() {
                                                                   </select>
                                                                   <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B0AFA5]" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                                             </div>
+                                                            <p className="text-[10px] text-[#B0AFA5] mt-2 text-center">{currentEventType.tagline}</p>
                                                       </div>
                                                 </div>
-
-                                                {/* Tagline hint below — full width */}
-                                                <p className="text-[10px] text-[#B0AFA5] mt-2.5 pl-1">{currentEventType.tagline}</p>
                                           </div>
 
                                           {/* Host uploader */}
