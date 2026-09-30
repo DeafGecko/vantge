@@ -139,27 +139,33 @@ export default function HostDashboard() {
                               </div>
                         </header>
 
-                        {/* DESIGN CUSTOMIZATION SECTION */}
+                        {/* EVENT BRANDING — BENTO LAYOUT */}
                         <div className="mb-12">
                               <div className="flex items-baseline justify-between mb-6">
                                     <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[#1A1A18]">Event Branding</h3>
                                     {savingSettings && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse">Saving...</span>}
                               </div>
 
-                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                                    <div className="lg:col-span-4 flex flex-col gap-6">
-                                          <div>
-                                                <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Live Preview</p>
+                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+                                    {/* LEFT COLUMN — Phone + QR */}
+                                    <div className="lg:col-span-4 flex flex-col gap-4">
+                                          {/* Phone preview card */}
+                                          <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5">
+                                                <p className="text-[10px] font-bold text-[#88887E] uppercase mb-4">Live Preview</p>
                                                 <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} />
                                           </div>
+                                          {/* QR card */}
                                           <QRCodeSection eventSlug={event.event_slug} eventName={event.event_name} />
                                     </div>
 
-                                    <div className="lg:col-span-8 flex flex-col gap-8">
-                                          {/* EVENT NAME */}
-                                          <div>
+                                    {/* RIGHT COLUMN — Bento grid of controls */}
+                                    <div className="lg:col-span-8 flex flex-col gap-4">
+
+                                          {/* ROW 1: Display Name (full width) */}
+                                          <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5">
                                                 <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Display Name</p>
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-2 items-center">
                                                       <input
                                                             type="text"
                                                             value={currentEventName}
@@ -171,63 +177,70 @@ export default function HostDashboard() {
                                                                   setSavingName(false)
                                                             }}
                                                             placeholder="e.g. Rogers & Bottrell Wedding"
-                                                            className="flex-1 bg-white border border-[#E0D8C6] rounded-lg px-4 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C84A44] transition-colors"
+                                                            className="flex-1 bg-[#F9F8F5] border border-[#E0D8C6] rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#C84A44] transition-colors"
                                                       />
-                                                      {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse self-center">Saving...</span>}
+                                                      {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse shrink-0">Saving...</span>}
                                                 </div>
-                                                <p className="text-[10px] text-[#88887E] mt-1.5">This is what guests see on their screen.</p>
+                                                <p className="text-[10px] text-[#88887E] mt-2">This is what guests see on their screen.</p>
                                           </div>
 
-                                          {/* FONT SELECTION — 3 rows by category */}
-                                          <div>
-                                                <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Title Font</p>
-                                                <div className="flex flex-col gap-5">
-                                                      {Object.entries(fontCategories).map(([catKey, fonts]) => (
-                                                            <div key={catKey}>
-                                                                  <p className="text-[9px] font-bold text-[#B0AFA5] uppercase tracking-widest mb-2">
-                                                                        {categoryLabels[catKey]}
-                                                                  </p>
-                                                                  <div className="flex flex-wrap gap-2">
-                                                                        {fonts.map((font) => (
-                                                                              <button
-                                                                                    key={font.id}
-                                                                                    onClick={() => { setLocalFont(font.id); updateEventSettings({ font_family: font.id }); }}
-                                                                                    className={"px-4 py-2 rounded-lg border text-xs transition-all " +
-                                                                                          (currentFontId === font.id ? "border-[#1A1A18] bg-white ring-1 ring-[#1A1A18]" : "border-[#E0D8C6] bg-white hover:border-[#88887E]")}
-                                                                                    style={{ fontFamily: font.cssFamily }}
-                                                                              >
-                                                                                    {font.name}
-                                                                              </button>
-                                                                        ))}
+                                          {/* ROW 2: Font + Color side by side */}
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                                                {/* Title Font card */}
+                                                <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5">
+                                                      <p className="text-[10px] font-bold text-[#88887E] uppercase mb-4">Title Font</p>
+                                                      <div className="flex flex-col gap-4">
+                                                            {Object.entries(fontCategories).map(([catKey, fonts]) => (
+                                                                  <div key={catKey}>
+                                                                        <p className="text-[9px] font-bold text-[#B0AFA5] uppercase tracking-widest mb-2">
+                                                                              {categoryLabels[catKey]}
+                                                                        </p>
+                                                                        <div className="flex flex-wrap gap-1.5">
+                                                                              {fonts.map((font) => (
+                                                                                    <button
+                                                                                          key={font.id}
+                                                                                          onClick={() => { setLocalFont(font.id); updateEventSettings({ font_family: font.id }); }}
+                                                                                          className={"px-3 py-1.5 rounded-lg border text-xs transition-all " +
+                                                                                                (currentFontId === font.id ? "border-[#1A1A18] bg-[#F9F8F5] ring-1 ring-[#1A1A18]" : "border-[#E0D8C6] bg-white hover:border-[#88887E]")}
+                                                                                          style={{ fontFamily: font.cssFamily }}
+                                                                                    >
+                                                                                          {font.name}
+                                                                                    </button>
+                                                                              ))}
+                                                                        </div>
                                                                   </div>
-                                                            </div>
-                                                      ))}
+                                                            ))}
+                                                      </div>
+                                                </div>
+
+                                                {/* Color Palette card */}
+                                                <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5">
+                                                      <p className="text-[10px] font-bold text-[#88887E] uppercase mb-4">Color Palette</p>
+                                                      <div className="grid grid-cols-2 gap-2">
+                                                            {getAllThemes().map((theme) => (
+                                                                  <ThemeOption
+                                                                        key={theme.id}
+                                                                        theme={theme}
+                                                                        isActive={theme.id === currentThemeId}
+                                                                        onClick={() => { setLocalTheme(theme.id); updateEventSettings({ theme: theme.id }); }}
+                                                                  />
+                                                            ))}
+                                                      </div>
                                                 </div>
                                           </div>
 
-                                          {/* BACKGROUND IMAGE */}
-                                          <BackgroundUploader
-                                                eventId={event.id}
-                                                currentImageUrl={currentBgImage}
-                                                currentPosition={currentBgPosition}
-                                                accentColor={currentTheme.colors.accent}
-                                                onSaved={(url, pos) => { setLocalBgImage(url); setLocalBgPosition(pos) }}
-                                          />
-
-                                          {/* THEME SELECTION */}
-                                          <div>
-                                                <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Color Palette</p>
-                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                                      {getAllThemes().map((theme) => (
-                                                            <ThemeOption
-                                                                  key={theme.id}
-                                                                  theme={theme}
-                                                                  isActive={theme.id === currentThemeId}
-                                                                  onClick={() => { setLocalTheme(theme.id); updateEventSettings({ theme: theme.id }); }}
-                                                            />
-                                                      ))}
-                                                </div>
+                                          {/* ROW 3: Background Photo (full width) */}
+                                          <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5">
+                                                <BackgroundUploader
+                                                      eventId={event.id}
+                                                      currentImageUrl={currentBgImage}
+                                                      currentPosition={currentBgPosition}
+                                                      accentColor={currentTheme.colors.accent}
+                                                      onSaved={(url, pos) => { setLocalBgImage(url); setLocalBgPosition(pos) }}
+                                                />
                                           </div>
+
                                     </div>
                               </div>
                         </div>
