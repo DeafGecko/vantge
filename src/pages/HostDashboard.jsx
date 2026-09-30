@@ -242,7 +242,10 @@ export default function HostDashboard() {
                                                 <p className="text-[10px] text-[#88887E] mt-2">This is what guests see on their screen.</p>
                                           </div>
 
-                                          {/* ROW 2: Font + Color side by side */}
+                                          {/* ROW 2: Host upload to gallery */}
+                                          <HostUploader eventId={event.id} />
+
+                                          {/* ROW 3: Font + Color side by side */}
                                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                                                 {/* Title Font card */}
@@ -299,8 +302,6 @@ export default function HostDashboard() {
                                                 />
                                           </div>
 
-                                          {/* ROW 4: Host pre-load gallery upload */}
-                                          <HostUploader eventId={event.id} />
 
                                     </div>
                               </div>
