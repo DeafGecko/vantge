@@ -257,42 +257,40 @@ export default function HostDashboard() {
                                     {/* RIGHT — controls */}
                                     <div className="md:col-span-8 flex flex-col gap-4">
 
-                                          {/* Display name + Event type + Logo */}
+                                          {/* Logo | Display Name | Event Type — all in one row */}
                                           <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
                                                 <div className="flex items-start gap-4">
 
-                                                      {/* Left: Logo above Display Name */}
-                                                      <div className="flex-1 min-w-0 flex flex-col gap-3">
-                                                            {/* Logo uploader */}
-                                                            <LogoUploader
-                                                                  eventId={event.id}
-                                                                  currentLogoUrl={currentLogoUrl}
-                                                                  onSaved={(url) => setLocalLogoUrl(url)}
-                                                            />
-                                                            {/* Display name below logo */}
-                                                            <div>
-                                                                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Display Name</p>
-                                                                  <div className="flex gap-2 items-center">
-                                                                        <input
-                                                                              type="text"
-                                                                              value={currentEventName}
-                                                                              onChange={(e) => setLocalEventName(e.target.value)}
-                                                                              onBlur={async () => {
-                                                                                    if (currentEventName === event.event_name) return
-                                                                                    setSavingName(true)
-                                                                                    await updateEventSettings({ event_name: currentEventName })
-                                                                                    setSavingName(false)
-                                                                              }}
-                                                                              placeholder="e.g. Rogers & Bottrell Wedding"
-                                                                              className="flex-1 min-w-0 bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal"
-                                                                        />
-                                                                        {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse shrink-0">Saving…</span>}
-                                                                  </div>
-                                                                  <p className="text-[10px] text-[#B0AFA5] mt-2">Shown to guests on the event page.</p>
+                                                      {/* 1. Logo */}
+                                                      <LogoUploader
+                                                            eventId={event.id}
+                                                            currentLogoUrl={currentLogoUrl}
+                                                            onSaved={(url) => setLocalLogoUrl(url)}
+                                                      />
+
+                                                      {/* 2. Display Name — grows */}
+                                                      <div className="flex-1 min-w-0">
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Display Name</p>
+                                                            <div className="flex gap-2 items-center">
+                                                                  <input
+                                                                        type="text"
+                                                                        value={currentEventName}
+                                                                        onChange={(e) => setLocalEventName(e.target.value)}
+                                                                        onBlur={async () => {
+                                                                              if (currentEventName === event.event_name) return
+                                                                              setSavingName(true)
+                                                                              await updateEventSettings({ event_name: currentEventName })
+                                                                              setSavingName(false)
+                                                                        }}
+                                                                        placeholder="e.g. Rogers & Bottrell Wedding"
+                                                                        className="flex-1 min-w-0 bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal"
+                                                                  />
+                                                                  {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse shrink-0">Saving…</span>}
                                                             </div>
+                                                            <p className="text-[10px] text-[#B0AFA5] mt-2">Shown to guests on the event page.</p>
                                                       </div>
 
-                                                      {/* Right: Event type dropdown */}
+                                                      {/* 3. Event Type dropdown */}
                                                       <div className="shrink-0 w-40">
                                                             <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Event Type</p>
                                                             <div className="relative">
@@ -307,7 +305,7 @@ export default function HostDashboard() {
                                                                   >
                                                                         {EVENT_TYPES.map((t) => (
                                                                               <option key={t.id} value={t.id}>
-                                                                                    {t.icon} {t.label}
+                                                                                    {t.label}
                                                                               </option>
                                                                         ))}
                                                                   </select>
