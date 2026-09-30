@@ -44,6 +44,7 @@ export default function HostDashboard() {
       const [savingName, setSavingName] = useState(false)
       const [savingSettings, setSavingSettings] = useState(false)
       const [pendingCount, setPendingCount] = useState(0)
+      const photoSectionRef = useRef(null)
 
       const isUnlocked = localUnlocked !== null ? localUnlocked : event?.gallery_unlocked
       const currentThemeId = localTheme || event?.theme || 'warm_editorial'
@@ -140,7 +141,7 @@ export default function HostDashboard() {
 
                               <div className="flex flex-wrap items-center gap-4">
                                     {/* Pending notification bell */}
-                                    <button onClick={() => setActiveTab(0)} className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors">
+                                    <button onClick={() => { setActiveTab(0); setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors">
                                           <Bell size={20} className="text-[#1A1A18]" />
                                           {pendingCount > 0 && (
                                                 <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#C84A44] text-white text-[10px] font-bold flex items-center justify-center px-1">
@@ -269,7 +270,7 @@ export default function HostDashboard() {
                         </div>
 
                         {/* TAB NAVIGATION */}
-                        <div className="mb-8 flex gap-8 border-b border-[#E0D8C6]">
+                        <div ref={photoSectionRef} className="mb-8 flex gap-8 border-b border-[#E0D8C6]">
                               <SimpleTab label="Pending" isActive={activeTab === 0} onClick={() => setActiveTab(0)} />
                               <SimpleTab label="Live Gallery" isActive={activeTab === 1} onClick={() => setActiveTab(1)} />
                               <SimpleTab label="Trash" isActive={activeTab === 2} onClick={() => setActiveTab(2)} />
