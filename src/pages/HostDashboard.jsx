@@ -72,8 +72,8 @@ export default function HostDashboard() {
                   .on('postgres_changes', { event: '*', schema: 'public', table: 'media_queue', filter: `event_id=eq.${event.id}` }, fetchCount)
                   .subscribe()
 
-            // Poll every 8s as reliable fallback in case realtime misses an event
-            const poll = setInterval(fetchCount, 8000)
+            // Poll every 3s as reliable fallback in case realtime misses an event
+            const poll = setInterval(fetchCount, 3000)
 
             return () => { supabase.removeChannel(channel); clearInterval(poll) }
       }, [event?.id])
