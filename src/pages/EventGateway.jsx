@@ -51,8 +51,8 @@ export default function EventGateway() {
                         className="min-h-screen relative flex flex-col items-center justify-end pb-0"
                         style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }}
                   >
-                        {/* Dark cinematic gradient — heavier at bottom for legibility */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20 pointer-events-none" />
+                        {/* Tint overlay — strength set by host */}
+                        <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${((event.background_tint ?? 55) / 100).toFixed(2)})` }} />
 
                         {/* Subtle top wordmark */}
                         <div className="absolute top-6 left-0 right-0 flex justify-center z-10">

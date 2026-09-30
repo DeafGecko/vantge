@@ -48,6 +48,7 @@ export default function HostDashboard() {
       const [pendingCount, setPendingCount] = useState(0)
       const [menuOpen, setMenuOpen] = useState(false)
       const [localBgPosition, setLocalBgPosition] = useState(null)
+      const [localBgTint, setLocalBgTint] = useState(null)
       const [localEventType, setLocalEventType] = useState(null)
       const [localLogoUrl, setLocalLogoUrl] = useState(undefined)
       const photoSectionRef = useRef(null)
@@ -60,6 +61,7 @@ export default function HostDashboard() {
       const currentBgImage = localBgImage !== null ? localBgImage : event?.background_image ?? null
       const currentEventName = localEventName !== null ? localEventName : event?.event_name ?? ''
       const currentBgPosition = localBgPosition !== null ? localBgPosition : event?.background_position ?? '50% 50%'
+      const currentBgTint = localBgTint !== null ? localBgTint : event?.background_tint ?? 55
       const currentEventTypeId = localEventType !== null ? localEventType : event?.event_type ?? DEFAULT_EVENT_TYPE_ID
       const currentLogoUrl = localLogoUrl !== undefined ? localLogoUrl : event?.logo_url ?? null
       const currentEventType = getEventType(currentEventTypeId)
@@ -247,7 +249,7 @@ export default function HostDashboard() {
                                           {/* Phone preview */}
                                           <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
                                                 <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-5">Live Preview</p>
-                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} eventType={currentEventType} logoUrl={currentLogoUrl} />
+                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} />
                                           </div>
 
                                           {/* QR code */}
@@ -368,8 +370,9 @@ export default function HostDashboard() {
                                                       eventId={event.id}
                                                       currentImageUrl={currentBgImage}
                                                       currentPosition={currentBgPosition}
+                                                      currentTint={currentBgTint}
                                                       accentColor={currentTheme.colors.accent}
-                                                      onSaved={(url, pos) => { setLocalBgImage(url); setLocalBgPosition(pos) }}
+                                                      onSaved={(url, pos, tint) => { setLocalBgImage(url); setLocalBgPosition(pos); setLocalBgTint(tint) }}
                                                 />
                                           </div>
                                     </div>
@@ -428,7 +431,7 @@ function ThemeOption({ theme, isActive, onClick }) {
       )
 }
 
-function ThemePreview({ theme, eventName, font, bgImage, bgPosition, eventType, logoUrl }) {
+function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl }) {
       const c = theme.colors
       const hasBg = !!bgImage
       const txt = hasBg ? '#fff' : c.text
@@ -449,7 +452,7 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, eventType, 
                               : { backgroundColor: c.bg }}
                   >
                         {/* Cinematic gradient overlay */}
-                        {hasBg && <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 pointer-events-none" />}
+                        {hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${((bgTint ?? 55) / 100).toFixed(2)})` }} />}
                         {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
 
                         <div className="relative z-10 p-4 text-center">
