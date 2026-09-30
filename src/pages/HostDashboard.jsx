@@ -31,7 +31,7 @@ const categoryLabels = {
 }
 
 export default function HostDashboard() {
-      const { user, signOut } = useAuth()
+      const { signOut } = useAuth()
       const navigate = useNavigate()
       const { event, loading: eventLoading } = useHostEvent()
       const [toggling, setToggling] = useState(false)
@@ -143,9 +143,6 @@ export default function HostDashboard() {
                                                 <span className={"w-2 h-2 rounded-full " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#88887E]")}></span>
                                           </div>
                                     </div>
-                                    <p className="text-xs text-[#88887E] font-medium tracking-wide">
-                                          {user?.email}
-                                    </p>
                               </div>
 
                               <div className="flex flex-wrap items-center gap-4">
