@@ -57,7 +57,7 @@ export default function EventGateway() {
                                     Welcome to the celebration
                               </p>
 
-                              <h1 className="font-extrabold tracking-tight mb-8 leading-tight" style={{ color: txt, fontFamily: selectedFontFamily, fontSize: '2.6rem' }}>
+                              <h1 className="font-extrabold tracking-tight mb-8 leading-tight" style={{ color: txt, fontFamily: selectedFontFamily, fontSize: 'clamp(1.6rem, 7vw, 2.6rem)' }}>
                                     {event.event_name}
                               </h1>
 
