@@ -10,7 +10,7 @@ import { supabase } from './supabase'
  * @param {string} params.guestName - Optional guest name
  * @returns {Promise<Object>} - { success, storagePath?, originalUrl?, error? }
  */
-export async function uploadPhoto({ blob, eventId, guestName = '' }) {
+export async function uploadPhoto({ blob, eventId, guestName = '', status = 0 }) {
       try {
             const mimeType = blob.type || 'image/jpeg'
             const extension = getExtensionFromMime(mimeType)
@@ -48,7 +48,7 @@ export async function uploadPhoto({ blob, eventId, guestName = '' }) {
                         storage_path: storagePath,
                         original_url: originalUrl,
                         guest_name: guestName.trim() || null,
-                        status: 0,
+                        status,
                         is_video: false,
                         user_agent: deviceInfo.user_agent,
                         device_type: deviceInfo.device_type,

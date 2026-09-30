@@ -10,6 +10,7 @@ import { getAllThemes, getTheme } from '../lib/themes'
 import { getFontsByCategory, getFont, getAllFonts, getGoogleFontsUrl, DEFAULT_FONT_ID } from '../lib/fonts'
 import FontLoader from '../components/FontLoader'
 import BackgroundUploader from '../components/BackgroundUploader'
+import HostUploader from '../components/HostUploader'
 
 
 const fontCategories = getFontsByCategory()
@@ -273,6 +274,9 @@ export default function HostDashboard() {
                                                       onSaved={(url, pos) => { setLocalBgImage(url); setLocalBgPosition(pos) }}
                                                 />
                                           </div>
+
+                                          {/* ROW 4: Host pre-load gallery upload */}
+                                          <HostUploader eventId={event.id} />
 
                                     </div>
                               </div>
