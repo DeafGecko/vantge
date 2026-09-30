@@ -1,10 +1,44 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import JSZip from 'jszip'
 import { supabase } from '../lib/supabase'
 import { getThumbnailUrl, getFullSizeUrl } from '../lib/cloudinary'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
 import FontLoader from '../components/FontLoader'
+
+async function downloadSinglePhoto(url, filename) {
+      try {
+            const res = await fetch(url)
+            const blob = await res.blob()
+            const a = document.createElement('a')
+            a.href = URL.createObjectURL(blob)
+            a.download = filename
+            a.click()
+            URL.revokeObjectURL(a.href)
+      } catch {
+            window.open(url, '_blank')
+      }
+}
+
+async function downloadZip(urls, eventName) {
+      const zip = new JSZip()
+      await Promise.all(
+            urls.map(async ({ url, name }) => {
+                  try {
+                        const res = await fetch(url)
+                        const blob = await res.blob()
+                        zip.file(name, blob)
+                  } catch { /* skip failed */ }
+            })
+      )
+      const blob = await zip.generateAsync({ type: 'blob' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `${eventName}-photos.zip`
+      a.click()
+      URL.revokeObjectURL(a.href)
+}
 
 
 
@@ -15,6 +49,31 @@ export default function Gallery() {
       const [loading, setLoading] = useState(true)
       const [error, setError] = useState(null)
       const [lightboxIndex, setLightboxIndex] = useState(null)
+      const [selectMode, setSelectMode] = useState(false)
+      const [selected, setSelected] = useState(new Set())
+      const [downloading, setDownloading] = useState(false)
+
+      const toggleSelect = useCallback((id) => {
+            setSelected(prev => {
+                  const next = new Set(prev)
+                  next.has(id) ? next.delete(id) : next.add(id)
+                  return next
+            })
+      }, [])
+
+      async function handleDownloadSelected() {
+            setDownloading(true)
+            const targets = photos
+                  .filter(p => selected.has(p.id))
+                  .map((p, i) => ({ url: getFullSizeUrl(p.original_url), name: `photo-${i + 1}.jpg` }))
+            await downloadZip(targets, event.event_slug)
+            setDownloading(false)
+      }
+
+      function exitSelectMode() {
+            setSelectMode(false)
+            setSelected(new Set())
+      }
 
       useEffect(() => {
             async function fetchData() {
@@ -176,46 +235,110 @@ export default function Gallery() {
                   <header className="px-4 sm:px-6 pt-5 pb-4">
                         <div className="max-w-6xl mx-auto">
                               <div className="flex items-center justify-between mb-3">
-                                    <Link
-                                          to={`/${event.event_slug}`}
-                                          className="inline-flex items-center gap-1 text-sm font-medium transition-colors"
-                                          style={{ color: c.textMuted }}
-                                    >
-                                          ← Back
-                                    </Link>
-                                    <p className="text-xs font-bold tracking-widest uppercase" style={{ color: c.textSubtle }}>
-                                          {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
-                                    </p>
+                                    {selectMode ? (
+                                          <button
+                                                onClick={exitSelectMode}
+                                                className="text-sm font-medium transition-colors"
+                                                style={{ color: c.textMuted }}
+                                          >
+                                                Cancel
+                                          </button>
+                                    ) : (
+                                          <Link
+                                                to={`/${event.event_slug}`}
+                                                className="inline-flex items-center gap-1 text-sm font-medium transition-colors"
+                                                style={{ color: c.textMuted }}
+                                          >
+                                                ← Back
+                                          </Link>
+                                    )}
+
+                                    <div className="flex items-center gap-3">
+                                          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: c.textSubtle }}>
+                                                {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+                                          </p>
+                                          {!selectMode && (
+                                                <button
+                                                      onClick={() => setSelectMode(true)}
+                                                      className="text-xs font-bold px-3 py-1.5 rounded-full border transition-all"
+                                                      style={{ borderColor: c.border, color: c.text }}
+                                                >
+                                                      Select
+                                                </button>
+                                          )}
+                                    </div>
                               </div>
 
-                              <div className="text-center">
+                              <div className="flex items-center justify-between">
                                     <h1
                                           className="text-2xl sm:text-3xl font-extrabold tracking-tight"
                                           style={{ color: c.text, fontFamily: selectedFontFamily }}
                                     >
                                           {event.event_name} — <span style={{ color: c.accent }}>Gallery</span>
                                     </h1>
+
+                                    {selectMode && (
+                                          <div className="flex items-center gap-2">
+                                                <button
+                                                      onClick={() => setSelected(selected.size === photos.length ? new Set() : new Set(photos.map(p => p.id)))}
+                                                      className="text-xs font-bold px-3 py-1.5 rounded-full border transition-all"
+                                                      style={{ borderColor: c.border, color: c.text }}
+                                                >
+                                                      {selected.size === photos.length ? 'Deselect all' : 'Select all'}
+                                                </button>
+                                                <button
+                                                      onClick={handleDownloadSelected}
+                                                      disabled={selected.size === 0 || downloading}
+                                                      className="text-xs font-bold px-3 py-1.5 rounded-full text-white transition-all disabled:opacity-40 flex items-center gap-1.5"
+                                                      style={{ backgroundColor: c.accent }}
+                                                >
+                                                      {downloading ? (
+                                                            <>
+                                                                  <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25" /><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" /></svg>
+                                                                  Zipping…
+                                                            </>
+                                                      ) : (
+                                                            <>
+                                                                  <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round" /><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" /></svg>
+                                                                  Download {selected.size > 0 ? `(${selected.size})` : ''}
+                                                            </>
+                                                      )}
+                                                </button>
+                                          </div>
+                                    )}
                               </div>
                         </div>
                   </header>
 
                   <div className="px-2 sm:px-4 pb-12">
                         <div className="max-w-6xl mx-auto grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1 sm:gap-1.5">
-                              {photos.map((photo, index) => (
-                                    <button
-                                          key={photo.id}
-                                          onClick={() => setLightboxIndex(index)}
-                                          className="aspect-square overflow-hidden rounded-md hover:opacity-90 active:scale-[0.98] transition-all focus:outline-none"
-                                          style={{ backgroundColor: c.surfaceMuted }}
-                                    >
-                                          <img
-                                                src={getThumbnailUrl(photo.original_url)}
-                                                alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'}
-                                                className="w-full h-full object-cover"
-                                                loading="lazy"
-                                          />
-                                    </button>
-                              ))}
+                              {photos.map((photo, index) => {
+                                    const isSelected = selected.has(photo.id)
+                                    return (
+                                          <button
+                                                key={photo.id}
+                                                onClick={() => selectMode ? toggleSelect(photo.id) : setLightboxIndex(index)}
+                                                className="aspect-square overflow-hidden rounded-md transition-all focus:outline-none relative"
+                                                style={{ backgroundColor: c.surfaceMuted }}
+                                          >
+                                                <img
+                                                      src={getThumbnailUrl(photo.original_url)}
+                                                      alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'}
+                                                      className="w-full h-full object-cover"
+                                                      style={{ opacity: selectMode && !isSelected ? 0.5 : 1 }}
+                                                      loading="lazy"
+                                                />
+                                                {selectMode && (
+                                                      <div className={`absolute top-1.5 right-1.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-white' : 'border-white/60'}`}
+                                                            style={{ backgroundColor: isSelected ? c.accent : 'transparent' }}>
+                                                            {isSelected && (
+                                                                  <svg width="10" height="10" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                                            )}
+                                                      </div>
+                                                )}
+                                          </button>
+                                    )
+                              })}
                         </div>
                   </div>
 
@@ -244,15 +367,11 @@ export default function Gallery() {
 
 function Lightbox({ photos, initialIndex, onClose }) {
       const [index, setIndex] = useState(initialIndex)
+      const [dlLoading, setDlLoading] = useState(false)
       const photo = photos[index]
 
-      function next() {
-            setIndex((i) => (i + 1) % photos.length)
-      }
-
-      function prev() {
-            setIndex((i) => (i - 1 + photos.length) % photos.length)
-      }
+      function next() { setIndex((i) => (i + 1) % photos.length) }
+      function prev() { setIndex((i) => (i - 1 + photos.length) % photos.length) }
 
       useEffect(() => {
             function handleKey(e) {
@@ -262,24 +381,46 @@ function Lightbox({ photos, initialIndex, onClose }) {
             }
             window.addEventListener('keydown', handleKey)
             return () => window.removeEventListener('keydown', handleKey)
-      }, [])
+      }, [index])
+
+      async function handleDownload(e) {
+            e.stopPropagation()
+            setDlLoading(true)
+            await downloadSinglePhoto(getFullSizeUrl(photo.original_url), `photo-${index + 1}.jpg`)
+            setDlLoading(false)
+      }
 
       return (
             <div
                   className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
                   onClick={onClose}
             >
-                  <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 text-white/70 hover:text-white text-3xl font-light w-12 h-12 flex items-center justify-center"
-                        aria-label="Close"
-                  >
-                        ×
-                  </button>
-
-                  <p className="absolute top-4 left-4 text-white/70 text-sm">
-                        {index + 1} / {photos.length}
-                  </p>
+                  {/* Top bar */}
+                  <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3">
+                        <p className="text-white/60 text-sm">{index + 1} / {photos.length}</p>
+                        <div className="flex items-center gap-2">
+                              {/* Download this photo */}
+                              <button
+                                    onClick={handleDownload}
+                                    disabled={dlLoading}
+                                    className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-2 rounded-full transition-all disabled:opacity-50"
+                              >
+                                    {dlLoading ? (
+                                          <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25" /><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" /></svg>
+                                    ) : (
+                                          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round" /><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" /></svg>
+                                    )}
+                                    Save photo
+                              </button>
+                              <button
+                                    onClick={onClose}
+                                    className="text-white/70 hover:text-white text-3xl font-light w-10 h-10 flex items-center justify-center"
+                                    aria-label="Close"
+                              >
+                                    ×
+                              </button>
+                        </div>
+                  </div>
 
                   <img
                         src={getFullSizeUrl(photo.original_url)}
@@ -309,7 +450,7 @@ function Lightbox({ photos, initialIndex, onClose }) {
                   )}
 
                   {photo.guest_name && (
-                        <p className="absolute bottom-6 left-0 right-0 text-center text-white/70 text-sm">
+                        <p className="absolute bottom-6 left-0 right-0 text-center text-white/50 text-sm">
                               {photo.guest_name}
                         </p>
                   )}
