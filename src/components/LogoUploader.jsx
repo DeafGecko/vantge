@@ -59,8 +59,6 @@ export default function LogoUploader({ eventId, currentLogoUrl, onSaved }) {
 
       return (
             <div className="shrink-0 flex flex-col items-center gap-2">
-                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] self-start">Logo</p>
-
                   {currentLogoUrl ? (
                         <div className="relative group">
                               <div className="w-16 h-16 rounded-2xl border-2 border-[#E8E4DA] bg-[#F7F5F0] overflow-hidden flex items-center justify-center">
