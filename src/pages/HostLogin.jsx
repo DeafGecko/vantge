@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
+import { Camera } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 export default function HostLogin() {
@@ -38,9 +39,12 @@ export default function HostLogin() {
 
                         {/* Small brand wordmark at top */}
                         <div className="text-center mb-10">
-                              <h1 className="text-3xl font-extrabold tracking-tight text-[#1A1A18] mb-2">
-                                    vantge
-                              </h1>
+                              <div className="flex items-center justify-center gap-2 mb-2">
+                                    <Camera size={26} className="text-[#1A1A18]" />
+                                    <h1 className="text-3xl font-extrabold tracking-tight text-[#1A1A18]">
+                                          vantge
+                                    </h1>
+                              </div>
                               <p className="text-xs text-[#88887E] tracking-wide uppercase">
                                     Host login
                               </p>
