@@ -29,6 +29,13 @@ export function AuthProvider({ children }) {
             return await supabase.auth.signInWithPassword({ email, password })
       }
 
+      const signInWithGoogle = async () => {
+            return await supabase.auth.signInWithOAuth({
+                  provider: 'google',
+                  options: { redirectTo: `${window.location.origin}/dashboard` },
+            })
+      }
+
       const signOut = async () => {
             return await supabase.auth.signOut()
       }
@@ -38,6 +45,7 @@ export function AuthProvider({ children }) {
             user: session?.user ?? null,
             loading,
             signIn,
+            signInWithGoogle,
             signOut,
       }
 
