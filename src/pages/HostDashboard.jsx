@@ -261,6 +261,7 @@ export default function HostDashboard() {
 
                                           {/* Logo | Display Name | Event Type */}
                                           <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
+                                                {/* Row 1 — controls all on same baseline */}
                                                 <div className="flex items-end gap-3">
 
                                                       {/* Logo */}
@@ -315,8 +316,17 @@ export default function HostDashboard() {
                                                                   </select>
                                                                   <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B0AFA5]" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                                             </div>
-                                                            <p className="text-[10px] text-[#B0AFA5] mt-2 text-center">{currentEventType.tagline}</p>
                                                       </div>
+                                                </div>
+
+                                                {/* Row 2 — motto aligned under Event Type only */}
+                                                <div className="flex gap-3 mt-2">
+                                                      {/* spacer matching logo width */}
+                                                      <div className="shrink-0 w-11" />
+                                                      {/* spacer matching display name */}
+                                                      <div className="flex-1 min-w-0" />
+                                                      {/* motto under dropdown */}
+                                                      <p className="shrink-0 w-36 text-[10px] text-[#B0AFA5] text-center">{currentEventType.tagline}</p>
                                                 </div>
                                           </div>
 
