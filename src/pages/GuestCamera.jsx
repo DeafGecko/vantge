@@ -189,10 +189,6 @@ export default function GuestCamera() {
             if (result.success) {
                   setUploadState('success')
                   if (capturedPhoto.url) URL.revokeObjectURL(capturedPhoto.url)
-                  setTimeout(() => {
-                        setCapturedPhoto(null)
-                        setUploadState('idle')
-                  }, 2000)
             } else {
                   setUploadState('error')
                   setUploadError(result.error)
@@ -353,53 +349,82 @@ export default function GuestCamera() {
                         {/* ── Preview / upload screen ──────────────────────────────── */}
                         {capturedPhoto && (
                               <div className="absolute inset-0 z-40 bg-black flex flex-col">
-                                    {capturedPhoto.type === 'video' ? (
-                                          <video
-                                                src={capturedPhoto.url}
-                                                className="flex-1 object-cover"
-                                                controls
-                                                autoPlay
-                                                loop
-                                                playsInline
-                                          />
-                                    ) : (
-                                          <img src={capturedPhoto.url} className="flex-1 object-cover" alt="Preview" />
-                                    )}
 
-                                    <div className="p-8 bg-black">
-                                          <input
-                                                type="text"
-                                                value={guestName}
-                                                onChange={(e) => setGuestName(e.target.value)}
-                                                placeholder="Your name (optional)"
-                                                className="w-full mb-4 bg-white/10 text-white rounded-full px-6 py-4 border border-white/20 outline-none"
-                                          />
-                                          {uploadError && (
-                                                <p className="text-red-400 text-sm text-center mb-3">{uploadError}</p>
-                                          )}
-                                          <div className="flex gap-4">
-                                                <button
-                                                      onClick={() => { setCapturedPhoto(null); startCamera() }}
-                                                      className="flex-1 py-4 bg-white/10 text-white rounded-full"
-                                                >
-                                                      Retake
-                                                </button>
-                                                <button
-                                                      onClick={handleUpload}
-                                                      disabled={uploadState === 'uploading' || uploadState === 'success'}
-                                                      className="flex-1 py-4 text-white rounded-full font-bold disabled:opacity-60"
-                                                      style={{ backgroundColor: c?.accent }}
-                                                >
-                                                      {uploadState === 'uploading'
-                                                            ? 'Sending…'
-                                                            : uploadState === 'success'
-                                                                  ? '✓ Sent!'
-                                                                  : capturedPhoto.type === 'video'
-                                                                        ? 'Use Video'
-                                                                        : 'Use Photo'}
-                                                </button>
+                                    {/* Success screen */}
+                                    {uploadState === 'success' ? (
+                                          <div className="flex-1 flex flex-col items-center justify-center gap-6 p-8 text-center">
+                                                <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ backgroundColor: c?.accent }}>
+                                                      <svg width="36" height="36" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
+                                                </div>
+                                                <div>
+                                                      <p className="text-white text-2xl font-bold mb-2">Photo sent!</p>
+                                                      <p className="text-white/60 text-sm">The host will review and add it to the gallery.</p>
+                                                </div>
+                                                <div className="flex flex-col gap-3 w-full max-w-xs">
+                                                      <button
+                                                            onClick={() => { setCapturedPhoto(null); setUploadState('idle'); startCamera() }}
+                                                            className="w-full py-4 text-white rounded-full font-bold"
+                                                            style={{ backgroundColor: c?.accent }}
+                                                      >
+                                                            Take Another Photo
+                                                      </button>
+                                                      <button
+                                                            onClick={() => navigate(`/${eventSlug}`)}
+                                                            className="w-full py-4 bg-white/10 text-white rounded-full font-bold"
+                                                      >
+                                                            Back to Event
+                                                      </button>
+                                                </div>
                                           </div>
-                                    </div>
+                                    ) : (
+                                          <>
+                                                {capturedPhoto.type === 'video' ? (
+                                                      <video
+                                                            src={capturedPhoto.url}
+                                                            className="flex-1 object-cover"
+                                                            controls
+                                                            autoPlay
+                                                            loop
+                                                            playsInline
+                                                      />
+                                                ) : (
+                                                      <img src={capturedPhoto.url} className="flex-1 object-cover" alt="Preview" />
+                                                )}
+
+                                                <div className="p-8 bg-black">
+                                                      <input
+                                                            type="text"
+                                                            value={guestName}
+                                                            onChange={(e) => setGuestName(e.target.value)}
+                                                            placeholder="Your name (optional)"
+                                                            className="w-full mb-4 bg-white/10 text-white rounded-full px-6 py-4 border border-white/20 outline-none"
+                                                      />
+                                                      {uploadError && (
+                                                            <p className="text-red-400 text-sm text-center mb-3">{uploadError}</p>
+                                                      )}
+                                                      <div className="flex gap-4">
+                                                            <button
+                                                                  onClick={() => { setCapturedPhoto(null); startCamera() }}
+                                                                  className="flex-1 py-4 bg-white/10 text-white rounded-full"
+                                                            >
+                                                                  Retake
+                                                            </button>
+                                                            <button
+                                                                  onClick={handleUpload}
+                                                                  disabled={uploadState === 'uploading'}
+                                                                  className="flex-1 py-4 text-white rounded-full font-bold disabled:opacity-60"
+                                                                  style={{ backgroundColor: c?.accent }}
+                                                            >
+                                                                  {uploadState === 'uploading'
+                                                                        ? 'Sending…'
+                                                                        : capturedPhoto.type === 'video'
+                                                                              ? 'Use Video'
+                                                                              : 'Use Photo'}
+                                                            </button>
+                                                      </div>
+                                                </div>
+                                          </>
+                                    )}
                               </div>
                         )}
 
