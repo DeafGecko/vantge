@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
-import { Bell, LogOut } from 'lucide-react'
+import { Images, LogOut } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
@@ -151,7 +151,7 @@ export default function HostDashboard() {
                               <div className="flex flex-wrap items-center gap-4">
                                     {/* Pending notification bell */}
                                     <button onClick={() => { setActiveTab(0); setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors">
-                                          <Bell size={20} className="text-[#1A1A18]" />
+                                          <Images size={20} className="text-[#1A1A18]" />
                                           {pendingCount > 0 && (
                                                 <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#C84A44] text-white text-[10px] font-bold flex items-center justify-center px-1">
                                                       {pendingCount > 99 ? '99+' : pendingCount}
