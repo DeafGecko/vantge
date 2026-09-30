@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
-import { Bell } from 'lucide-react'
+import { Bell, LogOut } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
@@ -166,8 +166,8 @@ export default function HostDashboard() {
                                     >
                                           {toggling ? "..." : isUnlocked ? "Lock Gallery" : "Open Gallery"}
                                     </button>
-                                    <button onClick={async () => { await signOut(); navigate('/host/login') }} className="text-xs font-bold text-[#88887E] hover:text-[#1A1A18] uppercase tracking-widest ml-2">
-                                          Sign out
+                                    <button onClick={async () => { await signOut(); navigate('/host/login') }} title="Sign out" className="p-2 rounded-full hover:bg-[#F4F3F0] transition-colors text-[#88887E] hover:text-[#1A1A18]">
+                                          <LogOut size={20} />
                                     </button>
                               </div>
                         </header>
