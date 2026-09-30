@@ -149,15 +149,6 @@ export default function HostDashboard() {
                               </div>
 
                               <div className="flex flex-wrap items-center gap-4">
-                                    {/* Pending notification bell */}
-                                    <button onClick={() => { setActiveTab(0); setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors">
-                                          <Images size={20} className="text-[#1A1A18]" />
-                                          {pendingCount > 0 && (
-                                                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#C84A44] text-white text-[10px] font-bold flex items-center justify-center px-1">
-                                                      {pendingCount > 99 ? '99+' : pendingCount}
-                                                </span>
-                                          )}
-                                    </button>
                                     <button
                                           onClick={toggleGallery}
                                           disabled={toggling}
@@ -165,6 +156,15 @@ export default function HostDashboard() {
                                                 (isUnlocked ? "bg-transparent border border-[#E0D8C6] text-[#5A5A52]" : "bg-[#1A1A18] text-white")}
                                     >
                                           {toggling ? "..." : isUnlocked ? "Lock Gallery" : "Open Gallery"}
+                                    </button>
+                                    {/* Pending notification icon */}
+                                    <button onClick={() => { setActiveTab(0); setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors">
+                                          <Images size={20} className="text-[#1A1A18]" />
+                                          {pendingCount > 0 && (
+                                                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#C84A44] text-white text-[10px] font-bold flex items-center justify-center px-1">
+                                                      {pendingCount > 99 ? '99+' : pendingCount}
+                                                </span>
+                                          )}
                                     </button>
                                     <button onClick={async () => { await signOut(); navigate('/host/login') }} title="Sign out" className="p-2 rounded-full hover:bg-[#F4F3F0] transition-colors text-[#88887E] hover:text-[#1A1A18]">
                                           <LogOut size={20} />
@@ -384,7 +384,7 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition }) {
       )
 }
 
-function QRCodeSection({ eventSlug, eventName }) {
+function QRCodeSection({ eventSlug }) {
       const qrRef = useRef(null)
       const guestUrl = `${window.location.origin}/${eventSlug}`
 
