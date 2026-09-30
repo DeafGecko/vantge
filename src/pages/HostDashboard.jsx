@@ -261,20 +261,15 @@ export default function HostDashboard() {
                                           <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
                                                 <div className="flex items-center gap-4">
 
-                                                      {/* 1. Logo tile */}
-                                                      <div className="shrink-0 flex flex-col items-center gap-1">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Logo</p>
-                                                            <LogoUploader
-                                                                  eventId={event.id}
-                                                                  currentLogoUrl={currentLogoUrl}
-                                                                  onSaved={(url) => setLocalLogoUrl(url)}
-                                                            />
-                                                      </div>
-
-                                                      {/* 2. Display Name — grows */}
+                                                      {/* Display Name with logo inline */}
                                                       <div className="flex-1 min-w-0">
                                                             <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2">Display Name</p>
                                                             <div className="flex gap-2 items-center">
+                                                                  <LogoUploader
+                                                                        eventId={event.id}
+                                                                        currentLogoUrl={currentLogoUrl}
+                                                                        onSaved={(url) => setLocalLogoUrl(url)}
+                                                                  />
                                                                   <input
                                                                         type="text"
                                                                         value={currentEventName}

@@ -60,7 +60,7 @@ export default function EventGateway() {
                         </div>
 
                         {/* Main card — sits at bottom on mobile, centred on tall screens */}
-                        <div className="relative z-10 w-full max-w-md px-5 pb-10 pt-0 flex flex-col items-start text-left">
+                        <div className="relative z-10 w-full max-w-md px-5 pb-10 pt-0 flex flex-col items-center text-center">
 
                               {/* Event name — large cinematic heading */}
                               <div className="mb-8">
@@ -71,7 +71,7 @@ export default function EventGateway() {
                                           <img
                                                 src={event.logo_url}
                                                 alt="Event logo"
-                                                className="mb-5 max-h-20 max-w-[180px] object-contain drop-shadow-lg"
+                                                className="mx-auto mb-5 max-h-20 max-w-[180px] object-contain drop-shadow-lg"
                                           />
                                     )}
                                     <h1
