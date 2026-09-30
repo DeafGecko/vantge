@@ -65,7 +65,7 @@ export default function EventGateway() {
 
                         {/* Top wordmark */}
                         <div className="flex justify-center pt-6 pb-2">
-                              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/40">vantge</span>
+                              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/80" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>vantge</span>
                         </div>
 
                         {/* Spacer — pushes content to bottom */}
