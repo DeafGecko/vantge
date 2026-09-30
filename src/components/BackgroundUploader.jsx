@@ -310,7 +310,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentPo
                                     {uploading ? 'Uploading...' : 'Upload background photo'}
                               </p>
                               <p className="text-xs text-[#B0AFA5]">
-                                    Drag to reposition · Adjust tint to pop your text
+                                    Use a <span className="font-bold text-[#1A1A18]">vertical (portrait)</span> photo for best results — landscape will be cropped
                               </p>
                         </button>
                   )}
