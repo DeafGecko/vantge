@@ -59,14 +59,23 @@ export default function HostDashboard() {
 
       useEffect(() => {
             if (!event?.id) return
-            supabase.from('media_queue').select('id', { count: 'exact', head: true }).eq('event_id', event.id).eq('status', 0)
-                  .then(({ count }) => setPendingCount(count ?? 0))
+
+            const fetchCount = () =>
+                  supabase.from('media_queue').select('id', { count: 'exact', head: true })
+                        .eq('event_id', event.id).eq('status', 0)
+                        .then(({ count }) => setPendingCount(count ?? 0))
+
+            fetchCount()
+
+            // Realtime for instant updates
             const channel = supabase.channel(`pending-count-${event.id}`)
-                  .on('postgres_changes', { event: '*', schema: 'public', table: 'media_queue', filter: `event_id=eq.${event.id}` }, () => {
-                        supabase.from('media_queue').select('id', { count: 'exact', head: true }).eq('event_id', event.id).eq('status', 0)
-                              .then(({ count }) => setPendingCount(count ?? 0))
-                  }).subscribe()
-            return () => supabase.removeChannel(channel)
+                  .on('postgres_changes', { event: '*', schema: 'public', table: 'media_queue', filter: `event_id=eq.${event.id}` }, fetchCount)
+                  .subscribe()
+
+            // Poll every 8s as reliable fallback in case realtime misses an event
+            const poll = setInterval(fetchCount, 8000)
+
+            return () => { supabase.removeChannel(channel); clearInterval(poll) }
       }, [event?.id])
 
       async function toggleGallery() {
