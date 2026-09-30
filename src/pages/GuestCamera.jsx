@@ -378,41 +378,45 @@ export default function GuestCamera() {
                                           </div>
                                     ) : (
                                           <>
-                                                {capturedPhoto.type === 'video' ? (
-                                                      <video
-                                                            src={capturedPhoto.url}
-                                                            className="flex-1 object-cover"
-                                                            controls
-                                                            autoPlay
-                                                            loop
-                                                            playsInline
-                                                      />
-                                                ) : (
-                                                      <img src={capturedPhoto.url} className="flex-1 object-cover" alt="Preview" />
-                                                )}
+                                                {/* Photo/video preview — leaves room for bottom panel */}
+                                                <div className="flex-1 relative overflow-hidden">
+                                                      {capturedPhoto.type === 'video' ? (
+                                                            <video
+                                                                  src={capturedPhoto.url}
+                                                                  className="w-full h-full object-cover"
+                                                                  controls
+                                                                  autoPlay
+                                                                  loop
+                                                                  playsInline
+                                                            />
+                                                      ) : (
+                                                            <img src={capturedPhoto.url} className="w-full h-full object-cover" alt="Preview" />
+                                                      )}
+                                                </div>
 
-                                                <div className="p-8 bg-black">
+                                                {/* Bottom panel — pinned above iOS browser bar */}
+                                                <div className="shrink-0 bg-black px-6 pt-5 pb-8" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
                                                       <input
                                                             type="text"
                                                             value={guestName}
                                                             onChange={(e) => setGuestName(e.target.value)}
                                                             placeholder="Your name (optional)"
-                                                            className="w-full mb-4 bg-white/10 text-white rounded-full px-6 py-4 border border-white/20 outline-none"
+                                                            className="w-full mb-4 bg-white/10 text-white rounded-full px-6 py-4 border border-white/20 outline-none text-base"
                                                       />
                                                       {uploadError && (
                                                             <p className="text-red-400 text-sm text-center mb-3">{uploadError}</p>
                                                       )}
-                                                      <div className="flex gap-4">
+                                                      <div className="flex gap-3">
                                                             <button
                                                                   onClick={() => { setCapturedPhoto(null); startCamera() }}
-                                                                  className="flex-1 py-4 bg-white/10 text-white rounded-full"
+                                                                  className="flex-1 py-4 bg-white/10 text-white rounded-full font-bold text-sm"
                                                             >
                                                                   Retake
                                                             </button>
                                                             <button
                                                                   onClick={handleUpload}
                                                                   disabled={uploadState === 'uploading'}
-                                                                  className="flex-1 py-4 text-white rounded-full font-bold disabled:opacity-60"
+                                                                  className="flex-1 py-4 text-white rounded-full font-bold text-sm disabled:opacity-60"
                                                                   style={{ backgroundColor: c?.accent }}
                                                             >
                                                                   {uploadState === 'uploading'
