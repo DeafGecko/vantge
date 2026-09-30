@@ -1,16 +1,18 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
-import { Images, LogOut, Camera, Menu, X } from 'lucide-react'
+import { Images, LogOut, Menu, X } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
 import PhotoManager from '../components/PhotoManager'
 import { getAllThemes, getTheme } from '../lib/themes'
 import { getFontsByCategory, getFont, getAllFonts, getGoogleFontsUrl, DEFAULT_FONT_ID } from '../lib/fonts'
+import { EVENT_TYPES, getEventType, DEFAULT_EVENT_TYPE_ID } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
 import BackgroundUploader from '../components/BackgroundUploader'
 import HostUploader from '../components/HostUploader'
+import LogoUploader from '../components/LogoUploader'
 
 const fontCategories = getFontsByCategory()
 
@@ -46,6 +48,8 @@ export default function HostDashboard() {
       const [pendingCount, setPendingCount] = useState(0)
       const [menuOpen, setMenuOpen] = useState(false)
       const [localBgPosition, setLocalBgPosition] = useState(null)
+      const [localEventType, setLocalEventType] = useState(null)
+      const [localLogoUrl, setLocalLogoUrl] = useState(undefined)
       const photoSectionRef = useRef(null)
 
       const isUnlocked = localUnlocked !== null ? localUnlocked : event?.gallery_unlocked
@@ -56,6 +60,9 @@ export default function HostDashboard() {
       const currentBgImage = localBgImage !== null ? localBgImage : event?.background_image ?? null
       const currentEventName = localEventName !== null ? localEventName : event?.event_name ?? ''
       const currentBgPosition = localBgPosition !== null ? localBgPosition : event?.background_position ?? '50% 50%'
+      const currentEventTypeId = localEventType !== null ? localEventType : event?.event_type ?? DEFAULT_EVENT_TYPE_ID
+      const currentLogoUrl = localLogoUrl !== undefined ? localLogoUrl : event?.logo_url ?? null
+      const currentEventType = getEventType(currentEventTypeId)
 
       useEffect(() => {
             if (!event?.id) return
@@ -240,7 +247,7 @@ export default function HostDashboard() {
                                           {/* Phone preview */}
                                           <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
                                                 <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-5">Live Preview</p>
-                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} />
+                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} eventType={currentEventType} logoUrl={currentLogoUrl} />
                                           </div>
 
                                           {/* QR code */}
@@ -250,26 +257,62 @@ export default function HostDashboard() {
                                     {/* RIGHT — controls */}
                                     <div className="md:col-span-8 flex flex-col gap-4">
 
-                                          {/* Display name */}
+                                          {/* Display name + Event type + Logo */}
                                           <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
-                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Display Name</p>
-                                                <div className="flex gap-3 items-center">
-                                                      <input
-                                                            type="text"
-                                                            value={currentEventName}
-                                                            onChange={(e) => setLocalEventName(e.target.value)}
-                                                            onBlur={async () => {
-                                                                  if (currentEventName === event.event_name) return
-                                                                  setSavingName(true)
-                                                                  await updateEventSettings({ event_name: currentEventName })
-                                                                  setSavingName(false)
-                                                            }}
-                                                            placeholder="e.g. Rogers & Bottrell Wedding"
-                                                            className="flex-1 bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal"
+                                                <div className="flex items-start gap-4">
+
+                                                      {/* Logo upload */}
+                                                      <LogoUploader
+                                                            eventId={event.id}
+                                                            currentLogoUrl={currentLogoUrl}
+                                                            onSaved={(url) => setLocalLogoUrl(url)}
                                                       />
-                                                      {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse shrink-0">Saving…</span>}
+                                                      {/* Event name — grows to fill */}
+                                                      <div className="flex-1 min-w-0">
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Display Name</p>
+                                                            <div className="flex gap-2 items-center">
+                                                                  <input
+                                                                        type="text"
+                                                                        value={currentEventName}
+                                                                        onChange={(e) => setLocalEventName(e.target.value)}
+                                                                        onBlur={async () => {
+                                                                              if (currentEventName === event.event_name) return
+                                                                              setSavingName(true)
+                                                                              await updateEventSettings({ event_name: currentEventName })
+                                                                              setSavingName(false)
+                                                                        }}
+                                                                        placeholder="e.g. Rogers & Bottrell Wedding"
+                                                                        className="flex-1 min-w-0 bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal"
+                                                                  />
+                                                                  {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse shrink-0">Saving…</span>}
+                                                            </div>
+                                                            <p className="text-[10px] text-[#B0AFA5] mt-2">Shown to guests on the event page.</p>
+                                                      </div>
+
+                                                      {/* Event type dropdown — fixed width */}
+                                                      <div className="shrink-0 w-40">
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Event Type</p>
+                                                            <div className="relative">
+                                                                  <select
+                                                                        value={currentEventTypeId}
+                                                                        onChange={async (e) => {
+                                                                              const val = e.target.value
+                                                                              setLocalEventType(val)
+                                                                              await updateEventSettings({ event_type: val })
+                                                                        }}
+                                                                        className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-3 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
+                                                                  >
+                                                                        {EVENT_TYPES.map((t) => (
+                                                                              <option key={t.id} value={t.id}>
+                                                                                    {t.icon} {t.label}
+                                                                              </option>
+                                                                        ))}
+                                                                  </select>
+                                                                  <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B0AFA5]" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                                            </div>
+                                                            <p className="text-[10px] text-[#B0AFA5] mt-2">{currentEventType.tagline}</p>
+                                                      </div>
                                                 </div>
-                                                <p className="text-[10px] text-[#B0AFA5] mt-2">Shown to guests on the event page.</p>
                                           </div>
 
                                           {/* Host uploader */}
@@ -387,7 +430,7 @@ function ThemeOption({ theme, isActive, onClick }) {
       )
 }
 
-function ThemePreview({ theme, eventName, font, bgImage, bgPosition }) {
+function ThemePreview({ theme, eventName, font, bgImage, bgPosition, eventType, logoUrl }) {
       const c = theme.colors
       const hasBg = !!bgImage
       const txt = hasBg ? '#fff' : c.text
@@ -412,8 +455,11 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition }) {
                         {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
 
                         <div className="relative z-10 p-4 text-center">
+                              {logoUrl && (
+                                    <img src={logoUrl} alt="Logo" className="mx-auto mb-2 max-h-8 max-w-[80px] object-contain" style={{ filter: hasBg ? 'brightness(0) invert(1)' : 'none' }} />
+                              )}
                               <p className="text-[7px] font-bold uppercase tracking-widest mb-2" style={{ color: txtSubtle }}>
-                                    Welcome to the celebration
+                                    {eventType?.tagline || 'Welcome to the celebration'}
                               </p>
                               <h3 className="font-extrabold leading-tight mb-3" style={{ color: txt, fontFamily: font.cssFamily, fontSize: '1.05rem' }}>
                                     {eventName || 'Your Event'}

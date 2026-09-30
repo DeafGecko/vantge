@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useEvent } from '../hooks/useEvent'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
+import { getEventType } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
 
 // Cinematic background for events without a custom background
@@ -41,6 +42,7 @@ export default function EventGateway() {
       const bgImage = event.background_image || DEFAULT_BG
       const bgPosition = event.background_position || '50% 40%'
       const accentColor = c.accent
+      const eventType = getEventType(event.event_type)
 
       return (
             <>
@@ -62,8 +64,15 @@ export default function EventGateway() {
 
                               {/* Event name — large cinematic heading */}
                               <div className="mb-8">
+                                    {event.logo_url && (
+                                          <img
+                                                src={event.logo_url}
+                                                alt="Event logo"
+                                                className="mx-auto mb-5 max-h-20 max-w-[180px] object-contain drop-shadow-lg"
+                                          />
+                                    )}
                                     <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50 mb-4">
-                                          Welcome to the celebration
+                                          {eventType.tagline}
                                     </p>
                                     <h1
                                           className="font-extrabold leading-tight text-white drop-shadow-lg"
