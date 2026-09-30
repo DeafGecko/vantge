@@ -261,17 +261,22 @@ export default function HostDashboard() {
 
                                           {/* Logo | Display Name | Event Type */}
                                           <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm">
-                                                <div className="flex items-center gap-4">
+                                                <div className="flex items-end gap-3">
 
-                                                      {/* Display Name with logo inline */}
-                                                      <div className="flex-1 min-w-0">
+                                                      {/* Logo */}
+                                                      <div className="shrink-0 flex flex-col">
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2">Logo</p>
+                                                            <LogoUploader
+                                                                  eventId={event.id}
+                                                                  currentLogoUrl={currentLogoUrl}
+                                                                  onSaved={(url) => setLocalLogoUrl(url)}
+                                                            />
+                                                      </div>
+
+                                                      {/* Display Name — grows */}
+                                                      <div className="flex-1 min-w-0 flex flex-col">
                                                             <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2">Display Name</p>
                                                             <div className="flex gap-2 items-center">
-                                                                  <LogoUploader
-                                                                        eventId={event.id}
-                                                                        currentLogoUrl={currentLogoUrl}
-                                                                        onSaved={(url) => setLocalLogoUrl(url)}
-                                                                  />
                                                                   <input
                                                                         type="text"
                                                                         value={currentEventName}
@@ -289,9 +294,9 @@ export default function HostDashboard() {
                                                             </div>
                                                       </div>
 
-                                                      {/* 3. Event Type dropdown */}
-                                                      <div className="shrink-0 w-36">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Event Type</p>
+                                                      {/* Event Type */}
+                                                      <div className="shrink-0 w-36 flex flex-col">
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2">Event Type</p>
                                                             <div className="relative">
                                                                   <select
                                                                         value={currentEventTypeId}
@@ -310,9 +315,11 @@ export default function HostDashboard() {
                                                                   </select>
                                                                   <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B0AFA5]" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                                             </div>
-                                                            <p className="text-[10px] text-[#B0AFA5] mt-2">{currentEventType.tagline}</p>
                                                       </div>
                                                 </div>
+
+                                                {/* Tagline hint below — full width */}
+                                                <p className="text-[10px] text-[#B0AFA5] mt-2.5 pl-1">{currentEventType.tagline}</p>
                                           </div>
 
                                           {/* Host uploader */}
