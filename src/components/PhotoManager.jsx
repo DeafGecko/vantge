@@ -244,71 +244,85 @@ function PhotoCard({ photo, status, onApprove, onReject, onRemoveFromGallery, on
       }
 
       return (
-            <div className="bg-white rounded-2xl border border-[#E0D8C6] overflow-hidden">
-                  <div className="aspect-[4/5] bg-[#F4F3F0] relative">
+            <div className="bg-white rounded-2xl border border-[#E8E4DA] overflow-hidden shadow-sm group">
+                  {/* Photo */}
+                  <div className="aspect-[4/5] bg-[#F4F3F0] relative overflow-hidden">
                         <img
                               src={getThumbnailUrl(photo.original_url)}
                               alt="Event photo"
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                               loading="lazy"
                         />
+                        {processing && (
+                              <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                                    <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A18" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".2"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
+                              </div>
+                        )}
                   </div>
 
-                  <div className="p-3">
+                  {/* Footer */}
+                  <div className="px-3.5 py-3">
+                        {/* Guest + time */}
                         <div className="flex items-center justify-between mb-3">
-                              <p className="text-sm font-medium text-[#1A1A18]">
+                              <p className="text-xs font-bold text-[#1A1A18] truncate mr-2">
                                     {photo.guest_name || 'Anonymous'}
                               </p>
-                              <p className="text-xs text-[#88887E]">{uploadTime}</p>
+                              <p className="text-[10px] text-[#B0AFA5] shrink-0 tracking-wide">{uploadTime}</p>
                         </div>
 
-                        {status === 0 ? (
+                        {/* Actions */}
+                        {status === 0 && (
                               <div className="flex gap-2">
                                     <button
                                           onClick={() => run(onApprove)}
                                           disabled={processing}
-                                          className="flex-1 bg-[#16A34A] hover:bg-[#15803D] text-white font-medium rounded-lg py-2 px-3 text-sm transition-colors active:scale-[0.98] disabled:opacity-50"
+                                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#1A1A18] hover:bg-black text-white text-[11px] font-bold tracking-wide rounded-xl py-2.5 transition-all active:scale-[0.97] disabled:opacity-40"
                                     >
-                                          ✓ Approve
+                                          <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                          Approve
                                     </button>
                                     <button
                                           onClick={() => run(onReject)}
                                           disabled={processing}
-                                          className="flex-1 bg-[#C84A44] hover:bg-[#B43E39] text-white font-medium rounded-lg py-2 px-3 text-sm transition-colors active:scale-[0.98] disabled:opacity-50"
+                                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#F7F5F0] hover:bg-[#EFEDE7] text-[#5A5A52] text-[11px] font-bold tracking-wide rounded-xl py-2.5 border border-[#E8E4DA] transition-all active:scale-[0.97] disabled:opacity-40"
                                     >
-                                          ✕ Reject
+                                          <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+                                          Reject
                                     </button>
                               </div>
-                        ) : null}
+                        )}
 
-                        {status === 1 ? (
+                        {status === 1 && (
                               <button
                                     onClick={() => run(onRemoveFromGallery)}
                                     disabled={processing}
-                                    className="w-full bg-[#F4F3F0] hover:bg-[#E8E5DC] text-[#5A5A52] border border-[#E0D8C6] font-medium rounded-lg py-2 px-3 text-sm transition-colors active:scale-[0.98] disabled:opacity-50"
+                                    className="w-full flex items-center justify-center gap-1.5 bg-[#F7F5F0] hover:bg-[#EFEDE7] text-[#5A5A52] text-[11px] font-bold tracking-wide rounded-xl py-2.5 border border-[#E8E4DA] transition-all active:scale-[0.97] disabled:opacity-40"
                               >
+                                    <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
                                     Remove from gallery
                               </button>
-                        ) : null}
+                        )}
 
-                        {status === 2 ? (
+                        {status === 2 && (
                               <div className="flex gap-2">
                                     <button
                                           onClick={() => run(onRestore)}
                                           disabled={processing}
-                                          className="flex-1 bg-[#F4F3F0] hover:bg-[#E8E5DC] text-[#1A1A18] border border-[#E0D8C6] font-medium rounded-lg py-2 px-3 text-sm transition-colors active:scale-[0.98] disabled:opacity-50"
+                                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#F7F5F0] hover:bg-[#EFEDE7] text-[#1A1A18] text-[11px] font-bold tracking-wide rounded-xl py-2.5 border border-[#E8E4DA] transition-all active:scale-[0.97] disabled:opacity-40"
                                     >
+                                          <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9 9 9 0 00-9 9" strokeLinecap="round"/><path d="M3 3v5h5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                           Restore
                                     </button>
                                     <button
                                           onClick={onDeleteForever}
                                           disabled={processing}
-                                          className="flex-1 bg-[#C84A44] hover:bg-[#B43E39] text-white font-medium rounded-lg py-2 px-3 text-sm transition-colors active:scale-[0.98] disabled:opacity-50"
+                                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#C84A44] text-[11px] font-bold tracking-wide rounded-xl py-2.5 border border-[#FECACA] transition-all active:scale-[0.97] disabled:opacity-40"
                                     >
-                                          Delete forever
+                                          <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6" strokeLinecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" strokeLinecap="round"/><path d="M10 11v6M14 11v6" strokeLinecap="round"/></svg>
+                                          Delete
                                     </button>
                               </div>
-                        ) : null}
+                        )}
                   </div>
             </div>
       )
