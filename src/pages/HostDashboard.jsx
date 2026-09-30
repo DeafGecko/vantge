@@ -153,7 +153,7 @@ export default function HostDashboard() {
                               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                                     <div className="lg:col-span-4">
                                           <p className="text-[10px] font-bold text-[#88887E] uppercase mb-3">Live Preview</p>
-                                          <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} />
+                                          <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} />
                                     </div>
 
                                     <div className="lg:col-span-8 flex flex-col gap-8">
@@ -268,16 +268,52 @@ function ThemeOption({ theme, isActive, onClick }) {
       )
 }
 
-function ThemePreview({ theme, eventName, font }) {
+function ThemePreview({ theme, eventName, font, bgImage, bgPosition }) {
+      const c = theme.colors
+      const hasBg = !!bgImage
+      const txt = hasBg ? '#fff' : c.text
+      const txtMuted = hasBg ? 'rgba(255,255,255,0.7)' : c.textMuted
+      const txtSubtle = hasBg ? 'rgba(255,255,255,0.5)' : c.textSubtle
+      const cardBg = hasBg ? 'rgba(255,255,255,0.15)' : c.surface
+      const cardBorder = hasBg ? 'rgba(255,255,255,0.25)' : c.border
+
       return (
-            <div className="rounded-2xl border p-10 text-center transition-all duration-500 shadow-sm" style={{ backgroundColor: theme.colors.bg, borderColor: theme.colors.border }}>
-                  <h3 className="text-2xl font-bold mb-6" style={{ color: theme.colors.text, fontFamily: font.cssFamily }}>
-                        {eventName}
-                  </h3>
-                  <div className="flex gap-2 justify-center">
-                        <span className="px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-white rounded-full" style={{ backgroundColor: theme.colors.accent }}>Take Photo</span>
-                        <span className="px-5 py-2 text-[10px] font-bold uppercase tracking-widest border rounded-full" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.text }}>Gallery</span>
+            /* Phone frame */
+            <div className="mx-auto relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-[#1A1A18]" style={{ width: 220, height: 420 }}>
+                  {/* Screen */}
+                  <div
+                        className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center"
+                        style={hasBg
+                              ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition || '50% 50%' }
+                              : { backgroundColor: c.bg }}
+                  >
+                        {/* Tint */}
+                        <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: hasBg ? 'rgba(0,0,0,0.52)' : c.accent + '11' }} />
+
+                        <div className="relative z-10 w-full">
+                              <p className="text-[8px] font-bold uppercase tracking-widest mb-2" style={{ color: txtSubtle }}>
+                                    Welcome to the celebration
+                              </p>
+                              <h3 className="font-extrabold leading-tight mb-4" style={{ color: txt, fontFamily: font.cssFamily, fontSize: '1.1rem' }}>
+                                    {eventName}
+                              </h3>
+                              <p className="text-[8px] mb-5" style={{ color: txtMuted }}>Scan. Snap. Share.</p>
+                              <div className="flex flex-col gap-2">
+                                    <div className="rounded-xl px-3 py-2 text-[9px] font-bold text-white text-left" style={{ backgroundColor: c.accent }}>
+                                          📷 Open Camera
+                                    </div>
+                                    <div className="rounded-xl px-3 py-2 text-[9px] font-bold text-left border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
+                                          🖼 Upload a Photo
+                                    </div>
+                                    <div className="rounded-xl px-3 py-2 text-[9px] font-bold text-left border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
+                                          ✦ View Gallery
+                                    </div>
+                              </div>
+                        </div>
                   </div>
+
+                  {/* Phone notch */}
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 w-14 h-4 bg-[#1A1A18] rounded-full z-20" />
             </div>
       )
 }
