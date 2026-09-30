@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
-import { Images, LogOut, Camera } from 'lucide-react'
+import { Images, LogOut, Camera, Menu, X } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
@@ -45,6 +45,7 @@ export default function HostDashboard() {
       const [savingName, setSavingName] = useState(false)
       const [savingSettings, setSavingSettings] = useState(false)
       const [pendingCount, setPendingCount] = useState(0)
+      const [menuOpen, setMenuOpen] = useState(false)
       const photoSectionRef = useRef(null)
 
       const isUnlocked = localUnlocked !== null ? localUnlocked : event?.gallery_unlocked
@@ -143,27 +144,56 @@ export default function HostDashboard() {
                                     </div>
                               </div>
 
-                              {/* Actions */}
-                              <div className="flex items-center gap-2 shrink-0">
-                                    <button
-                                          onClick={toggleGallery}
-                                          disabled={toggling}
-                                          className={"px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap " +
-                                                (isUnlocked ? "bg-transparent border border-[#E0D8C6] text-[#5A5A52]" : "bg-[#1A1A18] text-white")}
-                                    >
-                                          {toggling ? "..." : isUnlocked ? "Lock" : "Open Gallery"}
-                                    </button>
-                                    <button onClick={() => { setActiveTab(0); setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors">
-                                          <Images size={20} className="text-[#1A1A18]" />
-                                          {pendingCount > 0 && (
+                              {/* Burger menu */}
+                              <div className="relative shrink-0">
+                                    <button onClick={() => setMenuOpen(o => !o)} className="relative p-2 rounded-full hover:bg-[#F4F3F0] transition-colors text-[#1A1A18]">
+                                          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+                                          {!menuOpen && pendingCount > 0 && (
                                                 <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#C84A44] text-white text-[10px] font-bold flex items-center justify-center px-1">
                                                       {pendingCount > 99 ? '99+' : pendingCount}
                                                 </span>
                                           )}
                                     </button>
-                                    <button onClick={async () => { await signOut(); navigate('/host/login') }} title="Sign out" className="p-2 rounded-full hover:bg-[#F4F3F0] transition-colors text-[#88887E] hover:text-[#1A1A18]">
-                                          <LogOut size={20} />
-                                    </button>
+
+                                    {menuOpen && (
+                                          <>
+                                                {/* Backdrop */}
+                                                <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
+                                                {/* Dropdown */}
+                                                <div className="absolute right-0 top-12 z-40 w-56 bg-white rounded-2xl border border-[#E0D8C6] shadow-xl overflow-hidden">
+                                                      <button
+                                                            onClick={() => { toggleGallery(); setMenuOpen(false) }}
+                                                            disabled={toggling}
+                                                            className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors border-b border-[#E0D8C6]"
+                                                      >
+                                                            <span className={"w-2 h-2 rounded-full shrink-0 " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#88887E]")} />
+                                                            {toggling ? "Updating..." : isUnlocked ? "Lock Gallery" : "Open Gallery"}
+                                                      </button>
+                                                      <button
+                                                            onClick={() => { setActiveTab(0); setMenuOpen(false); setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }}
+                                                            className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors border-b border-[#E0D8C6]"
+                                                      >
+                                                            <span className="relative">
+                                                                  <Images size={18} />
+                                                                  {pendingCount > 0 && (
+                                                                        <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-[#C84A44] text-white text-[9px] font-bold flex items-center justify-center px-0.5">
+                                                                              {pendingCount > 99 ? '99+' : pendingCount}
+                                                                        </span>
+                                                                  )}
+                                                            </span>
+                                                            Pending Reviews
+                                                            {pendingCount > 0 && <span className="ml-auto text-[#C84A44] text-xs font-bold">{pendingCount}</span>}
+                                                      </button>
+                                                      <button
+                                                            onClick={async () => { await signOut(); navigate('/host/login') }}
+                                                            className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-[#88887E] hover:bg-[#F4F3F0] transition-colors"
+                                                      >
+                                                            <LogOut size={18} />
+                                                            Sign Out
+                                                      </button>
+                                                </div>
+                                          </>
+                                    )}
                               </div>
                         </header>
 
