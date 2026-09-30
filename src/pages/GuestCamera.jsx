@@ -176,17 +176,34 @@ export default function GuestCamera() {
       }
 
       // Gallery / file picker ─────────────────────────────────────────
-      function handleGalleryPick(e) {
+      async function handleGalleryPick(e) {
             const file = e.target.files?.[0]
             if (!file) return
+            e.target.value = ''
+
+            const isVideo = file.type.startsWith('video/')
+
+            if (isVideo) {
+                  const duration = await new Promise((resolve) => {
+                        const url = URL.createObjectURL(file)
+                        const vid = document.createElement('video')
+                        vid.preload = 'metadata'
+                        vid.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(vid.duration) }
+                        vid.onerror = () => { URL.revokeObjectURL(url); resolve(0) }
+                        vid.src = url
+                  })
+
+                  if (duration > 30) {
+                        setUploadError(`Sorry, unable to upload — this video is ${Math.round(duration)} seconds. Videos must be 30 seconds or less.`)
+                        return
+                  }
+            }
 
             const url = URL.createObjectURL(file)
-            const isVideo = file.type.startsWith('video/')
             setCapturedPhoto({ blob: file, url, type: isVideo ? 'video' : 'photo' })
             setUploadState('idle')
             setUploadError(null)
             stopStream()
-            e.target.value = ''
       }
 
       // Upload ────────────────────────────────────────────────────────

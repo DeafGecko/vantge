@@ -273,6 +273,14 @@ function PhotoCard({ photo, status, onApprove, onReject, onRemoveFromGallery, on
                                     alt="Event photo"
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                                     loading="lazy"
+                                    onError={(e) => {
+                                          e.currentTarget.style.display = 'none'
+                                          e.currentTarget.parentElement.innerHTML += `
+                                                <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#F4F3F0]">
+                                                      <svg width="28" height="28" fill="none" stroke="#B0AFA5" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                      <p class="text-[10px] font-bold text-[#B0AFA5] uppercase tracking-widest">Video</p>
+                                                </div>`
+                                    }}
                               />
                         )}
                         {processing && (
