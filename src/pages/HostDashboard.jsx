@@ -146,7 +146,7 @@ export default function HostDashboard() {
                                                             ? "border-white/20 text-white/60 hover:border-white/40 hover:text-white"
                                                             : "bg-white text-[#1A1A18] border-white hover:bg-white/90")}
                                           >
-                                                {toggling ? "..." : isUnlocked ? "Hide Gallery" : "Live Gallery"}
+                                                {toggling ? "..." : isUnlocked ? "Live Gallery" : "Hide Gallery"}
                                           </button>
 
                                           {/* Notification badge */}
@@ -192,7 +192,7 @@ export default function HostDashboard() {
                                                                   className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-[#1A1A18] hover:bg-[#F7F5F0] transition-colors border-b border-[#E8E4DA]"
                                                             >
                                                                   <span className={"w-2 h-2 rounded-full shrink-0 " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#B0AFA5]")} />
-                                                                  {toggling ? "Updating..." : isUnlocked ? "Hide Gallery" : "Live Gallery"}
+                                                                  {toggling ? "Updating..." : isUnlocked ? "Live Gallery" : "Hide Gallery"}
                                                             </button>
                                                             <button
                                                                   onClick={() => { scrollToPhotos(); setMenuOpen(false) }}
