@@ -1,6 +1,6 @@
 /**
  * VANTGE font system.
- * 10 curated Google Fonts organized into 3 style categories for any event type.
+ * 18 curated Google Fonts organized into 3 style categories for any event type.
  */
 
 export const FONTS = {
@@ -12,6 +12,24 @@ export const FONTS = {
             cssFamily: "'Great Vibes', cursive",
             category: 'elegant',
             vibe: 'Flowing wedding classic',
+            weight: 400,
+      },
+      cormorant_garamond: {
+            id: 'cormorant_garamond',
+            name: 'Cormorant Garamond',
+            googleFontName: 'Cormorant Garamond',
+            cssFamily: "'Cormorant Garamond', serif",
+            category: 'elegant',
+            vibe: 'Refined luxury serif',
+            weight: 700,
+      },
+      pinyon_script: {
+            id: 'pinyon_script',
+            name: 'Pinyon Script',
+            googleFontName: 'Pinyon Script',
+            cssFamily: "'Pinyon Script', cursive",
+            category: 'elegant',
+            vibe: 'Formal calligraphy',
             weight: 400,
       },
       imperial_script: {
@@ -41,6 +59,15 @@ export const FONTS = {
             vibe: 'Elegant formal script',
             weight: 400,
       },
+      sacramento: {
+            id: 'sacramento',
+            name: 'Sacramento',
+            googleFontName: 'Sacramento',
+            cssFamily: "'Sacramento', cursive",
+            category: 'elegant',
+            vibe: 'Thin flowing script',
+            weight: 400,
+      },
 
       // MODERN & CLEAN — birthdays, reunions, corporate, minimalist
       sans_outfit: {
@@ -50,6 +77,15 @@ export const FONTS = {
             cssFamily: "'Outfit', sans-serif",
             category: 'modern',
             vibe: 'Clean & friendly',
+            weight: 800,
+      },
+      montserrat: {
+            id: 'montserrat',
+            name: 'Montserrat',
+            googleFontName: 'Montserrat',
+            cssFamily: "'Montserrat', sans-serif",
+            category: 'modern',
+            vibe: 'Bold geometric',
             weight: 800,
       },
       lora: {
@@ -70,8 +106,26 @@ export const FONTS = {
             vibe: 'Magazine editorial',
             weight: 800,
       },
+      dm_serif_display: {
+            id: 'dm_serif_display',
+            name: 'DM Serif Display',
+            googleFontName: 'DM Serif Display',
+            cssFamily: "'DM Serif Display', serif",
+            category: 'modern',
+            vibe: 'Elegant editorial',
+            weight: 400,
+      },
+      josefin_sans: {
+            id: 'josefin_sans',
+            name: 'Josefin Sans',
+            googleFontName: 'Josefin Sans',
+            cssFamily: "'Josefin Sans', sans-serif",
+            category: 'modern',
+            vibe: 'Minimal & geometric',
+            weight: 700,
+      },
 
-      // DISPLAY & TECH — unique, memorable, playful, futuristic
+      // DISPLAY & FESTIVE — unique, memorable, playful, celebratory
       cinzel_decorative: {
             id: 'cinzel_decorative',
             name: 'Cinzel Decorative',
@@ -88,6 +142,24 @@ export const FONTS = {
             cssFamily: "'Pacifico', cursive",
             category: 'display',
             vibe: 'Playful handwritten',
+            weight: 400,
+      },
+      lobster: {
+            id: 'lobster',
+            name: 'Lobster',
+            googleFontName: 'Lobster',
+            cssFamily: "'Lobster', cursive",
+            category: 'display',
+            vibe: 'Retro party script',
+            weight: 400,
+      },
+      bebas_neue: {
+            id: 'bebas_neue',
+            name: 'Bebas Neue',
+            googleFontName: 'Bebas Neue',
+            cssFamily: "'Bebas Neue', sans-serif",
+            category: 'display',
+            vibe: 'Bold all-caps impact',
             weight: 400,
       },
       zen_dots: {
