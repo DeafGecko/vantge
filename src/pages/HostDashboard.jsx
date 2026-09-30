@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
-import { Images, LogOut } from 'lucide-react'
+import { Images, LogOut, Camera } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
@@ -131,7 +131,10 @@ export default function HostDashboard() {
                         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 pb-8 border-b border-[#E0D8C6]">
                               <div className="flex flex-col gap-1">
                                     <div className="flex items-center gap-3">
-                                          <h1 className="text-2xl font-black tracking-tighter text-[#1A1A18]">vantge</h1>
+                                          <div className="flex items-center gap-2">
+                                                <Camera size={22} className="text-[#1A1A18]" />
+                                                <h1 className="text-2xl font-black tracking-tighter text-[#1A1A18]">vantge</h1>
+                                          </div>
                                           <span className="w-[1px] h-4 bg-[#E0D8C6]"></span>
                                           <div className="flex items-center gap-2">
                                                 <h2
