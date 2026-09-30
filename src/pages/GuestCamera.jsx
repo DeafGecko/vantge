@@ -29,7 +29,6 @@ export default function GuestCamera() {
 
       // UI state
       const [mode, setMode] = useState('photo')
-      const [zoom, setZoom] = useState(1)
       const [showGrid, setShowGrid] = useState(false)
       const [facingMode, setFacingMode] = useState('environment')
 
@@ -37,6 +36,9 @@ export default function GuestCamera() {
       const mediaRecorderRef = useRef(null)
       const recordedChunksRef = useRef([])
       const [isRecording, setIsRecording] = useState(false)
+      const [recordingSeconds, setRecordingSeconds] = useState(0)
+      const recordingTimerRef = useRef(null)
+      const VIDEO_LIMIT = 30
 
       // Stop and clean up the media stream
       const stopStream = useCallback(() => {
@@ -139,11 +141,25 @@ export default function GuestCamera() {
 
             recorder.start()
             setIsRecording(true)
+            setRecordingSeconds(0)
+
+            // Auto-stop at VIDEO_LIMIT seconds
+            recordingTimerRef.current = setInterval(() => {
+                  setRecordingSeconds((s) => {
+                        const next = s + 1
+                        if (next >= VIDEO_LIMIT) {
+                              handleStopRecording()
+                        }
+                        return next
+                  })
+            }, 1000)
       }
 
       function handleStopRecording() {
             mediaRecorderRef.current?.stop()
             setIsRecording(false)
+            setRecordingSeconds(0)
+            clearInterval(recordingTimerRef.current)
       }
 
       // ── Unified shutter button handler ────────────────────────────────
@@ -258,30 +274,17 @@ export default function GuestCamera() {
                                           </div>
                                     )}
 
-                                    {/* Zoom — numbers left, slider bar right */}
-                                    <div className="absolute right-4 top-1/2  -translate-y-1/2 z-20 flex flex-row items-center gap-2">
-                                          <div className="flex flex-col items-end mr-4 gap-9">
-                                                {[2, 1.5, 1, 0.5].map((level) => (
-                                                      <button
-                                                            key={level}
-                                                            onClick={() => setZoom(level)}
-                                                            className={`text-xs font-bold w-8 text-right transition-all ${zoom === level ? 'text-red-500 scale-125' : 'text-white/60'}`}
-                                                      >
-                                                            {level.toFixed(1)}
-                                                      </button>
-                                                ))}
+                                    {/* Recording timer */}
+                                    {isRecording && (
+                                          <div className="absolute top-20 left-0 right-0 z-20 flex justify-center pointer-events-none">
+                                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-full px-4 py-2">
+                                                      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                                      <span className="text-white text-sm font-bold tabular-nums">
+                                                            {recordingSeconds}s / {VIDEO_LIMIT}s
+                                                      </span>
+                                                </div>
                                           </div>
-                                          {}
-                                          <div className="w-2 h-52 mr-6 bg-black/50 rounded-full relative overflow-hidden">
-                                                <div
-                                                      className="absolute w-full bg-red-500 rounded-full transition-all duration-300"
-                                                      style={{
-                                                            height: '25%',
-                                                            top: zoom === 2 ? '0%' : zoom === 1.5 ? '25%' : zoom === 1 ? '50%' : '75%'
-                                                      }}
-                                                />
-                                          </div>
-                                    </div>
+                                    )}
 
                                     {/* ── Bottom controls ──────────────────────────────────── */}
                                     <div className="absolute bottom-10 left-0 right-0 z-20 flex flex-col items-center gap-8">
