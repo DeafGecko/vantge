@@ -680,22 +680,26 @@ export default function Gallery() {
 
         {/* ── FILTER PILLS ── */}
         {!selectMode && (
-          <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-2">
-            {[
-              { key: 'all', label: 'All Photos' },
-              ...(allowFavorites ? [{ key: 'favorites', label: '♡ Favorites' }] : []),
-              { key: 'mine', label: 'My Uploads' },
-            ].map(({ key, label }) => (
-              <button key={key} onClick={() => setFilter(key)}
-                className={`px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all ${filter === key ? 'bg-[#1A1A18] text-white' : 'bg-white text-[#6B6B63] border border-[#E8E4DC] hover:border-[#1A1A18]'}`}>
-                {label}
-              </button>
-            ))}
-            <div className="ml-auto text-xs text-[#9A9A8E] font-medium whitespace-nowrap">
-              {photoCount > 0 && `${photoCount} photo${photoCount !== 1 ? 's' : ''}`}
-              {photoCount > 0 && videoCount > 0 && ' · '}
-              {videoCount > 0 && `${videoCount} video${videoCount !== 1 ? 's' : ''}`}
+          <div className="max-w-2xl mx-auto px-4 pt-3 pb-1">
+            <div className="flex items-center gap-2">
+              {[
+                { key: 'all', label: 'All Photos' },
+                ...(allowFavorites ? [{ key: 'favorites', label: '♡ Favorites' }] : []),
+                { key: 'mine', label: 'My Uploads' },
+              ].map(({ key, label }) => (
+                <button key={key} onClick={() => setFilter(key)}
+                  className={`px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${filter === key ? 'bg-[#1A1A18] text-white' : 'bg-white text-[#6B6B63] border border-[#E8E4DC] hover:border-[#1A1A18]'}`}>
+                  {label}
+                </button>
+              ))}
             </div>
+            {(photoCount > 0 || videoCount > 0) && (
+              <p className="text-xs text-[#9A9A8E] font-medium mt-1.5 px-0.5">
+                {photoCount > 0 && `${photoCount} photo${photoCount !== 1 ? 's' : ''}`}
+                {photoCount > 0 && videoCount > 0 && ' · '}
+                {videoCount > 0 && `${videoCount} video${videoCount !== 1 ? 's' : ''}`}
+              </p>
+            )}
           </div>
         )}
 
