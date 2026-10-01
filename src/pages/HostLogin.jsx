@@ -43,7 +43,9 @@ export default function HostLogin() {
       if (!authLoading && user) return (
             <div className="min-h-screen bg-[#0E0E0C] flex flex-col items-center justify-center px-5">
                   <div className="w-full max-w-sm text-center">
-                        <VantgeLogo size="lg" variant="dark" className="mx-auto mb-8" />
+                        <div className="flex justify-center mb-5">
+                              <VantgeLogo size="lg" variant="dark" />
+                        </div>
                         <p className="text-white/60 text-sm mb-1">You're already signed in as</p>
                         <p className="text-white font-semibold text-sm mb-8 truncate">{user.email}</p>
                         <button
