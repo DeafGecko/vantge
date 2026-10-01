@@ -42,22 +42,24 @@ export default function HostLogin() {
 
       if (!authLoading && user) return (
             <div className="min-h-screen bg-[#0E0E0C] flex flex-col items-center justify-center px-5">
-                  <div className="w-full max-w-sm text-center">
-                        <div className="flex justify-center mb-5">
+                  <div style={{ width: '100%', maxWidth: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                        <div style={{ marginBottom: 20 }}>
                               <VantgeLogo size="lg" variant="dark" />
                         </div>
-                        <p className="text-white/60 text-sm mb-1">You're already signed in as</p>
-                        <p className="text-white font-semibold text-sm mb-8 truncate">{user.email}</p>
+                        <p className="text-white/60 text-sm" style={{ marginBottom: 4 }}>You're already signed in as</p>
+                        <p className="text-white font-semibold text-sm" style={{ marginBottom: 32, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
                         <button
                               onClick={() => navigate('/dashboard')}
-                              className="w-full bg-white text-[#1A1A18] font-bold rounded-xl py-3.5 text-sm mb-3 transition-opacity hover:opacity-90"
+                              style={{ width: '100%', marginBottom: 12 }}
+                              className="bg-white text-[#1A1A18] font-bold rounded-xl py-3.5 text-sm transition-opacity hover:opacity-90"
                         >
                               Go to Dashboard
                         </button>
                         <button
                               onClick={handleSignOut}
                               disabled={signingOut}
-                              className="w-full bg-white/[0.07] border border-white/10 text-white/60 hover:text-white font-semibold rounded-xl py-3.5 text-sm transition-all disabled:opacity-40"
+                              style={{ width: '100%' }}
+                              className="bg-white/[0.07] border border-white/10 text-white/60 hover:text-white font-semibold rounded-xl py-3.5 text-sm transition-all disabled:opacity-40"
                         >
                               {signingOut ? 'Signing out…' : 'Sign out'}
                         </button>
