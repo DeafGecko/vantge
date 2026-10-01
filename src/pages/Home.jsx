@@ -131,7 +131,7 @@ export default function Home() {
               Sign in
             </Link>
             <Link
-              to="/login"
+              to="/signup"
               className="group inline-flex items-center gap-2 bg-[#0E0E0C] text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-[#2C2C28] transition-colors duration-200"
             >
               Create account

@@ -7,6 +7,7 @@ import GuestCamera    from './pages/GuestCamera'
 import GuestUploader  from './pages/GuestUploader'
 import Gallery        from './pages/Gallery'
 import HostLogin      from './pages/HostLogin'
+import HostSignup     from './pages/HostSignup'
 import HostDashboard  from './pages/HostDashboard'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
 
       {/* ── Host routes ──────────────────────────────────────── */}
       <Route path="/login"     element={<HostLogin />} />
+      <Route path="/signup"    element={<HostSignup />} />
       <Route path="/dashboard" element={<HostDashboard />} />
 
       {/* ── Guest routes (all scoped to /:eventSlug) ─────────── */}

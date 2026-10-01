@@ -170,7 +170,13 @@ export default function HostLogin() {
 
                         </div>
 
-                        <p className="text-[10px] text-white/20 text-center mt-6 tracking-widest uppercase">
+                        <p className="text-xs text-white/30 text-center mt-5">
+                              Don't have an account?{' '}
+                              <a href="/signup" className="text-white/60 hover:text-white underline transition-colors">
+                                    Create one
+                              </a>
+                        </p>
+                        <p className="text-[10px] text-white/20 text-center mt-4 tracking-widest uppercase">
                               Host access only — guests use your event link
                         </p>
                   </div>
