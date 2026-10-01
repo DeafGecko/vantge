@@ -5,6 +5,7 @@ import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
 import { getEventType } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
+import VantgeLogo from '../components/VantgeLogo'
 
 const DEFAULT_BG = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85'
 
@@ -65,7 +66,7 @@ export default function EventGateway() {
 
                         {/* Top wordmark */}
                         <div className="flex justify-center pt-6 pb-2">
-                              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/80" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>vantge</span>
+                              <VantgeLogo size="sm" monoWhite />
                         </div>
 
                         {/* Spacer — pushes content to bottom */}

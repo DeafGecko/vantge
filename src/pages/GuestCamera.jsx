@@ -5,6 +5,7 @@ import { uploadPhoto } from '../lib/uploadPhoto'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
 import FontLoader from '../components/FontLoader'
+import VantgeLogo from '../components/VantgeLogo'
 
 // The camera interface for guests to capture and upload photos/videos.
 export default function GuestCamera() {
@@ -246,6 +247,11 @@ export default function GuestCamera() {
 
 
                         {/* Top bar with back button, event name, and controls ___________________________________________________*/}
+                        {/* Brand logo */}
+                        <div className="absolute top-0 left-0 right-0 z-30 pt-3 flex justify-center pointer-events-none">
+                              <VantgeLogo size="sm" monoWhite />
+                        </div>
+
                         <div className="absolute top-0 left-0 right-0 z-30 p-6 flex items-center justify-between pointer-events-none">
 
                               {/* Back → event gateway (/:eventSlug) */}

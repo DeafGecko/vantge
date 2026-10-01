@@ -6,6 +6,7 @@ import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
 import { getEventType } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
+import VantgeLogo from '../components/VantgeLogo'
 
 const MAX_FILES = 10
 const VIDEO_LIMIT_SECONDS = 30
@@ -156,7 +157,7 @@ export default function GuestUploader() {
 
                         <div className="relative z-10 min-h-screen flex flex-col">
                               <div className="flex justify-center pt-6 pb-2">
-                                    <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/70">vantge</span>
+                                    <VantgeLogo size="sm" monoWhite />
                               </div>
                               <div className="flex-1" />
                               <div className="w-full max-w-md mx-auto px-5 flex flex-col items-center text-center" style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom))' }}>
@@ -258,7 +259,7 @@ export default function GuestUploader() {
                                     <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
                                     Back
                               </button>
-                              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50">vantge</span>
+                              <VantgeLogo size="sm" monoWhite />
                               <div className="w-12" />
                         </div>
 
