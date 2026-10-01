@@ -124,7 +124,7 @@ export default function Home() {
               to="/login"
               className="group inline-flex items-center gap-2 bg-[#1A1A18] text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-[#2C2C28] transition-colors duration-200"
             >
-              Get started
+              Create account
               <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </div>
@@ -158,7 +158,7 @@ export default function Home() {
                 onClick={() => setMobileOpen(false)}
                 className="inline-flex items-center justify-center gap-2 bg-[#1A1A18] text-white text-sm font-medium px-4 py-2.5 rounded-lg"
               >
-                Get started <ArrowRight size={14} />
+                Create account <ArrowRight size={14} />
               </Link>
             </div>
           </div>
@@ -190,7 +190,7 @@ export default function Home() {
                   to="/login"
                   className="group inline-flex items-center gap-2 bg-[#1A1A18] text-white font-medium px-6 py-3 rounded-lg hover:bg-[#2C2C28] transition-colors duration-200"
                 >
-                  Get started
+                  Create account
                   <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
                 </Link>
                 <button className="inline-flex items-center gap-2 border border-[#C8C4BB] text-[#1A1A18] font-medium px-6 py-3 rounded-lg hover:border-[#1A1A18] transition-colors duration-200">
@@ -507,7 +507,7 @@ function StoryCinematic() {
           to="/login"
           className="group inline-flex items-center gap-2 bg-white text-[#1A1A18] font-medium px-6 py-3 rounded-lg hover:bg-[#F7F5F0] transition-colors duration-200"
         >
-          Get started
+          Create account
           <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
         </Link>
       </div>
