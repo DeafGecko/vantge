@@ -1,11 +1,14 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import JSZip from 'jszip'
 import { supabase } from '../lib/supabase'
 import { getThumbnailUrl, getFullSizeUrl } from '../lib/cloudinary'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
+import { getEventType } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
+
+const DEFAULT_BG = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85'
 
 async function downloadSinglePhoto(url, filename) {
       try {
@@ -40,10 +43,14 @@ async function downloadZip(urls, eventName) {
       URL.revokeObjectURL(a.href)
 }
 
-
+function looksLikeVideo(url) {
+      if (!url) return false
+      return /\.(mp4|mov|webm|avi|mkv|3gp)(\?|$)/i.test(url)
+}
 
 export default function Gallery() {
       const { eventSlug } = useParams()
+      const navigate = useNavigate()
       const [event, setEvent] = useState(null)
       const [photos, setPhotos] = useState([])
       const [loading, setLoading] = useState(true)
@@ -78,77 +85,51 @@ export default function Gallery() {
       useEffect(() => {
             async function fetchData() {
                   setLoading(true)
-
                   const { data: eventData, error: eventError } = await supabase
-                        .from('events')
-                        .select('*')
-                        .eq('event_slug', eventSlug)
-                        .maybeSingle()
+                        .from('events').select('*').eq('event_slug', eventSlug).maybeSingle()
 
-                  if (eventError || !eventData) {
-                        setError('Event not found')
-                        setLoading(false)
-                        return
-                  }
-
+                  if (eventError || !eventData) { setError('Event not found'); setLoading(false); return }
                   setEvent(eventData)
 
-                  if (!eventData.gallery_unlocked) {
-                        setLoading(false)
-                        return
-                  }
+                  if (!eventData.gallery_unlocked) { setLoading(false); return }
 
                   const { data: photoData, error: photoError } = await supabase
-                        .from('media_queue')
-                        .select('*')
-                        .eq('event_id', eventData.id)
-                        .eq('status', 1)
+                        .from('media_queue').select('*')
+                        .eq('event_id', eventData.id).eq('status', 1)
                         .order('created_at', { ascending: false })
 
-                  if (photoError) {
-                        setError(photoError.message)
-                  } else {
-                        setPhotos(photoData || [])
-                  }
+                  if (photoError) setError(photoError.message)
+                  else setPhotos(photoData || [])
                   setLoading(false)
             }
 
             fetchData()
 
-            const channel = supabase
-                  .channel(`gallery:${eventSlug}`)
-                  .on(
-                        'postgres_changes',
-                        { event: 'UPDATE', schema: 'public', table: 'media_queue' },
-                        (payload) => {
-                              if (payload.new.status === 1 && payload.old.status === 0) {
-                                    setPhotos((current) => [payload.new, ...current])
-                              }
-                        }
-                  )
-                  .subscribe()
+            const channel = supabase.channel(`gallery:${eventSlug}`)
+                  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'media_queue' }, (payload) => {
+                        if (payload.new.status === 1 && payload.old.status === 0)
+                              setPhotos((current) => [payload.new, ...current])
+                  }).subscribe()
 
-            return () => {
-                  supabase.removeChannel(channel)
-            }
+            return () => supabase.removeChannel(channel)
       }, [eventSlug])
 
       if (loading) {
             return (
-                  <div className="min-h-screen bg-cream flex items-center justify-center p-6">
-                        <p className="text-sm text-[#88887E]">Loading gallery...</p>
+                  <div className="min-h-screen bg-[#0E0E0C] flex items-center justify-center">
+                        <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                              <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25" /><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" />
+                        </svg>
                   </div>
             )
       }
 
       if (error || !event) {
             return (
-                  <div className="min-h-screen bg-cream flex items-center justify-center p-6">
-                        <div className="max-w-sm text-center">
-                              <h1 className="text-2xl font-extrabold text-[#1A1A18] mb-2">Gallery not found</h1>
-                              <p className="text-sm text-[#5A5A52]">
-                                    We couldn't find that event. Double-check the link.
-                              </p>
+                  <div className="min-h-screen bg-[#0E0E0C] flex items-center justify-center p-8 text-center">
+                        <div>
+                              <p className="text-white/50 text-sm mb-4">Gallery not found.</p>
+                              <Link to="/" className="text-white/70 text-sm underline underline-offset-4">← Go home</Link>
                         </div>
                   </div>
             )
@@ -157,258 +138,239 @@ export default function Gallery() {
       const theme = getTheme(event.theme)
       const c = theme.colors
       const selectedFontFamily = resolveFontFamily(event.font_family)
+      const bgImage = event.background_image || DEFAULT_BG
+      const bgPosition = event.background_position || '50% 40%'
+      const accentColor = c.accent
+      const eventType = getEventType(event.event_type)
+      const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
 
-
+      // ── Gallery locked ────────────────────────────────────────────────
       if (!event.gallery_unlocked) {
             return (
-                  <div
-                        className="min-h-screen flex items-center justify-center p-6"
-                        style={{ backgroundColor: c.bg }}
-                  >
-                        <div className="max-w-md text-center">
-                              <div
-                                    className="w-12 h-12 rounded-full mx-auto mb-5 flex items-center justify-center border"
-                                    style={{
-                                          backgroundColor: c.surface,
-                                          borderColor: c.border,
-                                    }}
-                              >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke={c.textMuted} strokeWidth={2}>
-                                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
+                  <>
+                        <FontLoader fontId={event.font_family} />
+                        <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                        <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
+                        <div className="relative z-10 min-h-screen flex flex-col">
+                              <div className="flex justify-center pt-6"><span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50">vantge</span></div>
+                              <div className="flex-1" />
+                              <div className="w-full max-w-md mx-auto px-5 text-center" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom))' }}>
+                                    <div className="w-12 h-12 rounded-full mx-auto mb-5 flex items-center justify-center border border-white/15" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                                          <svg width="20" height="20" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                    </div>
+                                    <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/40 mb-3">{eventType.tagline}</p>
+                                    <h1 className="text-3xl font-extrabold text-white mb-3 leading-tight" style={{ fontFamily: selectedFontFamily }}>
+                                          Gallery opens <span style={{ color: accentColor }}>soon.</span>
+                                    </h1>
+                                    <p className="text-white/50 text-sm mb-8 leading-relaxed">
+                                          The host hasn't opened the gallery yet. Check back after the event — your photos will live here.
+                                    </p>
+                                    <button onClick={() => navigate(`/${eventSlug}`)}
+                                          className="w-full py-3.5 rounded-2xl font-bold text-sm text-white/70 border border-white/15 transition-all active:scale-[0.98]"
+                                          style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                                          ← Back to Event
+                                    </button>
                               </div>
-                              <p className="text-xs tracking-wide uppercase mb-2" style={{ color: c.textSubtle }}>
-                                    {event.event_name}
-                              </p>
-                              <h1 className="text-3xl font-extrabold tracking-tight mb-3" style={{ color: c.text }}>
-                                    Gallery opens <span style={{ color: c.accent }}>soon</span>.
-                              </h1>
-                              <p className="text-sm leading-relaxed" style={{ color: c.textMuted }}>
-                                    The host hasn't opened the gallery yet. Check back after the event — your photos will live here.
-                              </p>
-                              <Link
-                                    to={`/${event.event_slug}`}
-                                    className="inline-block mt-6 text-sm transition-colors"
-                                    style={{ color: c.textMuted }}
-                              >
-                                    ← Back to event
-                              </Link>
                         </div>
-                  </div>
+                  </>
             )
       }
 
-      // ...existing code...
-
+      // ── Empty gallery ─────────────────────────────────────────────────
       if (photos.length === 0) {
             return (
-                  <div
-                        className="min-h-screen flex items-center justify-center p-6"
-                        style={{ backgroundColor: c.bg }}
-                  >
-                        <div className="max-w-md text-center">
-                              <p className="text-xs tracking-wide uppercase mb-2" style={{ color: c.textSubtle }}>
-                                    {event.event_name}
-                              </p>
-                              <h1 className="text-3xl font-extrabold tracking-tight mb-3" style={{ color: c.text }}>
-                                    The gallery is <span style={{ color: c.accent }}>open</span>.
-                              </h1>
-                              <p className="text-sm" style={{ color: c.textMuted }}>
-                                    No photos yet — be the first.
-                              </p>
-                              <Link
-                                    to={`/${event.event_slug}/camera`}
-                                    className="inline-block mt-6 font-medium rounded-full py-3 px-6 transition-colors text-sm text-white"
-                                    style={{ backgroundColor: c.accent }}
-                              >
-                                    Open camera
-                              </Link>
+                  <>
+                        <FontLoader fontId={event.font_family} />
+                        <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                        <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
+                        <div className="relative z-10 min-h-screen flex flex-col">
+                              <div className="flex justify-center pt-6"><span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50">vantge</span></div>
+                              <div className="flex-1" />
+                              <div className="w-full max-w-md mx-auto px-5 text-center" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom))' }}>
+                                    <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/40 mb-3">{eventType.tagline}</p>
+                                    <h1 className="text-3xl font-extrabold text-white mb-3 leading-tight" style={{ fontFamily: selectedFontFamily }}>
+                                          The gallery is <span style={{ color: accentColor }}>open.</span>
+                                    </h1>
+                                    <p className="text-white/50 text-sm mb-8">No photos yet — be the first to share one.</p>
+                                    <button onClick={() => navigate(`/${eventSlug}/camera`)}
+                                          className="w-full py-3.5 rounded-2xl font-bold text-sm text-white transition-all active:scale-[0.98]"
+                                          style={{ backgroundColor: accentColor }}>
+                                          Open Camera
+                                    </button>
+                              </div>
                         </div>
-                  </div>
+                  </>
             )
       }
 
+      const videoCount = photos.filter(p => p.is_video || looksLikeVideo(p.original_url)).length
+      const photoCount = photos.length - videoCount
+
+      // ── Main gallery ──────────────────────────────────────────────────
       return (
             <>
-            <FontLoader fontId={event.font_family} />
-            <div className="min-h-screen" style={{ backgroundColor: c.bg }}>
-                  <header className="px-4 sm:px-6 pt-5 pb-4">
-                        <div className="max-w-6xl mx-auto">
-                              <div className="flex items-center justify-between mb-3">
-                                    {selectMode ? (
-                                          <button
-                                                onClick={exitSelectMode}
-                                                className="text-sm font-medium transition-colors"
-                                                style={{ color: c.textMuted }}
-                                          >
-                                                Cancel
-                                          </button>
-                                    ) : (
-                                          <Link
-                                                to={`/${event.event_slug}`}
-                                                className="inline-flex items-center gap-1 text-sm font-medium transition-colors"
-                                                style={{ color: c.textMuted }}
-                                          >
-                                                ← Back
-                                          </Link>
-                                    )}
+                  <FontLoader fontId={event.font_family} />
+                  <div className="min-h-screen bg-[#0E0E0C]">
 
-                                    <div className="flex items-center gap-3">
-                                          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: c.textSubtle }}>
-                                                {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
-                                          </p>
-                                          {!selectMode && (
+                        {/* Sticky header */}
+                        <header className="sticky top-0 z-20 border-b border-white/[0.07]" style={{ backgroundColor: 'rgba(14,14,12,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+                              <div className="max-w-6xl mx-auto px-4 sm:px-6">
+                                    <div className="flex items-center justify-between h-14">
+
+                                          {/* Left — back or cancel */}
+                                          {selectMode ? (
+                                                <button onClick={exitSelectMode} className="text-sm font-bold text-white/50 hover:text-white transition-colors">
+                                                      Cancel
+                                                </button>
+                                          ) : (
+                                                <button onClick={() => navigate(`/${eventSlug}`)} className="flex items-center gap-1.5 text-sm font-bold text-white/50 hover:text-white transition-colors">
+                                                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                                                      Back
+                                                </button>
+                                          )}
+
+                                          {/* Center — event name */}
+                                          <div className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none">
+                                                <p className="text-white text-sm font-extrabold leading-tight truncate max-w-[160px]" style={{ fontFamily: selectedFontFamily }}>
+                                                      {event.event_name}
+                                                </p>
+                                                <p className="text-white/35 text-[9px] font-bold uppercase tracking-widest">
+                                                      {photoCount > 0 && `${photoCount} photo${photoCount !== 1 ? 's' : ''}`}
+                                                      {photoCount > 0 && videoCount > 0 && ' · '}
+                                                      {videoCount > 0 && `${videoCount} video${videoCount !== 1 ? 's' : ''}`}
+                                                </p>
+                                          </div>
+
+                                          {/* Right — select or download */}
+                                          {selectMode ? (
+                                                <button
+                                                      onClick={handleDownloadSelected}
+                                                      disabled={selected.size === 0 || downloading}
+                                                      className="flex items-center gap-1.5 text-sm font-bold text-white disabled:opacity-30 transition-all"
+                                                      style={{ color: selected.size > 0 ? accentColor : undefined }}
+                                                >
+                                                      {downloading ? (
+                                                            <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
+                                                      ) : (
+                                                            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round"/><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round"/><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round"/></svg>
+                                                      )}
+                                                      {selected.size > 0 ? `Save (${selected.size})` : 'Save'}
+                                                </button>
+                                          ) : (
                                                 <button
                                                       onClick={() => setSelectMode(true)}
-                                                      className="text-xs font-bold px-3 py-1.5 rounded-full border transition-all"
-                                                      style={{ borderColor: c.border, color: c.text }}
+                                                      className="text-sm font-bold text-white/50 hover:text-white transition-colors"
                                                 >
                                                       Select
                                                 </button>
                                           )}
                                     </div>
-                              </div>
 
-                              <div className="flex items-center justify-between">
-                                    <h1
-                                          className="text-2xl sm:text-3xl font-extrabold tracking-tight"
-                                          style={{ color: c.text, fontFamily: selectedFontFamily }}
-                                    >
-                                          {event.event_name} — <span style={{ color: c.accent }}>Gallery</span>
-                                    </h1>
-
+                                    {/* Select-all bar */}
                                     {selectMode && (
-                                          <div className="flex items-center gap-2">
+                                          <div className="flex items-center justify-between pb-3 pt-0.5">
+                                                <p className="text-white/40 text-xs">{selected.size} selected</p>
                                                 <button
                                                       onClick={() => setSelected(selected.size === photos.length ? new Set() : new Set(photos.map(p => p.id)))}
-                                                      className="text-xs font-bold px-3 py-1.5 rounded-full border transition-all"
-                                                      style={{ borderColor: c.border, color: c.text }}
+                                                      className="text-xs font-bold transition-colors"
+                                                      style={{ color: accentColor }}
                                                 >
                                                       {selected.size === photos.length ? 'Deselect all' : 'Select all'}
-                                                </button>
-                                                <button
-                                                      onClick={handleDownloadSelected}
-                                                      disabled={selected.size === 0 || downloading}
-                                                      className="text-xs font-bold px-3 py-1.5 rounded-full text-white transition-all disabled:opacity-40 flex items-center gap-1.5"
-                                                      style={{ backgroundColor: c.accent }}
-                                                >
-                                                      {downloading ? (
-                                                            <>
-                                                                  <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25" /><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" /></svg>
-                                                                  Zipping…
-                                                            </>
-                                                      ) : (
-                                                            <>
-                                                                  <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round" /><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" /></svg>
-                                                                  Download {selected.size > 0 ? `(${selected.size})` : ''}
-                                                            </>
-                                                      )}
                                                 </button>
                                           </div>
                                     )}
                               </div>
-                        </div>
-                  </header>
+                        </header>
 
-                  <div className="px-2 sm:px-4 pb-12">
-                        <div className="max-w-6xl mx-auto grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1 sm:gap-1.5">
-                              {photos.map((photo, index) => {
-                                    const isSelected = selected.has(photo.id)
-                                    return (
-                                          <button
-                                                key={photo.id}
-                                                onClick={() => selectMode ? toggleSelect(photo.id) : setLightboxIndex(index)}
-                                                className="aspect-square overflow-hidden rounded-md transition-all focus:outline-none relative"
-                                                style={{ backgroundColor: c.surfaceMuted }}
-                                          >
-                                                {photo.is_video ? (
-                                                      <>
-                                                            {photo.thumbnail_url ? (
-                                                                  <img
-                                                                        src={photo.thumbnail_url}
-                                                                        alt="Video thumbnail"
-                                                                        className="w-full h-full object-cover"
-                                                                        style={{ opacity: selectMode && !isSelected ? 0.5 : 1 }}
-                                                                        loading="lazy"
-                                                                  />
-                                                            ) : (
-                                                                  <video
-                                                                        src={photo.original_url}
-                                                                        className="w-full h-full object-cover"
-                                                                        style={{ opacity: selectMode && !isSelected ? 0.5 : 1 }}
-                                                                        muted playsInline preload="metadata"
-                                                                  />
-                                                            )}
-                                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                                  <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center">
-                                                                        <svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        {/* Photo grid */}
+                        <div className="px-0.5 pt-0.5 pb-24">
+                              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-0.5">
+                                    {photos.map((photo, index) => {
+                                          const isSelected = selected.has(photo.id)
+                                          const isVid = photo.is_video || looksLikeVideo(photo.original_url)
+                                          return (
+                                                <button
+                                                      key={photo.id}
+                                                      onClick={() => selectMode ? toggleSelect(photo.id) : setLightboxIndex(index)}
+                                                      className="aspect-square overflow-hidden relative focus:outline-none group"
+                                                      style={{ backgroundColor: '#1A1A18' }}
+                                                >
+                                                      {isVid ? (
+                                                            <>
+                                                                  {photo.thumbnail_url ? (
+                                                                        <img src={photo.thumbnail_url} alt="Video" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" style={{ opacity: selectMode && !isSelected ? 0.4 : 1 }} loading="lazy" />
+                                                                  ) : (
+                                                                        <video src={photo.original_url} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" style={{ opacity: selectMode && !isSelected ? 0.4 : 1 }} muted playsInline preload="metadata" />
+                                                                  )}
+                                                                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                                        <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                                                                              <svg width="13" height="13" fill="white" viewBox="0 0 24 24" style={{ marginLeft: 2 }}><path d="M8 5v14l11-7z"/></svg>
+                                                                        </div>
                                                                   </div>
-                                                            </div>
-                                                      </>
-                                                ) : /\.(mp4|mov|webm|avi|mkv|3gp)(\?|$)/i.test(photo.original_url || '') ? (
-                                                      <>
-                                                            <video
-                                                                  src={photo.original_url}
-                                                                  className="w-full h-full object-cover"
-                                                                  style={{ opacity: selectMode && !isSelected ? 0.5 : 1 }}
-                                                                  muted playsInline preload="metadata"
+                                                            </>
+                                                      ) : (
+                                                            <img
+                                                                  src={getThumbnailUrl(photo.original_url)}
+                                                                  alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'}
+                                                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                                                                  style={{ opacity: selectMode && !isSelected ? 0.4 : 1 }}
+                                                                  loading="lazy"
                                                             />
-                                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                                  <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center">
-                                                                        <svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                                                  </div>
+                                                      )}
+
+                                                      {/* Select checkmark */}
+                                                      {selectMode && (
+                                                            <div className={`absolute top-2 right-2 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-white' : 'border-white/50'}`}
+                                                                  style={{ backgroundColor: isSelected ? accentColor : 'rgba(0,0,0,0.3)' }}>
+                                                                  {isSelected && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                                                             </div>
-                                                      </>
-                                                ) : (
-                                                      <img
-                                                            src={getThumbnailUrl(photo.original_url)}
-                                                            alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'}
-                                                            className="w-full h-full object-cover"
-                                                            style={{ opacity: selectMode && !isSelected ? 0.5 : 1 }}
-                                                            loading="lazy"
-                                                      />
-                                                )}
-                                                {selectMode && (
-                                                      <div className={`absolute top-1.5 right-1.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-white' : 'border-white/60'}`}
-                                                            style={{ backgroundColor: isSelected ? c.accent : 'transparent' }}>
-                                                            {isSelected && (
-                                                                  <svg width="10" height="10" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                                                            )}
-                                                      </div>
-                                                )}
-                                          </button>
-                                    )
-                              })}
+                                                      )}
+                                                </button>
+                                          )
+                                    })}
+                              </div>
                         </div>
+
+                        {/* Bottom bar */}
+                        <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-white/[0.07] flex items-center justify-center gap-6 px-6 py-4" style={{ backgroundColor: 'rgba(14,14,12,0.95)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+                              <button
+                                    onClick={() => navigate(`/${eventSlug}/camera`)}
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm text-white transition-all active:scale-[0.97]"
+                                    style={{ backgroundColor: accentColor }}
+                              >
+                                    <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                    Add Photo
+                              </button>
+                              <button
+                                    onClick={() => navigate(`/${eventSlug}/upload`)}
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm text-white/60 border border-white/15 transition-all active:scale-[0.97]"
+                                    style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}
+                              >
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                    Upload
+                              </button>
+                        </div>
+
+                        {lightboxIndex !== null && (
+                              <Lightbox
+                                    photos={photos}
+                                    initialIndex={lightboxIndex}
+                                    accentColor={accentColor}
+                                    onClose={() => setLightboxIndex(null)}
+                              />
+                        )}
                   </div>
-
-                  <footer className="text-center pb-6">
-                        <Link
-                              to={`/${event.event_slug}/camera`}
-                              className="inline-block font-medium rounded-full py-2.5 px-5 transition-colors text-sm text-white"
-                              style={{ backgroundColor: c.accent }}
-                        >
-                              Add your photo
-                        </Link>
-                        <p className="text-xs mt-3" style={{ color: c.textSubtle }}>powered by vantge</p>
-                  </footer>
-
-                  {lightboxIndex !== null && (
-                        <Lightbox
-                              photos={photos}
-                              initialIndex={lightboxIndex}
-                              onClose={() => setLightboxIndex(null)}
-                        />
-                  )}
-            </div>
             </>
       )
 }
 
-function Lightbox({ photos, initialIndex, onClose }) {
+function Lightbox({ photos, initialIndex, accentColor, onClose }) {
       const [index, setIndex] = useState(initialIndex)
       const [dlLoading, setDlLoading] = useState(false)
       const photo = photos[index]
+      const isVid = photo.is_video || looksLikeVideo(photo.original_url)
 
       function next() { setIndex((i) => (i + 1) % photos.length) }
       function prev() { setIndex((i) => (i - 1 + photos.length) % photos.length) }
@@ -426,86 +388,90 @@ function Lightbox({ photos, initialIndex, onClose }) {
       async function handleDownload(e) {
             e.stopPropagation()
             setDlLoading(true)
-            await downloadSinglePhoto(getFullSizeUrl(photo.original_url), `photo-${index + 1}.jpg`)
+            const ext = isVid ? 'mp4' : 'jpg'
+            await downloadSinglePhoto(photo.original_url, `${photo.guest_name || 'photo'}-${index + 1}.${ext}`)
             setDlLoading(false)
       }
 
       return (
-            <div
-                  className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
-                  onClick={onClose}
-            >
+            <div className="fixed inset-0 z-50 bg-black flex flex-col" onClick={onClose}>
+
                   {/* Top bar */}
-                  <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3">
-                        <p className="text-white/60 text-sm">{index + 1} / {photos.length}</p>
+                  <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/[0.07]" style={{ backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-3">
+                              <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center border border-white/15 text-white/60 hover:text-white transition-colors" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                              </button>
+                              <p className="text-white/40 text-xs font-bold">{index + 1} / {photos.length}</p>
+                        </div>
+
                         <div className="flex items-center gap-2">
-                              {/* Download this photo */}
+                              {isVid && (
+                                    <span className="flex items-center gap-1 bg-white/10 text-white/60 text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">
+                                          <svg width="9" height="9" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                          Video
+                                    </span>
+                              )}
                               <button
                                     onClick={handleDownload}
                                     disabled={dlLoading}
-                                    className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-2 rounded-full transition-all disabled:opacity-50"
+                                    className="flex items-center gap-1.5 text-white font-bold text-xs px-3.5 py-2 rounded-full border border-white/15 transition-all disabled:opacity-40 active:scale-95"
+                                    style={{ backgroundColor: 'rgba(255,255,255,0.10)' }}
                               >
                                     {dlLoading ? (
-                                          <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25" /><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" /></svg>
+                                          <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
                                     ) : (
-                                          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round" /><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" /></svg>
+                                          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round"/><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round"/><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round"/></svg>
                                     )}
-                                    Save photo
-                              </button>
-                              <button
-                                    onClick={onClose}
-                                    className="text-white/70 hover:text-white text-3xl font-light w-10 h-10 flex items-center justify-center"
-                                    aria-label="Close"
-                              >
-                                    ×
+                                    Save
                               </button>
                         </div>
                   </div>
 
-                  {photo.is_video ? (
-                        <video
-                              src={photo.original_url}
-                              controls
-                              autoPlay
-                              playsInline
-                              onClick={(e) => e.stopPropagation()}
-                              className="max-w-full max-h-[85vh] rounded-lg"
-                        />
-                  ) : (
-                        <img
-                              src={getFullSizeUrl(photo.original_url)}
-                              alt=""
-                              onClick={(e) => e.stopPropagation()}
-                              className="max-w-full max-h-[85vh] object-contain"
-                        />
-                  )}
+                  {/* Media */}
+                  <div className="flex-1 flex items-center justify-center relative overflow-hidden" onClick={e => e.stopPropagation()}>
+                        {isVid ? (
+                              <video
+                                    key={photo.id}
+                                    src={photo.original_url}
+                                    controls autoPlay playsInline
+                                    className="max-w-full max-h-full"
+                              />
+                        ) : (
+                              <img
+                                    key={photo.id}
+                                    src={getFullSizeUrl(photo.original_url)}
+                                    alt=""
+                                    className="max-w-full max-h-full object-contain"
+                              />
+                        )}
 
-                  {photos.length > 1 && (
-                        <button
-                              onClick={(e) => { e.stopPropagation(); prev() }}
-                              className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all active:scale-95"
-                              style={{ backgroundColor: 'rgba(255,255,255,0.25)' }}
-                              aria-label="Previous"
-                        >
-                              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        </button>
-                  )}
+                        {/* Prev / Next */}
+                        {photos.length > 1 && (
+                              <>
+                                    <button
+                                          onClick={(e) => { e.stopPropagation(); prev() }}
+                                          className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all active:scale-90"
+                                          style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}
+                                    >
+                                          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                    </button>
+                                    <button
+                                          onClick={(e) => { e.stopPropagation(); next() }}
+                                          className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all active:scale-90"
+                                          style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}
+                                    >
+                                          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                    </button>
+                              </>
+                        )}
+                  </div>
 
-                  {photos.length > 1 && (
-                        <button
-                              onClick={(e) => { e.stopPropagation(); next() }}
-                              className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all active:scale-95"
-                              style={{ backgroundColor: 'rgba(255,255,255,0.25)' }}
-                              aria-label="Next"
-                        >
-                              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        </button>
-                  )}
-
-                  {photo.guest_name && (
-                        <p className="absolute bottom-6 left-0 right-0 text-center text-white/50 text-sm">
-                              {photo.guest_name}
-                        </p>
+                  {/* Bottom — guest name */}
+                  {(photo.guest_name) && (
+                        <div className="shrink-0 text-center py-3 border-t border-white/[0.07]" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }} onClick={e => e.stopPropagation()}>
+                              <p className="text-white/50 text-xs font-bold uppercase tracking-widest">Shared by {photo.guest_name}</p>
+                        </div>
                   )}
             </div>
       )
