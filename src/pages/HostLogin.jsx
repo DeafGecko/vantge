@@ -43,7 +43,7 @@ export default function HostLogin() {
       if (!authLoading && user) return (
             <div className="min-h-screen bg-[#0E0E0C] flex flex-col items-center justify-center px-5">
                   <div style={{ width: '100%', maxWidth: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                        <div style={{ marginBottom: 20 }}>
+                        <div style={{ marginBottom: 40 }}>
                               <VantgeLogo size="lg" variant="dark" />
                         </div>
                         <p className="text-white/60 text-sm" style={{ marginBottom: 4 }}>You're already signed in as</p>
