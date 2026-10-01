@@ -180,7 +180,7 @@ export default function Home() {
       <main id="main-content">
 
         {/* ══ HERO ═══════════════════════════════════════════ */}
-        <section className="max-w-7xl mx-auto px-6 pt-16 pb-24 md:pt-24 md:pb-32">
+        <section id="hero" className="max-w-7xl mx-auto px-6 pt-16 pb-24 md:pt-24 md:pb-32">
           <div className="grid md:grid-cols-2 gap-16 items-center">
 
             <div className="vantge-hero-text">
@@ -690,7 +690,7 @@ function SiteFooter() {
       links: [
         { label: 'Features', href: '#features' },
         { label: 'How It Works', href: '#how-it-works' },
-        { label: 'Get Notified', href: '#notify' },
+        { label: 'Get Notified', href: '#hero' },
       ],
     },
     {
