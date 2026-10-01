@@ -61,22 +61,38 @@ function useScrolled(px = 40) {
 ══════════════════════════════════════════════════════════════════ */
 export default function Home() {
   const [betaDismissed, setBetaDismissed] = useState(false)
+  const [notifyEmail, setNotifyEmail] = useState('')
+  const [notifySubmitted, setNotifySubmitted] = useState(false)
+  const [notifyLoading, setNotifyLoading] = useState(false)
+
+  async function handleNotify(e) {
+    e.preventDefault()
+    if (!notifyEmail.trim()) return
+    setNotifyLoading(true)
+    // Save to Supabase notify_list table (create if needed)
+    try {
+      const { supabase } = await import('../lib/supabase')
+      await supabase.from('notify_list').insert({ email: notifyEmail.trim() })
+    } catch (_) {}
+    setNotifyLoading(false)
+    setNotifySubmitted(true)
+  }
   const [mobileOpen, setMobileOpen] = useState(false)
   const scrolled = useScrolled()
 
   return (
-    <div className="bg-[#F7F5F0] text-[#1A1A18] font-['Inter'] overflow-x-hidden">
+    <div className="bg-[#F7F5F0] text-inkfont-['Inter'] overflow-x-hidden">
       {/* Skip to main */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-[#1A1A18] focus:text-white focus:px-4 focus:py-2 focus:rounded"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-ink focus:text-white focus:px-4 focus:py-2 focus:rounded"
       >
         Skip to main content
       </a>
 
       {/* ── Beta banner ──────────────────────────────────────── */}
       {!betaDismissed && (
-        <div className="bg-[#1A1A18] text-white text-sm flex items-center justify-center gap-3 px-4 py-2.5 relative">
+        <div className="bg-inktext-white text-sm flex items-center justify-center gap-3 px-4 py-2.5 relative">
           <span>🎉 Now in Beta — Free while we&apos;re getting started. No credit card required.</span>
           <button
             onClick={() => setBetaDismissed(true)}
@@ -106,7 +122,7 @@ export default function Home() {
               <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
-                className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200"
+                className="text-sm text-[#6B6B63] hover:text-inktransition-colors duration-200"
               >
                 {item}
               </a>
@@ -116,13 +132,13 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-4">
             <Link
               to="/login"
-              className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200"
+              className="text-sm text-[#6B6B63] hover:text-ink transition-colors duration-200"
             >
               Sign in
             </Link>
             <Link
               to="/login"
-              className="group inline-flex items-center gap-2 bg-[#1A1A18] text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-[#2C2C28] transition-colors duration-200"
+              className="group inline-flex items-center gap-2 bg-inktext-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-[#2C2C28] transition-colors duration-200"
             >
               Create account
               <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />
@@ -146,20 +162,16 @@ export default function Home() {
                 key={item}
                 href={`#${item.toLowerCase()}`}
                 onClick={() => setMobileOpen(false)}
-                className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors"
+                className="text-sm text-[#6B6B63] hover:text-inktransition-colors"
               >
                 {item}
               </a>
             ))}
             <div className="flex flex-col gap-2 pt-2 border-t border-[#E8E4DC]">
               <Link to="/login" className="text-sm text-[#6B6B63]" onClick={() => setMobileOpen(false)}>Sign in</Link>
-              <Link
-                to="/login"
-                onClick={() => setMobileOpen(false)}
-                className="inline-flex items-center justify-center gap-2 bg-[#1A1A18] text-white text-sm font-medium px-4 py-2.5 rounded-lg"
-              >
-                Create account <ArrowRight size={14} />
-              </Link>
+              <a href="#notify" onClick={() => setMobileOpen(false)} className="inline-flex items-center justify-center gap-2 bg-[#1A1A18] text-white text-sm font-medium px-4 py-2.5 rounded-lg">
+                Get notified
+              </a>
             </div>
           </div>
         )}
@@ -185,18 +197,7 @@ export default function Home() {
                 Simple tools for hosts. Beautiful photo experiences for your guests.
               </p>
 
-              <div className="flex flex-wrap gap-3 mb-8">
-                <Link
-                  to="/login"
-                  className="group inline-flex items-center gap-2 bg-[#1A1A18] text-white font-medium px-6 py-3 rounded-lg hover:bg-[#2C2C28] transition-colors duration-200"
-                >
-                  Create account
-                  <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
-                </Link>
-                <button className="inline-flex items-center gap-2 border border-[#C8C4BB] text-[#1A1A18] font-medium px-6 py-3 rounded-lg hover:border-[#1A1A18] transition-colors duration-200">
-                  Watch demo
-                </button>
-              </div>
+              <NotifyForm className="mb-8" />
 
               <div className="flex flex-wrap gap-4">
                 {['Create Events', 'Share with Guests', 'Track & Download'].map(pill => (
@@ -209,7 +210,7 @@ export default function Home() {
             </div>
 
             {/* Editorial photo stack */}
-            <div className="relative h-[480px] md:h-[540px] select-none" aria-hidden="true">
+            <div className="relative h-120 md:h-135 select-none" aria-hidden="true">
               <div
                 className="absolute w-64 h-80 bg-white rounded-xl border border-[#E8E4DC] shadow-xl overflow-hidden vantge-card-1"
                 style={{ top: '0%', left: '5%', transform: 'rotate(-3deg)' }}
@@ -325,6 +326,63 @@ export default function Home() {
 }
 
 /* ─── TRUST BAR ───────────────────────────────────────────────── */
+/* ─── NOTIFY FORM ─────────────────────────────────────────────── */
+function NotifyForm({ dark = false, className = '' }) {
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (!email.trim()) return
+    setLoading(true)
+    try {
+      const { supabase } = await import('../lib/supabase')
+      await supabase.from('notify_list').insert({ email: email.trim() })
+    } catch { /* silent */ }
+    setLoading(false)
+    setSubmitted(true)
+  }
+
+  if (submitted) {
+    return (
+      <div id="notify" className={`flex items-center gap-2 ${dark ? 'text-white/70' : 'text-[#6B6B63]'} text-sm ${className}`}>
+        <Check size={16} className="text-[#B29746]" strokeWidth={2.5} />
+        You're on the list — we'll reach out when we launch!
+      </div>
+    )
+  }
+
+  return (
+    <form id="notify" onSubmit={handleSubmit} className={`flex flex-col sm:flex-row gap-3 ${className}`}>
+      <input
+        type="email"
+        required
+        placeholder="Enter your email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        className={`flex-1 px-4 py-3 rounded-lg text-sm border outline-none focus:ring-2 focus:ring-[#B29746]/40 transition ${
+          dark
+            ? 'bg-white/10 border-white/20 text-white placeholder-white/40'
+            : 'bg-white border-[#E8E4DC] text-[#1A1A18] placeholder-[#9A9A8E]'
+        }`}
+      />
+      <button
+        type="submit"
+        disabled={loading}
+        className={`inline-flex items-center justify-center gap-2 font-semibold px-6 py-3 rounded-lg transition-colors duration-200 whitespace-nowrap disabled:opacity-50 ${
+          dark
+            ? 'bg-[#B29746] text-[#1A1A18] hover:bg-[#C9AC57]'
+            : 'bg-[#1A1A18] text-white hover:bg-[#2C2C28]'
+        }`}
+      >
+        {loading ? 'Sending…' : 'Notify me'}
+        {!loading && <ArrowRight size={15} />}
+      </button>
+    </form>
+  )
+}
+
 function TrustBar() {
   const items = [
     { emoji: '💍', label: 'Weddings' },
@@ -386,7 +444,7 @@ function HowItWorks() {
                     className="font-semibold text-[#1A1A18] text-sm"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                   >
-                    Sarah &amp; James Wedding
+                    frist name &amp; last name Wedding
                   </div>
                 </div>
                 <span className="text-xs bg-[#F7F5F0] border border-[#E8E4DC] px-2 py-0.5 rounded-full text-[#6B6B63]">Live</span>
@@ -394,7 +452,7 @@ function HowItWorks() {
               <div className="flex gap-4 mb-4">
                 {[['428','Photos'],['87','Guests'],['312','Approved']].map(([val, lbl], i) => (
                   <div key={lbl} className="flex-1 bg-[#F7F5F0] rounded-lg p-3 text-center">
-                    <div className={`text-xl font-bold ${i === 2 ? 'text-[#B29746]' : 'text-[#1A1A18]'}`}>{val}</div>
+                    <div className={`text-xl font-bold ${i === 2 ? 'text-[#B29746]' : 'text-ink'}`}>{val}</div>
                     <div className="text-xs text-[#6B6B63]">{lbl}</div>
                   </div>
                 ))}
@@ -465,11 +523,11 @@ function HowItWorks() {
                 key={step.num}
                 className={`flex gap-5 vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
               >
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#F0EDE6] border border-[#E8E4DC] flex items-center justify-center">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-[#F0EDE6] border border-[#E8E4DC] flex items-center justify-center">
                   <span className="text-xs font-bold text-[#B29746]">{step.num}</span>
                 </div>
                 <div>
-                  <div className="font-semibold text-[#1A1A18] mb-1">{step.title}</div>
+                  <div className="font-semibold text-ink mb-1">{step.title}</div>
                   <div className="text-sm text-[#6B6B63] leading-relaxed">{step.desc}</div>
                 </div>
               </div>
@@ -507,13 +565,7 @@ function StoryCinematic() {
           From weddings to concerts, Vantge helps you collect real moments from every
           perspective — all in one beautiful gallery.
         </p>
-        <Link
-          to="/login"
-          className="group inline-flex items-center gap-2 bg-white text-[#1A1A18] font-medium px-6 py-3 rounded-lg hover:bg-[#F7F5F0] transition-colors duration-200"
-        >
-          Create account
-          <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
-        </Link>
+        <NotifyForm dark />
       </div>
     </section>
   )
@@ -556,7 +608,8 @@ function FeaturesGrid() {
               <div className="w-12 h-12 bg-[#F7F5F0] rounded-xl border border-[#E8E4DC] flex items-center justify-center mb-5">
                 <Icon size={22} className="text-[#B29746]" />
               </div>
-              <h3 className="font-semibold text-xl text-[#1A1A18] mb-2">{f.title}</h3>
+              <h3 className="font-semibold text-xl text-ink
+               mb-2">{f.title}</h3>
               <p className="text-[#6B6B63] leading-relaxed">{f.desc}</p>
             </article>
           )
@@ -569,12 +622,12 @@ function FeaturesGrid() {
           return (
             <article
               key={f.title}
-              className={`vantge-feature-card bg-white rounded-[16px] border border-[#E8E4DC] p-6 vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
+              className={`vantge-feature-card bg-white rounded-2x1 border border-[#E8E4DC] p-6 vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
             >
               <div className="w-10 h-10 bg-[#F7F5F0] rounded-lg border border-[#E8E4DC] flex items-center justify-center mb-4">
                 <Icon size={18} className="text-[#B29746]" />
               </div>
-              <h3 className="font-semibold text-[#1A1A18] mb-1.5">{f.title}</h3>
+              <h3 className="font-semibold text-ink mb-1.5">{f.title}</h3>
               <p className="text-sm text-[#6B6B63] leading-relaxed">{f.desc}</p>
             </article>
           )
@@ -597,14 +650,14 @@ function Testimonial() {
           <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
         </svg>
         <blockquote
-          className="text-2xl md:text-3xl italic text-[#1A1A18] leading-relaxed mb-10"
+          className="text-2xl md:text-3xl italic text-ink leading-relaxed mb-10"
           style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
         >
           "Everyone at our wedding could contribute photos without downloading another app."
         </blockquote>
         <div className="flex items-center justify-center gap-3">
           <div
-            className="w-10 h-10 rounded-full bg-[#1A1A18] flex items-center justify-center text-white text-sm font-semibold"
+            className="w-10 h-10 rounded-full bg-ink flex items-center justify-center text-white text-sm font-semibold"
             aria-hidden="true"
           >
             SR
@@ -635,23 +688,9 @@ function FinalCta() {
           Your Event.<br />Every Perspective.
         </h2>
         <p className="text-white/60 text-lg mb-10 max-w-lg mx-auto leading-relaxed">
-          Create your event and let everyone capture the moments together.
+          We're launching soon. Be the first to know when Vantge is ready.
         </p>
-        <div className="flex flex-wrap gap-4 justify-center">
-          <Link
-            to="/login"
-            className="group inline-flex items-center gap-2 bg-[#B29746] text-[#1A1A18] font-semibold px-7 py-3.5 rounded-lg hover:bg-[#C9AC57] transition-colors duration-200"
-          >
-            Create your event
-            <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
-          </Link>
-          <a
-            href="#pricing"
-            className="inline-flex items-center gap-2 border border-white/30 text-white font-medium px-7 py-3.5 rounded-lg hover:border-white/60 transition-colors duration-200"
-          >
-            View pricing
-          </a>
-        </div>
+        <NotifyForm dark />
       </div>
     </section>
   )
@@ -685,7 +724,7 @@ function SiteFooter() {
     },
   ]
   return (
-    <footer className="bg-[#1A1A18] border-t border-white/10 pt-14 pb-8">
+    <footer className="bg-inkborder-t border-white/10 pt-14 pb-8">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-10 mb-12">
           <div>
