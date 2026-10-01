@@ -1,6 +1,7 @@
 // src/App.jsx
 import { Routes, Route, Navigate } from 'react-router-dom'
 
+import Home           from './pages/Home'
 import EventGateway   from './pages/EventGateway'
 import GuestCamera    from './pages/GuestCamera'
 import GuestUploader  from './pages/GuestUploader'
@@ -12,6 +13,9 @@ export default function App() {
   return (
     // Removed the <BrowserRouter> from here to fix the conflict
     <Routes>
+      {/* ── Marketing home ───────────────────────────────────── */}
+      <Route path="/"          element={<Home />} />
+
       {/* ── Host routes ──────────────────────────────────────── */}
       <Route path="/login"     element={<HostLogin />} />
       <Route path="/dashboard" element={<HostDashboard />} />
