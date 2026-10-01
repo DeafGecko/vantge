@@ -273,25 +273,62 @@ export default function Home() {
 
       <style>{`
         @keyframes vantgeFadeInUp {
-          from { opacity: 0; transform: translateY(28px); }
+          from { opacity: 0; transform: translateY(32px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        .vantge-hero-text {
-          animation: vantgeFadeInUp 0.7s ease both;
+        @keyframes vantgeFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
+        @keyframes vantgeFloat1 {
+          0%, 100% { transform: rotate(-3deg) translateY(0px); }
+          50%       { transform: rotate(-3deg) translateY(-10px); }
+        }
+        @keyframes vantgeFloat2 {
+          0%, 100% { transform: rotate(2deg) translateY(0px); }
+          50%       { transform: rotate(2deg) translateY(-14px); }
+        }
+        @keyframes vantgeFloat3 {
+          0%, 100% { transform: rotate(-1deg) translateY(0px); }
+          50%       { transform: rotate(-1deg) translateY(-8px); }
+        }
+        @keyframes vantgeSlideDown {
+          from { opacity: 0; transform: translateY(-16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes vantgeScaleIn {
+          from { opacity: 0; transform: scale(0.93) translateY(20px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes vantgePulseGold {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(178,151,70,0); }
+          50%       { box-shadow: 0 0 0 8px rgba(178,151,70,0.12); }
+        }
+
+        /* Hero */
+        .vantge-hero-text {
+          animation: vantgeFadeInUp 0.8s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        .vantge-hero-badge {
+          animation: vantgeSlideDown 0.6s ease 0.1s both;
+        }
+
+        /* Photo cards — fade in then float */
         .vantge-card-1 {
-          animation: vantgeFadeInUp 0.7s ease 0.2s both;
+          animation: vantgeFadeInUp 0.7s ease 0.15s both, vantgeFloat1 6s ease-in-out 1s infinite;
         }
         .vantge-card-2 {
-          animation: vantgeFadeInUp 0.7s ease 0.4s both;
+          animation: vantgeFadeInUp 0.7s ease 0.3s both, vantgeFloat2 7s ease-in-out 1.2s infinite;
         }
         .vantge-card-3 {
-          animation: vantgeFadeInUp 0.7s ease 0.6s both;
+          animation: vantgeFadeInUp 0.7s ease 0.45s both, vantgeFloat3 5.5s ease-in-out 0.8s infinite;
         }
+
+        /* Scroll reveals */
         .vantge-reveal {
           opacity: 0;
-          transform: translateY(24px);
-          transition: opacity 0.6s ease, transform 0.6s ease;
+          transform: translateY(28px);
+          transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1);
         }
         .vantge-reveal.vantge-visible {
           opacity: 1;
@@ -300,25 +337,53 @@ export default function Home() {
         .vantge-delay-1 { transition-delay: 0.1s; }
         .vantge-delay-2 { transition-delay: 0.2s; }
         .vantge-delay-3 { transition-delay: 0.3s; }
+        .vantge-delay-4 { transition-delay: 0.4s; }
+        .vantge-delay-5 { transition-delay: 0.5s; }
+
+        /* Trust bar items */
+        .vantge-trust-item {
+          opacity: 0;
+          transform: translateY(16px);
+          transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .vantge-trust-visible .vantge-trust-item { opacity: 1; transform: none; }
+        .vantge-trust-item:nth-child(1) { transition-delay: 0.05s; }
+        .vantge-trust-item:nth-child(2) { transition-delay: 0.12s; }
+        .vantge-trust-item:nth-child(3) { transition-delay: 0.19s; }
+        .vantge-trust-item:nth-child(4) { transition-delay: 0.26s; }
+        .vantge-trust-item:nth-child(5) { transition-delay: 0.33s; }
+        .vantge-trust-item:nth-child(6) { transition-delay: 0.40s; }
+
+        /* Feature cards */
         .vantge-feature-card {
-          transition: box-shadow 200ms ease, transform 200ms ease;
+          transition: box-shadow 250ms ease, transform 250ms ease;
         }
         .vantge-feature-card:hover {
-          box-shadow: 0 8px 32px rgba(26,26,24,0.12);
-          transform: translateY(-2px);
+          box-shadow: 0 12px 40px rgba(26,26,24,0.14);
+          transform: translateY(-4px);
         }
+
+        /* Notify form pulse */
+        .vantge-notify-btn {
+          animation: vantgePulseGold 3s ease-in-out 2s infinite;
+        }
+
+        /* Login/signup card */
+        .vantge-auth-card {
+          animation: vantgeScaleIn 0.6s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+        }
+        .vantge-auth-logo {
+          animation: vantgeFadeInUp 0.6s ease both;
+        }
+
         @media (prefers-reduced-motion: reduce) {
-          .vantge-hero-text, .vantge-card-1, .vantge-card-2, .vantge-card-3 {
-            animation: none;
+          .vantge-hero-text, .vantge-hero-badge,
+          .vantge-card-1, .vantge-card-2, .vantge-card-3,
+          .vantge-auth-card, .vantge-auth-logo { animation: none; }
+          .vantge-reveal, .vantge-trust-item {
+            opacity: 1 !important; transform: none !important; transition: none !important;
           }
-          .vantge-reveal {
-            opacity: 1 !important;
-            transform: none !important;
-            transition: none !important;
-          }
-          .vantge-feature-card:hover {
-            transform: none;
-          }
+          .vantge-feature-card:hover { transform: none; }
         }
       `}</style>
     </div>
@@ -378,7 +443,7 @@ function NotifyForm({ dark = false, className = '' }) {
       <button
         type="submit"
         disabled={loading}
-        className={`inline-flex items-center justify-center gap-2 font-semibold px-6 py-3 rounded-lg transition-colors duration-200 whitespace-nowrap disabled:opacity-50 ${
+        className={`vantge-notify-btn inline-flex items-center justify-center gap-2 font-semibold px-6 py-3 rounded-lg transition-colors duration-200 whitespace-nowrap disabled:opacity-50 ${
           dark
             ? 'bg-[#B29746] text-[#1A1A18] hover:bg-[#C9AC57]'
             : 'bg-[#1A1A18] text-white hover:bg-[#2C2C28]'
@@ -392,6 +457,7 @@ function NotifyForm({ dark = false, className = '' }) {
 }
 
 function TrustBar() {
+  const [ref, inView] = useInView(0.2)
   const items = [
     { icon: Heart,         label: 'Weddings' },
     { icon: Building2,     label: 'Corporate' },
@@ -406,9 +472,9 @@ function TrustBar() {
         <p className="text-center text-xs font-semibold tracking-[0.16em] uppercase text-[#1A1A18]/40 mb-6">
           Perfect for every occasion
         </p>
-        <ul className="flex flex-wrap justify-center gap-8 md:gap-12 list-none p-0 m-0">
+        <ul ref={ref} className={`flex flex-wrap justify-center gap-8 md:gap-12 list-none p-0 m-0 ${inView ? 'vantge-trust-visible' : ''}`}>
           {items.map(({ icon: Icon, label }) => (
-            <li key={label} className="flex items-center gap-2 text-[#1A1A18]/40">
+            <li key={label} className="vantge-trust-item flex items-center gap-2 text-[#1A1A18]/40">
               <Icon size={18} aria-hidden="true" />
               <span className="text-sm font-medium">{label}</span>
             </li>

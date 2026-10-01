@@ -48,6 +48,7 @@ export default function HostSignup() {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-[#0E0E0C] flex flex-col items-center justify-center px-5 py-12 relative overflow-hidden">
 
       {/* Background photo strip */}
@@ -66,11 +67,11 @@ export default function HostSignup() {
       <div className="relative z-10 w-full max-w-sm">
 
         <div className="flex flex-col items-center mb-10">
-          <a href="/"><VantgeLogo size="lg" variant="dark" /></a>
+          <div className="vantge-auth-logo"><a href="/"><VantgeLogo size="lg" variant="dark" /></a></div>
           <p className="text-[11px] text-white/40 tracking-[0.2em] uppercase mt-2">Event Photo Sharing</p>
         </div>
 
-        <div className="bg-white/[0.06] backdrop-blur-xl border border-white/10 rounded-3xl p-7 shadow-2xl">
+        <div className="vantge-auth-card bg-white/[0.06] backdrop-blur-xl border border-white/10 rounded-3xl p-7 shadow-2xl">
 
           <h1 className="text-xl font-black text-white mb-1 tracking-tight">Create your account</h1>
           <p className="text-sm text-white/40 mb-6">Welcome! Set up your host account to get started.</p>
@@ -176,5 +177,21 @@ export default function HostSignup() {
         </p>
       </div>
     </div>
+    <style>{`
+      @keyframes vantgeScaleIn {
+        from { opacity: 0; transform: scale(0.93) translateY(20px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      @keyframes vantgeFadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .vantge-auth-card { animation: vantgeScaleIn 0.6s cubic-bezier(0.22,1,0.36,1) 0.1s both; }
+      .vantge-auth-logo { animation: vantgeFadeInUp 0.6s ease both; }
+      @media (prefers-reduced-motion: reduce) {
+        .vantge-auth-card, .vantge-auth-logo { animation: none; }
+      }
+    `}</style>
+    </>
   )
 }

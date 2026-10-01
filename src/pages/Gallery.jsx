@@ -294,8 +294,8 @@ export default function Gallery() {
                                                 <button
                                                       key={photo.id}
                                                       onClick={() => selectMode ? toggleSelect(photo.id) : setLightboxIndex(index)}
-                                                      className="flex flex-col overflow-hidden relative focus:outline-none group text-left"
-                                                      style={{ backgroundColor: '#1A1A18' }}
+                                                      className="flex flex-col overflow-hidden relative focus:outline-none group text-left vantge-photo-cell"
+                                                      style={{ backgroundColor: '#1A1A18', animationDelay: `${Math.min(index * 40, 600)}ms` }}
                                                 >
                                                       {/* Square image area */}
                                                       <div className="aspect-square w-full relative overflow-hidden">
@@ -372,6 +372,18 @@ export default function Gallery() {
                               />
                         )}
                   </div>
+            <style>{`
+              @keyframes vantgePhotoIn {
+                from { opacity: 0; transform: scale(0.96); }
+                to   { opacity: 1; transform: scale(1); }
+              }
+              .vantge-photo-cell {
+                animation: vantgePhotoIn 0.4s ease both;
+              }
+              @media (prefers-reduced-motion: reduce) {
+                .vantge-photo-cell { animation: none; }
+              }
+            `}</style>
             </>
       )
 }
