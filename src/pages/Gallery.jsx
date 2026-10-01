@@ -68,6 +68,28 @@ export default function Gallery() {
             })
       }, [])
 
+      async function handleShareSelected() {
+            const selectedPhotos = photos.filter(p => selected.has(p.id))
+            if (selectedPhotos.length === 1) {
+                  const photo = selectedPhotos[0]
+                  const url = getFullSizeUrl(photo.original_url)
+                  if (navigator.share) {
+                        try { await navigator.share({ title: event.event_name, text: `Photo from ${event.event_name}`, url }) } catch { /* aborted */ }
+                  } else {
+                        await navigator.clipboard.writeText(url)
+                        alert('Link copied!')
+                  }
+            } else {
+                  const urls = selectedPhotos.map(p => getFullSizeUrl(p.original_url)).join('\n')
+                  if (navigator.share) {
+                        try { await navigator.share({ title: event.event_name, text: `${selectedPhotos.length} photos from ${event.event_name}\n\n${urls}` }) } catch { /* aborted */ }
+                  } else {
+                        await navigator.clipboard.writeText(urls)
+                        alert(`${selectedPhotos.length} links copied!`)
+                  }
+            }
+      }
+
       async function handleDownloadSelected() {
             setDownloading(true)
             const targets = photos
@@ -247,21 +269,35 @@ export default function Gallery() {
                                                 </p>
                                           </div>
 
-                                          {/* Right — select or download */}
+                                          {/* Right — select actions or enter select */}
                                           {selectMode ? (
-                                                <button
-                                                      onClick={handleDownloadSelected}
-                                                      disabled={selected.size === 0 || downloading}
-                                                      className="flex items-center gap-1.5 text-sm font-bold text-white disabled:opacity-30 transition-all"
-                                                      style={{ color: selected.size > 0 ? accentColor : undefined }}
-                                                >
-                                                      {downloading ? (
-                                                            <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
-                                                      ) : (
-                                                            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round"/><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round"/><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round"/></svg>
+                                                <div className="flex items-center gap-3">
+                                                      {(event.allow_sharing ?? true) && (
+                                                            <button
+                                                                  onClick={handleShareSelected}
+                                                                  disabled={selected.size === 0}
+                                                                  className="flex items-center gap-1.5 text-sm font-bold text-white/60 disabled:opacity-30 hover:text-white transition-all"
+                                                            >
+                                                                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                                                  Share{selected.size > 0 ? ` (${selected.size})` : ''}
+                                                            </button>
                                                       )}
-                                                      {selected.size > 0 ? `Download (${selected.size})` : 'Download'}
-                                                </button>
+                                                      {(event.allow_downloads ?? true) && (
+                                                            <button
+                                                                  onClick={handleDownloadSelected}
+                                                                  disabled={selected.size === 0 || downloading}
+                                                                  className="flex items-center gap-1.5 text-sm font-bold disabled:opacity-30 transition-all"
+                                                                  style={{ color: selected.size > 0 ? accentColor : 'rgba(255,255,255,0.6)' }}
+                                                            >
+                                                                  {downloading ? (
+                                                                        <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
+                                                                  ) : (
+                                                                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round"/><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round"/><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round"/></svg>
+                                                                  )}
+                                                                  {selected.size > 0 ? `Save (${selected.size})` : 'Save'}
+                                                            </button>
+                                                      )}
+                                                </div>
                                           ) : (
                                                 <button
                                                       onClick={() => setSelectMode(true)}
