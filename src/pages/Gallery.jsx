@@ -294,37 +294,50 @@ export default function Gallery() {
                                                 <button
                                                       key={photo.id}
                                                       onClick={() => selectMode ? toggleSelect(photo.id) : setLightboxIndex(index)}
-                                                      className="aspect-square overflow-hidden relative focus:outline-none group"
+                                                      className="flex flex-col overflow-hidden relative focus:outline-none group text-left"
                                                       style={{ backgroundColor: '#1A1A18' }}
                                                 >
-                                                      {isVid ? (
-                                                            <>
-                                                                  {photo.thumbnail_url ? (
-                                                                        <img src={photo.thumbnail_url} alt="Video" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" style={{ opacity: selectMode && !isSelected ? 0.4 : 1 }} loading="lazy" />
-                                                                  ) : (
-                                                                        <video src={photo.original_url} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" style={{ opacity: selectMode && !isSelected ? 0.4 : 1 }} muted playsInline preload="metadata" />
-                                                                  )}
-                                                                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                                        <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                                                                              <svg width="13" height="13" fill="white" viewBox="0 0 24 24" style={{ marginLeft: 2 }}><path d="M8 5v14l11-7z"/></svg>
+                                                      {/* Square image area */}
+                                                      <div className="aspect-square w-full relative overflow-hidden">
+                                                            {isVid ? (
+                                                                  <>
+                                                                        {photo.thumbnail_url ? (
+                                                                              <img src={photo.thumbnail_url} alt="Video" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" style={{ opacity: selectMode && !isSelected ? 0.4 : 1 }} loading="lazy" />
+                                                                        ) : (
+                                                                              <video src={photo.original_url} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" style={{ opacity: selectMode && !isSelected ? 0.4 : 1 }} muted playsInline preload="metadata" />
+                                                                        )}
+                                                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                                              <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                                                                                    <svg width="13" height="13" fill="white" viewBox="0 0 24 24" style={{ marginLeft: 2 }}><path d="M8 5v14l11-7z"/></svg>
+                                                                              </div>
                                                                         </div>
-                                                                  </div>
-                                                            </>
-                                                      ) : (
-                                                            <img
-                                                                  src={getThumbnailUrl(photo.original_url)}
-                                                                  alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'}
-                                                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                                                                  style={{ opacity: selectMode && !isSelected ? 0.4 : 1 }}
-                                                                  loading="lazy"
-                                                            />
-                                                      )}
+                                                                  </>
+                                                            ) : (
+                                                                  <img
+                                                                        src={getThumbnailUrl(photo.original_url)}
+                                                                        alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'}
+                                                                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                                                                        style={{ opacity: selectMode && !isSelected ? 0.4 : 1 }}
+                                                                        loading="lazy"
+                                                                  />
+                                                            )}
 
-                                                      {/* Select checkmark */}
-                                                      {selectMode && (
-                                                            <div className={`absolute top-2 right-2 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-white' : 'border-white/50'}`}
-                                                                  style={{ backgroundColor: isSelected ? accentColor : 'rgba(0,0,0,0.3)' }}>
-                                                                  {isSelected && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                                            {/* Select checkmark */}
+                                                            {selectMode && (
+                                                                  <div className={`absolute top-2 right-2 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-white' : 'border-white/50'}`}
+                                                                        style={{ backgroundColor: isSelected ? accentColor : 'rgba(0,0,0,0.3)' }}>
+                                                                        {isSelected && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                                                  </div>
+                                                            )}
+                                                      </div>
+
+                                                      {/* Caption below image */}
+                                                      {photo.caption && (
+                                                            <div className="w-full px-2 py-1.5 border-t border-white/[0.06]">
+                                                                  <p className="text-white/70 text-[11px] leading-snug line-clamp-2">{photo.caption}</p>
+                                                                  {photo.guest_name && (
+                                                                        <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest mt-0.5">{photo.guest_name}</p>
+                                                                  )}
                                                             </div>
                                                       )}
                                                 </button>
@@ -469,10 +482,15 @@ function Lightbox({ photos, initialIndex, accentColor, onClose }) {
                         )}
                   </div>
 
-                  {/* Bottom — guest name */}
-                  {(photo.guest_name) && (
-                        <div className="shrink-0 text-center py-3 border-t border-white/[0.07]" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }} onClick={e => e.stopPropagation()}>
-                              <p className="text-white/50 text-xs font-bold uppercase tracking-widest">Shared by {photo.guest_name}</p>
+                  {/* Bottom — caption + guest name */}
+                  {(photo.caption || photo.guest_name) && (
+                        <div className="shrink-0 px-5 py-3 border-t border-white/[0.07] text-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }} onClick={e => e.stopPropagation()}>
+                              {photo.caption && (
+                                    <p className="text-white/80 text-sm leading-snug mb-0.5">{photo.caption}</p>
+                              )}
+                              {photo.guest_name && (
+                                    <p className="text-white/35 text-[10px] font-bold uppercase tracking-widest">— {photo.guest_name}</p>
+                              )}
                         </div>
                   )}
             </div>

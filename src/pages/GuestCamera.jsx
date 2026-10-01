@@ -26,6 +26,7 @@ export default function GuestCamera() {
       const [uploadState, setUploadState] = useState('idle')
       const [uploadError, setUploadError] = useState(null)
       const [guestName, setGuestName] = useState('')
+      const [caption, setCaption] = useState('')
 
       // UI state
       const [mode, setMode] = useState('photo')
@@ -217,6 +218,7 @@ export default function GuestCamera() {
                   blob: capturedPhoto.blob,
                   eventId: event.id,
                   guestName: guestName,
+                  caption: caption,
                   is_video: capturedPhoto.type === 'video',
             })
 
@@ -448,6 +450,20 @@ export default function GuestCamera() {
                                                       className="shrink-0 px-5 pt-5"
                                                       style={{ paddingBottom: 'max(1.75rem, env(safe-area-inset-bottom))', backgroundColor: '#0a0a0a' }}
                                                 >
+                                                      {/* Caption input */}
+                                                      <div className="mb-2.5">
+                                                            <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Caption <span className="text-red-400">*</span></p>
+                                                            <input
+                                                                  type="text"
+                                                                  value={caption}
+                                                                  onChange={(e) => setCaption(e.target.value)}
+                                                                  placeholder="Required — add a message to your photo"
+                                                                  maxLength={200}
+                                                                  className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 outline-none border border-white/10 focus:border-white/30 transition-colors"
+                                                                  style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}
+                                                            />
+                                                      </div>
+
                                                       {/* Name input */}
                                                       <div className="mb-3">
                                                             <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Your name</p>
@@ -476,7 +492,7 @@ export default function GuestCamera() {
                                                             </button>
                                                             <button
                                                                   onClick={handleUpload}
-                                                                  disabled={uploadState === 'uploading'}
+                                                                  disabled={uploadState === 'uploading' || !caption.trim()}
                                                                   className="flex-1 py-3.5 text-white rounded-xl font-bold text-sm disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                                                                   style={{ backgroundColor: c?.accent }}
                                                             >

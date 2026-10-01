@@ -30,6 +30,7 @@ export default function GuestUploader() {
 
       const [files, setFiles] = useState([])
       const [guestName, setGuestName] = useState('')
+      const [caption, setCaption] = useState('')
       const [uploadState, setUploadState] = useState('idle')
       const [currentIndex, setCurrentIndex] = useState(0)
       const [successCount, setSuccessCount] = useState(0)
@@ -88,6 +89,7 @@ export default function GuestUploader() {
                         blob: file,
                         eventId: event.id,
                         guestName,
+                        caption,
                         is_video: isVideo,
                   })
 
@@ -267,8 +269,8 @@ export default function GuestUploader() {
 
                               {/* Event label + title */}
                               <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-2">{event.event_name}</p>
-                              <h1 className="text-2xl font-extrabold text-white leading-tight mb-5" style={{ fontFamily: selectedFontFamily }}>
-                                    Share your photos<br />& videos.
+                              <h1 className="text-2xl font-extrabold text-white leading-tight mb-5 whitespace-nowrap" style={{ fontFamily: selectedFontFamily }}>
+                                    Share your photos & videos.
                               </h1>
 
                               {/* File picker / preview */}
@@ -339,6 +341,20 @@ export default function GuestUploader() {
                                     </div>
                               )}
 
+                              {/* Caption input */}
+                              <div className="mb-2.5">
+                                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Caption <span className="text-red-400">*</span></p>
+                                    <input
+                                          type="text"
+                                          value={caption}
+                                          onChange={(e) => setCaption(e.target.value)}
+                                          placeholder="Required — add a message to your photo"
+                                          maxLength={200}
+                                          className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 outline-none border border-white/10 focus:border-white/30 transition-colors"
+                                          style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}
+                                    />
+                              </div>
+
                               {/* Name input */}
                               <div className="mb-3">
                                     <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Your name</p>
@@ -355,7 +371,8 @@ export default function GuestUploader() {
                               {/* Send button */}
                               <button
                                     onClick={files.length > 0 ? handleUpload : () => fileInputRef.current?.click()}
-                                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all active:scale-[0.98]"
+                                    disabled={files.length > 0 && !caption.trim()}
+                                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-50"
                                     style={{ backgroundColor: accentColor }}
                               >
                                     {files.length > 0 ? (
