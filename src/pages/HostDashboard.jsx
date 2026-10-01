@@ -34,7 +34,7 @@ const categoryLabels = {
 }
 
 export default function HostDashboard() {
-      const { user, signOut } = useAuth()
+      const { user, loading: authLoading, signOut } = useAuth()
       const navigate = useNavigate()
       const { event, loading: eventLoading } = useHostEvent()
       const [toggling, setToggling] = useState(false)
@@ -116,7 +116,7 @@ export default function HostDashboard() {
             </div>
       )
 
-      if (!user) {
+      if (!authLoading && !user) {
             navigate('/login', { replace: true })
             return null
       }
