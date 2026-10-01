@@ -20,7 +20,7 @@ export default function VantgeLogo({ size = 'md', variant = 'dark', showWordmark
                         <path fill={markFill} d="M62.16,110.85S27.27,79.12,10.09,43.07c0,0-14.65,22.57-8.64,55.92,0,0,14.6,9.24,60.71,11.85Z"/>
                   </svg>
                   {showWordmark && (
-                        <span className={`font-black tracking-tight leading-none ${wordSize} ${monoWhite ? 'text-white' : wordColor}`}>
+                        <span className={`font-black tracking-widest leading-none uppercase ${wordSize} ${monoWhite ? 'text-white' : wordColor}`}>
                               Vantge
                         </span>
                   )}
