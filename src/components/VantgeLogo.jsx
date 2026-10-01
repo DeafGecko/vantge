@@ -11,7 +11,7 @@ export default function VantgeLogo({ size = 'md', variant = 'dark', showWordmark
       const wordColor = variant === 'dark' ? 'text-white' : 'text-[#1A1A18]'
 
       return (
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5">
                   {/* Double-chevron mark */}
                   <svg width={markW} height={markH} viewBox="0 0 32 24" fill="none">
                         {/* Left chevron — solid dark/black */}
