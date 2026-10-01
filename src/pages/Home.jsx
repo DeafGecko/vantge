@@ -105,7 +105,6 @@ export default function Home() {
             {[
               { label: 'Features', href: '#features' },
               { label: 'How It Works', href: '#how-it-works' },
-              { label: 'Pricing', href: '#notify' },
               { label: 'Contact', href: '#notify' },
             ].map(item => (
               <a
@@ -116,6 +115,10 @@ export default function Home() {
                 {item.label}
               </a>
             ))}
+            <a href="#notify" className="relative text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200">
+              <span className="line-through decoration-red-500 decoration-2">Pricing</span>
+              <span className="ml-1.5 text-red-500 font-semibold text-xs">Beta</span>
+            </a>
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
