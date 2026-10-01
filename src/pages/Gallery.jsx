@@ -285,8 +285,8 @@ export default function Gallery() {
                         </header>
 
                         {/* Photo grid */}
-                        <div className="px-0.5 pt-0.5 pb-24">
-                              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-0.5">
+                        <div className="px-3 pt-3 pb-24">
+                              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                                     {photos.map((photo, index) => {
                                           const isSelected = selected.has(photo.id)
                                           const isVid = photo.is_video || looksLikeVideo(photo.original_url)
@@ -294,7 +294,7 @@ export default function Gallery() {
                                                 <button
                                                       key={photo.id}
                                                       onClick={() => selectMode ? toggleSelect(photo.id) : setLightboxIndex(index)}
-                                                      className="flex flex-col overflow-hidden relative focus:outline-none group text-left vantge-photo-cell"
+                                                      className="flex flex-col overflow-hidden relative focus:outline-none group text-left vantge-photo-cell rounded-xl"
                                                       style={{ backgroundColor: '#1A1A18', animationDelay: `${Math.min(index * 40, 600)}ms` }}
                                                 >
                                                       {/* Square image area */}
