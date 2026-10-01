@@ -634,7 +634,7 @@ function CreateEventOnboarding({ onCreated, signOut }) {
                         <form onSubmit={handleCreate} className="flex flex-col gap-3">
                               <input
                                     type="text"
-                                    placeholder="e.g. Sarah &amp; James Wedding"
+                                    placeholder="e.g. Ashley &amp; James Wedding"
                                     value={eventName}
                                     onChange={e => setEventName(e.target.value)}
                                     maxLength={80}

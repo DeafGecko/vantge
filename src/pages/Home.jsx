@@ -646,11 +646,11 @@ function Testimonial() {
             className="w-10 h-10 rounded-full bg-ink flex items-center justify-center text-white text-sm font-semibold"
             aria-hidden="true"
           >
-            SR
+            AR
           </div>
           <div className="text-left">
-            <div className="font-semibold text-sm text-[#1A1A18]">Sarah R.</div>
-            <div className="text-xs text-[#6B6B63]">Wedding · June 2025</div>
+            <div className="font-semibold text-sm text-[#1A1A18]">Ashley R.</div>
+            <div className="text-xs text-[#6B6B63]">Wedding · October 2025</div>
           </div>
         </div>
       </div>
