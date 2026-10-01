@@ -434,8 +434,12 @@ function HowItWorks() {
                 <div className="text-[7px] font-semibold text-[#1A1A18] leading-tight">Upload a Photo</div>
                 <div className="text-[6px] text-[#6B6B63]">Sarah &amp; James</div>
               </div>
-              <div className="flex-1 bg-[#E8E4DC] rounded-lg flex items-center justify-center">
-                <Camera size={18} className="text-[#6B6B63]" />
+              <div className="flex-1 rounded-lg overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1519741497674-611481863552?w=200&q=80"
+                  alt="Wedding photo preview"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="bg-[#1A1A18] rounded-lg py-1 text-center">
                 <span className="text-[7px] font-semibold text-white">Share Photo</span>
