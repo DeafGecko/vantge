@@ -266,7 +266,7 @@ export default function HostDashboard() {
                               <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mb-7">
 
                                     {/* LEFT — phone preview + QR */}
-                                    <div className="md:col-span-4 flex flex-col gap-3">
+                                    <div className="md:col-span-4 flex flex-col gap-3 md:self-start md:sticky md:top-20">
 
                                           {/* Phone preview */}
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
