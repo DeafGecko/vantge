@@ -323,6 +323,30 @@ export default function Gallery() {
                                           >
                                                 {photo.is_video ? (
                                                       <>
+                                                            {photo.thumbnail_url ? (
+                                                                  <img
+                                                                        src={photo.thumbnail_url}
+                                                                        alt="Video thumbnail"
+                                                                        className="w-full h-full object-cover"
+                                                                        style={{ opacity: selectMode && !isSelected ? 0.5 : 1 }}
+                                                                        loading="lazy"
+                                                                  />
+                                                            ) : (
+                                                                  <video
+                                                                        src={photo.original_url}
+                                                                        className="w-full h-full object-cover"
+                                                                        style={{ opacity: selectMode && !isSelected ? 0.5 : 1 }}
+                                                                        muted playsInline preload="metadata"
+                                                                  />
+                                                            )}
+                                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                                  <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center">
+                                                                        <svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                  </div>
+                                                            </div>
+                                                      </>
+                                                ) : /\.(mp4|mov|webm|avi|mkv|3gp)(\?|$)/i.test(photo.original_url || '') ? (
+                                                      <>
                                                             <video
                                                                   src={photo.original_url}
                                                                   className="w-full h-full object-cover"

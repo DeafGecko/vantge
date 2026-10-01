@@ -47,6 +47,8 @@ export default function HostDashboard() {
       const [savingName, setSavingName] = useState(false)
       const [savingSettings, setSavingSettings] = useState(false)
       const [pendingCount, setPendingCount] = useState(0)
+      const [approvedPhotoCount, setApprovedPhotoCount] = useState(0)
+      const [approvedVideoCount, setApprovedVideoCount] = useState(0)
       const [menuOpen, setMenuOpen] = useState(false)
       const [localBgPosition, setLocalBgPosition] = useState(null)
       const [localBgTint, setLocalBgTint] = useState(null)
@@ -69,10 +71,16 @@ export default function HostDashboard() {
 
       useEffect(() => {
             if (!event?.id) return
-            const fetchCount = () =>
-                  supabase.from('media_queue').select('id', { count: 'exact', head: true })
-                        .eq('event_id', event.id).eq('status', 0)
-                        .then(({ count }) => setPendingCount(count ?? 0))
+            const fetchCount = async () => {
+                  const [pendingRes, approvedRes] = await Promise.all([
+                        supabase.from('media_queue').select('id', { count: 'exact', head: true }).eq('event_id', event.id).eq('status', 0),
+                        supabase.from('media_queue').select('is_video').eq('event_id', event.id).eq('status', 1),
+                  ])
+                  setPendingCount(pendingRes.count ?? 0)
+                  const approved = approvedRes.data ?? []
+                  setApprovedPhotoCount(approved.filter(r => !r.is_video).length)
+                  setApprovedVideoCount(approved.filter(r => r.is_video).length)
+            }
             fetchCount()
             const channel = supabase.channel(`pending-count-${event.id}`)
                   .on('postgres_changes', { event: '*', schema: 'public', table: 'media_queue', filter: `event_id=eq.${event.id}` }, fetchCount)
@@ -382,6 +390,39 @@ export default function HostDashboard() {
                                                       accentColor={currentTheme.colors.accent}
                                                       onSaved={(url, pos, tint) => { setLocalBgImage(url); setLocalBgPosition(pos); setLocalBgTint(tint) }}
                                                 />
+                                          </div>
+                                    </div>
+                              </div>
+
+                              {/* APPROVED STATS */}
+                              <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm px-5 py-4 flex items-center gap-4">
+                                    <div className="flex-1 flex items-center gap-3">
+                                          <div className="w-8 h-8 rounded-lg bg-[#F4F3F0] flex items-center justify-center shrink-0">
+                                                <svg width="15" height="15" fill="none" stroke="#1A1A18" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                          </div>
+                                          <div>
+                                                <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest">Photos</p>
+                                                <p className="text-xl font-extrabold text-[#1A1A18] leading-tight">{approvedPhotoCount}</p>
+                                          </div>
+                                    </div>
+                                    <div className="w-px h-10 bg-[#E8E4DA]" />
+                                    <div className="flex-1 flex items-center gap-3">
+                                          <div className="w-8 h-8 rounded-lg bg-[#F4F3F0] flex items-center justify-center shrink-0">
+                                                <svg width="15" height="15" fill="none" stroke="#1A1A18" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+                                          </div>
+                                          <div>
+                                                <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest">Videos</p>
+                                                <p className="text-xl font-extrabold text-[#1A1A18] leading-tight">{approvedVideoCount}</p>
+                                          </div>
+                                    </div>
+                                    <div className="w-px h-10 bg-[#E8E4DA]" />
+                                    <div className="flex-1 flex items-center gap-3">
+                                          <div className="w-8 h-8 rounded-lg bg-[#F4F3F0] flex items-center justify-center shrink-0">
+                                                <svg width="15" height="15" fill="none" stroke="#1A1A18" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                                          </div>
+                                          <div>
+                                                <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest">In Gallery</p>
+                                                <p className="text-xl font-extrabold text-[#1A1A18] leading-tight">{approvedPhotoCount + approvedVideoCount}</p>
                                           </div>
                                     </div>
                               </div>

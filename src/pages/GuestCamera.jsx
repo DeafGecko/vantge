@@ -217,6 +217,7 @@ export default function GuestCamera() {
                   blob: capturedPhoto.blob,
                   eventId: event.id,
                   guestName: guestName,
+                  is_video: capturedPhoto.type === 'video',
             })
 
             if (result.success) {
@@ -366,31 +367,41 @@ export default function GuestCamera() {
                               </>
                         )}
 
+                        {/* Video-too-long error banner (shown on camera screen, before capturedPhoto is set) */}
+                        {uploadError && !capturedPhoto && (
+                              <div className="absolute bottom-44 left-4 right-4 z-30 bg-black/75 border border-red-500/50 text-red-300 text-sm font-medium rounded-2xl px-4 py-3 text-center">
+                                    {uploadError}
+                              </div>
+                        )}
+
                         {/* ── Preview / upload screen ──────────────────────────────── */}
                         {capturedPhoto && (
                               <div className="absolute inset-0 z-40 bg-black flex flex-col">
 
                                     {/* Success screen */}
                                     {uploadState === 'success' ? (
-                                          <div className="flex-1 flex flex-col items-center justify-center gap-6 p-8 text-center">
-                                                <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ backgroundColor: c?.accent }}>
-                                                      <svg width="36" height="36" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
+                                          <div className="flex-1 flex flex-col items-center justify-center gap-5 px-6 text-center">
+                                                <div className="w-16 h-16 rounded-full flex items-center justify-center mb-1" style={{ backgroundColor: c?.accent }}>
+                                                      <svg width="28" height="28" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
                                                 </div>
                                                 <div>
-                                                      <p className="text-white text-2xl font-bold mb-2">Photo sent!</p>
-                                                      <p className="text-white/60 text-sm">The host will review and add it to the gallery.</p>
+                                                      <p className="text-white text-2xl font-extrabold mb-1">
+                                                            {capturedPhoto.type === 'video' ? 'Video sent!' : 'Photo sent!'}
+                                                      </p>
+                                                      <p className="text-white/50 text-sm">The host will review and add it to the gallery.</p>
                                                 </div>
-                                                <div className="flex flex-col gap-3 w-full max-w-xs">
+                                                <div className="flex flex-col gap-2.5 w-full max-w-xs mt-2">
                                                       <button
                                                             onClick={() => { setCapturedPhoto(null); setUploadState('idle'); startCamera() }}
-                                                            className="w-full py-4 text-white rounded-full font-bold"
+                                                            className="w-full py-3.5 text-white rounded-2xl font-bold text-sm"
                                                             style={{ backgroundColor: c?.accent }}
                                                       >
-                                                            Take Another Photo
+                                                            Take Another
                                                       </button>
                                                       <button
                                                             onClick={() => navigate(`/${eventSlug}`)}
-                                                            className="w-full py-4 bg-white/10 text-white rounded-full font-bold"
+                                                            className="w-full py-3.5 text-white/70 rounded-2xl font-bold text-sm border border-white/15"
+                                                            style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
                                                       >
                                                             Back to Event
                                                       </button>
@@ -398,7 +409,7 @@ export default function GuestCamera() {
                                           </div>
                                     ) : (
                                           <>
-                                                {/* Photo/video preview — leaves room for bottom panel */}
+                                                {/* Photo/video preview */}
                                                 <div className="flex-1 relative overflow-hidden">
                                                       {capturedPhoto.type === 'video' ? (
                                                             <video
@@ -412,38 +423,76 @@ export default function GuestCamera() {
                                                       ) : (
                                                             <img src={capturedPhoto.url} className="w-full h-full object-cover" alt="Preview" />
                                                       )}
+
+                                                      {/* Media type badge */}
+                                                      <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-black/50 rounded-full px-3 py-1">
+                                                            {capturedPhoto.type === 'video' ? (
+                                                                  <>
+                                                                        <svg width="11" height="11" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                        <span className="text-white text-[10px] font-bold uppercase tracking-widest">Video</span>
+                                                                  </>
+                                                            ) : (
+                                                                  <>
+                                                                        <svg width="11" height="11" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                                                        <span className="text-white text-[10px] font-bold uppercase tracking-widest">Photo</span>
+                                                                  </>
+                                                            )}
+                                                      </div>
                                                 </div>
 
-                                                {/* Bottom panel — pinned above iOS browser bar */}
-                                                <div className="shrink-0 bg-black px-6 pt-5 pb-8" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
-                                                      <input
-                                                            type="text"
-                                                            value={guestName}
-                                                            onChange={(e) => setGuestName(e.target.value)}
-                                                            placeholder="Your name (optional)"
-                                                            className="w-full mb-4 bg-white/10 text-white rounded-full px-6 py-4 border border-white/20 outline-none text-base"
-                                                      />
+                                                {/* Bottom panel */}
+                                                <div
+                                                      className="shrink-0 px-5 pt-5"
+                                                      style={{ paddingBottom: 'max(1.75rem, env(safe-area-inset-bottom))', backgroundColor: '#0a0a0a' }}
+                                                >
+                                                      {/* Name input */}
+                                                      <div className="mb-3">
+                                                            <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Your name</p>
+                                                            <input
+                                                                  type="text"
+                                                                  value={guestName}
+                                                                  onChange={(e) => setGuestName(e.target.value)}
+                                                                  placeholder="Optional — so the host knows it's from you"
+                                                                  className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 outline-none border border-white/10 focus:border-white/30 transition-colors"
+                                                                  style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}
+                                                            />
+                                                      </div>
+
                                                       {uploadError && (
-                                                            <p className="text-red-400 text-sm text-center mb-3">{uploadError}</p>
+                                                            <p className="text-red-400 text-xs text-center mb-3">{uploadError}</p>
                                                       )}
-                                                      <div className="flex gap-3">
+
+                                                      {/* Action buttons */}
+                                                      <div className="flex gap-2.5">
                                                             <button
                                                                   onClick={() => { setCapturedPhoto(null); startCamera() }}
-                                                                  className="flex-1 py-4 bg-white/10 text-white rounded-full font-bold text-sm"
+                                                                  className="flex-none px-5 py-3.5 text-white/70 rounded-xl font-bold text-sm border border-white/15 transition-all"
+                                                                  style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
                                                             >
                                                                   Retake
                                                             </button>
                                                             <button
                                                                   onClick={handleUpload}
                                                                   disabled={uploadState === 'uploading'}
-                                                                  className="flex-1 py-4 text-white rounded-full font-bold text-sm disabled:opacity-60"
+                                                                  className="flex-1 py-3.5 text-white rounded-xl font-bold text-sm disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                                                                   style={{ backgroundColor: c?.accent }}
                                                             >
-                                                                  {uploadState === 'uploading'
-                                                                        ? 'Sending…'
-                                                                        : capturedPhoto.type === 'video'
-                                                                              ? 'Use Video'
-                                                                              : 'Use Photo'}
+                                                                  {uploadState === 'uploading' ? (
+                                                                        <>
+                                                                              <svg className="animate-spin" width="14" height="14" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
+                                                                              Sending…
+                                                                        </>
+                                                                  ) : capturedPhoto.type === 'video' ? (
+                                                                        <>
+                                                                              <svg width="14" height="14" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                              Send Video
+                                                                        </>
+                                                                  ) : (
+                                                                        <>
+                                                                              <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                                              Send Photo
+                                                                        </>
+                                                                  )}
                                                             </button>
                                                       </div>
                                                 </div>

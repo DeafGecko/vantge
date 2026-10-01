@@ -228,8 +228,84 @@ export default function PhotoManager({ eventId, status }) {
       )
 }
 
+function looksLikeVideo(url) {
+      if (!url) return false
+      return /\.(mp4|mov|webm|avi|mkv|3gp)(\?|$)/i.test(url)
+}
+
+function VideoLightbox({ photo, status, onApprove, onReject, onClose }) {
+      const [processing, setProcessing] = useState(false)
+
+      async function run(fn) {
+            setProcessing(true)
+            await fn()
+            onClose()
+      }
+
+      return (
+            <div className="fixed inset-0 z-50 flex flex-col bg-black" onClick={onClose}>
+                  {/* Video player */}
+                  <div className="flex-1 flex items-center justify-center relative" onClick={e => e.stopPropagation()}>
+                        <video
+                              src={photo.original_url}
+                              className="max-w-full max-h-full"
+                              controls
+                              autoPlay
+                              playsInline
+                        />
+                  </div>
+
+                  {/* Bottom panel */}
+                  <div className="shrink-0 px-5 py-5 border-t border-white/10" style={{ backgroundColor: '#0a0a0a', paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }} onClick={e => e.stopPropagation()}>
+                        {/* Meta */}
+                        <div className="flex items-center justify-between mb-4">
+                              <div>
+                                    <p className="text-white font-bold text-sm">{photo.guest_name || 'Anonymous'}</p>
+                                    <p className="text-white/40 text-xs mt-0.5">
+                                          {new Date(photo.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                                    </p>
+                              </div>
+                              <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center border border-white/15" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                                    <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                              </button>
+                        </div>
+
+                        {/* Actions */}
+                        {status === 0 && (
+                              <div className="flex gap-2.5">
+                                    <button
+                                          onClick={() => run(onReject)}
+                                          disabled={processing}
+                                          className="flex-1 flex items-center justify-center gap-1.5 py-3.5 rounded-xl font-bold text-sm border border-white/15 text-white/60 disabled:opacity-40 transition-all"
+                                          style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+                                    >
+                                          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                          Reject
+                                    </button>
+                                    <button
+                                          onClick={() => run(onApprove)}
+                                          disabled={processing}
+                                          className="flex-1 flex items-center justify-center gap-1.5 py-3.5 rounded-xl font-bold text-sm text-white disabled:opacity-40 transition-all"
+                                          style={{ backgroundColor: '#1A1A18' }}
+                                    >
+                                          {processing ? (
+                                                <svg className="animate-spin" width="14" height="14" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
+                                          ) : (
+                                                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                                          )}
+                                          Approve
+                                    </button>
+                              </div>
+                        )}
+                  </div>
+            </div>
+      )
+}
+
 function PhotoCard({ photo, status, onApprove, onReject, onRemoveFromGallery, onRestore, onDeleteForever }) {
       const [processing, setProcessing] = useState(false)
+      const [videoOpen, setVideoOpen] = useState(false)
+      const isVideo = photo.is_video || looksLikeVideo(photo.original_url)
 
       const uploadTime = new Date(photo.created_at).toLocaleString([], {
             month: 'short',
@@ -244,27 +320,65 @@ function PhotoCard({ photo, status, onApprove, onReject, onRemoveFromGallery, on
       }
 
       return (
+            <>
+            {videoOpen && (
+                  <VideoLightbox
+                        photo={photo}
+                        status={status}
+                        onApprove={onApprove}
+                        onReject={onReject}
+                        onClose={() => setVideoOpen(false)}
+                  />
+            )}
             <div className="bg-white rounded-2xl border border-[#E8E4DA] overflow-hidden shadow-sm group">
                   {/* Photo or Video */}
-                  <div className="aspect-[4/5] bg-[#F4F3F0] relative overflow-hidden">
+                  <div
+                        className={`aspect-[4/5] bg-[#F4F3F0] relative overflow-hidden${isVideo ? ' cursor-pointer' : ''}`}
+                        onClick={isVideo ? () => setVideoOpen(true) : undefined}
+                  >
                         {photo.is_video ? (
+                              <>
+                                    {photo.thumbnail_url ? (
+                                          <img
+                                                src={photo.thumbnail_url}
+                                                alt="Video thumbnail"
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                                                loading="lazy"
+                                          />
+                                    ) : (
+                                          <video
+                                                src={photo.original_url}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                                                muted
+                                                playsInline
+                                                preload="metadata"
+                                          />
+                                    )}
+                                    {/* Play button overlay */}
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/20 transition-all group-hover:bg-black/30">
+                                          <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-110" style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}>
+                                                <svg width="22" height="22" fill="white" viewBox="0 0 24 24" style={{ marginLeft: 3 }}><path d="M8 5v14l11-7z"/></svg>
+                                          </div>
+                                    </div>
+                                    {/* Video label */}
+                                    <div className="absolute top-2 left-2 bg-black/55 text-white text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">
+                                          Video · tap to preview
+                                    </div>
+                              </>
+                        ) : looksLikeVideo(photo.original_url) ? (
                               <>
                                     <video
                                           src={photo.original_url}
                                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                                          muted
-                                          playsInline
-                                          preload="metadata"
+                                          muted playsInline preload="metadata"
                                     />
-                                    {/* Play badge */}
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                          <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center">
-                                                <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/20 transition-all group-hover:bg-black/30">
+                                          <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-110" style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}>
+                                                <svg width="22" height="22" fill="white" viewBox="0 0 24 24" style={{ marginLeft: 3 }}><path d="M8 5v14l11-7z"/></svg>
                                           </div>
                                     </div>
-                                    {/* Video label */}
-                                    <div className="absolute top-2 left-2 bg-black/50 text-white text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">
-                                          Video
+                                    <div className="absolute top-2 left-2 bg-black/55 text-white text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">
+                                          Video · tap to preview
                                     </div>
                               </>
                         ) : (
@@ -356,6 +470,7 @@ function PhotoCard({ photo, status, onApprove, onReject, onRemoveFromGallery, on
                         )}
                   </div>
             </div>
+            </>
       )
 }
 
