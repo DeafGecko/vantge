@@ -522,33 +522,47 @@ function Toast({ toast, onUndo, onDismiss }) {
 function ConfirmDeleteModal({ photo, onConfirm, onCancel }) {
       return (
             <div
-                  className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+                  className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
                   onClick={onCancel}
             >
                   <div
-                        className="bg-white rounded-2xl max-w-sm w-full p-6"
+                        className="w-full max-w-sm rounded-3xl overflow-hidden"
+                        style={{ backgroundColor: '#1A1A18', border: '1px solid rgba(255,255,255,0.08)' }}
                         onClick={(e) => e.stopPropagation()}
                   >
-                        <h3 className="text-lg font-extrabold text-[#1A1A18] mb-2">
-                              Delete this photo forever?
-                        </h3>
-                        <p className="text-sm text-[#5A5A52] mb-1">
-                              This cannot be undone. The photo file will be permanently deleted.
-                        </p>
-                        <p className="text-xs text-[#88887E] mb-5">
-                              Guest: {photo.guest_name || 'Anonymous'}
-                        </p>
+                        {/* Icon + text */}
+                        <div className="px-6 pt-7 pb-5 text-center">
+                              <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: 'rgba(200,74,68,0.15)', border: '1px solid rgba(200,74,68,0.3)' }}>
+                                    <svg width="20" height="20" fill="none" stroke="#C84A44" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                                    </svg>
+                              </div>
+                              <h3 className="text-base font-extrabold text-white mb-1.5">
+                                    Delete {photo.is_video ? 'video' : 'photo'} forever?
+                              </h3>
+                              <p className="text-sm text-white/50 leading-relaxed">
+                                    This cannot be undone. The file will be permanently removed from storage.
+                              </p>
+                              {photo.guest_name && (
+                                    <p className="text-xs text-white/30 mt-2 font-bold uppercase tracking-widest">
+                                          From {photo.guest_name}
+                                    </p>
+                              )}
+                        </div>
 
-                        <div className="flex gap-2">
+                        {/* Buttons */}
+                        <div className="border-t border-white/[0.07] grid grid-cols-2">
                               <button
                                     onClick={onCancel}
-                                    className="flex-1 bg-[#F4F3F0] hover:bg-[#E8E5DC] text-[#1A1A18] border border-[#E0D8C6] font-medium rounded-full py-2.5 px-4 text-sm transition-colors"
+                                    className="py-4 text-sm font-bold text-white/50 hover:text-white transition-colors border-r border-white/[0.07]"
                               >
                                     Cancel
                               </button>
                               <button
                                     onClick={onConfirm}
-                                    className="flex-1 bg-[#C84A44] hover:bg-[#B43E39] text-white font-medium rounded-full py-2.5 px-4 text-sm transition-colors"
+                                    className="py-4 text-sm font-bold transition-colors"
+                                    style={{ color: '#C84A44' }}
                               >
                                     Delete forever
                               </button>
