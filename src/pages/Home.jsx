@@ -61,22 +61,6 @@ function useScrolled(px = 40) {
 ══════════════════════════════════════════════════════════════════ */
 export default function Home() {
   const [betaDismissed, setBetaDismissed] = useState(false)
-  const [notifyEmail, setNotifyEmail] = useState('')
-  const [notifySubmitted, setNotifySubmitted] = useState(false)
-  const [notifyLoading, setNotifyLoading] = useState(false)
-
-  async function handleNotify(e) {
-    e.preventDefault()
-    if (!notifyEmail.trim()) return
-    setNotifyLoading(true)
-    // Save to Supabase notify_list table (create if needed)
-    try {
-      const { supabase } = await import('../lib/supabase')
-      await supabase.from('notify_list').insert({ email: notifyEmail.trim() })
-    } catch (_) {}
-    setNotifyLoading(false)
-    setNotifySubmitted(true)
-  }
   const [mobileOpen, setMobileOpen] = useState(false)
   const scrolled = useScrolled()
 
@@ -118,13 +102,18 @@ export default function Home() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8" aria-label="Main navigation">
-            {['Features','Pricing','Examples','Resources'].map(item => (
+            {[
+              { label: 'Features', href: '#features' },
+              { label: 'How It Works', href: '#how-it-works' },
+              { label: 'Pricing', href: '#notify' },
+              { label: 'Contact', href: '#notify' },
+            ].map(item => (
               <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                className="text-sm text-[#6B6B63] hover:text-inktransition-colors duration-200"
+                key={item.label}
+                href={item.href}
+                className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200"
               >
-                {item}
+                {item.label}
               </a>
             ))}
           </nav>
@@ -157,14 +146,19 @@ export default function Home() {
 
         {mobileOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-[#F7F5F0] border-b border-[#E8E4DC] px-6 py-4 flex flex-col gap-4 shadow-lg">
-            {['Features','Pricing','Examples','Resources'].map(item => (
+            {[
+              { label: 'Features', href: '#features' },
+              { label: 'How It Works', href: '#how-it-works' },
+              { label: 'Pricing', href: '#notify' },
+              { label: 'Contact', href: '#notify' },
+            ].map(item => (
               <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
+                key={item.label}
+                href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className="text-sm text-[#6B6B63] hover:text-inktransition-colors"
+                className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors"
               >
-                {item}
+                {item.label}
               </a>
             ))}
             <div className="flex flex-col gap-2 pt-2 border-t border-[#E8E4DC]">
@@ -393,21 +387,21 @@ function TrustBar() {
     { emoji: '🏆', label: 'Sports' },
   ]
   return (
-    <div className="border-y border-[#E8E4DC]">
+    <aside aria-label="Trusted by event professionals" className="border-y border-[#E8E4DC]">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <p className="text-center text-xs font-semibold tracking-[0.16em] uppercase text-[#1A1A18]/40 mb-6">
           Trusted by Event Professionals
         </p>
-        <div className="flex flex-wrap justify-center gap-8 md:gap-12">
+        <ul className="flex flex-wrap justify-center gap-8 md:gap-12 list-none p-0 m-0">
           {items.map(({ emoji, label }) => (
-            <div key={label} className="flex items-center gap-2 text-[#1A1A18]/40">
+            <li key={label} className="flex items-center gap-2 text-[#1A1A18]/40">
               <span className="text-xl" role="img" aria-label={label}>{emoji}</span>
               <span className="text-sm font-medium">{label}</span>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
-    </div>
+    </aside>
   )
 }
 
@@ -420,7 +414,7 @@ function HowItWorks() {
     { num: '03', title: 'Relive the moments', desc: 'View, manage, and download all photos in one place.' },
   ]
   return (
-    <section className="max-w-7xl mx-auto px-6 py-24 md:py-32">
+    <section id="how-it-works" className="max-w-7xl mx-auto px-6 py-24 md:py-32">
       <div className="grid md:grid-cols-2 gap-16 items-center" ref={sectionRef}>
 
         {/* Left: browser mock */}
@@ -517,22 +511,22 @@ function HowItWorks() {
           >
             Create. Share.<br />Enjoy.
           </h2>
-          <div className="space-y-8">
+          <ol className="space-y-8 list-none p-0 m-0">
             {steps.map((step, i) => (
-              <div
+              <li
                 key={step.num}
                 className={`flex gap-5 vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
               >
-                <div className="shrink-0 w-10 h-10 rounded-full bg-[#F0EDE6] border border-[#E8E4DC] flex items-center justify-center">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-[#F0EDE6] border border-[#E8E4DC] flex items-center justify-center" aria-hidden="true">
                   <span className="text-xs font-bold text-[#B29746]">{step.num}</span>
                 </div>
                 <div>
-                  <div className="font-semibold text-ink mb-1">{step.title}</div>
-                  <div className="text-sm text-[#6B6B63] leading-relaxed">{step.desc}</div>
+                  <p className="font-semibold text-[#1A1A18] mb-1">{step.title}</p>
+                  <p className="text-sm text-[#6B6B63] leading-relaxed">{step.desc}</p>
                 </div>
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
 
       </div>
