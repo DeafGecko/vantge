@@ -34,7 +34,7 @@ const categoryLabels = {
 }
 
 export default function HostDashboard() {
-      const { signOut } = useAuth()
+      const { user, signOut } = useAuth()
       const navigate = useNavigate()
       const { event, loading: eventLoading } = useHostEvent()
       const [toggling, setToggling] = useState(false)
@@ -116,14 +116,14 @@ export default function HostDashboard() {
             </div>
       )
 
-      if (!event) return (
-            <>
-                  <FontLoader fontId={currentFontId} />
-                  <div className="min-h-screen bg-[#F7F5F0] p-6 text-center">
-                        <p className="text-sm text-[#5A5A52]">No event found.</p>
-                  </div>
-            </>
-      )
+      if (!user) {
+            navigate('/login', { replace: true })
+            return null
+      }
+
+      if (!event) return <CreateEventOnboarding onCreated={() => window.location.reload()} signOut={async () => { await signOut(); navigate('/login') }} />
+
+
 
       function scrollToPhotos() {
             setActiveTab(0)
@@ -588,6 +588,76 @@ function QRCodeSection({ eventSlug }) {
                   >
                         Download QR PNG
                   </button>
+            </div>
+      )
+}
+
+function CreateEventOnboarding({ onCreated, signOut }) {
+      const { user } = useAuth()
+      const [eventName, setEventName] = useState('')
+      const [saving, setSaving] = useState(false)
+      const [error, setError] = useState(null)
+
+      async function handleCreate(e) {
+            e.preventDefault()
+            const name = eventName.trim()
+            if (!name) return
+            setSaving(true)
+            setError(null)
+            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '-' + Math.random().toString(36).slice(2, 7)
+            const { error: insertError } = await supabase
+                  .from('events')
+                  .insert({
+                        host_id: user.id,
+                        event_name: name,
+                        slug,
+                        gallery_unlocked: false,
+                        theme: 'warm_editorial',
+                        font_family: DEFAULT_FONT_ID,
+                        event_type: DEFAULT_EVENT_TYPE_ID,
+                  })
+            if (insertError) {
+                  setError(insertError.message)
+                  setSaving(false)
+                  return
+            }
+            onCreated()
+      }
+
+      return (
+            <div className="min-h-screen bg-[#0E0E0C] flex flex-col items-center justify-center px-6">
+                  <div className="w-full max-w-sm">
+                        <div className="mb-8 text-center">
+                              <VantgeLogo className="h-7 mx-auto mb-6" variant="dark" />
+                              <h1 className="text-white text-2xl font-semibold tracking-tight mb-1">Create your event</h1>
+                              <p className="text-white/50 text-sm">Give your event a name to get started.</p>
+                        </div>
+                        <form onSubmit={handleCreate} className="flex flex-col gap-3">
+                              <input
+                                    type="text"
+                                    placeholder="e.g. Sarah &amp; James Wedding"
+                                    value={eventName}
+                                    onChange={e => setEventName(e.target.value)}
+                                    maxLength={80}
+                                    required
+                                    className="w-full bg-white/[0.07] border border-white/12 text-white placeholder-white/30 rounded-xl px-4 py-3 text-sm outline-none focus:border-white/30"
+                              />
+                              {error && <p className="text-red-400 text-xs">{error}</p>}
+                              <button
+                                    type="submit"
+                                    disabled={saving || !eventName.trim()}
+                                    className="w-full bg-white text-[#0E0E0C] font-semibold rounded-xl py-3 text-sm transition-opacity disabled:opacity-40"
+                              >
+                                    {saving ? 'Creating…' : 'Create Event'}
+                              </button>
+                        </form>
+                        <button
+                              onClick={signOut}
+                              className="mt-6 w-full text-white/30 text-xs text-center hover:text-white/50 transition-colors"
+                        >
+                              Sign out
+                        </button>
+                  </div>
             </div>
       )
 }

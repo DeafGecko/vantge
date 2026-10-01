@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import VantgeLogo from '../components/VantgeLogo'
 
@@ -12,16 +12,19 @@ const HERO_PHOTOS = [
 
 export default function HostLogin() {
       const navigate = useNavigate()
-      const { user, loading: authLoading, signIn, signInWithGoogle } = useAuth()
+      const { user, loading: authLoading, signIn, signInWithGoogle, signOut } = useAuth()
       const [email, setEmail] = useState('')
       const [password, setPassword] = useState('')
       const [submitting, setSubmitting] = useState(false)
       const [error, setError] = useState(null)
       const [showPassword, setShowPassword] = useState(false)
       const [googleLoading, setGoogleLoading] = useState(false)
+      const [signingOut, setSigningOut] = useState(false)
 
-      if (!authLoading && user) {
-            return <Navigate to="/dashboard" replace />
+      async function handleSignOut() {
+            setSigningOut(true)
+            await signOut()
+            setSigningOut(false)
       }
 
       async function handleSubmit(e) {
@@ -36,6 +39,29 @@ export default function HostLogin() {
                   navigate('/dashboard')
             }
       }
+
+      if (!authLoading && user) return (
+            <div className="min-h-screen bg-[#0E0E0C] flex flex-col items-center justify-center px-5">
+                  <div className="w-full max-w-sm text-center">
+                        <VantgeLogo size="lg" variant="dark" className="mx-auto mb-8" />
+                        <p className="text-white/60 text-sm mb-1">You're already signed in as</p>
+                        <p className="text-white font-semibold text-sm mb-8 truncate">{user.email}</p>
+                        <button
+                              onClick={() => navigate('/dashboard')}
+                              className="w-full bg-white text-[#1A1A18] font-bold rounded-xl py-3.5 text-sm mb-3 transition-opacity hover:opacity-90"
+                        >
+                              Go to Dashboard
+                        </button>
+                        <button
+                              onClick={handleSignOut}
+                              disabled={signingOut}
+                              className="w-full bg-white/[0.07] border border-white/10 text-white/60 hover:text-white font-semibold rounded-xl py-3.5 text-sm transition-all disabled:opacity-40"
+                        >
+                              {signingOut ? 'Signing out…' : 'Sign out'}
+                        </button>
+                  </div>
+            </div>
+      )
 
       return (
             <div className="min-h-screen bg-[#0E0E0C] flex flex-col items-center justify-center px-5 py-12 relative overflow-hidden">
