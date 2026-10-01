@@ -119,15 +119,16 @@ export default function Home() {
               {/* Pricing text with handwritten scribble over it */}
               <span className="relative">
                 Pricing
-                {/* Hand-drawn scribble SVG */}
-                <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" viewBox="0 0 54 16" preserveAspectRatio="none" aria-hidden="true">
-                  <path d="M2,9 C8,5 16,13 24,8 C32,3 40,12 52,7" stroke="#C0392B" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"
-                    style={{ filter: 'url(#handwriting)' }}
-                    pathLength="1" strokeDasharray="1" strokeDashoffset="0" />
+                {/* Hand-drawn messy strikethrough */}
+                <svg className="absolute overflow-visible pointer-events-none" aria-hidden="true"
+                  style={{ top: '48%', left: '-4px', width: 'calc(100% + 8px)', height: '14px' }}
+                  viewBox="0 0 60 14" preserveAspectRatio="none">
+                  <path d="M1,8 C5,4 9,11 15,7 C20,4 25,10 31,6 C37,3 42,9 48,6 C52,4 56,8 59,6"
+                    stroke="#C0392B" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
               {/* Cursive "Beta" label below */}
-              <span className="text-[#C0392B] leading-none" style={{ fontFamily: "'Caveat', 'Dancing Script', cursive", fontSize: '13px', marginTop: '-1px' }}>Beta</span>
+              <span className="text-[#C0392B] leading-none" style={{ fontFamily: "'Caveat', cursive", fontSize: '16px', marginTop: '1px' }}>Beta</span>
             </a>
             <a href="#notify" className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200">
               Contact
