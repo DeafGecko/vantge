@@ -334,6 +334,14 @@ function NotifyForm({ dark = false, className = '' }) {
       const { supabase } = await import('../lib/supabase')
       await supabase.from('notify_list').insert({ email: email.trim() })
     } catch { /* silent */ }
+    // Also notify via Formspree → forwards to dwirog@gmail.com
+    try {
+      await fetch('https://formspree.io/f/REPLACE_WITH_YOUR_ID', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ email: email.trim(), _subject: 'New Vantge signup notification' }),
+      })
+    } catch { /* silent */ }
     setLoading(false)
     setSubmitted(true)
   }
@@ -390,7 +398,7 @@ function TrustBar() {
     <aside aria-label="Trusted by event professionals" className="border-y border-[#E8E4DC]">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <p className="text-center text-xs font-semibold tracking-[0.16em] uppercase text-[#1A1A18]/40 mb-6">
-          Trusted by Event Professionals
+          Perfect for every occasion
         </p>
         <ul className="flex flex-wrap justify-center gap-8 md:gap-12 list-none p-0 m-0">
           {items.map(({ emoji, label }) => (
