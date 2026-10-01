@@ -372,8 +372,17 @@ export default function HostDashboard() {
                                                 </div>
                                           </div>
 
-                                          {/* Host uploader */}
-                                          <HostUploader eventId={event.id} />
+                                          {/* Background photo */}
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+                                                <BackgroundUploader
+                                                      eventId={event.id}
+                                                      currentImageUrl={currentBgImage}
+                                                      currentPosition={currentBgPosition}
+                                                      currentTint={currentBgTint}
+                                                      accentColor={currentTheme.colors.accent}
+                                                      onSaved={(url, pos, tint) => { setLocalBgImage(url); setLocalBgPosition(pos); setLocalBgTint(tint) }}
+                                                />
+                                          </div>
 
                                           {/* Font + Color side by side */}
                                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -422,17 +431,8 @@ export default function HostDashboard() {
                                                 </div>
                                           </div>
 
-                                          {/* Background photo */}
-                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
-                                                <BackgroundUploader
-                                                      eventId={event.id}
-                                                      currentImageUrl={currentBgImage}
-                                                      currentPosition={currentBgPosition}
-                                                      currentTint={currentBgTint}
-                                                      accentColor={currentTheme.colors.accent}
-                                                      onSaved={(url, pos, tint) => { setLocalBgImage(url); setLocalBgPosition(pos); setLocalBgTint(tint) }}
-                                                />
-                                          </div>
+                                          {/* Host uploader */}
+                                          <HostUploader eventId={event.id} />
                                     </div>
                               </div>
 
