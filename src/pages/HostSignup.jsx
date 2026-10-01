@@ -66,7 +66,7 @@ export default function HostSignup() {
       <div className="relative z-10 w-full max-w-sm">
 
         <div className="flex flex-col items-center mb-10">
-          <VantgeLogo size="lg" variant="dark" />
+          <a href="/"><VantgeLogo size="lg" variant="dark" /></a>
           <p className="text-[11px] text-white/40 tracking-[0.2em] uppercase mt-2">Event Photo Sharing</p>
         </div>
 

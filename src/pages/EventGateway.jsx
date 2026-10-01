@@ -66,7 +66,7 @@ export default function EventGateway() {
 
                         {/* Top wordmark */}
                         <div className="flex justify-center pt-6 pb-2">
-                              <VantgeLogo size="sm" monoWhite />
+                              <a href="/"><VantgeLogo size="sm" monoWhite /></a>
                         </div>
 
                         {/* Spacer — pushes content to bottom */}

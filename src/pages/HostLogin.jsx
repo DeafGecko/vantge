@@ -43,7 +43,7 @@ export default function HostLogin() {
             <div className="min-h-screen bg-[#0E0E0C] flex flex-col items-center justify-center px-5">
                   <div style={{ width: '100%', maxWidth: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                         <div style={{ marginBottom: 40 }}>
-                              <VantgeLogo size="lg" variant="dark" />
+                              <a href="/"><VantgeLogo size="lg" variant="dark" /></a>
                         </div>
                         <p className="text-white/60 text-sm" style={{ marginBottom: 4 }}>You're already signed in as</p>
                         <p className="text-white font-semibold text-sm" style={{ marginBottom: 32, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
@@ -86,7 +86,7 @@ export default function HostLogin() {
 
                         {/* Brand mark */}
                         <div className="flex flex-col items-center mb-10">
-                              <VantgeLogo size="lg" variant="dark" />
+                              <a href="/"><VantgeLogo size="lg" variant="dark" /></a>
                               <p className="text-[11px] text-white/40 tracking-[0.2em] uppercase mt-2">Event Photo Sharing</p>
                         </div>
 

@@ -249,7 +249,7 @@ export default function GuestCamera() {
                         {/* Top bar with back button, event name, and controls ___________________________________________________*/}
                         {/* Brand logo */}
                         <div className="absolute top-0 left-0 right-0 z-30 pt-3 flex justify-center pointer-events-none">
-                              <VantgeLogo size="sm" monoWhite />
+                              <a href="/"><VantgeLogo size="sm" monoWhite /></a>
                         </div>
 
                         <div className="absolute top-0 left-0 right-0 z-30 p-6 flex items-center justify-between pointer-events-none">

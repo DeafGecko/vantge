@@ -157,7 +157,7 @@ export default function GuestUploader() {
 
                         <div className="relative z-10 min-h-screen flex flex-col">
                               <div className="flex justify-center pt-6 pb-2">
-                                    <VantgeLogo size="sm" monoWhite />
+                                    <a href="/"><VantgeLogo size="sm" monoWhite /></a>
                               </div>
                               <div className="flex-1" />
                               <div className="w-full max-w-md mx-auto px-5 flex flex-col items-center text-center" style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom))' }}>
@@ -259,7 +259,7 @@ export default function GuestUploader() {
                                     <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
                                     Back
                               </button>
-                              <VantgeLogo size="sm" monoWhite />
+                              <a href="/"><VantgeLogo size="sm" monoWhite /></a>
                               <div className="w-12" />
                         </div>
 
