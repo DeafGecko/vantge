@@ -72,7 +72,11 @@ export default function Gallery() {
             setDownloading(true)
             const targets = photos
                   .filter(p => selected.has(p.id))
-                  .map((p, i) => ({ url: getFullSizeUrl(p.original_url), name: `photo-${i + 1}.jpg` }))
+                  .map((p, i) => {
+                        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+                        const ext = p.is_video || looksLikeVideo(p.original_url) ? 'mp4' : 'jpg'
+                        return { url: getFullSizeUrl(p.original_url), name: `vantge-${date}-#${String(i + 1).padStart(3, '0')}.${ext}` }
+                  })
             await downloadZip(targets, event.event_slug)
             setDownloading(false)
       }
@@ -411,7 +415,8 @@ function Lightbox({ photos, initialIndex, accentColor, onClose }) {
             e.stopPropagation()
             setDlLoading(true)
             const ext = isVid ? 'mp4' : 'jpg'
-            await downloadSinglePhoto(photo.original_url, `${photo.guest_name || 'photo'}-${index + 1}.${ext}`)
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+            await downloadSinglePhoto(photo.original_url, `vantge-${date}-#${String(index + 1).padStart(3, '0')}.${ext}`)
             setDlLoading(false)
       }
 
