@@ -161,6 +161,7 @@ export default function HostDashboard() {
                                           <button
                                                 onClick={scrollToPhotos}
                                                 className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
+                                                aria-label={`Review pending photos${pendingCount > 0 ? ` (${pendingCount})` : ''}`}
                                                 title="Pending reviews"
                                           >
                                                 <Images size={18} className="text-white/70" />
@@ -173,6 +174,7 @@ export default function HostDashboard() {
 
                                           <button
                                                 onClick={async () => { await signOut(); navigate('/login') }}
+                                                aria-label="Sign out"
                                                 title="Sign out"
                                                 className="p-2 rounded-full hover:bg-white/10 transition-colors text-white/50 hover:text-white"
                                           >
@@ -182,7 +184,7 @@ export default function HostDashboard() {
 
                                     {/* Mobile burger */}
                                     <div className="relative md:hidden shrink-0">
-                                          <button onClick={() => setMenuOpen(o => !o)} className="relative p-2 rounded-full hover:bg-white/10 transition-colors text-white">
+                                          <button onClick={() => setMenuOpen(o => !o)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} className="relative p-2 rounded-full hover:bg-white/10 transition-colors text-white">
                                                 {menuOpen ? <X size={20} /> : <Menu size={20} />}
                                                 {!menuOpen && pendingCount > 0 && (
                                                       <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-[#C84A44] text-white text-[9px] font-bold flex items-center justify-center px-0.5">

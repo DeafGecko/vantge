@@ -249,6 +249,7 @@ export default function GuestCamera() {
                               {/* Back → event gateway (/:eventSlug) */}
                               <button
                                     onClick={() => navigate(`/${eventSlug}`)}
+                                    aria-label="Back to event"
                                     className="pointer-events-auto w-10 h-10 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-full text-white"
                               >
                                     <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
@@ -265,13 +266,15 @@ export default function GuestCamera() {
                               {/* Right-side controls: flash, grid toggle */}
                               <div className="flex gap-3 pointer-events-auto">
                                     {/* Flash toggle (placeholder, as browser APIs don't support controlling flash) */}
-                                    <button className="w-10 h-10 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-full text-white">
+                                    <button aria-label="Toggle flash" className="w-10 h-10 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-full text-white">
                                           <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
                                     </button>
 
                                     {/* Grid toggle */}
                                     <button
                                           onClick={() => setShowGrid(!showGrid)}
+                                          aria-label={showGrid ? 'Hide grid overlay' : 'Show grid overlay'}
+                                          aria-pressed={showGrid}
                                           className={`w-10 h-10 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-full ${showGrid ? 'text-red-500' : 'text-white'}`}
                                     >
                                           <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 9h18M3 15h18M9 3v18M15 3v18" /></svg>

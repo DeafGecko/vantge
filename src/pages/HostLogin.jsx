@@ -100,6 +100,7 @@ export default function HostLogin() {
                                                 <button
                                                       type="button"
                                                       onClick={() => setShowPassword(s => !s)}
+                                                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                                                       className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                                                       tabIndex={-1}
                                                 >

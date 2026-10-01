@@ -195,7 +195,7 @@ export default function PhotoManager({ eventId, status }) {
                         <h2 className="text-lg font-extrabold text-[#1A1A18]">
                               {status === 0 ? 'Pending approval' : status === 1 ? 'Live gallery' : 'Trash'}
                         </h2>
-                        <span className="text-xs text-[#C84A44] font-semibold tracking-wide uppercase">
+                        <span className="text-xs text-[#C84A44] font-semibold tracking-wide uppercase" aria-live="polite">
                               {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
                         </span>
                   </div>
@@ -243,7 +243,7 @@ function VideoLightbox({ photo, status, onApprove, onReject, onClose }) {
       }
 
       return (
-            <div className="fixed inset-0 z-50 flex flex-col bg-black" onClick={onClose}>
+            <div className="fixed inset-0 z-50 flex flex-col bg-black" role="dialog" aria-modal="true" aria-label="Video preview" onClick={onClose}>
                   {/* Video player */}
                   <div className="flex-1 flex items-center justify-center relative" onClick={e => e.stopPropagation()}>
                         <video
@@ -265,7 +265,7 @@ function VideoLightbox({ photo, status, onApprove, onReject, onClose }) {
                                           {new Date(photo.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                                     </p>
                               </div>
-                              <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center border border-white/15" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                              <button onClick={onClose} aria-label="Close video preview" className="w-8 h-8 rounded-full flex items-center justify-center border border-white/15" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
                                     <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
                               </button>
                         </div>
@@ -384,7 +384,7 @@ function PhotoCard({ photo, status, onApprove, onReject, onRemoveFromGallery, on
                         ) : (
                               <img
                                     src={getThumbnailUrl(photo.original_url)}
-                                    alt="Event photo"
+                                    alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'}
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                                     loading="lazy"
                                     onError={(e) => {
@@ -527,6 +527,9 @@ function ConfirmDeleteModal({ photo, onConfirm, onCancel }) {
                   onClick={onCancel}
             >
                   <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="delete-modal-title"
                         className="w-full max-w-sm rounded-3xl overflow-hidden"
                         style={{ backgroundColor: '#1A1A18', border: '1px solid rgba(255,255,255,0.08)' }}
                         onClick={(e) => e.stopPropagation()}
@@ -538,7 +541,7 @@ function ConfirmDeleteModal({ photo, onConfirm, onCancel }) {
                                           <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
                                     </svg>
                               </div>
-                              <h3 className="text-base font-extrabold text-white mb-1.5">
+                              <h3 id="delete-modal-title" className="text-base font-extrabold text-white mb-1.5">
                                     Delete {photo.is_video ? 'video' : 'photo'} forever?
                               </h3>
                               <p className="text-sm text-white/50 leading-relaxed">
