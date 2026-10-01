@@ -331,13 +331,10 @@ export default function Gallery() {
                                                             )}
                                                       </div>
 
-                                                      {/* Caption below image */}
+                                                      {/* Caption below image — guest name hidden from public */}
                                                       {photo.caption && (
                                                             <div className="w-full px-2 py-1.5 border-t border-white/[0.06]">
                                                                   <p className="text-white/70 text-[11px] leading-snug line-clamp-2">{photo.caption}</p>
-                                                                  {photo.guest_name && (
-                                                                        <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest mt-0.5">{photo.guest_name}</p>
-                                                                  )}
                                                             </div>
                                                       )}
                                                 </button>
@@ -482,15 +479,10 @@ function Lightbox({ photos, initialIndex, accentColor, onClose }) {
                         )}
                   </div>
 
-                  {/* Bottom — caption + guest name */}
-                  {(photo.caption || photo.guest_name) && (
+                  {/* Bottom — caption only, guest name hidden from public */}
+                  {photo.caption && (
                         <div className="shrink-0 px-5 py-3 border-t border-white/[0.07] text-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }} onClick={e => e.stopPropagation()}>
-                              {photo.caption && (
-                                    <p className="text-white/80 text-sm leading-snug mb-0.5">{photo.caption}</p>
-                              )}
-                              {photo.guest_name && (
-                                    <p className="text-white/35 text-[10px] font-bold uppercase tracking-widest">— {photo.guest_name}</p>
-                              )}
+                              <p className="text-white/80 text-sm leading-snug">{photo.caption}</p>
                         </div>
                   )}
             </div>

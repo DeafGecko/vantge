@@ -406,6 +406,10 @@ function PhotoCard({ photo, status, onApprove, onReject, onRemoveFromGallery, on
 
                   {/* Footer */}
                   <div className="px-3.5 py-3">
+                        {/* Caption */}
+                        {photo.caption && (
+                              <p className="text-xs text-[#1A1A18] leading-snug mb-2 line-clamp-2">"{photo.caption}"</p>
+                        )}
                         {/* Guest + time */}
                         <div className="flex items-center justify-between mb-3">
                               <p className="text-xs font-bold text-[#1A1A18] truncate mr-2">
