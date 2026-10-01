@@ -341,7 +341,7 @@ export default function HostDashboard() {
 
                                                 <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
                                                       <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Title Font</p>
-                                                      <div className="flex flex-col gap-2.5">
+                                                      <div className="flex flex-col gap-5">
                                                             {Object.entries(fontCategories).map(([catKey, fonts]) => (
                                                                   <div key={catKey}>
                                                                         <p className="text-[8px] font-bold text-[#C0BFB5] uppercase tracking-widest mb-1.5">
