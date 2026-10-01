@@ -341,24 +341,25 @@ export default function HostDashboard() {
 
                                                 <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
                                                       <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Title Font</p>
-                                                      <div className="flex flex-col gap-3">
+                                                      <div className="flex flex-col gap-2.5">
                                                             {Object.entries(fontCategories).map(([catKey, fonts]) => (
                                                                   <div key={catKey}>
-                                                                        <p className="text-[8px] font-bold text-[#C0BFB5] uppercase tracking-widest mb-2">
+                                                                        <p className="text-[8px] font-bold text-[#C0BFB5] uppercase tracking-widest mb-1.5">
                                                                               {categoryLabels[catKey]}
                                                                         </p>
-                                                                        <div className="flex flex-col gap-1.5">
+                                                                        <div className="grid grid-cols-3 gap-1.5">
                                                                               {fonts.map((font) => (
                                                                                     <button
                                                                                           key={font.id}
                                                                                           onClick={() => { setLocalFont(font.id); updateEventSettings({ font_family: font.id }) }}
-                                                                                          className={"w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all " +
+                                                                                          title={font.name}
+                                                                                          className={"flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-xl border transition-all " +
                                                                                                 (currentFontId === font.id
                                                                                                       ? "border-[#1A1A18] bg-[#1A1A18] text-white"
                                                                                                       : "border-[#E8E4DA] bg-[#FAFAF8] text-[#1A1A18] hover:border-[#1A1A18]")}
                                                                                     >
-                                                                                          <span className="text-[10px] font-bold uppercase tracking-widest text-current opacity-50 shrink-0">{font.name}</span>
-                                                                                          <span className="text-base leading-none" style={{ fontFamily: font.cssFamily }}>Aa</span>
+                                                                                          <span className="text-lg leading-none" style={{ fontFamily: font.cssFamily }}>Aa</span>
+                                                                                          <span className="text-[8px] font-bold uppercase tracking-wide text-current opacity-40 truncate w-full text-center">{font.name}</span>
                                                                                     </button>
                                                                               ))}
                                                                         </div>
