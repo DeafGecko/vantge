@@ -76,12 +76,12 @@ export default function Home() {
 
       {/* ── Beta banner ──────────────────────────────────────── */}
       {!betaDismissed && (
-        <div className="bg-inktext-white text-sm flex items-center justify-center gap-3 px-4 py-2.5 relative">
-          <span>🎉 Now in Beta — Free while we&apos;re getting started. No credit card required.</span>
+        <div className="bg-[#B29746] text-[#1A1A18] text-sm flex items-center justify-center gap-3 px-4 py-2.5 relative">
+          <span>Now in Beta — Free while we&apos;re getting started. No credit card required.</span>
           <button
             onClick={() => setBetaDismissed(true)}
             aria-label="Dismiss beta notice"
-            className="absolute right-4 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100 transition-opacity"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#1A1A18] opacity-60 hover:opacity-100 transition-opacity"
           >
             <X size={16} />
           </button>
