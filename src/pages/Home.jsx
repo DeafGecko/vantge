@@ -115,9 +115,19 @@ export default function Home() {
                 {item.label}
               </a>
             ))}
-            <a href="#notify" className="relative text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200">
-              <span className="line-through decoration-red-500 decoration-2">Pricing</span>
-              <span className="ml-1.5 text-red-500 font-semibold text-xs">Beta</span>
+            <a href="#notify" className="relative inline-flex flex-col items-center gap-0 text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200 group">
+              {/* Pricing text with handwritten scribble over it */}
+              <span className="relative">
+                Pricing
+                {/* Hand-drawn scribble SVG */}
+                <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" viewBox="0 0 54 16" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M2,9 C8,5 16,13 24,8 C32,3 40,12 52,7" stroke="#C0392B" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                    style={{ filter: 'url(#handwriting)' }}
+                    pathLength="1" strokeDasharray="1" strokeDashoffset="0" />
+                </svg>
+              </span>
+              {/* Cursive "Beta" label below */}
+              <span className="text-[#C0392B] leading-none" style={{ fontFamily: "'Caveat', 'Dancing Script', cursive", fontSize: '13px', marginTop: '-1px' }}>Beta</span>
             </a>
             <a href="#notify" className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200">
               Contact
