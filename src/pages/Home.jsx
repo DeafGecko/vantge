@@ -640,18 +640,18 @@ const FEATURES = [
   {
     icon: Camera, title: 'Instant Guest Uploads', large: true,
     desc: 'Guests share photos with no app install. Just scan and tap — works on any phone.',
-    bg: 'linear-gradient(135deg, #1A1A18 0%, #2D2D28 100%)',
-    iconBg: 'rgba(178,151,70,0.18)', iconColor: '#D4AF5A',
-    textColor: 'text-white', subColor: 'text-white/60',
-    accent: '#B29746',
+    photo: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=900&q=80',
+    overlay: 'rgba(15,13,10,0.58)',
+    iconBg: 'rgba(178,151,70,0.22)', iconColor: '#D4AF5A',
+    textColor: 'text-white', subColor: 'text-white/65',
   },
   {
     icon: QrCode, title: 'QR Code Sharing', large: true,
     desc: 'Print it, display it, text it. Guests scan to join with zero friction.',
-    bg: 'linear-gradient(135deg, #B29746 0%, #C9A84C 100%)',
-    iconBg: 'rgba(255,255,255,0.2)', iconColor: '#fff',
+    photo: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&q=80',
+    overlay: 'rgba(140,110,20,0.62)',
+    iconBg: 'rgba(255,255,255,0.22)', iconColor: '#fff',
     textColor: 'text-white', subColor: 'text-white/70',
-    accent: '#fff',
   },
   {
     icon: ImageIcon, title: 'Beautiful Galleries',
@@ -702,23 +702,25 @@ function FeaturesGrid() {
           return (
             <article
               key={f.title}
-              className={`relative overflow-hidden rounded-3xl p-8 vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
-              style={{ background: f.bg, boxShadow: '0 2px 24px rgba(0,0,0,0.10)' }}
+              className={`relative overflow-hidden rounded-3xl vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
+              style={{ minHeight: 260, boxShadow: '0 4px 32px rgba(0,0,0,0.18)' }}
             >
-              {/* Decorative blob */}
-              <div className="absolute -bottom-8 -right-8 w-40 h-40 rounded-full opacity-10 pointer-events-none"
-                style={{ background: f.accent || '#fff' }} />
-              <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full opacity-[0.06] pointer-events-none"
-                style={{ background: f.accent || '#fff' }} />
+              {/* Background photo */}
+              <img src={f.photo} alt="" aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy" />
+              {/* Overlay */}
+              <div className="absolute inset-0" style={{ background: f.overlay }} />
 
-              {/* Icon */}
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 relative"
-                style={{ backgroundColor: f.iconBg, boxShadow: `0 4px 16px ${f.iconBg}` }}>
-                <Icon size={26} color={f.iconColor} strokeWidth={1.8} />
+              {/* Content */}
+              <div className="relative z-10 p-8 h-full flex flex-col justify-end">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 backdrop-blur-sm"
+                  style={{ backgroundColor: f.iconBg, boxShadow: '0 2px 12px rgba(0,0,0,0.2)' }}>
+                  <Icon size={22} color={f.iconColor} strokeWidth={1.8} />
+                </div>
+                <h3 className={`font-bold text-2xl mb-2 ${f.textColor}`}>{f.title}</h3>
+                <p className={`leading-relaxed ${f.subColor}`}>{f.desc}</p>
               </div>
-
-              <h3 className={`font-bold text-2xl mb-3 ${f.textColor}`}>{f.title}</h3>
-              <p className={`leading-relaxed text-base ${f.subColor}`}>{f.desc}</p>
             </article>
           )
         })}
