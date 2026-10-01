@@ -489,28 +489,6 @@ function HowItWorks() {
             </div>
           </div>
 
-          {/* Floating phone */}
-          <div
-            className="relative -mt-8 ml-auto mr-6 w-28 bg-[#1A1A18] rounded-2xl border-4 border-[#1A1A18] shadow-2xl overflow-hidden"
-            style={{ height: '172px' }}
-          >
-            <div className="bg-[#F7F5F0] h-full rounded-xl p-2 flex flex-col gap-1.5">
-              <div className="text-center">
-                <div className="text-[7px] font-semibold text-[#1A1A18] leading-tight">Upload a Photo</div>
-                <div className="text-[6px] text-[#6B6B63]">Sarah &amp; James</div>
-              </div>
-              <div className="flex-1 rounded-lg overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1519741497674-611481863552?w=200&q=80"
-                  alt="Wedding photo preview"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="bg-[#1A1A18] rounded-md py-0.5 text-center">
-                <span className="text-[7px] font-semibold text-white">Share Photo</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Right: steps */}
