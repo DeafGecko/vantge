@@ -604,13 +604,12 @@ function CreateEventOnboarding({ onCreated, signOut }) {
             if (!name) return
             setSaving(true)
             setError(null)
-            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '-' + Math.random().toString(36).slice(2, 7)
             const { error: insertError } = await supabase
                   .from('events')
                   .insert({
                         host_id: user.id,
                         event_name: name,
-                        slug,
+                        event_slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '-' + Math.random().toString(36).slice(2, 7),
                         gallery_unlocked: false,
                         theme: 'warm_editorial',
                         font_family: DEFAULT_FONT_ID,
@@ -627,8 +626,8 @@ function CreateEventOnboarding({ onCreated, signOut }) {
       return (
             <div className="min-h-screen bg-[#0E0E0C] flex flex-col items-center justify-center px-6">
                   <div className="w-full max-w-sm">
-                        <div className="mb-8 text-center">
-                              <VantgeLogo className="h-7 mx-auto mb-6" variant="dark" />
+                        <div className="mb-10 flex flex-col items-center text-center">
+                              <VantgeLogo variant="dark" className="mb-8" />
                               <h1 className="text-white text-2xl font-semibold tracking-tight mb-1">Create your event</h1>
                               <p className="text-white/50 text-sm">Give your event a name to get started.</p>
                         </div>
