@@ -650,7 +650,7 @@ function Testimonial() {
           </div>
           <div className="text-left">
             <div className="font-semibold text-sm text-[#1A1A18]">Ashley R.</div>
-            <div className="text-xs text-[#6B6B63]">Wedding · October 2025</div>
+            <div className="text-xs text-[#6B6B63]">Wedding · September 2026</div>
           </div>
         </div>
       </div>
