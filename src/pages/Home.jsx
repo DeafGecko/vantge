@@ -504,7 +504,7 @@ function HowItWorks() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="bg-[#1A1A18] rounded-lg py-1 text-center">
+              <div className="bg-[#1A1A18] rounded-md py-0.5 text-center">
                 <span className="text-[7px] font-semibold text-white">Share Photo</span>
               </div>
             </div>
