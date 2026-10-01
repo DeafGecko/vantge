@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
-import { Images, LogOut, Menu, X } from 'lucide-react'
+import { Images, LogOut, Menu, X, Copy, Check as CheckIcon } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
@@ -553,6 +553,13 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
 function QRCodeSection({ eventSlug }) {
       const qrRef = useRef(null)
       const guestUrl = `${window.location.origin}/${eventSlug}`
+      const [copied, setCopied] = useState(false)
+
+      function copyLink() {
+            navigator.clipboard.writeText(guestUrl)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+      }
 
       function downloadQR() {
             const svg = qrRef.current?.querySelector('svg')
@@ -581,7 +588,14 @@ function QRCodeSection({ eventSlug }) {
                   <div ref={qrRef} className="bg-[#F7F5F0] p-4 rounded-2xl">
                         <QRCodeSVG value={guestUrl} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
                   </div>
-                  <p className="text-[10px] text-[#B0AFA5] break-all text-center leading-relaxed">{guestUrl}</p>
+                  <div className="w-full flex items-center gap-2 bg-[#F7F5F0] border border-[#E8E4DA] rounded-xl px-3 py-2.5">
+                        <a href={guestUrl} target="_blank" rel="noopener noreferrer" className="flex-1 text-[10px] text-[#6B6B63] truncate hover:text-[#1A1A18] transition-colors">
+                              {guestUrl}
+                        </a>
+                        <button onClick={copyLink} aria-label="Copy link" className="shrink-0 text-[#B0AFA5] hover:text-[#1A1A18] transition-colors">
+                              {copied ? <CheckIcon size={14} className="text-green-500" /> : <Copy size={14} />}
+                        </button>
+                  </div>
                   <button
                         onClick={downloadQR}
                         className="w-full bg-[#1A1A18] hover:bg-black text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-3 transition-all"
