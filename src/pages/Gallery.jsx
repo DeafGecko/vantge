@@ -373,6 +373,9 @@ export default function Gallery() {
                                     initialIndex={lightboxIndex}
                                     accentColor={accentColor}
                                     onClose={() => setLightboxIndex(null)}
+                                    allowDownloads={event.allow_downloads ?? true}
+                                    allowSharing={event.allow_sharing ?? true}
+                                    eventName={event.event_name}
                               />
                         )}
                   </div>
@@ -392,24 +395,28 @@ export default function Gallery() {
       )
 }
 
-function Lightbox({ photos, initialIndex, accentColor, onClose }) {
+function Lightbox({ photos, initialIndex, accentColor, onClose, allowDownloads, allowSharing, eventName }) {
       const [index, setIndex] = useState(initialIndex)
       const [dlLoading, setDlLoading] = useState(false)
+      const [shareMenuOpen, setShareMenuOpen] = useState(false)
+      const [linkCopied, setLinkCopied] = useState(false)
       const photo = photos[index]
       const isVid = photo.is_video || looksLikeVideo(photo.original_url)
+      const photoUrl = getFullSizeUrl(photo.original_url)
+      const hasNativeShare = typeof navigator !== 'undefined' && !!navigator.share
 
-      function next() { setIndex((i) => (i + 1) % photos.length) }
-      function prev() { setIndex((i) => (i - 1 + photos.length) % photos.length) }
+      function next() { setIndex((i) => (i + 1) % photos.length); setShareMenuOpen(false) }
+      function prev() { setIndex((i) => (i - 1 + photos.length) % photos.length); setShareMenuOpen(false) }
 
       useEffect(() => {
             function handleKey(e) {
-                  if (e.key === 'Escape') onClose()
+                  if (e.key === 'Escape') { if (shareMenuOpen) setShareMenuOpen(false); else onClose() }
                   if (e.key === 'ArrowRight') next()
                   if (e.key === 'ArrowLeft') prev()
             }
             window.addEventListener('keydown', handleKey)
             return () => window.removeEventListener('keydown', handleKey)
-      }, [index])
+      }, [index, shareMenuOpen])
 
       async function handleDownload(e) {
             e.stopPropagation()
@@ -420,14 +427,52 @@ function Lightbox({ photos, initialIndex, accentColor, onClose }) {
             setDlLoading(false)
       }
 
+      async function handleShare(e) {
+            e.stopPropagation()
+            if (hasNativeShare) {
+                  try {
+                        const shareData = {
+                              title: eventName || 'Vantge',
+                              text: `Check out this photo from ${eventName || 'the event'}`,
+                              url: photoUrl,
+                        }
+                        if (!isVid && navigator.canShare && navigator.canShare({ files: [] })) {
+                              try {
+                                    const res = await fetch(photoUrl)
+                                    const blob = await res.blob()
+                                    const file = new File([blob], `vantge-photo.jpg`, { type: blob.type })
+                                    if (navigator.canShare({ files: [file] })) {
+                                          await navigator.share({ files: [file], title: shareData.title, text: shareData.text })
+                                          return
+                                    }
+                              } catch { /* fall through to URL share */ }
+                        }
+                        await navigator.share(shareData)
+                  } catch (err) {
+                        if (err.name !== 'AbortError') setShareMenuOpen(true)
+                  }
+            } else {
+                  setShareMenuOpen(s => !s)
+            }
+      }
+
+      async function copyLink(e) {
+            e.stopPropagation()
+            await navigator.clipboard.writeText(photoUrl)
+            setLinkCopied(true)
+            setTimeout(() => { setLinkCopied(false); setShareMenuOpen(false) }, 2000)
+      }
+
+      const btnStyle = { backgroundColor: 'rgba(255,255,255,0.10)' }
+
       return (
-            <div className="fixed inset-0 z-50 bg-black flex flex-col" onClick={onClose}>
+            <div className="fixed inset-0 z-50 bg-black flex flex-col" onClick={() => shareMenuOpen ? setShareMenuOpen(false) : onClose()}>
 
                   {/* Top bar */}
-                  <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/[0.07]" style={{ backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)' }} onClick={e => e.stopPropagation()}>
+                  <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/[0.07]" style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-3">
-                              <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-full flex items-center justify-center border border-white/15 text-white/60 hover:text-white transition-colors" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
-                                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                              <button onClick={onClose} aria-label="Back to gallery" className="w-8 h-8 rounded-full flex items-center justify-center border border-white/15 text-white/60 hover:text-white transition-colors" style={btnStyle}>
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
                               </button>
                               <p className="text-white/40 text-xs font-bold">{index + 1} / {photos.length}</p>
                         </div>
@@ -439,69 +484,118 @@ function Lightbox({ photos, initialIndex, accentColor, onClose }) {
                                           Video
                                     </span>
                               )}
-                              <button
-                                    onClick={handleDownload}
-                                    disabled={dlLoading}
-                                    className="flex items-center gap-1.5 text-white font-bold text-xs px-3.5 py-2 rounded-full border border-white/15 transition-all disabled:opacity-40 active:scale-95"
-                                    style={{ backgroundColor: 'rgba(255,255,255,0.10)' }}
-                              >
-                                    {dlLoading ? (
-                                          <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
-                                    ) : (
-                                          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round"/><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round"/><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round"/></svg>
-                                    )}
-                                    Download
-                              </button>
+                              {allowSharing && (
+                                    <div className="relative">
+                                          <button
+                                                onClick={handleShare}
+                                                aria-label="Share photo"
+                                                className="flex items-center gap-1.5 text-white font-bold text-xs px-3.5 py-2 rounded-full border border-white/15 transition-all active:scale-95"
+                                                style={btnStyle}
+                                          >
+                                                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                                                      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                                                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                                                </svg>
+                                                Share
+                                          </button>
+                                          {/* Desktop share menu */}
+                                          {shareMenuOpen && (
+                                                <div className="absolute right-0 top-full mt-2 w-44 rounded-2xl border border-white/10 overflow-hidden shadow-2xl z-10" style={{ backgroundColor: 'rgba(20,20,18,0.97)', backdropFilter: 'blur(20px)' }} onClick={e => e.stopPropagation()}>
+                                                      <button onClick={copyLink} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-colors text-left">
+                                                            {linkCopied
+                                                                  ? <><svg width="14" height="14" fill="none" stroke="#22c55e" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg><span className="text-green-400 font-semibold">Link copied!</span></>
+                                                                  : <><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy Link</>
+                                                            }
+                                                      </button>
+                                                      <div className="h-px bg-white/[0.06]" />
+                                                      <a href={`mailto:?subject=${encodeURIComponent(eventName || 'Vantge Photo')}&body=${encodeURIComponent(photoUrl)}`} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-colors" onClick={e => e.stopPropagation()}>
+                                                            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                                            Email
+                                                      </a>
+                                                      {allowDownloads && (
+                                                            <>
+                                                                  <div className="h-px bg-white/[0.06]" />
+                                                                  <button onClick={handleDownload} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-colors text-left">
+                                                                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                                                        Download
+                                                                  </button>
+                                                            </>
+                                                      )}
+                                                </div>
+                                          )}
+                                    </div>
+                              )}
+                              {allowDownloads && (
+                                    <button
+                                          onClick={handleDownload}
+                                          disabled={dlLoading}
+                                          aria-label="Download photo"
+                                          className="flex items-center gap-1.5 text-white font-bold text-xs px-3.5 py-2 rounded-full border border-white/15 transition-all disabled:opacity-40 active:scale-95"
+                                          style={btnStyle}
+                                    >
+                                          {dlLoading ? (
+                                                <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
+                                          ) : (
+                                                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round"/><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round"/><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round"/></svg>
+                                          )}
+                                          Save
+                                    </button>
+                              )}
                         </div>
                   </div>
 
                   {/* Media */}
                   <div className="flex-1 flex items-center justify-center relative overflow-hidden" onClick={e => e.stopPropagation()}>
                         {isVid ? (
-                              <video
-                                    key={photo.id}
-                                    src={photo.original_url}
-                                    controls autoPlay playsInline
-                                    className="max-w-full max-h-full"
-                              />
+                              <video key={photo.id} src={photo.original_url} controls autoPlay playsInline className="max-w-full max-h-full" />
                         ) : (
-                              <img
-                                    key={photo.id}
-                                    src={getFullSizeUrl(photo.original_url)}
-                                    alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'}
-                                    className="max-w-full max-h-full object-contain"
-                              />
+                              <img key={photo.id} src={photoUrl} alt={photo.guest_name ? `Photo by ${photo.guest_name}` : 'Event photo'} className="max-w-full max-h-full object-contain" />
                         )}
 
                         {/* Prev / Next */}
                         {photos.length > 1 && (
                               <>
-                                    <button
-                                          onClick={(e) => { e.stopPropagation(); prev() }}
-                                          aria-label="Previous"
-                                          className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all active:scale-90"
-                                          style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}
-                                    >
+                                    <button onClick={(e) => { e.stopPropagation(); prev() }} aria-label="Previous photo" className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all active:scale-90" style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}>
                                           <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                     </button>
-                                    <button
-                                          onClick={(e) => { e.stopPropagation(); next() }}
-                                          aria-label="Next"
-                                          className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all active:scale-90"
-                                          style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}
-                                    >
+                                    <button onClick={(e) => { e.stopPropagation(); next() }} aria-label="Next photo" className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all active:scale-90" style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}>
                                           <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                     </button>
                               </>
                         )}
                   </div>
 
-                  {/* Bottom — caption only, guest name hidden from public */}
-                  {photo.caption && (
-                        <div className="shrink-0 px-5 py-3 border-t border-white/[0.07] text-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }} onClick={e => e.stopPropagation()}>
-                              <p className="text-white/80 text-sm leading-snug">{photo.caption}</p>
-                        </div>
-                  )}
+                  {/* Bottom — caption + mobile share/save row */}
+                  <div className="shrink-0" style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)' }} onClick={e => e.stopPropagation()}>
+                        {photo.caption && (
+                              <div className="px-5 pt-3 pb-1 border-t border-white/[0.07] text-center">
+                                    <p className="text-white/70 text-sm leading-snug">{photo.caption}</p>
+                              </div>
+                        )}
+                        {/* Mobile action row — easy thumb reach */}
+                        {(allowDownloads || allowSharing) && (
+                              <div className="flex gap-3 px-5 py-4 border-t border-white/[0.07]" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+                                    {allowSharing && (
+                                          <button onClick={handleShare} aria-label="Share photo" className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-white/15 text-white font-bold text-sm transition-all active:scale-95" style={btnStyle}>
+                                                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                                                      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                                                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                                                </svg>
+                                                Share
+                                          </button>
+                                    )}
+                                    {allowDownloads && (
+                                          <button onClick={handleDownload} disabled={dlLoading} aria-label="Download photo" className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-white/15 text-white font-bold text-sm transition-all disabled:opacity-40 active:scale-95" style={btnStyle}>
+                                                {dlLoading
+                                                      ? <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg>
+                                                      : <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round"/><polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round"/><line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round"/></svg>
+                                                }
+                                                Save
+                                          </button>
+                                    )}
+                              </div>
+                        )}
+                  </div>
             </div>
       )
 }

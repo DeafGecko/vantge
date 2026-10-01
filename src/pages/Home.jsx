@@ -252,6 +252,18 @@ export default function Home() {
         {/* ══ TRUST BAR ══════════════════════════════════════ */}
         <TrustBar />
 
+        {/* ══ TAGLINE ════════════════════════════════════════ */}
+        <div className="bg-[#1A1A18] py-16 px-6 text-center">
+          <p
+            className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight max-w-3xl mx-auto"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            Your event.{' '}
+            <span className="text-[#B29746]">Everyone's photos.</span>
+            <br />One beautiful place.
+          </p>
+        </div>
+
         {/* ══ HOW IT WORKS ═══════════════════════════════════ */}
         <HowItWorks />
 

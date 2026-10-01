@@ -54,7 +54,23 @@ export default function HostDashboard() {
       const [localBgTint, setLocalBgTint] = useState(null)
       const [localEventType, setLocalEventType] = useState(null)
       const [localLogoUrl, setLocalLogoUrl] = useState(undefined)
+      const [localAllowDownloads, setLocalAllowDownloads] = useState(null)
+      const [localAllowSharing, setLocalAllowSharing] = useState(null)
       const photoSectionRef = useRef(null)
+
+      const allowDownloads = localAllowDownloads !== null ? localAllowDownloads : (event?.allow_downloads ?? true)
+      const allowSharing = localAllowSharing !== null ? localAllowSharing : (event?.allow_sharing ?? true)
+
+      async function toggleAllowDownloads() {
+            const newVal = !allowDownloads
+            setLocalAllowDownloads(newVal)
+            await updateEventSettings({ allow_downloads: newVal })
+      }
+      async function toggleAllowSharing() {
+            const newVal = !allowSharing
+            setLocalAllowSharing(newVal)
+            await updateEventSettings({ allow_sharing: newVal })
+      }
 
       const isUnlocked = localUnlocked !== null ? localUnlocked : event?.gallery_unlocked
       const currentThemeId = localTheme || event?.theme || 'warm_editorial'
@@ -260,6 +276,29 @@ export default function HostDashboard() {
 
                                           {/* QR code */}
                                           <QRCodeSection eventSlug={event.event_slug} />
+
+                                          {/* Guest Sharing controls */}
+                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col gap-3">
+                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Guest Sharing</p>
+                                                {[
+                                                      { label: 'Allow Downloads', sub: 'Guests can save photos', value: allowDownloads, toggle: toggleAllowDownloads },
+                                                      { label: 'Allow Sharing', sub: 'Guests can share photos', value: allowSharing, toggle: toggleAllowSharing },
+                                                ].map(({ label, sub, value, toggle }) => (
+                                                      <div key={label} className="flex items-center justify-between gap-3">
+                                                            <div>
+                                                                  <p className="text-sm font-semibold text-[#1A1A18]">{label}</p>
+                                                                  <p className="text-[11px] text-[#88887E]">{sub}</p>
+                                                            </div>
+                                                            <button
+                                                                  onClick={toggle}
+                                                                  aria-label={label}
+                                                                  className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-[#1A1A18]' : 'bg-[#E0D8C6]'}`}
+                                                            >
+                                                                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                            </button>
+                                                      </div>
+                                                ))}
+                                          </div>
                                     </div>
 
                                     {/* RIGHT — controls */}
