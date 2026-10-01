@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom'
 import VantgeLogo from '../components/VantgeLogo'
 import {
   Menu, X, ArrowRight, Camera, QrCode, LayoutDashboard,
-  Download, Users, ImageIcon, Check
+  Download, Users, ImageIcon, Check,
+  Heart, Building2, Music, Church, GraduationCap, Trophy
 } from 'lucide-react'
 
 /* Simple inline SVG social icons (lucide-react v1 doesn't ship Twitter/Instagram/Linkedin) */
@@ -392,12 +393,12 @@ function NotifyForm({ dark = false, className = '' }) {
 
 function TrustBar() {
   const items = [
-    { emoji: '💍', label: 'Weddings' },
-    { emoji: '🏢', label: 'Corporate' },
-    { emoji: '🎵', label: 'Concerts' },
-    { emoji: '⛪', label: 'Churches' },
-    { emoji: '🎓', label: 'Schools' },
-    { emoji: '🏆', label: 'Sports' },
+    { icon: Heart,         label: 'Weddings' },
+    { icon: Building2,     label: 'Corporate' },
+    { icon: Music,         label: 'Concerts' },
+    { icon: Church,        label: 'Churches' },
+    { icon: GraduationCap, label: 'Schools' },
+    { icon: Trophy,        label: 'Sports' },
   ]
   return (
     <aside aria-label="Trusted by event professionals" className="border-y border-[#E8E4DC]">
@@ -406,9 +407,9 @@ function TrustBar() {
           Perfect for every occasion
         </p>
         <ul className="flex flex-wrap justify-center gap-8 md:gap-12 list-none p-0 m-0">
-          {items.map(({ emoji, label }) => (
+          {items.map(({ icon: Icon, label }) => (
             <li key={label} className="flex items-center gap-2 text-[#1A1A18]/40">
-              <span className="text-xl" role="img" aria-label={label}>{emoji}</span>
+              <Icon size={18} aria-hidden="true" />
               <span className="text-sm font-medium">{label}</span>
             </li>
           ))}
