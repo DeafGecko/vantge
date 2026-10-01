@@ -637,12 +637,46 @@ function StoryCinematic() {
 
 /* ─── FEATURES GRID ───────────────────────────────────────────── */
 const FEATURES = [
-  { icon: Camera,          title: 'Instant Guest Uploads', desc: 'Guests share photos with no app install. Just scan and tap — works on any phone.',          large: true },
-  { icon: QrCode,          title: 'QR Code Sharing',       desc: 'Print it, display it, text it. Guests scan to join with zero friction.',                       large: true },
-  { icon: ImageIcon,       title: 'Beautiful Galleries',   desc: 'Curated, approved photo feeds your guests will actually want to browse.' },
-  { icon: LayoutDashboard, title: 'Host Dashboard',        desc: 'Full control over your event — approve photos, manage guests, view analytics.' },
-  { icon: Download,        title: 'Photo Downloads',       desc: 'Download your entire gallery as a ZIP in one click.' },
-  { icon: Users,           title: 'Guest Analytics',       desc: 'See who contributed what — photo counts per guest, upload timeline.' },
+  {
+    icon: Camera, title: 'Instant Guest Uploads', large: true,
+    desc: 'Guests share photos with no app install. Just scan and tap — works on any phone.',
+    bg: 'linear-gradient(135deg, #1A1A18 0%, #2D2D28 100%)',
+    iconBg: 'rgba(178,151,70,0.18)', iconColor: '#D4AF5A',
+    textColor: 'text-white', subColor: 'text-white/60',
+    accent: '#B29746',
+  },
+  {
+    icon: QrCode, title: 'QR Code Sharing', large: true,
+    desc: 'Print it, display it, text it. Guests scan to join with zero friction.',
+    bg: 'linear-gradient(135deg, #B29746 0%, #C9A84C 100%)',
+    iconBg: 'rgba(255,255,255,0.2)', iconColor: '#fff',
+    textColor: 'text-white', subColor: 'text-white/70',
+    accent: '#fff',
+  },
+  {
+    icon: ImageIcon, title: 'Beautiful Galleries',
+    desc: 'Curated, approved photo feeds your guests will actually want to browse.',
+    bg: '#fff', iconBg: '#FDF8EE', iconColor: '#B29746',
+    textColor: 'text-[#1A1A18]', subColor: 'text-[#6B6B63]',
+  },
+  {
+    icon: LayoutDashboard, title: 'Host Dashboard',
+    desc: 'Full control over your event — approve photos, manage guests, view analytics.',
+    bg: '#fff', iconBg: '#FDF8EE', iconColor: '#B29746',
+    textColor: 'text-[#1A1A18]', subColor: 'text-[#6B6B63]',
+  },
+  {
+    icon: Download, title: 'Photo Downloads',
+    desc: 'Download your entire gallery as a ZIP in one click.',
+    bg: '#fff', iconBg: '#FDF8EE', iconColor: '#B29746',
+    textColor: 'text-[#1A1A18]', subColor: 'text-[#6B6B63]',
+  },
+  {
+    icon: Users, title: 'Guest Analytics',
+    desc: 'See who contributed what — photo counts per guest, upload timeline.',
+    bg: '#fff', iconBg: '#FDF8EE', iconColor: '#B29746',
+    textColor: 'text-[#1A1A18]', subColor: 'text-[#6B6B63]',
+  },
 ]
 
 function FeaturesGrid() {
@@ -661,37 +695,59 @@ function FeaturesGrid() {
         </h2>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-5 mb-5">
+      {/* Large hero cards */}
+      <div className="grid md:grid-cols-2 gap-4 mb-4">
         {large.map((f, i) => {
           const Icon = f.icon
           return (
             <article
               key={f.title}
-              className={`vantge-feature-card bg-white rounded-[20px] border border-[#E8E4DC] p-8 vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
+              className={`relative overflow-hidden rounded-3xl p-8 vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
+              style={{ background: f.bg, boxShadow: '0 2px 24px rgba(0,0,0,0.10)' }}
             >
-              <div className="w-12 h-12 bg-[#F7F5F0] rounded-xl border border-[#E8E4DC] flex items-center justify-center mb-5">
-                <Icon size={22} className="text-[#B29746]" />
+              {/* Decorative blob */}
+              <div className="absolute -bottom-8 -right-8 w-40 h-40 rounded-full opacity-10 pointer-events-none"
+                style={{ background: f.accent || '#fff' }} />
+              <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full opacity-[0.06] pointer-events-none"
+                style={{ background: f.accent || '#fff' }} />
+
+              {/* Icon */}
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 relative"
+                style={{ backgroundColor: f.iconBg, boxShadow: `0 4px 16px ${f.iconBg}` }}>
+                <Icon size={26} color={f.iconColor} strokeWidth={1.8} />
               </div>
-              <h3 className="font-semibold text-xl text-ink
-               mb-2">{f.title}</h3>
-              <p className="text-[#6B6B63] leading-relaxed">{f.desc}</p>
+
+              <h3 className={`font-bold text-2xl mb-3 ${f.textColor}`}>{f.title}</h3>
+              <p className={`leading-relaxed text-base ${f.subColor}`}>{f.desc}</p>
             </article>
           )
         })}
       </div>
 
-      <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
+      {/* Small feature cards */}
+      <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
         {small.map((f, i) => {
           const Icon = f.icon
           return (
             <article
               key={f.title}
-              className={`vantge-feature-card bg-white rounded-2x1 border border-[#E8E4DC] p-6 vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
+              className={`group relative overflow-hidden rounded-2xl border border-[#E8E4DC] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
+              style={{ background: f.bg }}
             >
-              <div className="w-10 h-10 bg-[#F7F5F0] rounded-lg border border-[#E8E4DC] flex items-center justify-center mb-4">
-                <Icon size={18} className="text-[#B29746]" />
+              {/* Subtle hover glow */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
+                style={{ background: 'linear-gradient(135deg, rgba(178,151,70,0.04) 0%, transparent 60%)' }} />
+
+              {/* 3D-style icon */}
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 relative"
+                style={{
+                  background: 'linear-gradient(145deg, #FDF6E3 0%, #F7F0DC 100%)',
+                  boxShadow: '0 2px 0 #E8D99A, 0 4px 12px rgba(178,151,70,0.15)',
+                }}>
+                <Icon size={19} color="#B29746" strokeWidth={1.8} />
               </div>
-              <h3 className="font-semibold text-ink mb-1.5">{f.title}</h3>
+
+              <h3 className={`font-bold text-[#1A1A18] mb-1.5`}>{f.title}</h3>
               <p className="text-sm text-[#6B6B63] leading-relaxed">{f.desc}</p>
             </article>
           )
