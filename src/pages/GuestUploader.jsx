@@ -342,28 +342,28 @@ export default function GuestUploader() {
                                     </div>
                               )}
 
-                              {/* Caption input */}
+                              {/* Name input */}
                               <div className="mb-2.5">
-                                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Caption <span className="text-red-400">*</span></p>
+                                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Your name <span className="text-red-400">*</span></p>
                                     <input
                                           type="text"
-                                          value={caption}
-                                          onChange={(e) => setCaption(e.target.value)}
-                                          placeholder="Required — add a message to your photo"
-                                          maxLength={200}
+                                          value={guestName}
+                                          onChange={(e) => setGuestName(e.target.value)}
+                                          placeholder="Required — so the host knows it's from you"
                                           className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 outline-none border border-white/10 focus:border-white/30 transition-colors"
                                           style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}
                                     />
                               </div>
 
-                              {/* Name input */}
+                              {/* Caption input */}
                               <div className="mb-3">
-                                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Your name</p>
+                                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Caption</p>
                                     <input
                                           type="text"
-                                          value={guestName}
-                                          onChange={(e) => setGuestName(e.target.value)}
-                                          placeholder="Optional — so the host knows it's from you"
+                                          value={caption}
+                                          onChange={(e) => setCaption(e.target.value)}
+                                          placeholder="Optional — add a message to your photo"
+                                          maxLength={200}
                                           className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 outline-none border border-white/10 focus:border-white/30 transition-colors"
                                           style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}
                                     />
@@ -372,7 +372,7 @@ export default function GuestUploader() {
                               {/* Send button */}
                               <button
                                     onClick={files.length > 0 ? handleUpload : () => fileInputRef.current?.click()}
-                                    disabled={files.length > 0 && !caption.trim()}
+                                    disabled={files.length > 0 && !guestName.trim()}
                                     className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-50"
                                     style={{ backgroundColor: accentColor }}
                               >
