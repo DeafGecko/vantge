@@ -714,7 +714,7 @@ function SiteFooter() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-10 mb-12">
           <div>
-            <VantgeLogo size="md" variant="dark" />
+            <a href="#hero"><VantgeLogo size="md" variant="dark" /></a>
             <p className="text-white/50 text-sm mt-3">Event Photo Sharing</p>
           </div>
           {cols.map(col => (
