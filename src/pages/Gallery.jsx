@@ -623,25 +623,13 @@ export default function Gallery() {
       <FontLoader fontId={event.font_family} />
       <div className="min-h-screen bg-[#F8F5ED]">
 
-        {/* ── STICKY HEADER ── */}
-        <header className="sticky top-0 z-30 bg-[#F8F5ED]/95 backdrop-blur-md border-b border-[#E8E4DC]">
-          <div className="max-w-2xl mx-auto px-4 flex items-center justify-between" style={{ height: '52px' }}>
-
-            {/* Left: logo or cancel */}
-            {selectMode ? (
+        {/* ── SELECT MODE HEADER (only shown when selecting) ── */}
+        {selectMode && (
+          <header className="sticky top-0 z-30 bg-cream/95 backdrop-blur-md border-b border-[#E8E4DC]">
+            <div className="max-w-2xl mx-auto px-4 flex items-center justify-between" style={{ height: '52px' }}>
               <button onClick={() => { setSelectMode(false); setSelected(new Set()) }}
                 className="text-sm font-bold text-[#6B6B63] hover:text-ink transition-colors min-w-14">Cancel</button>
-            ) : (
-              <a href="/"><VantgeLogo size="sm" variant="light" /></a>
-            )}
-
-            {/* Center: selected count or nothing */}
-            {selectMode && (
               <p className="absolute left-1/2 -translate-x-1/2 text-sm font-bold text-ink">{selected.size} selected</p>
-            )}
-
-            {/* Right: actions or hamburger */}
-            {selectMode ? (
               <div className="flex items-center gap-3 min-w-14 justify-end">
                 {allowSharing && (
                   <button onClick={handleShareSelected} disabled={selected.size === 0}
@@ -657,17 +645,7 @@ export default function Gallery() {
                   </button>
                 )}
               </div>
-            ) : (
-              <button onClick={() => setSelectMode(true)} aria-label="Select photos"
-                className="p-1 text-ink hover:text-[#6B6B63] transition-colors">
-                <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24">
-                  <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {selectMode && (
+            </div>
             <div className="max-w-2xl mx-auto px-4 pb-2 flex items-center justify-between">
               <p className="text-xs text-[#9A9A8E]">{selected.size} of {photos.length} selected</p>
               <button onClick={() => setSelected(selected.size === photos.length ? new Set() : new Set(photos.map(p => p.id)))}
@@ -675,8 +653,8 @@ export default function Gallery() {
                 {selected.size === photos.length ? 'Deselect all' : 'Select all'}
               </button>
             </div>
-          )}
-        </header>
+          </header>
+        )}
 
         {/* ── EVENT HERO ── */}
         {!selectMode && (
