@@ -696,16 +696,16 @@ function SiteFooter() {
     {
       heading: 'Company',
       links: [
-        { label: 'About', href: '#' },
-        { label: 'Contact', href: '#' },
+        { label: 'About', comingSoon: true },
+        { label: 'Contact', href: '#notify' },
       ],
     },
     {
       heading: 'Resources',
       links: [
-        { label: 'Help Center', href: '#' },
-        { label: 'Privacy', href: '#' },
-        { label: 'Terms', href: '#' },
+        { label: 'Help Center', comingSoon: true },
+        { label: 'Privacy', comingSoon: true },
+        { label: 'Terms', comingSoon: true },
       ],
     },
   ]
@@ -725,9 +725,15 @@ function SiteFooter() {
               <ul className="space-y-2.5">
                 {col.links.map(link => (
                   <li key={link.label}>
-                    <a href={link.href} className="text-sm text-white/50 hover:text-white/90 transition-colors duration-200">
-                      {link.label}
-                    </a>
+                    {link.comingSoon ? (
+                      <span className="text-sm text-white/20 cursor-default select-none">
+                        {link.label}
+                      </span>
+                    ) : (
+                      <a href={link.href} className="text-sm text-white/50 hover:text-white/90 transition-colors duration-200">
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
