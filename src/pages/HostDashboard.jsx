@@ -181,7 +181,17 @@ export default function HostDashboard() {
                                                             ? "border-white/20 text-white/60 hover:border-white/40 hover:text-white"
                                                             : "bg-white text-[#1A1A18] border-white hover:bg-white/90")}
                                           >
-                                                {toggling ? "..." : isUnlocked ? "Close Gallery" : "Open Gallery"}
+                                                {toggling ? "..." : isUnlocked ? (
+                                                      <>
+                                                            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',marginRight:5,verticalAlign:'middle'}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                                                            Close Gallery
+                                                      </>
+                                                ) : (
+                                                      <>
+                                                            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',marginRight:5,verticalAlign:'middle'}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0117 0"/></svg>
+                                                            Open Gallery
+                                                      </>
+                                                )}
                                           </button>
 
                                           {/* Notification badge */}
@@ -228,7 +238,10 @@ export default function HostDashboard() {
                                                                   disabled={toggling}
                                                                   className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-[#1A1A18] hover:bg-[#F7F5F0] transition-colors border-b border-[#E8E4DA]"
                                                             >
-                                                                  <span className={"w-2 h-2 rounded-full shrink-0 " + (isUnlocked ? "bg-[#16A34A]" : "bg-[#B0AFA5]")} />
+                                                                  {isUnlocked
+                                                                        ? <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#16A34A]"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                                                                        : <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#B0AFA5]"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0117 0"/></svg>
+                                                                  }
                                                                   {toggling ? "Updating..." : isUnlocked ? "Close Gallery" : "Open Gallery"}
                                                             </button>
                                                             <button
