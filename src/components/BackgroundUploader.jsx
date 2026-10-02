@@ -205,23 +205,13 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
       return (
             <div>
                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Background Photo</p>
-                  <div className="grid grid-cols-2 gap-4 items-start">
-                        {/* Landscape — desktop */}
+                  {/* Mobile portrait first (smaller), then landscape desktop (wider) fills remaining space */}
+                  <div className="flex gap-4 items-start">
+                        {/* Portrait — mobile (fixed narrow width) */}
+                        <div className="shrink-0 w-[120px]">
                         <UploadZone
                               eventId={eventId}
-                              label="Landscape · Desktop"
-                              isLandscape={true}
-                              currentImageUrl={currentImageDesktopUrl}
-                              currentPosition={currentPosition}
-                              currentTint={currentTint}
-                              accentColor={accentColor}
-                              dbField="background_image_desktop"
-                              onSaved={onSavedDesktop}
-                        />
-                        {/* Portrait — mobile */}
-                        <UploadZone
-                              eventId={eventId}
-                              label="Portrait · Mobile"
+                              label="Mobile · Portrait"
                               isLandscape={false}
                               currentImageUrl={currentImageUrl}
                               currentPosition={currentPosition}
@@ -230,7 +220,23 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               dbField="background_image"
                               onSaved={onSaved}
                         />
+                        </div>
+                        {/* Landscape — desktop (fills rest) */}
+                        <div className="flex-1 min-w-0">
+                        <UploadZone
+                              eventId={eventId}
+                              label="Desktop · Landscape"
+                              isLandscape={true}
+                              currentImageUrl={currentImageDesktopUrl}
+                              currentPosition={currentPosition}
+                              currentTint={currentTint}
+                              accentColor={accentColor}
+                              dbField="background_image_desktop"
+                              onSaved={onSavedDesktop}
+                        />
+                        </div>
                   </div>
             </div>
       )
 }
+
