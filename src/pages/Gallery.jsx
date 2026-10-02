@@ -662,7 +662,14 @@ export default function Gallery() {
             <img src={bgImage} alt={event.event_name} className="w-full h-full object-cover"
               style={{ objectPosition: bgPosition }} loading="eager" />
             <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%)` }} />
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-6 text-center px-6">
+            <div className="absolute inset-0 flex flex-col items-center justify-between py-5 text-center px-6">
+              {/* Brand logo — top center, links to home */}
+              <a href="/" className="opacity-80 hover:opacity-100 transition-opacity">
+                <VantgeLogo size="sm" monoWhite />
+              </a>
+
+              {/* Event info — bottom */}
+              <div className="flex flex-col items-center">
               <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-white/60 mb-1">{eventType.tagline}</p>
               <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-1"
                 style={{ fontFamily: selectedFontFamily }}>{event.event_name}</h1>
@@ -674,6 +681,7 @@ export default function Gallery() {
               {event.welcome_message && (
                 <p className="text-white/70 text-sm mt-1 max-w-xs leading-relaxed">{event.welcome_message}</p>
               )}
+              </div>
             </div>
           </div>
         )}
