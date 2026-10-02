@@ -81,10 +81,7 @@ export default function LogoUploader({ eventId, currentLogoUrl, onSaved }) {
                               {uploading ? (
                                     <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B0AFA5" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25" /><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" /></svg>
                               ) : (
-                                    <>
-                                          <svg width="14" height="14" fill="none" stroke="#B0AFA5" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round" /><polyline points="17 8 12 3 7 8" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="3" x2="12" y2="15" strokeLinecap="round" /></svg>
-                                          <span className="text-[7px] text-[#B0AFA5] font-bold leading-none">Logo</span>
-                                    </>
+                                    <svg width="14" height="14" fill="none" stroke="#B0AFA5" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round" /><polyline points="17 8 12 3 7 8" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="3" x2="12" y2="15" strokeLinecap="round" /></svg>
                               )}
                         </button>
                   )}
