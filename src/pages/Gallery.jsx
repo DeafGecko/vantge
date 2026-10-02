@@ -670,18 +670,16 @@ export default function Gallery() {
         )}
 
         {/* ── BACK BUTTON ── */}
-        {!selectMode && (
-          <button
-            onClick={() => navigate(`/${eventSlug}`)}
-            className="fixed top-4 left-4 z-50 flex items-center gap-1.5 text-sm font-bold px-3 py-2 rounded-full shadow-lg"
-            style={{ background: '#1A1A18', color: '#fff' }}
-          >
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 5l-7 7 7 7" />
-            </svg>
-            Back
-          </button>
-        )}
+        <button
+          onClick={() => navigate(`/${eventSlug}`)}
+          className="fixed top-4 left-4 z-[150] flex items-center gap-1.5 text-sm font-bold px-3 py-2 rounded-full shadow-lg"
+          style={{ background: '#1A1A18', color: '#fff' }}
+        >
+          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
+          Back
+        </button>
 
         {/* ── EVENT HERO ── */}
         {!selectMode && (
