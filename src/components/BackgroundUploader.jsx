@@ -119,20 +119,20 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
       const previewW = isLandscape ? '100%' : 100
 
       if (editing && activeUrl) return (
-            <div>
+            <div className="w-full overflow-hidden">
                   <p className="text-[9px] text-[#88887E] mb-2">Drag to reposition.</p>
                   <div
                         ref={editorRef}
-                        className="relative rounded-2xl overflow-hidden border-2 border-[#1A1A18] select-none"
+                        className="relative rounded-2xl overflow-hidden border-2 border-[#1A1A18] select-none w-full"
                         style={{ height: previewH, cursor: dragging ? 'grabbing' : 'crosshair' }}
                         onMouseDown={onDragStart} onMouseMove={onDragMove} onMouseUp={onDragEnd} onMouseLeave={onDragEnd}
                         onTouchStart={onDragStart} onTouchMove={onDragMove} onTouchEnd={onDragEnd}
                   >
                         <img src={activeUrl} alt="Background" className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: position }} draggable={false} />
                         <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1">
-                              <p className="text-[9px] font-bold tracking-widest uppercase text-white/60">Your tagline</p>
-                              <p className="text-lg font-black text-white drop-shadow-lg">Event Name</p>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1 px-3">
+                              <p className="text-[8px] font-bold tracking-widest uppercase text-white/50">Your tagline</p>
+                              <p className="text-sm font-black text-white/70 text-center truncate w-full">Event Name</p>
                         </div>
                         <div className="absolute w-5 h-5 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2" style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: accentColor }} />
                   </div>
