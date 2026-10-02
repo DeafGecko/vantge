@@ -33,7 +33,7 @@ async function compressImage(file) {
 }
 
 // Thumbnail card shown in the side-by-side row
-function ZoneThumb({ label, isLandscape, imageUrl, defaultBg, currentTint, isActive, uploading, onUpload, onEdit }) {
+function ZoneThumb({ label, imageUrl, defaultBg, currentTint, isActive, uploading, onUpload, onEdit }) {
       const inputRef = useRef(null)
 
       async function handleFile(e) {
@@ -51,7 +51,7 @@ function ZoneThumb({ label, isLandscape, imageUrl, defaultBg, currentTint, isAct
                   <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
                   <div
                         className={`relative rounded-xl overflow-hidden border-2 w-full cursor-pointer group transition-colors ${isActive ? 'border-[#1A1A18]' : 'border-[#E8E4DA]'}`}
-                        style={{ aspectRatio: isLandscape ? '16/9' : '3/4' }}
+                        style={{ height: 220 }}
                         onClick={() => displayUrl ? onEdit() : inputRef.current?.click()}
                   >
                         {displayUrl ? (
@@ -86,7 +86,6 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       const [tint, setTint] = useState(currentTint ?? 55)
       const [pendingUrl, setPendingUrl] = useState(null)
       const [uploading, setUploading] = useState(false)
-      const [removing, setRemoving] = useState(false)
       const [dragging, setDragging] = useState(false)
       const [activeToolIndex, setActiveToolIndex] = useState(0)
       const editorRef = useRef(null)
@@ -142,12 +141,9 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       }
 
       async function handleRemove() {
-            setRemoving(true)
-            const fallback = null
-            const { error } = await supabase.from('events').update({ [dbField]: fallback }).eq('id', eventId)
+            const { error } = await supabase.from('events').update({ [dbField]: null }).eq('id', eventId)
             if (error) { alert('Could not remove: ' + error.message) }
-            else { onSaved(fallback, currentPosition, currentTint); onClose() }
-            setRemoving(false)
+            else { onSaved(null, currentPosition, currentTint); onClose() }
       }
 
       const tools = [
