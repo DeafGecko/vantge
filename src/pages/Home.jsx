@@ -722,13 +722,6 @@ function FeaturesGrid() {
 
               {/* Content */}
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                {/* Logo centered at top */}
-                <div className="absolute top-5 left-0 right-0 flex justify-center pointer-events-none">
-                  <a href="/" className="pointer-events-auto opacity-80 hover:opacity-100 transition-opacity">
-                    <VantgeLogo size="sm" monoWhite />
-                  </a>
-                </div>
-
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 backdrop-blur-sm"
                   style={{ backgroundColor: f.iconBg, boxShadow: '0 2px 12px rgba(0,0,0,0.2)' }}>
                   <Icon size={22} color={f.iconColor} strokeWidth={1.8} />
