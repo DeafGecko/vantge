@@ -595,23 +595,6 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
                   {/* Notch */}
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 w-14 h-4 bg-[#1A1A18] rounded-full z-20" />
 
-                  {/* Gallery status icon — top right */}
-                  <div className="absolute top-3 right-4 z-20 flex items-center gap-1">
-                        {isUnlocked ? (
-                              /* Open door */
-                              <svg width="14" height="14" fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                    <path d="M13 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2v-5" />
-                                    <path d="M13 4l5 2v6" />
-                                    <circle cx="18" cy="9" r="0" />
-                              </svg>
-                        ) : (
-                              /* Closed lock */
-                              <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                                    <path d="M7 11V7a5 5 0 0110 0v4" />
-                              </svg>
-                        )}
-                  </div>
 
                   <div
                         className="absolute inset-0 flex flex-col justify-end"
