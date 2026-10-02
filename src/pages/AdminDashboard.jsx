@@ -497,12 +497,18 @@ function UsersTab() {
     fetchUsers()
   }
 
+  async function reject(id) {
+    await supabase.from('profiles').delete().eq('id', id)
+    await supabase.auth.admin?.deleteUser(id)
+    fetchUsers()
+  }
+
   const pending  = users.filter(u => !u.approved)
   const approved = users.filter(u => u.approved)
 
   if (loading) return <div className="flex justify-center py-10"><svg className="animate-spin w-5 h-5 text-white/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg></div>
 
-  function UserRow({ u, onApprove, onRevoke }) {
+  function UserRow({ u, onApprove, onReject, onRevoke }) {
     return (
       <div className="bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-3 flex items-center justify-between gap-4">
         <div className="min-w-0">
@@ -513,6 +519,11 @@ function UsersTab() {
           {onApprove && (
             <button onClick={() => onApprove(u.id)} className="px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-300 text-xs font-bold hover:bg-emerald-500/30 transition-colors">
               Approve
+            </button>
+          )}
+          {onReject && (
+            <button onClick={() => onReject(u.id)} className="px-3 py-1.5 rounded-lg bg-red-500/15 text-red-300 text-xs font-bold hover:bg-red-500/30 transition-colors">
+              Reject
             </button>
           )}
           {onRevoke && (
@@ -537,7 +548,7 @@ function UsersTab() {
         <div>
           <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-3">Awaiting Approval ({pending.length})</h2>
           <div className="space-y-2">
-            {pending.map(u => <UserRow key={u.id} u={u} onApprove={approve} />)}
+            {pending.map(u => <UserRow key={u.id} u={u} onApprove={approve} onReject={reject} />)}
           </div>
         </div>
       )}
