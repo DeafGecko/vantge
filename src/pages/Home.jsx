@@ -657,9 +657,9 @@ const FEATURES = [
     icon: QrCode, title: 'QR Code Sharing', large: true,
     desc: 'Print it, display it, text it. Guests scan to join with zero friction.',
     photo: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&q=80',
-    overlay: 'rgba(140,110,20,0.62)',
-    iconBg: 'rgba(255,255,255,0.22)', iconColor: '#fff',
-    textColor: 'text-white', subColor: 'text-white/70',
+    overlay: 'rgba(15,13,10,0.60)',
+    iconBg: 'rgba(255,255,255,0.15)', iconColor: '#fff',
+    textColor: 'text-white', subColor: 'text-white/65',
   },
   {
     icon: ImageIcon, title: 'Beautiful Galleries',
