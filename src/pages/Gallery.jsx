@@ -672,31 +672,31 @@ export default function Gallery() {
 
         {/* ── EVENT HERO ── */}
         {!selectMode && (
-          <div className="relative w-full overflow-hidden" style={{ height: 'min(56vw, 340px)' }}>
-            <img src={bgImage} alt={event.event_name} className="w-full h-full object-cover"
+          <div className="relative w-full" style={{ height: 'min(56vw, 340px)' }}>
+            <img src={bgImage} alt={event.event_name} className="absolute inset-0 w-full h-full object-cover"
               style={{ objectPosition: bgPosition }} loading="eager" />
             <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%)` }} />
 
-            {/* Back button — sits directly on hero, top-left */}
-            <button
-              onClick={() => navigate(`/${eventSlug}`)}
-              className="absolute top-4 left-4 z-10 flex items-center gap-1.5 text-white text-sm font-bold"
-              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}
-            >
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 5l-7 7 7 7" />
-              </svg>
-              Back
-            </button>
-
-            <div className="absolute inset-0 flex flex-col items-center justify-between py-5 text-center px-6">
-              {/* Brand logo — top center, links to home */}
+            {/* Top bar: Back | Logo | spacer — same pattern as upload page */}
+            <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-5 pt-5 pb-2">
+              <button
+                onClick={() => navigate(`/${eventSlug}`)}
+                className="flex items-center gap-1.5 text-white text-sm font-semibold"
+                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+              >
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+                Back
+              </button>
               <a href="/" className="opacity-80 hover:opacity-100 transition-opacity">
                 <VantgeLogo size="sm" monoWhite />
               </a>
+              <div className="w-12" />
+            </div>
 
-              {/* Event info — bottom */}
-              <div className="flex flex-col items-center">
+            {/* Event info — bottom */}
+            <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center pb-5 text-center px-6">
               <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-white/60 mb-1">{eventType.tagline}</p>
               <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-1"
                 style={{ fontFamily: selectedFontFamily }}>{event.event_name}</h1>
@@ -708,7 +708,6 @@ export default function Gallery() {
               {event.welcome_message && (
                 <p className="text-white/70 text-sm mt-1 max-w-xs leading-relaxed">{event.welcome_message}</p>
               )}
-              </div>
             </div>
           </div>
         )}
