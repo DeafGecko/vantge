@@ -209,55 +209,87 @@ function LiveEventsTab({ events, onEmergency }) {
 
 // ── Photos tab ────────────────────────────────────────────────────────────────
 function PhotosTab({ photos, onAction }) {
-  const [filter, setFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
 
   const filtered = photos.filter(p => {
-    if (filter === 'approved') return p.status === 1
-    if (filter === 'pending')  return p.status === 0
-    if (filter === 'blocked')  return p.status === 2
-    return true
+    const statusOk = statusFilter === 'all' || (statusFilter === 'approved' && p.status === 1) || (statusFilter === 'pending' && p.status === 0) || (statusFilter === 'blocked' && p.status === 2)
+    const typeOk = typeFilter === 'all' || (typeFilter === 'photos' && !p.is_video) || (typeFilter === 'videos' && p.is_video)
+    return statusOk && typeOk
   })
+
+  const photoCount = photos.filter(p => !p.is_video).length
+  const videoCount = photos.filter(p => p.is_video).length
 
   async function approve(id) { await supabase.from('media_queue').update({ status: 1 }).eq('id', id); onAction() }
   async function reject(id)  { await supabase.from('media_queue').update({ status: 0 }).eq('id', id); onAction() }
   async function block(id)   { await supabase.from('media_queue').update({ status: 2 }).eq('id', id); onAction() }
   async function remove(id)  {
-    const photo = photos.find(p => p.id === id)
-    if (photo?.file_path) await supabase.storage.from('event-media').remove([photo.file_path])
+    const item = photos.find(p => p.id === id)
+    if (item?.storage_path) await supabase.storage.from('event-media').remove([item.storage_path])
     await supabase.from('media_queue').delete().eq('id', id)
     onAction()
   }
 
   return (
     <div className="space-y-4">
-      {/* Filter pills */}
-      <div className="flex gap-2 flex-wrap">
-        {['all','approved','pending','blocked'].map(f => (
-          <button key={f} onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-colors ${filter === f ? 'bg-white text-[#1A1A18]' : 'bg-white/[0.06] text-white/50 hover:bg-white/[0.1]'}`}>
-            {f}
-          </button>
-        ))}
+      {/* Type filter */}
+      <div className="flex gap-2 flex-wrap items-center">
+        <div className="flex gap-1.5">
+          {[['all', `All (${photos.length})`], ['photos', `Photos (${photoCount})`], ['videos', `Videos (${videoCount})`]].map(([f, label]) => (
+            <button key={f} onClick={() => setTypeFilter(f)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${typeFilter === f ? 'bg-white text-[#1A1A18]' : 'bg-white/[0.06] text-white/50 hover:bg-white/[0.1]'}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="w-px h-4 bg-white/10" />
+        <div className="flex gap-1.5">
+          {[['all','All'], ['approved','Approved'], ['pending','Pending'], ['blocked','Blocked']].map(([f, label]) => (
+            <button key={f} onClick={() => setStatusFilter(f)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${statusFilter === f ? 'bg-white/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {filtered.length === 0
-        ? <p className="text-white/30 text-sm">No photos in this queue.</p>
+        ? <p className="text-white/30 text-sm">Nothing in this queue.</p>
         : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
             {filtered.map(p => {
               const thumb = p.cloudinary_public_id
                 ? `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_300,h_300,q_80/${p.cloudinary_public_id}`
-                : (p.thumbnail_url || p.original_url)
+                : (p.thumbnail_url || (!p.is_video ? p.original_url : null))
               return (
                 <div key={p.id} className="relative group rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.07] aspect-square">
-                  {thumb
-                    ? <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    : <div className="w-full h-full flex items-center justify-center text-white/20 text-xs">No preview</div>
-                  }
+                  {p.is_video && !thumb ? (
+                    <video src={p.original_url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                  ) : thumb ? (
+                    <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white/20 text-xs">No preview</div>
+                  )}
+
+                  {/* Type badge */}
+                  {p.is_video && (
+                    <div className="absolute top-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                      VID
+                    </div>
+                  )}
+
                   {/* Status badge */}
                   <div className={`absolute top-1.5 right-1.5 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${p.status === 1 ? 'bg-emerald-500/90 text-white' : p.status === 2 ? 'bg-red-500/90 text-white' : 'bg-amber-500/90 text-white'}`}>
                     {p.status === 1 ? 'OK' : p.status === 2 ? 'BLK' : 'PND'}
                   </div>
+
+                  {/* Format label bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-white/50 text-[9px] truncate">{p.storage_path?.split('/').pop()}</p>
+                  </div>
+
                   {/* Hover actions */}
                   <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
                     {p.status !== 1 && (
