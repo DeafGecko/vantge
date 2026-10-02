@@ -671,8 +671,7 @@ export default function Gallery() {
 
 
         {/* ── EVENT HERO ── */}
-        {!selectMode && (
-          <div className="relative w-full" style={{ height: 'min(56vw, 340px)' }}>
+        <div className="relative w-full" style={{ height: 'min(56vw, 340px)' }}>
             <img src={bgImage} alt={event.event_name} className="absolute inset-0 w-full h-full object-cover"
               style={{ objectPosition: bgPosition }} loading="eager" />
             <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%)` }} />
@@ -710,9 +709,9 @@ export default function Gallery() {
               )}
             </div>
           </div>
-        )}
 
         {/* ── FILTER PILLS ── */}
+
         {!selectMode && (
           <div className="max-w-2xl mx-auto px-4 py-3 flex justify-center gap-2">
             {[
