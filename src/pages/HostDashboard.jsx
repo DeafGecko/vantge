@@ -114,8 +114,8 @@ export default function HostDashboard() {
 
       async function toggleGallery() {
             if (!event) return
-            if (!isUnlocked) {
-                  const ok = window.confirm('Open the gallery to guests now? Guests will be able to view and upload photos.')
+            if (isUnlocked) {
+                  const ok = window.confirm('Close the gallery? Guests will see "This event is not open yet."')
                   if (!ok) return
             }
             setToggling(true)
@@ -144,7 +144,7 @@ export default function HostDashboard() {
             <div className="min-h-screen bg-[#F7F5F0] flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3">
                         <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A18" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".2" /><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" /></svg>
-                        <p className="text-xs text-[#88887E] tracking-widest uppercase">Loading</p>
+                        <p className="text-xs text-ink-muted tracking-widest uppercase">Loading</p>
                   </div>
             </div>
       )
@@ -169,7 +169,7 @@ export default function HostDashboard() {
                   <div className="min-h-screen bg-[#F7F5F0]">
 
                         {/* HEADER — dark refined bar */}
-                        <header className="bg-[#1A1A18] sticky top-0 z-50">
+                        <header className="bg-ink sticky top-0 z-50">
                               <div className="max-w-6xl mx-auto px-5 md:px-8 h-14 flex items-center justify-between gap-4">
 
                                     {/* Brand */}
@@ -184,8 +184,8 @@ export default function HostDashboard() {
                                                 disabled={toggling}
                                                 className={"px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all border " +
                                                       (isUnlocked
-                                                            ? "border-white/20 text-white/60 hover:border-white/40 hover:text-white"
-                                                            : "bg-white text-[#1A1A18] border-white hover:bg-white/90")}
+                                                            ? "bg-white text-ink border-white hover:bg-white/90"
+                                                            : "border-white/20 text-white/60 hover:border-white/40 hover:text-white")}
                                           >
                                                 {toggling ? "..." : isUnlocked ? (
                                                       <span style={{display:'flex',alignItems:'center',gap:6}}>
@@ -209,7 +209,7 @@ export default function HostDashboard() {
                                           >
                                                 <Images size={18} className="text-white/70" />
                                                 {pendingCount > 0 && (
-                                                      <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#C84A44] text-white text-[10px] font-bold flex items-center justify-center px-1">
+                                                      <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 rounded-full bg-[#C84A44] text-white text-[10px] font-bold flex items-center justify-center px-1">
                                                             {pendingCount > 99 ? '99+' : pendingCount}
                                                       </span>
                                                 )}
