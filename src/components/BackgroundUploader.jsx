@@ -165,7 +165,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
                                     <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
                               </div>
                               {/* Action buttons below image */}
-                              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                              <div className="flex items-center justify-center gap-1.5 mt-2 flex-wrap">
                                     <button onClick={() => setEditing(true)} className="text-[9px] font-bold uppercase tracking-widest text-[#5A5A52] hover:text-[#1A1A18] transition-colors">Adjust</button>
                                     <span className="text-[#D1D0C8] text-[9px]">·</span>
                                     <button onClick={() => inputRef.current?.click()} disabled={uploading} className="text-[9px] font-bold uppercase tracking-widest text-[#5A5A52] hover:text-[#1A1A18] transition-colors">{uploading ? 'Uploading...' : 'Change'}</button>
