@@ -247,7 +247,7 @@ function PhotosTab({ photos, onAction }) {
             {filtered.map(p => {
               const thumb = p.cloudinary_public_id
                 ? `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_300,h_300,q_80/${p.cloudinary_public_id}`
-                : (p.preview_url || p.file_url)
+                : (p.thumbnail_url || p.original_url)
               return (
                 <div key={p.id} className="relative group rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.07] aspect-square">
                   {thumb
@@ -302,7 +302,7 @@ function SafetyTab({ photos, onAction }) {
               {items.map(p => {
                 const thumb = p.cloudinary_public_id
                   ? `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_120,h_120,q_70/${p.cloudinary_public_id}`
-                  : (p.preview_url || p.file_url)
+                  : (p.thumbnail_url || p.original_url)
                 return (
                   <div key={p.id} className="bg-white/[0.04] border border-white/[0.07] rounded-xl p-3 flex items-center gap-3">
                     <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-white/[0.06]">
