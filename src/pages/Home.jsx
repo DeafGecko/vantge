@@ -132,19 +132,20 @@ export default function Home() {
             <span className="text-sm text-[#6B6B63] cursor-default select-none opacity-40">Contact</span>
           </nav>
 
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3">
             <Link
               to="/login"
-              className="text-sm text-[#6B6B63] hover:text-ink transition-colors duration-200"
+              className="group flex items-center gap-2 bg-[#0E0E0C] hover:bg-[#2C2C28] text-white text-sm font-medium px-4 py-2 rounded-full transition-colors duration-200"
+              aria-label="Sign in"
             >
+              {/* Avatar icon */}
+              <span className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                <svg width="13" height="13" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
               Sign in
-            </Link>
-            <Link
-              to="/signup"
-              className="group inline-flex items-center gap-2 bg-[#0E0E0C] text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-[#2C2C28] transition-colors duration-200"
-            >
-              Create account
-              <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </div>
 
