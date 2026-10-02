@@ -142,6 +142,27 @@ export default function GuestUploader() {
       const bgPosition = event.background_position || '50% 50%'
       const accentColor = c.accent
       const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
+
+      if (!event.gallery_unlocked) return (
+            <>
+                  <FontLoader fontId={event.font_family} />
+                  <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+                  <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                  <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }} />
+                  <div className="relative z-10 min-h-screen flex flex-col items-center justify-end pb-16 px-6 text-center">
+                        <a href="/"><VantgeLogo size="sm" monoWhite /></a>
+                        <div className="mt-auto">
+                              <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/40 mb-3">{eventType.tagline}</p>
+                              <h1 className="text-4xl font-bold text-white mb-3 leading-tight" style={{ fontFamily: selectedFontFamily }}>{event.event_name}</h1>
+                              <p className="text-white/50 text-sm mb-8">This event is not open yet. Check back soon.</p>
+                              <button onClick={() => navigate(`/${eventSlug}`)} className="px-6 py-3 rounded-2xl font-bold text-sm text-white/70 border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                                    ← Back to Event
+                              </button>
+                        </div>
+                  </div>
+            </>
+      )
+
       const totalFiles = files.length
       const videoCount = files.filter(f => f.type.startsWith('video/')).length
       const photoCount = totalFiles - videoCount
