@@ -87,7 +87,7 @@ function UploadSheet({ event, accentColor, onClose, onUploaded }) {
     setError(null)
     let completed = 0
     for (const file of files) {
-      const result = await uploadPhoto({ blob: file, eventId: event.id, guestName: guestName.trim(), status: event.require_approval ? 0 : 1 })
+      const result = await uploadPhoto({ blob: file, eventId: event.id, guestName: guestName.trim(), status: 0 })
       if (!result.success) { setError('Some files failed to upload.') }
       completed++
       setProgress(Math.round((completed / files.length) * 100))
