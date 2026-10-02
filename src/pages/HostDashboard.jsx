@@ -665,8 +665,8 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
                                     </>
                               ) : (
                                     <>
-                                          <p className="text-[7px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>This event is not open yet.</p>
-                                          <p className="text-[6px]" style={{ color: 'rgba(255,255,255,0.25)' }}>Check back soon.</p>
+                                          <p className="text-[8px] font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>This event is not open yet.</p>
+                                          <p className="text-[7px]" style={{ color: 'rgba(255,255,255,0.5)' }}>Check back soon.</p>
                                     </>
                               )}
                         </div>
