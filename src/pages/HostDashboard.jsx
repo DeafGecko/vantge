@@ -209,7 +209,7 @@ export default function HostDashboard() {
                                           >
                                                 <Images size={18} className="text-white/70" />
                                                 {pendingCount > 0 && (
-                                                      <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 rounded-full bg-[#C84A44] text-white text-[10px] font-bold flex items-center justify-center px-1">
+                                                      <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 rounded-full bg-coral-text text-white text-[10px] font-bold flex items-center justify-center px-1">
                                                             {pendingCount > 99 ? '99+' : pendingCount}
                                                       </span>
                                                 )}
@@ -230,7 +230,7 @@ export default function HostDashboard() {
                                           <button onClick={() => setMenuOpen(o => !o)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} className="relative p-2 rounded-full hover:bg-white/10 transition-colors text-white">
                                                 {menuOpen ? <X size={20} /> : <Menu size={20} />}
                                                 {!menuOpen && pendingCount > 0 && (
-                                                      <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-[#C84A44] text-white text-[9px] font-bold flex items-center justify-center px-0.5">
+                                                      <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 rounded-full bg-coral-text text-white text-[9px] font-bold flex items-center justify-center px-0.5">
                                                             {pendingCount > 99 ? '99+' : pendingCount}
                                                       </span>
                                                 )}
@@ -242,7 +242,7 @@ export default function HostDashboard() {
                                                             <button
                                                                   onClick={() => { toggleGallery(); setMenuOpen(false) }}
                                                                   disabled={toggling}
-                                                                  className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-[#1A1A18] hover:bg-[#F7F5F0] transition-colors border-b border-[#E8E4DA]"
+                                                                  className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-ink hover:bg-[#F7F5F0] transition-colors border-b border-[#E8E4DA]"
                                                             >
                                                                   {isUnlocked
                                                                         ? <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#16A34A]"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
@@ -301,7 +301,7 @@ export default function HostDashboard() {
                                           {/* Phone preview */}
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
                                                 <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Live Preview</p>
-                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} />
+                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} isUnlocked={isUnlocked} />
                                           </div>
 
                                           {/* QR code */}
@@ -552,7 +552,7 @@ function ThemeOption({ theme, isActive, onClick }) {
       )
 }
 
-function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl }) {
+function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked }) {
       const c = theme.colors
       const hasBg = !!bgImage
       const txt = hasBg ? '#fff' : c.text
@@ -565,6 +565,24 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
             <div className="mx-auto relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-[#1A1A18]" style={{ width: 220, height: 420 }}>
                   {/* Notch */}
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 w-14 h-4 bg-[#1A1A18] rounded-full z-20" />
+
+                  {/* Gallery status icon — top right */}
+                  <div className="absolute top-3 right-4 z-20 flex items-center gap-1">
+                        {isUnlocked ? (
+                              /* Open door */
+                              <svg width="14" height="14" fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                    <path d="M13 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2v-5" />
+                                    <path d="M13 4l5 2v6" />
+                                    <circle cx="18" cy="9" r="0" />
+                              </svg>
+                        ) : (
+                              /* Closed lock */
+                              <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                                    <path d="M7 11V7a5 5 0 0110 0v4" />
+                              </svg>
+                        )}
+                  </div>
 
                   <div
                         className="absolute inset-0 flex flex-col justify-end"
@@ -586,33 +604,46 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
                               <h3 className="font-extrabold leading-tight mb-3" style={{ color: txt, fontFamily: font.cssFamily, fontSize: '1.05rem' }}>
                                     {eventName || 'Your Event'}
                               </h3>
-                              <p className="text-[7px] mb-4" style={{ color: txtMuted }}>Scan. Snap. Share.</p>
 
-                              <div className="flex flex-col gap-1.5">
-                                    <div className="rounded-xl px-2.5 py-2 text-[8px] font-bold text-white flex items-center gap-1.5" style={{ backgroundColor: c.accent }}>
-                                          <span className="w-4 h-4 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                                                <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
-                                                      <circle cx="12" cy="13" r="4" />
-                                                </svg>
-                                          </span>
-                                          Open Camera
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-1">
-                                          <div className="rounded-xl px-2 py-1.5 text-[7px] font-bold flex items-center gap-1 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
-                                                <svg width="8" height="8" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                      <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
-                                                </svg>
-                                                Upload
+                              {isUnlocked ? (
+                                    <>
+                                          <p className="text-[7px] mb-4" style={{ color: txtMuted }}>Scan. Snap. Share.</p>
+                                          <div className="flex flex-col gap-1.5">
+                                                <div className="rounded-xl px-2.5 py-2 text-[8px] font-bold text-white flex items-center gap-1.5" style={{ backgroundColor: c.accent }}>
+                                                      <span className="w-4 h-4 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
+                                                            <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                                                                  <circle cx="12" cy="13" r="4" />
+                                                            </svg>
+                                                      </span>
+                                                      Open Camera
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-1">
+                                                      <div className="rounded-xl px-2 py-1.5 text-[7px] font-bold flex items-center gap-1 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
+                                                            <svg width="8" height="8" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                                  <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                                                            </svg>
+                                                            Upload
+                                                      </div>
+                                                      <div className="rounded-xl px-2 py-1.5 text-[7px] font-bold flex items-center gap-1 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
+                                                            <svg width="8" height="8" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                                  <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+                                                            </svg>
+                                                            Gallery
+                                                      </div>
+                                                </div>
                                           </div>
-                                          <div className="rounded-xl px-2 py-1.5 text-[7px] font-bold flex items-center gap-1 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
-                                                <svg width="8" height="8" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                      <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
-                                                </svg>
-                                                Gallery
-                                          </div>
+                                    </>
+                              ) : (
+                                    <div className="mt-2 px-3 py-4 rounded-2xl" style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
+                                          <svg width="20" height="20" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" className="mx-auto mb-2">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                                <path d="M7 11V7a5 5 0 0110 0v4" />
+                                          </svg>
+                                          <p className="text-[7px] font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>This event is not open yet.</p>
+                                          <p className="text-[6px] mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Check back soon.</p>
                                     </div>
-                              </div>
+                              )}
                         </div>
                   </div>
             </div>
