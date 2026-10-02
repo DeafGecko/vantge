@@ -577,7 +577,9 @@ function UsersTab() {
 
 // ── Marketing Collection tab ──────────────────────────────────────────────────
 function MarketingTab({ photos, events }) {
+  const [activeView, setActiveView] = useState('inbox') // 'inbox' | 'collection'
   const [collection, setCollection] = useState([])
+  const [skipped, setSkipped] = useState(new Set())
   const [adding, setAdding] = useState({})
 
   async function fetchCollection() {
@@ -608,85 +610,138 @@ function MarketingTab({ photos, events }) {
     fetchCollection()
   }
 
+  function skip(id) {
+    setSkipped(s => new Set([...s, id]))
+  }
+
   const collectionIds = new Set(collection.map(c => c.media_id))
   const approvedPhotos = photos.filter(p => p.status === 1)
+  // Inbox = approved, not yet in collection, not skipped
+  const inbox = approvedPhotos.filter(p => !collectionIds.has(p.id) && !skipped.has(p.id))
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <StatCard label="In Collection" value={fmt(collection.length)} color="green" />
-        <StatCard label="Approved Photos" value={fmt(approvedPhotos.length)} />
-        <StatCard label="Videos" value={fmt(collection.filter(c => c.is_video).length)} />
+    <div className="space-y-4">
+      {/* Tab switcher with badges */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setActiveView('inbox')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${activeView === 'inbox' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.05]'}`}
+        >
+          New Photos
+          {inbox.length > 0 && (
+            <span className="text-[10px] font-bold bg-amber-500 text-black px-1.5 py-0.5 rounded-full leading-none">
+              {inbox.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveView('collection')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${activeView === 'collection' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.05]'}`}
+        >
+          My Collection
+          {collection.length > 0 && (
+            <span className="text-[10px] font-bold bg-emerald-500/80 text-white px-1.5 py-0.5 rounded-full leading-none">
+              {collection.length}
+            </span>
+          )}
+        </button>
       </div>
 
-      {/* Collection grid */}
-      {collection.length > 0 && (
+      {/* ── Inbox view ── */}
+      {activeView === 'inbox' && (
         <div>
-          <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Your Collection</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-            {collection.map(c => {
-              const thumb = c.thumbnail_url || c.original_url
-              return (
-                <div key={c.id} className="relative group rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.07] aspect-square">
-                  {thumb ? <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full bg-white/[0.04]" />}
-                  {c.is_video && (
-                    <div className="absolute top-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>VID
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
-                    <a href={c.original_url} download target="_blank" rel="noopener noreferrer"
-                      className="w-full py-1.5 rounded-lg bg-white/20 text-white text-[10px] font-bold hover:bg-white/30 transition-colors text-center">
-                      ↓ Download Full Quality
-                    </a>
-                    <button onClick={() => removeFromCollection(c.id)}
-                      className="w-full py-1.5 rounded-lg bg-red-500/20 text-red-300 text-[10px] font-bold hover:bg-red-500/40 transition-colors">
-                      Remove
-                    </button>
-                    {c.guest_name && <p className="text-white/40 text-[9px] truncate w-full text-center">{c.guest_name}</p>}
-                    {c.event_name && <p className="text-white/25 text-[9px] truncate w-full text-center">{c.event_name}</p>}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Add from approved photos */}
-      <div>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Add from Approved Photos</h2>
-        {approvedPhotos.length === 0
-          ? <p className="text-white/30 text-sm">No approved photos yet.</p>
-          : (
+          {inbox.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-white/20 text-3xl mb-3">✓</p>
+              <p className="text-white/40 text-sm font-medium">All caught up</p>
+              <p className="text-white/20 text-xs mt-1">No new approved photos to review</p>
+            </div>
+          ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-              {approvedPhotos.map(p => {
+              {inbox.map(p => {
                 const thumb = p.thumbnail_url || p.original_url
-                const inCollection = collectionIds.has(p.id)
                 return (
                   <div key={p.id} className="relative group rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.07] aspect-square">
-                    {thumb ? <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full bg-white/[0.04]" />}
-                    {inCollection && (
-                      <div className="absolute top-1.5 right-1.5 bg-amber-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">★</div>
+                    {p.is_video && !thumb ? (
+                      <video src={p.original_url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                    ) : thumb ? (
+                      <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    ) : (
+                      <div className="w-full h-full bg-white/[0.04]" />
                     )}
-                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
-                      {inCollection
-                        ? <p className="text-amber-300 text-[10px] font-bold">In collection ★</p>
-                        : (
-                          <button onClick={() => addToCollection(p)} disabled={adding[p.id]}
-                            className="w-full py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-bold hover:bg-amber-500/40 transition-colors disabled:opacity-40">
-                            {adding[p.id] ? 'Adding…' : '★ Add to Collection'}
-                          </button>
-                        )
-                      }
+                    {p.is_video && (
+                      <div className="absolute top-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>VID
+                      </div>
+                    )}
+                    {/* Always-visible action buttons at bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 flex gap-1 p-1.5 bg-gradient-to-t from-black/80 to-transparent">
+                      <button
+                        onClick={() => addToCollection(p)}
+                        disabled={adding[p.id]}
+                        className="flex-1 py-1.5 rounded-lg bg-amber-500/90 text-black text-[10px] font-black hover:bg-amber-400 transition-colors disabled:opacity-40 text-center"
+                      >
+                        {adding[p.id] ? '…' : '★'}
+                      </button>
+                      <button
+                        onClick={() => skip(p.id)}
+                        className="flex-1 py-1.5 rounded-lg bg-white/15 text-white/60 text-[10px] font-bold hover:bg-white/25 transition-colors text-center"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    {/* Guest name on hover */}
+                    <div className="absolute top-0 left-0 right-0 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {p.guest_name && <p className="text-white text-[9px] font-medium bg-black/60 rounded px-1.5 py-0.5 truncate">{p.guest_name}</p>}
                     </div>
                   </div>
                 )
               })}
             </div>
-          )
-        }
-      </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Collection view ── */}
+      {activeView === 'collection' && (
+        <div>
+          {collection.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-white/20 text-3xl mb-3">★</p>
+              <p className="text-white/40 text-sm font-medium">Collection is empty</p>
+              <p className="text-white/20 text-xs mt-1">Star photos from the New Photos tab to add them here</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+              {collection.map(c => {
+                const thumb = c.thumbnail_url || c.original_url
+                return (
+                  <div key={c.id} className="relative group rounded-xl overflow-hidden bg-white/[0.04] border border-amber-500/20 aspect-square">
+                    {thumb ? <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full bg-white/[0.04]" />}
+                    <div className="absolute top-1.5 right-1.5 bg-amber-500/90 text-black text-[9px] font-black px-1.5 py-0.5 rounded">★</div>
+                    {c.is_video && (
+                      <div className="absolute top-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>VID
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
+                      <a href={c.original_url} download target="_blank" rel="noopener noreferrer"
+                        className="w-full py-1.5 rounded-lg bg-white/20 text-white text-[10px] font-bold hover:bg-white/30 transition-colors text-center">
+                        ↓ Download
+                      </a>
+                      <button onClick={() => removeFromCollection(c.id)}
+                        className="w-full py-1.5 rounded-lg bg-red-500/20 text-red-300 text-[10px] font-bold hover:bg-red-500/40 transition-colors">
+                        Remove
+                      </button>
+                      {c.guest_name && <p className="text-white/40 text-[9px] truncate w-full text-center">{c.guest_name}</p>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -745,6 +800,13 @@ export default function AdminDashboard() {
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('approved', false).then(({ count }) => setPendingUsers(count || 0))
   }, [])
 
+  const [marketingCollectionIds, setMarketingCollectionIds] = useState(new Set())
+  useEffect(() => {
+    supabase.from('marketing_collection').select('media_id').then(({ data }) => {
+      setMarketingCollectionIds(new Set((data || []).map(r => r.media_id)))
+    })
+  }, [])
+
   const stats = {
     activeEvents:  events.filter(e => !e.is_locked).length,
     totalEvents:   events.length,
@@ -757,6 +819,7 @@ export default function AdminDashboard() {
     storageBytes:  null,
     uploadRate:    photos.length > 0 ? Math.round((photos.filter(p => p.status === 1).length / photos.length) * 100) : 0,
     pendingUsers,
+    marketingInbox: photos.filter(p => p.status === 1 && !marketingCollectionIds.has(p.id)).length,
   }
 
   if (loading) return (
@@ -797,6 +860,9 @@ export default function AdminDashboard() {
               )}
               {item.id === 'users' && stats.pendingUsers > 0 && (
                 <span className="ml-auto text-[10px] font-bold bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">{stats.pendingUsers}</span>
+              )}
+              {item.id === 'marketing' && stats.marketingInbox > 0 && (
+                <span className="ml-auto text-[10px] font-bold bg-amber-500 text-black px-1.5 py-0.5 rounded-full">{stats.marketingInbox}</span>
               )}
             </button>
           ))}
