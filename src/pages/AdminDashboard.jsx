@@ -576,21 +576,23 @@ export default function AdminDashboard() {
   const fetchData = useCallback(async () => {
     const [evRes, phRes] = await Promise.all([
       supabase.from('events').select('*').order('created_at', { ascending: false }),
-      supabase.from('media_queue').select('*, events(event_name)').order('created_at', { ascending: false }).limit(500),
+      supabase.from('media_queue').select('*').order('created_at', { ascending: false }).limit(500),
     ])
+    const evList = evRes.data || []
+    const phList = phRes.data || []
+    // build event name lookup
+    const evMap = {}
+    evList.forEach(ev => { evMap[ev.id] = ev.event_name })
     if (evRes.data) {
-      // attach photo/pending/blocked counts to each event
-      const enriched = evRes.data.map(ev => ({
+      const enriched = evList.map(ev => ({
         ...ev,
-        photo_count:   (phRes.data || []).filter(p => p.event_id === ev.id).length,
-        pending_count: (phRes.data || []).filter(p => p.event_id === ev.id && p.status === 0).length,
-        blocked_count: (phRes.data || []).filter(p => p.event_id === ev.id && p.status === 2).length,
+        photo_count:   phList.filter(p => p.event_id === ev.id).length,
+        pending_count: phList.filter(p => p.event_id === ev.id && p.status === 0).length,
+        blocked_count: phList.filter(p => p.event_id === ev.id && p.status === 2).length,
       }))
       setEvents(enriched)
     }
-    if (phRes.data) {
-      setPhotos(phRes.data.map(p => ({ ...p, event_name: p.events?.event_name })))
-    }
+    setPhotos(phList.map(p => ({ ...p, event_name: evMap[p.event_id] || null })))
     setLastRefresh(new Date())
     setDataLoading(false)
   }, [])
