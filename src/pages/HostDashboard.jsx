@@ -426,12 +426,16 @@ export default function HostDashboard() {
                                                                               if (isUsingDefault) {
                                                                                     if (!val) {
                                                                                           updates.background_image = null
+                                                                                          updates.background_image_desktop = null
                                                                                           setLocalBgImage(null)
+                                                                                          setLocalBgImageDesktop(null)
                                                                                     } else {
                                                                                           const { data } = await supabase.from('admin_branding').select('background_url').eq('event_type', val).maybeSingle()
                                                                                           const newDefault = data?.background_url || getEventType(val)?.defaultBg || null
                                                                                           updates.background_image = newDefault
+                                                                                          updates.background_image_desktop = null
                                                                                           setLocalBgImage(newDefault)
+                                                                                          setLocalBgImageDesktop(null)
                                                                                     }
                                                                               }
                                                                               await updateEventSettings(updates)
