@@ -69,9 +69,9 @@ function ZoneThumb({ label, imageUrl, defaultBg, currentTint, isActive, uploadin
                                     </div>
                               </>
                         ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                                    <svg width="24" height="24" fill="none" stroke="#B0AFA5" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                                    <p className="text-[10px] font-bold text-[#B0AFA5]">{uploading ? 'Uploading...' : 'Upload photo'}</p>
+                              <div className="w-full h-full bg-[#F7F5F0] flex flex-col items-center justify-center gap-2 group-hover:bg-[#EFEDE8] transition-colors">
+                                    <svg width="20" height="20" fill="none" stroke="#B0AFA5" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                    <p className="text-[9px] font-bold text-[#B0AFA5] uppercase tracking-widest">{uploading ? 'Uploading...' : 'Upload photo'}</p>
                               </div>
                         )}
                   </div>
