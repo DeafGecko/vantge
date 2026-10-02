@@ -579,10 +579,9 @@ function UsersTab({ onBadgeRefresh }) {
 }
 
 // ── Marketing Collection tab ──────────────────────────────────────────────────
-function MarketingTab({ photos, events, onBadgeRefresh }) {
+function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
   const [activeView, setActiveView] = useState('inbox') // 'inbox' | 'collection'
   const [collection, setCollection] = useState([])
-  const [skipped, setSkipped] = useState(new Set())
   const [adding, setAdding] = useState({})
 
   async function fetchCollection() {
@@ -615,9 +614,6 @@ function MarketingTab({ photos, events, onBadgeRefresh }) {
     onBadgeRefresh?.()
   }
 
-  function skip(id) {
-    setSkipped(s => new Set([...s, id]))
-  }
 
   const collectionIds = new Set(collection.map(c => c.media_id))
   const approvedPhotos = photos.filter(p => p.status === 1)
@@ -689,7 +685,7 @@ function MarketingTab({ photos, events, onBadgeRefresh }) {
                         {adding[p.id] ? '…' : '★'}
                       </button>
                       <button
-                        onClick={() => skip(p.id)}
+                        onClick={() => onSkip(p.id)}
                         className="flex-1 py-1.5 rounded-lg bg-white/15 text-white/60 text-[10px] font-bold hover:bg-white/25 transition-colors text-center"
                       >
                         ✕
@@ -807,6 +803,7 @@ export default function AdminDashboard() {
   useEffect(() => { fetchPendingUsers() }, [fetchPendingUsers])
 
   const [marketingCollectionIds, setMarketingCollectionIds] = useState(new Set())
+  const [marketingSkipped, setMarketingSkipped] = useState(new Set())
   const fetchMarketingIds = useCallback(() => {
     supabase.from('marketing_collection').select('media_id').then(({ data }) => {
       setMarketingCollectionIds(new Set((data || []).map(r => r.media_id)))
@@ -826,7 +823,7 @@ export default function AdminDashboard() {
     storageBytes:  null,
     uploadRate:    photos.length > 0 ? Math.round((photos.filter(p => p.status === 1).length / photos.length) * 100) : 0,
     pendingUsers,
-    marketingInbox: photos.filter(p => p.status === 1 && !marketingCollectionIds.has(p.id)).length,
+    marketingInbox: photos.filter(p => p.status === 1 && !marketingCollectionIds.has(p.id) && !marketingSkipped.has(p.id)).length,
   }
 
   if (loading) return (
@@ -911,7 +908,7 @@ export default function AdminDashboard() {
               {activeTab === 'photos'     && <PhotosTab photos={photos} onAction={fetchData} />}
               {activeTab === 'safety'     && <SafetyTab photos={photos} onAction={fetchData} />}
               {activeTab === 'users'      && <UsersTab onBadgeRefresh={fetchPendingUsers} />}
-              {activeTab === 'marketing'  && <MarketingTab photos={photos} events={events} onBadgeRefresh={fetchMarketingIds} />}
+              {activeTab === 'marketing'  && <MarketingTab photos={photos} events={events} onBadgeRefresh={fetchMarketingIds} skipped={marketingSkipped} onSkip={id => setMarketingSkipped(s => new Set([...s, id]))} />}
               {activeTab === 'tech'       && <TechTab photos={photos} />}
             </>
           }
