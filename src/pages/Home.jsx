@@ -134,18 +134,21 @@ export default function Home() {
 
           <div className="hidden md:flex items-center gap-3">
             <Link
-              to="/login"
-              className="group flex items-center gap-2 bg-[#0E0E0C] hover:bg-[#2C2C28] text-white text-sm font-medium px-4 py-2 rounded-full transition-colors duration-200"
-              aria-label="Sign in"
+              to="/signup"
+              className="group inline-flex items-center gap-2 bg-[#0E0E0C] text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-[#2C2C28] transition-colors duration-200"
             >
-              {/* Avatar icon */}
-              <span className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                <svg width="13" height="13" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-              </span>
-              Sign in
+              Create account
+              <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />
+            </Link>
+            <Link
+              to="/login"
+              aria-label="Sign in"
+              className="w-9 h-9 rounded-full bg-[#E8E4DC] hover:bg-[#D8D4CC] flex items-center justify-center transition-colors duration-200"
+            >
+              <svg width="16" height="16" fill="none" stroke="#1A1A18" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
             </Link>
           </div>
 
