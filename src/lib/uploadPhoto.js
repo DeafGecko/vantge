@@ -21,7 +21,7 @@ async function getLocation() {
       })
 }
 
-export async function uploadPhoto({ blob, eventId, guestName = '', caption = '', status = 0, is_video = false }) {
+export async function uploadPhoto({ blob, eventId, guestName = '', caption = '', status = 0, is_video = false, is_admin_upload = false }) {
       try {
             const mimeType = blob.type || 'image/jpeg'
             const isVideo = is_video || mimeType.startsWith('video/')
@@ -93,6 +93,7 @@ export async function uploadPhoto({ blob, eventId, guestName = '', caption = '',
                         file_size_bytes: blob.size || null,
                         latitude: location?.latitude ?? null,
                         longitude: location?.longitude ?? null,
+                        is_admin_upload,
                   })
 
             if (insertError) {

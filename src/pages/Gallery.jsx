@@ -528,7 +528,7 @@ export default function Gallery() {
       setEvent(eventData)
       if (!eventData.gallery_unlocked) { setLoading(false); return }
       const { data: photoData, error: photoError } = await supabase
-        .from('media_queue').select('*').eq('event_id', eventData.id).eq('status', 1)
+        .from('media_queue').select('*').eq('event_id', eventData.id).eq('status', 1).eq('is_admin_upload', false)
         .order('created_at', { ascending: false })
       if (!photoError) setPhotos(photoData || [])
       setLoading(false)
@@ -536,10 +536,10 @@ export default function Gallery() {
     fetchData()
     const channel = supabase.channel(`gallery:${eventSlug}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'media_queue' }, (payload) => {
-        if (payload.new.status === 1) setPhotos(curr => [payload.new, ...curr])
+        if (payload.new.status === 1 && !payload.new.is_admin_upload) setPhotos(curr => [payload.new, ...curr])
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'media_queue' }, (payload) => {
-        if (payload.new.status === 1 && payload.old.status === 0) setPhotos(curr => [payload.new, ...curr])
+        if (payload.new.status === 1 && payload.old.status === 0 && !payload.new.is_admin_upload) setPhotos(curr => [payload.new, ...curr])
       }).subscribe()
     return () => supabase.removeChannel(channel)
   }, [eventSlug])

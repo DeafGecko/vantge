@@ -69,8 +69,9 @@ export default function HostUploader({ eventId }) {
                         blob: file,
                         eventId,
                         guestName: 'Host',
-                        status: 1, // auto-approved into Live Gallery
+                        status: 1,
                         is_video: isVideo,
+                        is_admin_upload: true,
                   })
                   if (result.success) succeeded++
                   else failed++

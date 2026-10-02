@@ -213,6 +213,7 @@ function LiveEventsTab({ events, onEmergency }) {
 function PhotosTab({ photos, onAction }) {
   const [statusFilter, setStatusFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
+  const [preview, setPreview] = useState(null)
 
   const filtered = photos.filter(p => {
     const statusOk = statusFilter === 'all' || (statusFilter === 'approved' && p.status === 1) || (statusFilter === 'pending' && p.status === 0) || (statusFilter === 'blocked' && p.status === 2)
@@ -256,6 +257,26 @@ function PhotosTab({ photos, onAction }) {
         </div>
       </div>
 
+      {/* Preview modal */}
+      {preview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/85" onClick={() => setPreview(null)}>
+          <div className="relative max-w-3xl w-full" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setPreview(null)} className="absolute -top-10 right-0 text-white/60 hover:text-white text-sm">✕ Close</button>
+            {preview.is_video
+              ? <video src={preview.original_url} controls autoPlay className="w-full max-h-[80vh] rounded-2xl object-contain" />
+              : <img src={preview.original_url} alt="" className="w-full max-h-[80vh] rounded-2xl object-contain" />
+            }
+            <div className="flex gap-2 mt-3 justify-center flex-wrap">
+              {preview.status !== 1 && <button onClick={() => { approve(preview.id); setPreview(null) }} className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold hover:bg-emerald-500/40 transition-colors">Approve</button>}
+              {preview.status !== 0 && <button onClick={() => { reject(preview.id); setPreview(null) }} className="px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 text-xs font-bold hover:bg-amber-500/40 transition-colors">Review</button>}
+              {preview.status !== 2 && <button onClick={() => { block(preview.id); setPreview(null) }} className="px-4 py-2 rounded-xl bg-red-500/20 text-red-300 text-xs font-bold hover:bg-red-500/40 transition-colors">Block</button>}
+              <button onClick={() => { remove(preview.id); setPreview(null) }} className="px-4 py-2 rounded-xl bg-white/10 text-white/60 text-xs font-bold hover:bg-white/20 transition-colors">Delete</button>
+            </div>
+            <p className="text-white/30 text-xs text-center mt-2">{preview.guest_name} · {preview.event_name} · {timeAgo(preview.created_at)}</p>
+          </div>
+        </div>
+      )}
+
       {filtered.length === 0
         ? <p className="text-white/30 text-sm">Nothing in this queue.</p>
         : (
@@ -265,7 +286,7 @@ function PhotosTab({ photos, onAction }) {
                 ? `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,w_300,h_300,q_80/${p.cloudinary_public_id}`
                 : (p.thumbnail_url || (!p.is_video ? p.original_url : null))
               return (
-                <div key={p.id} className="relative group rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.07] aspect-square">
+                <div key={p.id} className="relative group rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.07] aspect-square cursor-pointer" onClick={() => setPreview(p)}>
                   {p.is_video && !thumb ? (
                     <video src={p.original_url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
                   ) : thumb ? (
@@ -287,24 +308,9 @@ function PhotosTab({ photos, onAction }) {
                     {p.status === 1 ? 'OK' : p.status === 2 ? 'BLK' : 'PND'}
                   </div>
 
-                  {/* Format label bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-white/50 text-[9px] truncate">{p.storage_path?.split('/').pop()}</p>
-                  </div>
-
-                  {/* Hover actions */}
-                  <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
-                    {p.status !== 1 && (
-                      <button onClick={() => approve(p.id)} className="w-full py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-bold hover:bg-emerald-500/40 transition-colors">Approve</button>
-                    )}
-                    {p.status !== 0 && (
-                      <button onClick={() => reject(p.id)} className="w-full py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-bold hover:bg-amber-500/40 transition-colors">Review</button>
-                    )}
-                    {p.status !== 2 && (
-                      <button onClick={() => block(p.id)} className="w-full py-1.5 rounded-lg bg-red-500/20 text-red-300 text-[10px] font-bold hover:bg-red-500/40 transition-colors">Block</button>
-                    )}
-                    <button onClick={() => remove(p.id)} className="w-full py-1.5 rounded-lg bg-white/10 text-white/60 text-[10px] font-bold hover:bg-white/20 transition-colors">Delete</button>
-                    {p.event_name && <p className="text-white/40 text-[9px] text-center truncate w-full mt-0.5">{p.event_name}</p>}
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-white text-xs font-bold bg-black/60 px-3 py-1.5 rounded-lg">Click to Preview</span>
                   </div>
                 </div>
               )

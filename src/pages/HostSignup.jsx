@@ -43,7 +43,7 @@ export default function HostSignup() {
       setError(signUpError.message)
       setSubmitting(false)
     } else {
-      navigate('/dashboard')
+      navigate('/pending')
     }
   }
 
