@@ -675,6 +675,18 @@ export default function Gallery() {
             <img src={bgImage} alt={event.event_name} className="w-full h-full object-cover"
               style={{ objectPosition: bgPosition }} loading="eager" />
             <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%)` }} />
+            {/* Back button — top left */}
+            <button
+              onClick={() => navigate(`/${eventSlug}`)}
+              className="absolute top-4 left-4 z-10 flex items-center gap-1.5 text-white/80 hover:text-white transition-colors text-sm font-semibold"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}
+            >
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 5l-7 7 7 7" />
+              </svg>
+              Back
+            </button>
+
             <div className="absolute inset-0 flex flex-col items-center justify-between py-5 text-center px-6">
               {/* Brand logo — top center, links to home */}
               <a href="/" className="opacity-80 hover:opacity-100 transition-opacity">
