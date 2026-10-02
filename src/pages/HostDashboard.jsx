@@ -378,7 +378,7 @@ export default function HostDashboard() {
                                           {/* Logo | Display Name | Event Type */}
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
                                                 {/* Row 1 — controls all on same baseline */}
-                                                <div className="flex items-end gap-3">
+                                                <div className="flex items-start gap-3">
 
                                                       {/* Logo */}
                                                       <div className="shrink-0 flex flex-col">
@@ -440,7 +440,7 @@ export default function HostDashboard() {
                                                                               }
                                                                               await updateEventSettings(updates)
                                                                         }}
-                                                                        className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
+                                                                        className="w-full h-[68px] appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
                                                                   >
                                                                         <option value="">— None —</option>
                                                                         {EVENT_TYPES.map((t) => (

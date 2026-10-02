@@ -61,8 +61,8 @@ export default function LogoUploader({ eventId, currentLogoUrl, onSaved }) {
             <div className="shrink-0 flex flex-col items-center gap-1.5">
                   {currentLogoUrl ? (
                         <div className="relative group">
-                              <div className="w-11 h-11 rounded-xl border-2 border-[#E8E4DA] bg-[#F7F5F0] overflow-hidden flex items-center justify-center">
-                                    <img src={currentLogoUrl} alt="Event logo" className="w-full h-full object-contain p-0.5" />
+                              <div className="w-16 h-[68px] rounded-xl border-2 border-[#E8E4DA] bg-[#F7F5F0] overflow-hidden flex items-center justify-center">
+                                    <img src={currentLogoUrl} alt="Event logo" className="w-full h-full object-contain p-1" />
                               </div>
                               <button
                                     onClick={removeLogo}
@@ -76,7 +76,7 @@ export default function LogoUploader({ eventId, currentLogoUrl, onSaved }) {
                         <button
                               onClick={() => inputRef.current?.click()}
                               disabled={uploading}
-                              className="w-11 h-11 rounded-xl border-2 border-dashed border-[#E8E4DA] bg-[#F7F5F0] hover:border-[#1A1A18] transition-colors flex flex-col items-center justify-center gap-0.5 disabled:opacity-50"
+                              className="w-16 h-[68px] rounded-xl border-2 border-dashed border-[#E8E4DA] bg-[#F7F5F0] hover:border-[#1A1A18] transition-colors flex flex-col items-center justify-center gap-0.5 disabled:opacity-50"
                         >
                               {uploading ? (
                                     <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B0AFA5" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25" /><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" /></svg>
