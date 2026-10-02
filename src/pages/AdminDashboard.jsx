@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { id: 'safety',     label: 'Safety',      icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
   { id: 'users',      label: 'Users',       icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
   { id: 'marketing',  label: 'Marketing',   icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
+  { id: 'branding',   label: 'Branding',    icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
   { id: 'tech',       label: 'Technical',   icon: 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v10m0 0H5m4 0h10m0 0V3m0 10v4a2 2 0 01-2 2H9m10-6H9' },
 ]
 
@@ -747,6 +748,147 @@ function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
   )
 }
 
+// ── Branding tab ─────────────────────────────────────────────────────────────
+const EVENT_TYPE_LABELS = {
+  wedding:     { label: 'Wedding',        icon: '💍' },
+  birthday:    { label: 'Birthday',       icon: '🎂' },
+  anniversary: { label: 'Anniversary',    icon: '🥂' },
+  party:       { label: 'Party',          icon: '🎉' },
+  corporate:   { label: 'Conference',     icon: '🏢' },
+  family:      { label: 'Family Reunion', icon: '🏡' },
+  graduation:  { label: 'Graduation',     icon: '🎓' },
+  other:       { label: 'Other',          icon: '✨' },
+}
+
+const DEFAULT_BGS = {
+  wedding:     'https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85',
+  birthday:    'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1600&q=85',
+  anniversary: 'https://images.unsplash.com/photo-1470756544705-1ba4b6b3c9d8?w=1600&q=85',
+  party:       'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=1600&q=85',
+  corporate:   'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600&q=85',
+  family:      'https://images.unsplash.com/photo-1511895426328-dc8714191011?w=1600&q=85',
+  graduation:  'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&q=85',
+  other:       'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600&q=85',
+}
+
+function BrandingTab({ marketingPhotos }) {
+  const [overrides, setOverrides] = useState({})
+  const [saving, setSaving] = useState({})
+  const [pickingFor, setPickingFor] = useState(null) // event type id
+  const fileRefs = useRef({})
+
+  useEffect(() => {
+    supabase.from('admin_branding').select('*').then(({ data }) => {
+      const map = {}
+      ;(data || []).forEach(r => { map[r.event_type] = r.background_url })
+      setOverrides(map)
+    })
+  }, [])
+
+  async function saveUrl(eventType, url) {
+    setSaving(s => ({ ...s, [eventType]: true }))
+    await supabase.from('admin_branding').upsert({ event_type: eventType, background_url: url }, { onConflict: 'event_type' })
+    setOverrides(o => ({ ...o, [eventType]: url }))
+    setSaving(s => ({ ...s, [eventType]: false }))
+  }
+
+  async function handleFileUpload(eventType, file) {
+    if (!file) return
+    setSaving(s => ({ ...s, [eventType]: true }))
+    const path = `branding/${eventType}-${Date.now()}.${file.name.split('.').pop()}`
+    const { error } = await supabase.storage.from('event-media').upload(path, file, { upsert: true })
+    if (!error) {
+      const { data: urlData } = supabase.storage.from('event-media').getPublicUrl(path)
+      await saveUrl(eventType, urlData.publicUrl)
+    }
+    setSaving(s => ({ ...s, [eventType]: false }))
+  }
+
+  async function reset(eventType) {
+    await supabase.from('admin_branding').delete().eq('event_type', eventType)
+    setOverrides(o => { const n = { ...o }; delete n[eventType]; return n })
+  }
+
+  const approvedPhotos = (marketingPhotos || []).filter(p => !p.is_video && p.status === 1)
+
+  return (
+    <div className="space-y-3">
+      <p className="text-white/40 text-xs mb-4">Set the default background photo shown to guests for each event type. Hosts can still override with their own photo. Changes apply to all new events of that type.</p>
+
+      {Object.entries(EVENT_TYPE_LABELS).map(([typeId, { label, icon }]) => {
+        const current = overrides[typeId] || DEFAULT_BGS[typeId]
+        const isCustom = !!overrides[typeId]
+        return (
+          <div key={typeId} className="bg-white/[0.04] border border-white/[0.07] rounded-2xl overflow-hidden">
+            <div className="flex items-stretch gap-0">
+              {/* Preview */}
+              <div className="w-24 h-20 shrink-0 relative">
+                <img src={current} alt={label} className="w-full h-full object-cover" />
+                {isCustom && <div className="absolute top-1 left-1 bg-emerald-500 text-white text-[8px] font-bold px-1 rounded">CUSTOM</div>}
+              </div>
+              {/* Info + actions */}
+              <div className="flex-1 flex items-center justify-between px-4 gap-3">
+                <div>
+                  <p className="text-white text-sm font-bold">{icon} {label}</p>
+                  {isCustom && <p className="text-white/30 text-[10px] truncate max-w-[180px]">Custom photo set</p>}
+                  {!isCustom && <p className="text-white/25 text-[10px]">Using default</p>}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {/* Pick from marketing collection */}
+                  <button
+                    onClick={() => setPickingFor(pickingFor === typeId ? null : typeId)}
+                    className="px-2.5 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-bold hover:bg-amber-500/30 transition-colors"
+                  >
+                    ★ Collection
+                  </button>
+                  {/* Upload new */}
+                  <button
+                    onClick={() => fileRefs.current[typeId]?.click()}
+                    disabled={saving[typeId]}
+                    className="px-2.5 py-1.5 rounded-lg bg-white/10 text-white/70 text-[10px] font-bold hover:bg-white/20 transition-colors disabled:opacity-40"
+                  >
+                    {saving[typeId] ? '…' : '↑ Upload'}
+                  </button>
+                  {/* Reset to default */}
+                  {isCustom && (
+                    <button onClick={() => reset(typeId)} className="px-2.5 py-1.5 rounded-lg bg-red-500/20 text-red-400 text-[10px] font-bold hover:bg-red-500/30 transition-colors">
+                      Reset
+                    </button>
+                  )}
+                  <input
+                    ref={el => fileRefs.current[typeId] = el}
+                    type="file" accept="image/*" className="hidden"
+                    onChange={e => { handleFileUpload(typeId, e.target.files[0]); e.target.value = '' }}
+                  />
+                </div>
+              </div>
+            </div>
+            {/* Marketing collection picker */}
+            {pickingFor === typeId && (
+              <div className="border-t border-white/[0.07] p-3">
+                <p className="text-white/40 text-[10px] font-bold uppercase mb-2">Pick from Marketing Collection</p>
+                {approvedPhotos.length === 0
+                  ? <p className="text-white/25 text-xs">No approved photos in collection yet.</p>
+                  : (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {approvedPhotos.slice(0, 20).map(p => (
+                        <button key={p.id} onClick={() => { saveUrl(typeId, p.original_url); setPickingFor(null) }}
+                          className="shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 transition-colors">
+                          <img src={p.thumbnail_url || p.original_url} alt="" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )
+                }
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── Main AdminDashboard ───────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const navigate = useNavigate()
@@ -909,6 +1051,7 @@ export default function AdminDashboard() {
               {activeTab === 'safety'     && <SafetyTab photos={photos} onAction={fetchData} />}
               {activeTab === 'users'      && <UsersTab onBadgeRefresh={fetchPendingUsers} />}
               {activeTab === 'marketing'  && <MarketingTab photos={photos} events={events} onBadgeRefresh={fetchMarketingIds} skipped={marketingSkipped} onSkip={id => setMarketingSkipped(s => new Set([...s, id]))} />}
+              {activeTab === 'branding'   && <BrandingTab marketingPhotos={photos} />}
               {activeTab === 'tech'       && <TechTab photos={photos} />}
             </>
           }
