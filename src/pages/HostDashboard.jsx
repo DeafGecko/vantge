@@ -56,6 +56,7 @@ export default function HostDashboard() {
       const [localLogoUrl, setLocalLogoUrl] = useState(undefined)
       const [localAllowDownloads, setLocalAllowDownloads] = useState(null)
       const [localAllowSharing, setLocalAllowSharing] = useState(null)
+      const [previewUnlocked, setPreviewUnlocked] = useState(true)
       const photoSectionRef = useRef(null)
 
       const allowDownloads = localAllowDownloads !== null ? localAllowDownloads : (event?.allow_downloads ?? true)
@@ -303,16 +304,14 @@ export default function HostDashboard() {
                                                 <div className="flex items-center justify-between mb-4">
                                                       <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Live Preview</p>
                                                       <button
-                                                            onClick={toggleGallery}
-                                                            disabled={toggling}
+                                                            onClick={() => setPreviewUnlocked(v => !v)}
                                                             className={"flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border transition-all " +
-                                                                  (isUnlocked
+                                                                  (previewUnlocked
                                                                         ? "bg-[#DCFCE7] border-[#86EFAC] text-[#15803D]"
                                                                         : "bg-[#F3F4F6] border-[#D1D5DB] text-[#6B7280]")}
                                                       >
-                                                            {isUnlocked ? (
+                                                            {previewUnlocked ? (
                                                                   <>
-                                                                        {/* Open door icon */}
                                                                         <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                                                                               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8" />
                                                                               <path d="M14 2v6h6" />
@@ -322,7 +321,6 @@ export default function HostDashboard() {
                                                                   </>
                                                             ) : (
                                                                   <>
-                                                                        {/* Closed door / lock icon */}
                                                                         <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                                                                               <rect x="3" y="11" width="18" height="11" rx="2" />
                                                                               <path d="M7 11V7a5 5 0 0110 0v4" />
@@ -332,7 +330,7 @@ export default function HostDashboard() {
                                                             )}
                                                       </button>
                                                 </div>
-                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} isUnlocked={isUnlocked} />
+                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} isUnlocked={previewUnlocked} />
                                           </div>
 
                                           {/* QR code */}
