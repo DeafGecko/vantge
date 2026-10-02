@@ -664,14 +664,10 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
                                           </div>
                                     </>
                               ) : (
-                                    <div className="mt-2 px-3 py-4 rounded-2xl" style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
-                                          <svg width="20" height="20" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" className="mx-auto mb-2">
-                                                <rect x="3" y="11" width="18" height="11" rx="2" />
-                                                <path d="M7 11V7a5 5 0 0110 0v4" />
-                                          </svg>
-                                          <p className="text-[7px] font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>This event is not open yet.</p>
-                                          <p className="text-[6px] mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Check back soon.</p>
-                                    </div>
+                                    <>
+                                          <p className="text-[7px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>This event is not open yet.</p>
+                                          <p className="text-[6px]" style={{ color: 'rgba(255,255,255,0.25)' }}>Check back soon.</p>
+                                    </>
                               )}
                         </div>
                   </div>
