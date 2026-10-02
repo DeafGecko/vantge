@@ -115,7 +115,7 @@ export default function HostDashboard() {
       async function toggleGallery() {
             if (!event) return
             if (!isUnlocked) {
-                  const ok = window.confirm('Open the gallery to guests now? They will be able to see all approved photos.')
+                  const ok = window.confirm('Open the gallery to guests now? Guests will be able to view and upload photos.')
                   if (!ok) return
             }
             setToggling(true)
@@ -189,13 +189,13 @@ export default function HostDashboard() {
                                           >
                                                 {toggling ? "..." : isUnlocked ? (
                                                       <span style={{display:'flex',alignItems:'center',gap:6}}>
-                                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="-1 -1 26 26" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,overflow:'visible'}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                                                            Close Gallery
+                                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="-1 -1 26 26" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,overflow:'visible'}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0117 0"/></svg>
+                                                            Gallery Open
                                                       </span>
                                                 ) : (
                                                       <span style={{display:'flex',alignItems:'center',gap:6}}>
-                                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="-1 -1 26 26" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,overflow:'visible'}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0117 0"/></svg>
-                                                            Open Gallery
+                                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="-1 -1 26 26" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,overflow:'visible'}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                                                            Gallery Closed
                                                       </span>
                                                 )}
                                           </button>
@@ -248,7 +248,7 @@ export default function HostDashboard() {
                                                                         ? <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#16A34A]"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                                                                         : <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#B0AFA5]"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0117 0"/></svg>
                                                                   }
-                                                                  {toggling ? "Updating..." : isUnlocked ? "Close Gallery" : "Open Gallery"}
+                                                                  {toggling ? "Updating..." : isUnlocked ? "Gallery Open" : "Gallery Closed"}
                                                             </button>
                                                             <button
                                                                   onClick={() => { scrollToPhotos(); setMenuOpen(false) }}
