@@ -498,13 +498,13 @@ function UsersTab() {
   }
 
   async function reject(id) {
-    await supabase.from('profiles').delete().eq('id', id)
-    await supabase.auth.admin?.deleteUser(id)
+    await supabase.from('profiles').update({ approved: false, rejected: true }).eq('id', id)
     fetchUsers()
   }
 
-  const pending  = users.filter(u => !u.approved)
+  const pending  = users.filter(u => !u.approved && !u.rejected)
   const approved = users.filter(u => u.approved)
+  const rejected = users.filter(u => u.rejected)
 
   if (loading) return <div className="flex justify-center py-10"><svg className="animate-spin w-5 h-5 text-white/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg></div>
 
