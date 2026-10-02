@@ -750,6 +750,7 @@ function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
 
 // ── Branding tab ─────────────────────────────────────────────────────────────
 const EVENT_TYPE_LABELS = {
+  none:        { label: 'None',           icon: '—'  },
   wedding:     { label: 'Wedding',        icon: '💍' },
   birthday:    { label: 'Birthday',       icon: '🎂' },
   anniversary: { label: 'Anniversary',    icon: '🥂' },
@@ -761,6 +762,7 @@ const EVENT_TYPE_LABELS = {
 }
 
 const DEFAULT_BGS = {
+  none:        null,
   wedding:     'https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85',
   birthday:    'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1600&q=85',
   anniversary: 'https://images.unsplash.com/photo-1470756544705-1ba4b6b3c9d8?w=1600&q=85',
@@ -822,8 +824,11 @@ function BrandingTab({ marketingPhotos }) {
           <div key={typeId} className="bg-white/[0.04] border border-white/[0.07] rounded-2xl overflow-hidden">
             <div className="flex items-stretch gap-0">
               {/* Preview */}
-              <div className="w-24 h-20 shrink-0 relative">
-                <img src={current} alt={label} className="w-full h-full object-cover" />
+              <div className="w-24 h-20 shrink-0 relative bg-white/[0.06] flex items-center justify-center">
+                {current
+                  ? <img src={current} alt={label} className="w-full h-full object-cover" />
+                  : <span className="text-white/20 text-xs font-bold uppercase tracking-widest">None</span>
+                }
                 {isCustom && <div className="absolute top-1 left-1 bg-emerald-500 text-white text-[8px] font-bold px-1 rounded">CUSTOM</div>}
               </div>
               {/* Info + actions */}

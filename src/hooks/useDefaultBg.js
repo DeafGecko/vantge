@@ -5,19 +5,19 @@ import { getEventType } from '../lib/eventTypes'
 const cache = {}
 
 export function useDefaultBg(eventType) {
-  const fallback = eventType ? getEventType(eventType)?.defaultBg : null
-  const [bg, setBg] = useState(eventType ? (cache[eventType] || fallback) : null)
+  const key = eventType || 'none'
+  const fallback = eventType ? (getEventType(eventType)?.defaultBg ?? null) : null
+  const [bg, setBg] = useState(cache[key] !== undefined ? cache[key] : fallback)
 
   useEffect(() => {
-    if (!eventType) { setBg(null); return }
-    if (cache[eventType]) { setBg(cache[eventType]); return }
-    supabase.from('admin_branding').select('background_url').eq('event_type', eventType).maybeSingle()
+    if (cache[key] !== undefined) { setBg(cache[key]); return }
+    supabase.from('admin_branding').select('background_url').eq('event_type', key).maybeSingle()
       .then(({ data }) => {
         const url = data?.background_url || fallback
-        cache[eventType] = url
-        setBg(url)
+        cache[key] = url ?? null
+        setBg(url ?? null)
       })
-  }, [eventType, fallback])
+  }, [key, fallback])
 
   return bg
 }
