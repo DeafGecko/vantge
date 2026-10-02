@@ -635,6 +635,24 @@ export default function Gallery() {
   return (
     <>
       <FontLoader fontId={event.font_family} />
+
+      {/* ── BACK BUTTON — fixed, always on top, same as upload page ── */}
+      {!selectMode && (
+        <div className="fixed top-0 left-0 right-0 z-[999] flex items-center justify-between px-5 pt-5 pb-2 pointer-events-none">
+          <button
+            onClick={() => navigate(`/${eventSlug}`)}
+            className="pointer-events-auto flex items-center gap-1.5 text-white text-sm font-semibold"
+            style={{ textShadow: '0 1px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)' }}
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+            Back
+          </button>
+          <div className="w-12" />
+        </div>
+      )}
+
       <div className="min-h-screen bg-[#F8F5ED]">
 
         {/* ── SELECT MODE HEADER (only shown when selecting) ── */}
@@ -676,24 +694,6 @@ export default function Gallery() {
             <img src={bgImage} alt={event.event_name} className="absolute inset-0 w-full h-full object-cover"
               style={{ objectPosition: bgPosition }} loading="eager" />
             <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%)` }} />
-
-            {/* Top bar: Back | Logo | spacer — same pattern as upload page */}
-            <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-5 pt-5 pb-2">
-              <button
-                onClick={() => navigate(`/${eventSlug}`)}
-                className="flex items-center gap-1.5 text-white text-sm font-bold px-3 py-1.5 rounded-full"
-                style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
-              >
-                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-                Back
-              </button>
-              <a href="/" className="opacity-80 hover:opacity-100 transition-opacity">
-                <VantgeLogo size="sm" monoWhite />
-              </a>
-              <div className="w-12" />
-            </div>
 
             {/* Event info — bottom */}
             <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center pb-5 text-center px-6">
