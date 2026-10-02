@@ -673,8 +673,8 @@ export default function Gallery() {
         {!selectMode && (
           <button
             onClick={() => navigate(`/${eventSlug}`)}
-            className="fixed top-4 left-4 z-40 flex items-center gap-1.5 text-white text-sm font-semibold px-3 py-1.5 rounded-full"
-            style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)' }}
+            className="fixed top-4 left-4 z-50 flex items-center gap-1.5 text-sm font-bold px-3 py-2 rounded-full shadow-lg"
+            style={{ background: '#1A1A18', color: '#fff' }}
           >
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 12H5M12 5l-7 7 7 7" />
