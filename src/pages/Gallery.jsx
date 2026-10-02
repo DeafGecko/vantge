@@ -641,8 +641,8 @@ export default function Gallery() {
         <div className="fixed top-0 left-0 right-0 z-[999] flex items-center justify-between px-5 pt-5 pb-2 pointer-events-none">
           <button
             onClick={() => navigate(`/${eventSlug}`)}
-            className="pointer-events-auto flex items-center gap-1.5 text-white text-sm font-semibold"
-            style={{ textShadow: '0 1px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)' }}
+            className="pointer-events-auto flex items-center gap-1.5 text-white text-sm font-bold px-3 py-1.5 rounded-full"
+            style={{ background: '#1A1A18' }}
           >
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
               <path d="M15 18l-6-6 6-6"/>
