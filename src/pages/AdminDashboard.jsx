@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { id: 'photos',     label: 'Photos / Videos', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
   { id: 'safety',     label: 'Safety',      icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
   { id: 'users',      label: 'Users',       icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
+  { id: 'marketing',  label: 'Marketing',   icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
   { id: 'tech',       label: 'Technical',   icon: 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v10m0 0H5m4 0h10m0 0V3m0 10v4a2 2 0 01-2 2H9m10-6H9' },
 ]
 
@@ -568,6 +569,122 @@ function UsersTab() {
   )
 }
 
+// ── Marketing Collection tab ──────────────────────────────────────────────────
+function MarketingTab({ photos, events }) {
+  const [collection, setCollection] = useState([])
+  const [adding, setAdding] = useState({})
+
+  async function fetchCollection() {
+    const { data } = await supabase.from('marketing_collection').select('*').order('added_at', { ascending: false })
+    setCollection(data || [])
+  }
+
+  useEffect(() => { fetchCollection() }, [])
+
+  async function addToCollection(p) {
+    setAdding(a => ({ ...a, [p.id]: true }))
+    const eventName = events.find(e => e.id === p.event_id)?.event_name || null
+    await supabase.from('marketing_collection').insert({
+      media_id: p.id,
+      event_id: p.event_id,
+      original_url: p.original_url,
+      thumbnail_url: p.thumbnail_url,
+      is_video: p.is_video,
+      guest_name: p.guest_name,
+      event_name: eventName,
+    })
+    await fetchCollection()
+    setAdding(a => ({ ...a, [p.id]: false }))
+  }
+
+  async function removeFromCollection(id) {
+    await supabase.from('marketing_collection').delete().eq('id', id)
+    fetchCollection()
+  }
+
+  const collectionIds = new Set(collection.map(c => c.media_id))
+  const approvedPhotos = photos.filter(p => p.status === 1)
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatCard label="In Collection" value={fmt(collection.length)} color="green" />
+        <StatCard label="Approved Photos" value={fmt(approvedPhotos.length)} />
+        <StatCard label="Videos" value={fmt(collection.filter(c => c.is_video).length)} />
+      </div>
+
+      {/* Collection grid */}
+      {collection.length > 0 && (
+        <div>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Your Collection</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+            {collection.map(c => {
+              const thumb = c.thumbnail_url || c.original_url
+              return (
+                <div key={c.id} className="relative group rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.07] aspect-square">
+                  {thumb ? <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full bg-white/[0.04]" />}
+                  {c.is_video && (
+                    <div className="absolute top-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>VID
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
+                    <a href={c.original_url} download target="_blank" rel="noopener noreferrer"
+                      className="w-full py-1.5 rounded-lg bg-white/20 text-white text-[10px] font-bold hover:bg-white/30 transition-colors text-center">
+                      ↓ Download Full Quality
+                    </a>
+                    <button onClick={() => removeFromCollection(c.id)}
+                      className="w-full py-1.5 rounded-lg bg-red-500/20 text-red-300 text-[10px] font-bold hover:bg-red-500/40 transition-colors">
+                      Remove
+                    </button>
+                    {c.guest_name && <p className="text-white/40 text-[9px] truncate w-full text-center">{c.guest_name}</p>}
+                    {c.event_name && <p className="text-white/25 text-[9px] truncate w-full text-center">{c.event_name}</p>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Add from approved photos */}
+      <div>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Add from Approved Photos</h2>
+        {approvedPhotos.length === 0
+          ? <p className="text-white/30 text-sm">No approved photos yet.</p>
+          : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+              {approvedPhotos.map(p => {
+                const thumb = p.thumbnail_url || p.original_url
+                const inCollection = collectionIds.has(p.id)
+                return (
+                  <div key={p.id} className="relative group rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.07] aspect-square">
+                    {thumb ? <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full bg-white/[0.04]" />}
+                    {inCollection && (
+                      <div className="absolute top-1.5 right-1.5 bg-amber-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">★</div>
+                    )}
+                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
+                      {inCollection
+                        ? <p className="text-amber-300 text-[10px] font-bold">In collection ★</p>
+                        : (
+                          <button onClick={() => addToCollection(p)} disabled={adding[p.id]}
+                            className="w-full py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-bold hover:bg-amber-500/40 transition-colors disabled:opacity-40">
+                            {adding[p.id] ? 'Adding…' : '★ Add to Collection'}
+                          </button>
+                        )
+                      }
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        }
+      </div>
+    </div>
+  )
+}
+
 // ── Main AdminDashboard ───────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const navigate = useNavigate()
@@ -710,12 +827,13 @@ export default function AdminDashboard() {
           {dataLoading
             ? <div className="flex items-center justify-center py-20"><svg className="animate-spin w-6 h-6 text-white/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg></div>
             : <>
-              {activeTab === 'overview' && <OverviewTab stats={stats} events={events} />}
-              {activeTab === 'events'   && <LiveEventsTab events={events} onEmergency={fetchData} />}
-              {activeTab === 'photos'   && <PhotosTab photos={photos} onAction={fetchData} />}
-              {activeTab === 'safety'   && <SafetyTab photos={photos} onAction={fetchData} />}
-              {activeTab === 'users'    && <UsersTab />}
-              {activeTab === 'tech'     && <TechTab photos={photos} />}
+              {activeTab === 'overview'   && <OverviewTab stats={stats} events={events} />}
+              {activeTab === 'events'     && <LiveEventsTab events={events} onEmergency={fetchData} />}
+              {activeTab === 'photos'     && <PhotosTab photos={photos} onAction={fetchData} />}
+              {activeTab === 'safety'     && <SafetyTab photos={photos} onAction={fetchData} />}
+              {activeTab === 'users'      && <UsersTab />}
+              {activeTab === 'marketing'  && <MarketingTab photos={photos} events={events} />}
+              {activeTab === 'tech'       && <TechTab photos={photos} />}
             </>
           }
         </main>

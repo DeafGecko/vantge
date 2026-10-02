@@ -171,8 +171,12 @@ function UploadSheet({ event, accentColor, onClose, onUploaded }) {
               </div>
             )}
 
+            <p className="text-[10px] text-[#9A9A8E] text-center mt-3 leading-relaxed">
+              By uploading, you agree your photos may be used by the event host for promotional purposes.
+            </p>
+
             <button onClick={handleUpload} disabled={!files.length || !guestName.trim() || progress !== null}
-              className="w-full mt-4 py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-[0.98] disabled:opacity-40"
+              className="w-full mt-2 py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-[0.98] disabled:opacity-40"
               style={{ backgroundColor: accentColor }}>
               {progress !== null ? 'Uploading…' : `Share ${files.length > 0 ? files.length + ' ' : ''}Photo${files.length !== 1 ? 's' : ''}`}
             </button>
