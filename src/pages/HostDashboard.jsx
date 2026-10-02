@@ -182,15 +182,15 @@ export default function HostDashboard() {
                                                             : "bg-white text-[#1A1A18] border-white hover:bg-white/90")}
                                           >
                                                 {toggling ? "..." : isUnlocked ? (
-                                                      <>
-                                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',marginRight:6,verticalAlign:'middle',flexShrink:0}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                                                      <span style={{display:'flex',alignItems:'center',gap:6}}>
+                                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                                                             Close Gallery
-                                                      </>
+                                                      </span>
                                                 ) : (
-                                                      <>
-                                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',marginRight:6,verticalAlign:'middle',flexShrink:0}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0117 0"/></svg>
+                                                      <span style={{display:'flex',alignItems:'center',gap:6}}>
+                                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0117 0"/></svg>
                                                             Open Gallery
-                                                      </>
+                                                      </span>
                                                 )}
                                           </button>
 
