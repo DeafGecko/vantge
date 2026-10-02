@@ -8,8 +8,9 @@ import Gallery        from './pages/Gallery'
 import HostLogin      from './pages/HostLogin'
 import HostSignup     from './pages/HostSignup'
 import HostDashboard  from './pages/HostDashboard'
-import AdminLogin     from './pages/AdminLogin'
-import AdminDashboard from './pages/AdminDashboard'
+import AdminLogin       from './pages/AdminLogin'
+import AdminDashboard   from './pages/AdminDashboard'
+import PendingApproval  from './pages/PendingApproval'
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
       {/* ── Admin routes ─────────────────────────────────────── */}
       <Route path="/admin/login"  element={<AdminLogin />} />
       <Route path="/admin"        element={<AdminDashboard />} />
+      <Route path="/pending"      element={<PendingApproval />} />
 
       {/* ── Fallback ─────────────────────────────────────────── */}
       <Route path="*" element={<Navigate to="/" replace />} />

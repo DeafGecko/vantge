@@ -86,6 +86,13 @@ export default function HostDashboard() {
       const currentEventType = getEventType(currentEventTypeId)
 
       useEffect(() => {
+            if (!user) return
+            supabase.from('profiles').select('approved').eq('id', user.id).single().then(({ data }) => {
+                  if (data && data.approved === false) navigate('/pending', { replace: true })
+            })
+      }, [user, navigate])
+
+      useEffect(() => {
             if (!event?.id) return
             const fetchCount = async () => {
                   const [pendingRes, approvedRes] = await Promise.all([

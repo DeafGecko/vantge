@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { id: 'events',     label: 'Live Events', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
   { id: 'photos',     label: 'Photos',      icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
   { id: 'safety',     label: 'Safety',      icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+  { id: 'users',      label: 'Users',       icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
   { id: 'tech',       label: 'Technical',   icon: 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v10m0 0H5m4 0h10m0 0V3m0 10v4a2 2 0 01-2 2H9m10-6H9' },
 ]
 
@@ -428,6 +429,89 @@ function TechTab({ photos }) {
   )
 }
 
+// ── Users tab ─────────────────────────────────────────────────────────────────
+function UsersTab() {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  async function fetchUsers() {
+    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
+    setUsers(data || [])
+    setLoading(false)
+  }
+
+  useEffect(() => { fetchUsers() }, [])
+
+  async function approve(id) {
+    await supabase.from('profiles').update({ approved: true }).eq('id', id)
+    fetchUsers()
+  }
+
+  async function revoke(id) {
+    await supabase.from('profiles').update({ approved: false }).eq('id', id)
+    fetchUsers()
+  }
+
+  const pending  = users.filter(u => !u.approved)
+  const approved = users.filter(u => u.approved)
+
+  if (loading) return <div className="flex justify-center py-10"><svg className="animate-spin w-5 h-5 text-white/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M21 12a9 9 0 00-9-9" strokeLinecap="round"/></svg></div>
+
+  function UserRow({ u, onApprove, onRevoke }) {
+    return (
+      <div className="bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-3 flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-white text-sm font-medium truncate">{u.email}</p>
+          <p className="text-white/35 text-xs">{u.full_name || 'No name'} · Joined {timeAgo(u.created_at)}</p>
+        </div>
+        <div className="flex gap-2 shrink-0">
+          {onApprove && (
+            <button onClick={() => onApprove(u.id)} className="px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-300 text-xs font-bold hover:bg-emerald-500/30 transition-colors">
+              Approve
+            </button>
+          )}
+          {onRevoke && (
+            <button onClick={() => onRevoke(u.id)} className="px-3 py-1.5 rounded-lg bg-white/[0.06] text-white/40 text-xs font-bold hover:bg-red-500/20 hover:text-red-300 transition-colors">
+              Revoke
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-3 gap-3">
+        <StatCard label="Total Users"    value={fmt(users.length)} />
+        <StatCard label="Pending"        value={fmt(pending.length)}  color={pending.length > 0 ? 'amber' : 'white'} />
+        <StatCard label="Approved"       value={fmt(approved.length)} color="green" />
+      </div>
+
+      {pending.length > 0 && (
+        <div>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-3">Awaiting Approval ({pending.length})</h2>
+          <div className="space-y-2">
+            {pending.map(u => <UserRow key={u.id} u={u} onApprove={approve} />)}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Approved ({approved.length})</h2>
+        {approved.length === 0
+          ? <p className="text-white/25 text-sm">No approved users yet.</p>
+          : (
+            <div className="space-y-2">
+              {approved.map(u => <UserRow key={u.id} u={u} onRevoke={revoke} />)}
+            </div>
+          )
+        }
+      </div>
+    </div>
+  )
+}
+
 // ── Main AdminDashboard ───────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const navigate = useNavigate()
@@ -475,6 +559,11 @@ export default function AdminDashboard() {
   }, [adminUser, fetchData])
 
   // stats derived from live data
+  const [pendingUsers, setPendingUsers] = useState(0)
+  useEffect(() => {
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('approved', false).then(({ count }) => setPendingUsers(count || 0))
+  }, [])
+
   const stats = {
     activeEvents:  events.filter(e => !e.is_locked).length,
     totalEvents:   events.length,
@@ -486,6 +575,7 @@ export default function AdminDashboard() {
     favorites:     photos.filter(p => p.is_favorited).length,
     storageBytes:  null,
     uploadRate:    photos.length > 0 ? Math.round((photos.filter(p => p.status === 1).length / photos.length) * 100) : 0,
+    pendingUsers,
   }
 
   if (loading) return (
@@ -523,6 +613,9 @@ export default function AdminDashboard() {
               {item.label}
               {item.id === 'safety' && stats.pendingReview > 0 && (
                 <span className="ml-auto text-[10px] font-bold bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">{stats.pendingReview}</span>
+              )}
+              {item.id === 'users' && stats.pendingUsers > 0 && (
+                <span className="ml-auto text-[10px] font-bold bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">{stats.pendingUsers}</span>
               )}
             </button>
           ))}
@@ -563,6 +656,7 @@ export default function AdminDashboard() {
               {activeTab === 'events'   && <LiveEventsTab events={events} onEmergency={fetchData} />}
               {activeTab === 'photos'   && <PhotosTab photos={photos} onAction={fetchData} />}
               {activeTab === 'safety'   && <SafetyTab photos={photos} onAction={fetchData} />}
+              {activeTab === 'users'    && <UsersTab />}
               {activeTab === 'tech'     && <TechTab photos={photos} />}
             </>
           }
