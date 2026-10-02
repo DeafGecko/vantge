@@ -97,7 +97,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
 
       if (editing && activeUrl) return (
             <div className="w-full overflow-hidden">
-                  <p className="text-[9px] text-[#88887E] mb-2">Click to set the focus point — that area stays centered on all screens.</p>
+                  <p className="text-[9px] text-[#88887E] mb-2">Click to set focus point.</p>
                   <div
                         ref={editorRef}
                         className="relative rounded-xl overflow-hidden border border-[#E8E4DA] select-none w-full"
