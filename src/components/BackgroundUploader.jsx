@@ -100,7 +100,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
                   <p className="text-[9px] text-[#88887E] mb-2">Click to set the focus point — that area stays centered on all screens.</p>
                   <div
                         ref={editorRef}
-                        className="relative rounded-2xl overflow-hidden border-2 border-[#1A1A18] select-none w-full"
+                        className="relative rounded-xl overflow-hidden border border-[#E8E4DA] select-none w-full"
                         style={{ height: previewH, cursor: 'crosshair' }}
                         onClick={(e) => {
                               const rect = editorRef.current.getBoundingClientRect()
