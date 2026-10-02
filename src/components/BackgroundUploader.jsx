@@ -115,7 +115,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
       }
 
       // Preview dimensions
-      const previewH = isLandscape ? 130 : 180
+      const previewH = 180
       const previewW = isLandscape ? '100%' : 100
 
       if (editing && activeUrl) return (
