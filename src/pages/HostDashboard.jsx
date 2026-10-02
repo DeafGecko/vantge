@@ -84,7 +84,7 @@ export default function HostDashboard() {
       const currentEventName = localEventName !== null ? localEventName : event?.event_name ?? ''
       const currentBgPosition = localBgPosition !== null ? localBgPosition : event?.background_position ?? '50% 50%'
       const currentBgTint = localBgTint !== null ? localBgTint : event?.background_tint ?? 55
-      const currentEventTypeId = localEventType !== null ? localEventType : event?.event_type ?? DEFAULT_EVENT_TYPE_ID
+      const currentEventTypeId = localEventType !== null ? localEventType : event?.event_type ?? ''
       const currentLogoUrl = localLogoUrl !== undefined ? localLogoUrl : event?.logo_url ?? null
       const currentEventType = getEventType(currentEventTypeId)
 
@@ -452,7 +452,7 @@ export default function HostDashboard() {
                                                 <div className="flex gap-3 mt-1.5">
                                                       <div className="shrink-0 w-11" />
                                                       <div className="flex-1 min-w-0" />
-                                                      <p className="shrink-0 w-36 text-[10px] text-[#B0AFA5] text-center">{currentEventType.tagline}</p>
+                                                      <p className="shrink-0 w-36 text-[10px] text-[#B0AFA5] text-center">{currentEventTypeId ? currentEventType.tagline : ''}</p>
                                                 </div>
                                           </div>
 

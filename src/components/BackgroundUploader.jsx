@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import { getEventType } from '../lib/eventTypes'
 import { useDefaultBg } from '../hooks/useDefaultBg'
 
 const MAX_BYTES = 50 * 1024 * 1024
@@ -117,16 +116,12 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
             onSaved(currentImageUrl, currentPosition, val)
       }
 
-      // Preview dimensions
-      const previewH = 180
-      const previewW = '100%'
-
       if (editing && activeUrl) return (
             <div className="w-full overflow-hidden">
                   <div
                         ref={editorRef}
                         className="relative rounded-xl overflow-hidden border border-[#E8E4DA] select-none mx-auto"
-                        style={{ height: previewH, width: previewW, cursor: dragging ? 'grabbing' : 'grab' }}
+                        style={{ aspectRatio: isLandscape ? '16/9' : '3/4', width: '100%', cursor: dragging ? 'grabbing' : 'grab' }}
                         onMouseDown={onDragStart} onMouseMove={onDragMove} onMouseUp={onDragEnd} onMouseLeave={onDragEnd}
                         onTouchStart={onDragStart} onTouchMove={onDragMove} onTouchEnd={onDragEnd}
                   >
@@ -161,7 +156,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
                         <div className="w-full">
                               <div
                                     className="relative rounded-xl overflow-hidden border border-[#E8E4DA] mx-auto"
-                                    style={{ height: previewH, width: previewW }}
+                                    style={{ aspectRatio: isLandscape ? '16/9' : '3/4', width: '100%' }}
                               >
                                     <img src={currentImageUrl} alt="Background" className="w-full h-full object-cover" style={{ objectPosition: currentPosition || '50% 50%' }} />
                                     <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
@@ -190,7 +185,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
                         <div className="w-full">
                               <div
                                     className="relative rounded-xl overflow-hidden border border-[#E8E4DA] mx-auto cursor-pointer group"
-                                    style={{ height: previewH, width: previewW }}
+                                    style={{ aspectRatio: isLandscape ? '16/9' : '3/4', width: '100%' }}
                                     onClick={() => inputRef.current?.click()}
                               >
                                     <img src={defaultBg} alt="Default background" className="w-full h-full object-cover" style={{ objectPosition: '50% 50%' }} />
@@ -198,8 +193,8 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
                                           <svg width="20" height="20" fill="none" stroke="white" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                           <p className="text-[9px] font-bold text-white uppercase tracking-widest">Upload photo</p>
                                     </div>
-                                    <div className="absolute bottom-2 left-0 right-0 flex justify-center pointer-events-none group-hover:hidden">
-                                          <span className="text-[8px] font-bold uppercase tracking-widest text-white/60 bg-black/40 px-2 py-0.5 rounded-full">Default</span>
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:hidden">
+                                          <span className="text-sm font-bold text-white/70 drop-shadow">Default Photo</span>
                                     </div>
                               </div>
                               <div className="flex items-center justify-center mt-2">
@@ -210,8 +205,8 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
                         <button
                               onClick={() => inputRef.current?.click()}
                               disabled={uploading}
-                              className="border-2 border-dashed border-[#E8E4DA] rounded-xl flex flex-col items-center justify-center gap-2 hover:border-[#1A1A18] transition-colors"
-                              style={{ height: previewH, width: previewW }}
+                              className="border-2 border-dashed border-[#E8E4DA] rounded-xl flex flex-col items-center justify-center gap-2 hover:border-[#1A1A18] transition-colors w-full"
+                              style={{ aspectRatio: isLandscape ? '16/9' : '3/4' }}
                         >
                               <svg width="24" height="24" fill="none" stroke="#B0AFA5" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" /></svg>
                               <p className="text-[10px] font-bold text-[#B0AFA5] text-center px-2">{uploading ? 'Uploading...' : 'Upload photo'}</p>
@@ -230,35 +225,35 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
             <div>
                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Background Photo</p>
                   <div className="flex gap-4 items-start">
-                        {/* Portrait — mobile */}
-                        <div className="flex-1 min-w-0 overflow-hidden">
-                        <UploadZone
-                              eventId={eventId}
-                              label="Mobile · Portrait"
-                              isLandscape={false}
-                              currentImageUrl={currentImageUrl}
-                              defaultBg={defaultBg}
-                              currentPosition={currentPosition}
-                              currentTint={currentTint}
-                              accentColor={accentColor}
-                              dbField="background_image"
-                              onSaved={onSaved}
-                        />
+                        {/* Portrait — mobile: fixed narrow width */}
+                        <div className="w-[30%] shrink-0 overflow-hidden">
+                              <UploadZone
+                                    eventId={eventId}
+                                    label="Mobile · Portrait"
+                                    isLandscape={false}
+                                    currentImageUrl={currentImageUrl}
+                                    defaultBg={defaultBg}
+                                    currentPosition={currentPosition}
+                                    currentTint={currentTint}
+                                    accentColor={accentColor}
+                                    dbField="background_image"
+                                    onSaved={onSaved}
+                              />
                         </div>
-                        {/* Landscape — desktop */}
+                        {/* Landscape — desktop: takes remaining width */}
                         <div className="flex-1 min-w-0 overflow-hidden">
-                        <UploadZone
-                              eventId={eventId}
-                              label="Desktop · Landscape"
-                              isLandscape={true}
-                              currentImageUrl={currentImageDesktopUrl}
-                              defaultBg={defaultBg}
-                              currentPosition={currentPosition}
-                              currentTint={currentTint}
-                              accentColor={accentColor}
-                              dbField="background_image_desktop"
-                              onSaved={onSavedDesktop}
-                        />
+                              <UploadZone
+                                    eventId={eventId}
+                                    label="Desktop · Landscape"
+                                    isLandscape={true}
+                                    currentImageUrl={currentImageDesktopUrl}
+                                    defaultBg={defaultBg}
+                                    currentPosition={currentPosition}
+                                    currentTint={currentTint}
+                                    accentColor={accentColor}
+                                    dbField="background_image_desktop"
+                                    onSaved={onSavedDesktop}
+                              />
                         </div>
                   </div>
             </div>
