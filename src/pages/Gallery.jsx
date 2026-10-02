@@ -127,7 +127,7 @@ function UploadSheet({ event, accentColor, onClose, onUploaded }) {
             {/* Hidden inputs */}
             <input ref={inputRef} type="file" accept="image/*,video/*" multiple className="hidden"
               onChange={e => setFiles(Array.from(e.target.files || []))} />
-            <input ref={cameraRef} type="file" accept="image/*,video/*" capture="environment" className="hidden"
+            <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
               onChange={e => setFiles(Array.from(e.target.files || []))} />
 
             {files.length === 0 ? (
