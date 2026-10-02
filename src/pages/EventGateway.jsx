@@ -40,8 +40,7 @@ export default function EventGateway() {
       const c = theme.colors
       const selectedFontFamily = resolveFontFamily(event.font_family)
       const eventType = getEventType(event.event_type)
-      const defaultBg = useDefaultBg(event.event_type)
-      const bgImage = event.background_image || defaultBg
+      const bgImage = event.background_image || eventType.defaultBg
       const bgPosition = event.background_position || '50% 50%'
       const accentColor = c.accent
       const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
