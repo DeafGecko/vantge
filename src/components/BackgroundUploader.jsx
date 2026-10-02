@@ -97,7 +97,6 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
 
       if (editing && activeUrl) return (
             <div className="w-full overflow-hidden">
-                  <p className="text-[9px] text-[#88887E] mb-2">Click to set focus point.</p>
                   <div
                         ref={editorRef}
                         className="relative rounded-xl overflow-hidden border border-[#E8E4DA] select-none w-full"
@@ -125,7 +124,8 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
                               </div>
                         </div>
                   </div>
-                  <div className="mt-3">
+                  <p className="text-[9px] text-[#B0AFA5] mt-1.5 mb-2">Click to set focus point.</p>
+                  <div className="mt-1">
                         <div className="flex items-center justify-between mb-1">
                               <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Black Tint</p>
                               <span className="text-[9px] font-bold text-[#5A5A52]">{tint}%</span>
