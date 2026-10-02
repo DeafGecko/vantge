@@ -11,6 +11,7 @@ import { getFontsByCategory, getFont, getAllFonts, getGoogleFontsUrl, DEFAULT_FO
 import { EVENT_TYPES, getEventType, DEFAULT_EVENT_TYPE_ID } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
 import BackgroundUploader from '../components/BackgroundUploader'
+import { useDefaultBg } from '../hooks/useDefaultBg'
 import HostUploader from '../components/HostUploader'
 import LogoUploader from '../components/LogoUploader'
 import VantgeLogo from '../components/VantgeLogo'
@@ -87,6 +88,7 @@ export default function HostDashboard() {
       const currentEventTypeId = localEventType !== null ? localEventType : event?.event_type ?? ''
       const currentLogoUrl = localLogoUrl !== undefined ? localLogoUrl : event?.logo_url ?? null
       const currentEventType = getEventType(currentEventTypeId)
+      const currentDefaultBg = useDefaultBg(currentEventTypeId)
 
       useEffect(() => {
             if (!user) return
@@ -420,7 +422,7 @@ export default function HostDashboard() {
                                                                               setLocalEventType(val)
                                                                               const updates = { event_type: val || null }
                                                                               const allDefaults = EVENT_TYPES.map(t => t.defaultBg)
-                                                                              const isUsingDefault = !currentBgImage || allDefaults.includes(currentBgImage)
+                                                                              const isUsingDefault = !currentBgImage || allDefaults.includes(currentBgImage) || currentBgImage === currentDefaultBg
                                                                               if (isUsingDefault) {
                                                                                     if (!val) {
                                                                                           updates.background_image = null
