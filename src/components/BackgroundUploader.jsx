@@ -80,7 +80,7 @@ function ZoneThumb({ label, isLandscape, imageUrl, defaultBg, currentTint, isAct
       )
 }
 
-// Full-width editor shown below the row when a zone is active
+// Full-screen modal editor — photo left, tools right
 function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, currentTint, accentColor, eventId, dbField, onSaved, onClose }) {
       const [position, setPosition] = useState(currentPosition || '50% 50%')
       const [tint, setTint] = useState(currentTint ?? 55)
@@ -88,12 +88,14 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       const [uploading, setUploading] = useState(false)
       const [removing, setRemoving] = useState(false)
       const [dragging, setDragging] = useState(false)
+      const [activeToolIndex, setActiveToolIndex] = useState(0)
       const editorRef = useRef(null)
       const dragStart = useRef(null)
       const inputRef = useRef(null)
 
       const activeUrl = pendingUrl || imageUrl || defaultBg
       const tintAlpha = (tint / 100).toFixed(2)
+      const hasCustomPhoto = !!(pendingUrl || imageUrl)
 
       const getPos = useCallback((e, rect) => {
             const clientX = e.touches ? e.touches[0].clientX : e.clientX
@@ -132,7 +134,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       }
 
       async function handleConfirm() {
-            const urlToSave = pendingUrl || imageUrl
+            const urlToSave = pendingUrl || imageUrl || null
             const { error } = await supabase.from('events').update({ [dbField]: urlToSave, background_position: position, background_tint: tint }).eq('id', eventId)
             if (error) { alert('Could not save: ' + error.message); return }
             onSaved(urlToSave, position, tint)
@@ -141,69 +143,132 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
 
       async function handleRemove() {
             setRemoving(true)
-            const fallback = !isLandscape ? (defaultBg ?? null) : null
+            const fallback = null
             const { error } = await supabase.from('events').update({ [dbField]: fallback }).eq('id', eventId)
             if (error) { alert('Could not remove: ' + error.message) }
             else { onSaved(fallback, currentPosition, currentTint); onClose() }
             setRemoving(false)
       }
 
+      const tools = [
+            { id: 'adjust', label: 'Adjust', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> },
+            { id: 'change', label: 'Change Photo', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+            { id: 'tint',   label: 'Tint',         icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 2v20"/></svg> },
+            { id: 'delete', label: 'Delete Photo',  icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> },
+      ]
+
       return (
-            <div className="w-full mt-4 border-t border-[#E8E4DA] pt-4">
-                  <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
-                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">{label}</p>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex overflow-hidden">
 
-                  {/* Photo editor */}
-                  <div
-                        ref={editorRef}
-                        className="relative rounded-xl overflow-hidden border border-[#E8E4DA] select-none w-full"
-                        style={{ aspectRatio: isLandscape ? '16/9' : '3/4', cursor: dragging ? 'grabbing' : 'grab' }}
-                        onMouseDown={onDragStart} onMouseMove={onDragMove} onMouseUp={onDragEnd} onMouseLeave={onDragEnd}
-                        onTouchStart={onDragStart} onTouchMove={onDragMove} onTouchEnd={onDragEnd}
-                  >
-                        {activeUrl ? (
-                              <>
-                                    <img src={activeUrl} alt="Background" className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: position }} draggable={false} />
-                                    <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-                                    <div className="absolute w-6 h-6 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2" style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: `${accentColor}99` }} />
-                              </>
-                        ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-[#F7F5F0]">
-                                    <p className="text-[10px] text-[#B0AFA5]">No photo</p>
+                        {/* LEFT — photo */}
+                        <div className="flex-1 bg-[#1A1A18] relative flex items-center justify-center min-w-0">
+                              <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+                              {activeUrl ? (
+                                    <div
+                                          ref={editorRef}
+                                          className="relative w-full h-full select-none"
+                                          style={{ cursor: dragging ? 'grabbing' : (activeToolIndex === 0 ? 'grab' : 'default') }}
+                                          onMouseDown={activeToolIndex === 0 ? onDragStart : undefined}
+                                          onMouseMove={activeToolIndex === 0 ? onDragMove : undefined}
+                                          onMouseUp={activeToolIndex === 0 ? onDragEnd : undefined}
+                                          onMouseLeave={activeToolIndex === 0 ? onDragEnd : undefined}
+                                          onTouchStart={activeToolIndex === 0 ? onDragStart : undefined}
+                                          onTouchMove={activeToolIndex === 0 ? onDragMove : undefined}
+                                          onTouchEnd={activeToolIndex === 0 ? onDragEnd : undefined}
+                                    >
+                                          <img src={activeUrl} alt="Background" className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: position }} draggable={false} />
+                                          <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                                          {activeToolIndex === 0 && (
+                                                <div className="absolute w-7 h-7 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2" style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: `${accentColor}99` }} />
+                                          )}
+                                          {activeToolIndex === 0 && (
+                                                <div className="absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none">
+                                                      <span className="text-[9px] font-bold text-white/60 uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">Drag to reposition</span>
+                                                </div>
+                                          )}
+                                    </div>
+                              ) : (
+                                    <div className="flex flex-col items-center gap-3 text-white/30">
+                                          <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                          <p className="text-xs font-bold uppercase tracking-widest">No photo</p>
+                                    </div>
+                              )}
+                        </div>
+
+                        {/* RIGHT — tools panel */}
+                        <div className="w-64 shrink-0 flex flex-col border-l border-[#E8E4DA]">
+
+                              {/* Header */}
+                              <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E4DA]">
+                                    <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#B0AFA5]">{label}</p>
+                                    <button onClick={onClose} className="text-[#B0AFA5] hover:text-[#1A1A18] transition-colors">
+                                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+                                    </button>
                               </div>
-                        )}
-                  </div>
 
-                  <p className="text-[9px] text-[#B0AFA5] mt-1.5">Drag to reposition.</p>
+                              {/* Tool list */}
+                              <div className="flex flex-col gap-1 p-3 border-b border-[#E8E4DA]">
+                                    {tools.map((tool, i) => {
+                                          if (tool.id === 'delete' && !hasCustomPhoto) return null
+                                          const isActive = activeToolIndex === i
+                                          return (
+                                                <button
+                                                      key={tool.id}
+                                                      onClick={() => {
+                                                            if (tool.id === 'change') { inputRef.current?.click(); return }
+                                                            if (tool.id === 'delete') { handleRemove(); return }
+                                                            setActiveToolIndex(i)
+                                                      }}
+                                                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
+                                                            tool.id === 'delete'
+                                                                  ? 'text-[#C84A44] hover:bg-red-50'
+                                                                  : isActive
+                                                                        ? 'bg-[#1A1A18] text-white'
+                                                                        : 'text-[#5A5A52] hover:bg-[#F7F5F0]'
+                                                      }`}
+                                                >
+                                                      <span className="shrink-0">{tool.icon}</span>
+                                                      <span className="text-[11px] font-bold uppercase tracking-widest">{uploading && tool.id === 'change' ? 'Uploading...' : tool.label}</span>
+                                                </button>
+                                          )
+                                    })}
+                              </div>
 
-                  {/* Actions row */}
-                  <div className="flex items-center justify-center gap-1.5 mt-2 flex-wrap">
-                        <button onClick={() => inputRef.current?.click()} disabled={uploading} className="text-[9px] font-bold uppercase tracking-widest text-[#5A5A52] hover:text-[#1A1A18] transition-colors">{uploading ? 'Uploading...' : 'Change Photo'}</button>
-                        {imageUrl && imageUrl !== defaultBg && (
-                              <>
-                                    <span className="text-[#D1D0C8] text-[9px]">·</span>
-                                    <button onClick={handleRemove} disabled={removing} className="text-[9px] font-bold uppercase tracking-widest text-[#C84A44] hover:text-red-700 transition-colors">{removing ? 'Removing...' : 'Remove'}</button>
-                              </>
-                        )}
-                  </div>
+                              {/* Active tool content */}
+                              <div className="flex-1 overflow-y-auto p-5">
+                                    {activeToolIndex === 0 && (
+                                          <div>
+                                                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">Reposition</p>
+                                                <p className="text-[10px] text-[#B0AFA5] leading-relaxed">Drag the photo on the left to reposition the focus point.</p>
+                                                <div className="mt-3 text-[9px] text-[#B0AFA5]">
+                                                      <span className="font-bold">X:</span> {position.split(' ')[0]} &nbsp; <span className="font-bold">Y:</span> {position.split(' ')[1]}
+                                                </div>
+                                          </div>
+                                    )}
+                                    {activeToolIndex === 2 && (
+                                          <div>
+                                                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-3">Black Tint</p>
+                                                <div className="flex items-center justify-between mb-2">
+                                                      <span className="text-[9px] text-[#B0AFA5]">None</span>
+                                                      <span className="text-[11px] font-bold text-[#1A1A18]">{tint}%</span>
+                                                      <span className="text-[9px] text-[#B0AFA5]">Dark</span>
+                                                </div>
+                                                <input
+                                                      type="range" min={0} max={90} value={tint}
+                                                      onChange={(e) => setTint(Number(e.target.value))}
+                                                      className="w-full accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
+                                                />
+                                          </div>
+                                    )}
+                              </div>
 
-                  {/* Tint */}
-                  <div className="mt-3">
-                        <div className="flex items-center justify-between mb-1">
-                              <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5]">Black Tint</p>
-                              <span className="text-[9px] font-bold text-[#5A5A52]">{tint}%</span>
+                              {/* Save / Cancel */}
+                              <div className="p-4 border-t border-[#E8E4DA] flex flex-col gap-2">
+                                    <button onClick={handleConfirm} className="w-full bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-3 hover:bg-black transition-all">Save</button>
+                                    <button onClick={onClose} className="w-full border border-[#E8E4DA] text-[#5A5A52] text-[10px] font-bold uppercase tracking-widest rounded-full py-3 hover:border-[#88887E] transition-all">Cancel</button>
+                              </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                              <span className="text-[9px] text-[#B0AFA5]">None</span>
-                              <input type="range" min={0} max={90} value={tint} onChange={(e) => setTint(Number(e.target.value))} className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer" />
-                              <span className="text-[9px] text-[#B0AFA5]">Dark</span>
-                        </div>
-                  </div>
-
-                  {/* Save / Cancel */}
-                  <div className="flex gap-2 mt-4">
-                        <button onClick={handleConfirm} className="flex-1 bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-2.5 hover:bg-black transition-all">Save</button>
-                        <button onClick={onClose} className="flex-1 border border-[#E8E4DA] text-[#5A5A52] text-[10px] font-bold uppercase tracking-widest rounded-full py-2.5 hover:border-[#88887E] transition-all">Cancel</button>
                   </div>
             </div>
       )
