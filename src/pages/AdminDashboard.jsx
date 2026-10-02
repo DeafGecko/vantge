@@ -579,7 +579,7 @@ function UsersTab({ onBadgeRefresh }) {
 }
 
 // ── Marketing Collection tab ──────────────────────────────────────────────────
-function MarketingTab({ photos, events }) {
+function MarketingTab({ photos, events, onBadgeRefresh }) {
   const [activeView, setActiveView] = useState('inbox') // 'inbox' | 'collection'
   const [collection, setCollection] = useState([])
   const [skipped, setSkipped] = useState(new Set())
@@ -606,11 +606,13 @@ function MarketingTab({ photos, events }) {
     })
     await fetchCollection()
     setAdding(a => ({ ...a, [p.id]: false }))
+    onBadgeRefresh?.()
   }
 
   async function removeFromCollection(id) {
     await supabase.from('marketing_collection').delete().eq('id', id)
     fetchCollection()
+    onBadgeRefresh?.()
   }
 
   function skip(id) {
@@ -805,11 +807,12 @@ export default function AdminDashboard() {
   useEffect(() => { fetchPendingUsers() }, [fetchPendingUsers])
 
   const [marketingCollectionIds, setMarketingCollectionIds] = useState(new Set())
-  useEffect(() => {
+  const fetchMarketingIds = useCallback(() => {
     supabase.from('marketing_collection').select('media_id').then(({ data }) => {
       setMarketingCollectionIds(new Set((data || []).map(r => r.media_id)))
     })
   }, [])
+  useEffect(() => { fetchMarketingIds() }, [fetchMarketingIds])
 
   const stats = {
     activeEvents:  events.filter(e => !e.is_locked).length,
@@ -908,7 +911,7 @@ export default function AdminDashboard() {
               {activeTab === 'photos'     && <PhotosTab photos={photos} onAction={fetchData} />}
               {activeTab === 'safety'     && <SafetyTab photos={photos} onAction={fetchData} />}
               {activeTab === 'users'      && <UsersTab onBadgeRefresh={fetchPendingUsers} />}
-              {activeTab === 'marketing'  && <MarketingTab photos={photos} events={events} />}
+              {activeTab === 'marketing'  && <MarketingTab photos={photos} events={events} onBadgeRefresh={fetchMarketingIds} />}
               {activeTab === 'tech'       && <TechTab photos={photos} />}
             </>
           }
