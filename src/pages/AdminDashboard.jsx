@@ -385,16 +385,41 @@ function TechTab({ photos }) {
 
   const today = new Date().toISOString().slice(0,10)
   const photosToday = photos.filter(p => p.created_at?.slice(0,10) === today).length
-  const photosTotal = photos.length
+  const withLocation = photos.filter(p => p.latitude && p.longitude).length
+
+  // Group by mobile vs tablet vs desktop
+  const mobileKeywords = ['iPhone', 'Android Phone', 'Mobile']
+  const tabletKeywords = ['iPad', 'Android Tablet', 'Tablet']
+  const mobileCount  = photos.filter(p => mobileKeywords.some(k => p.device_type?.includes(k))).length
+  const tabletCount  = photos.filter(p => tabletKeywords.some(k => p.device_type?.includes(k))).length
+  const desktopCount = photos.filter(p => p.device_type && !mobileKeywords.some(k => p.device_type.includes(k)) && !tabletKeywords.some(k => p.device_type.includes(k))).length
+
+  // Uploads with location
+  const locationUploads = photos.filter(p => p.latitude && p.longitude)
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <StatCard label="Photos Today"  value={fmt(photosToday)} />
-        <StatCard label="Total Photos"  value={fmt(photosTotal)} />
-        <StatCard label="Device Types"  value={fmt(devices.length)} />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatCard label="Uploads Today"    value={fmt(photosToday)} />
+        <StatCard label="Total Uploads"    value={fmt(photos.length)} />
+        <StatCard label="With Location"    value={fmt(withLocation)} />
+        <StatCard label="Device Types"     value={fmt(devices.length)} />
       </div>
 
+      {/* Category summary */}
+      <div>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Device Category</h2>
+        <div className="grid grid-cols-3 gap-3">
+          {[['📱 Mobile', mobileCount], ['⬜ Tablet', tabletCount], ['💻 Desktop / Laptop', desktopCount]].map(([label, count]) => (
+            <div key={label} className="bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-3 text-center">
+              <p className="text-white font-bold text-lg">{fmt(count)}</p>
+              <p className="text-white/35 text-[10px] mt-0.5">{label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Detailed device breakdown */}
       <div>
         <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Device Breakdown</h2>
         {devices.length === 0
@@ -403,7 +428,7 @@ function TechTab({ photos }) {
             <div className="space-y-2">
               {devices.map(([name, count]) => (
                 <div key={name} className="flex items-center gap-3">
-                  <p className="text-white/70 text-sm w-28 shrink-0">{name}</p>
+                  <p className="text-white/70 text-sm w-36 shrink-0">{name}</p>
                   <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                     <div className="h-full bg-white/30 rounded-full" style={{ width: `${(count/total)*100}%` }} />
                   </div>
@@ -416,14 +441,34 @@ function TechTab({ photos }) {
         }
       </div>
 
-      <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Monitoring Notes</p>
-        <ul className="space-y-1 text-xs text-white/40">
-          <li>• Sentry error tracking: not yet configured</li>
-          <li>• API error rate: no server-side logging yet</li>
-          <li>• Upload timing: not yet instrumented</li>
-          <li>• Gallery load time: not yet instrumented</li>
-        </ul>
+      {/* Location uploads */}
+      <div>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Upload Locations ({withLocation})</h2>
+        {locationUploads.length === 0
+          ? <p className="text-white/30 text-sm">No location data yet — guests haven't shared location or new uploads haven't come in.</p>
+          : (
+            <div className="space-y-2">
+              {locationUploads.slice(0, 20).map(p => (
+                <div key={p.id} className="bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-2.5 flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-white/70 text-xs truncate">{p.event_name || 'Unknown event'}</p>
+                    <p className="text-white/35 text-[10px]">{p.device_type || 'Unknown device'} · {timeAgo(p.created_at)}</p>
+                  </div>
+                  <a
+                    href={`https://maps.google.com/?q=${p.latitude},${p.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] text-white/50 text-xs hover:bg-white/[0.12] hover:text-white transition-colors"
+                  >
+                    <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    {p.latitude.toFixed(4)}, {p.longitude.toFixed(4)}
+                  </a>
+                </div>
+              ))}
+              {locationUploads.length > 20 && <p className="text-white/25 text-xs text-center">+{locationUploads.length - 20} more</p>}
+            </div>
+          )
+        }
       </div>
     </div>
   )

@@ -10,6 +10,17 @@ import { supabase } from './supabase'
  * @param {string} params.guestName - Optional guest name
  * @returns {Promise<Object>} - { success, storagePath?, originalUrl?, error? }
  */
+async function getLocation() {
+      if (!navigator.geolocation) return null
+      return new Promise((resolve) => {
+            navigator.geolocation.getCurrentPosition(
+                  (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+                  () => resolve(null),
+                  { timeout: 5000, maximumAge: 60000 }
+            )
+      })
+}
+
 export async function uploadPhoto({ blob, eventId, guestName = '', caption = '', status = 0, is_video = false }) {
       try {
             const mimeType = blob.type || 'image/jpeg'
@@ -59,8 +70,11 @@ export async function uploadPhoto({ blob, eventId, guestName = '', caption = '',
                   }
             }
 
-            // Capture device info for beta testing analytics
-            const deviceInfo = getDeviceInfo()
+            // Capture device info and location in parallel
+            const [deviceInfo, location] = await Promise.all([
+                  Promise.resolve(getDeviceInfo()),
+                  getLocation(),
+            ])
 
             const { error: insertError } = await supabase
                   .from('media_queue')
@@ -77,6 +91,8 @@ export async function uploadPhoto({ blob, eventId, guestName = '', caption = '',
                         device_type: deviceInfo.device_type,
                         viewport: deviceInfo.viewport,
                         file_size_bytes: blob.size || null,
+                        latitude: location?.latitude ?? null,
+                        longitude: location?.longitude ?? null,
                   })
 
             if (insertError) {
@@ -168,14 +184,18 @@ function getExtensionFromMime(mimeType) {
 function getDeviceInfo() {
       try {
             const ua = navigator.userAgent
-            const viewport = `${window.innerWidth}×${window.innerHeight}`
+            const w = window.innerWidth
+            const viewport = `${w}×${window.innerHeight}`
 
-            let deviceType = 'Unknown'
+            let deviceType = 'Desktop'
             if (/iPhone/i.test(ua)) deviceType = 'iPhone'
             else if (/iPad/i.test(ua)) deviceType = 'iPad'
-            else if (/Android/i.test(ua)) deviceType = 'Android'
+            else if (/Android/i.test(ua) && /Mobile/i.test(ua)) deviceType = 'Android Phone'
+            else if (/Android/i.test(ua)) deviceType = 'Android Tablet'
+            else if (w <= 768 && /Macintosh|Windows|Linux/i.test(ua)) deviceType = 'Mobile'
+            else if (w <= 1024) deviceType = 'Tablet'
             else if (/Macintosh/i.test(ua)) deviceType = 'Mac'
-            else if (/Windows/i.test(ua)) deviceType = 'Windows'
+            else if (/Windows/i.test(ua)) deviceType = 'Windows PC'
             else if (/Linux/i.test(ua)) deviceType = 'Linux'
 
             return {
