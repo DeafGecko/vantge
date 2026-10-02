@@ -117,14 +117,14 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
 
       // Preview dimensions
       const previewH = 180
-      const previewW = isLandscape ? '100%' : 100
+      const previewW = isLandscape ? '80%' : 100
 
       if (editing && activeUrl) return (
             <div className="w-full overflow-hidden">
                   <div
                         ref={editorRef}
-                        className="relative rounded-xl overflow-hidden border border-[#E8E4DA] select-none w-full"
-                        style={{ height: previewH, cursor: dragging ? 'grabbing' : 'grab' }}
+                        className="relative rounded-xl overflow-hidden border border-[#E8E4DA] select-none mx-auto"
+                        style={{ height: previewH, width: previewW, cursor: dragging ? 'grabbing' : 'grab' }}
                         onMouseDown={onDragStart} onMouseMove={onDragMove} onMouseUp={onDragEnd} onMouseLeave={onDragEnd}
                         onTouchStart={onDragStart} onTouchMove={onDragMove} onTouchEnd={onDragEnd}
                   >
@@ -159,7 +159,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
                         <div className="w-full">
                               <div
                                     className="relative rounded-xl overflow-hidden border border-[#E8E4DA] mx-auto"
-                                    style={{ height: previewH, width: isLandscape ? '100%' : previewW }}
+                                    style={{ height: previewH, width: previewW }}
                               >
                                     <img src={currentImageUrl} alt="Background" className="w-full h-full object-cover" style={{ objectPosition: currentPosition || '50% 50%' }} />
                                     <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
@@ -189,7 +189,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
                               onClick={() => inputRef.current?.click()}
                               disabled={uploading}
                               className="border-2 border-dashed border-[#E8E4DA] rounded-xl flex flex-col items-center justify-center gap-2 hover:border-[#1A1A18] transition-colors"
-                              style={{ height: previewH, width: isLandscape ? '100%' : previewW }}
+                              style={{ height: previewH, width: previewW }}
                         >
                               <svg width="24" height="24" fill="none" stroke="#B0AFA5" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" /></svg>
                               <p className="text-[10px] font-bold text-[#B0AFA5] text-center px-2">{uploading ? 'Uploading...' : 'Upload photo'}</p>
