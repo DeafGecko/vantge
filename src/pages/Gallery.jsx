@@ -590,7 +590,7 @@ export default function Gallery() {
   const c = theme.colors
   const selectedFontFamily = resolveFontFamily(event.font_family)
   const bgImage = event.background_image || DEFAULT_BG
-  const bgPosition = event.background_position || '50% 40%'
+  const bgPosition = event.background_position || '50% 50%'
   const accentColor = c.accent
   const eventType = getEventType(event.event_type)
   const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
