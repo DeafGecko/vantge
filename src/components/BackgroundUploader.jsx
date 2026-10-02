@@ -33,7 +33,7 @@ async function compressImage(file) {
 }
 
 // Thumbnail card shown in the side-by-side row
-function ZoneThumb({ label, isLandscape, imageUrl, defaultBg, isActive, uploading, onUpload, onEdit }) {
+function ZoneThumb({ label, isLandscape, imageUrl, defaultBg, currentTint, isActive, uploading, onUpload, onEdit }) {
       const inputRef = useRef(null)
 
       async function handleFile(e) {
@@ -43,7 +43,8 @@ function ZoneThumb({ label, isLandscape, imageUrl, defaultBg, isActive, uploadin
       }
 
       const displayUrl = imageUrl || defaultBg
-      const isDefault = !imageUrl && !!defaultBg
+      const isDefault = !imageUrl || imageUrl === defaultBg
+      const tintAlpha = ((currentTint ?? 55) / 100).toFixed(2)
 
       return (
             <div className="flex flex-col items-center gap-2 w-full">
@@ -56,9 +57,10 @@ function ZoneThumb({ label, isLandscape, imageUrl, defaultBg, isActive, uploadin
                         {displayUrl ? (
                               <>
                                     <img src={displayUrl} alt="Background" className="w-full h-full object-cover" style={{ objectPosition: '50% 50%' }} />
+                                    <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
                                     {isDefault && (
                                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:hidden">
-                                                <span className="text-sm font-bold text-white/70 drop-shadow">Default Photo</span>
+                                                <span className="text-[10px] font-black tracking-[0.2em] uppercase text-white/80 drop-shadow">Default</span>
                                           </div>
                                     )}
                                     <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -238,10 +240,11 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                                     isLandscape={false}
                                     imageUrl={currentImageUrl}
                                     defaultBg={defaultBg}
+                                    currentTint={currentTint}
                                     isActive={activeZone === 'portrait'}
                                     uploading={uploadingPortrait}
                                     onEdit={() => setActiveZone(activeZone === 'portrait' ? null : 'portrait')}
-                                    onUpload={(file, ref) => handleUpload(file, 'background_image', false, setUploadingPortrait, onSaved)}
+                                    onUpload={(file) => handleUpload(file, 'background_image', false, setUploadingPortrait, onSaved)}
                               />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -250,10 +253,11 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                                     isLandscape={true}
                                     imageUrl={currentImageDesktopUrl}
                                     defaultBg={defaultBg}
+                                    currentTint={currentTint}
                                     isActive={activeZone === 'landscape'}
                                     uploading={uploadingLandscape}
                                     onEdit={() => setActiveZone(activeZone === 'landscape' ? null : 'landscape')}
-                                    onUpload={(file, ref) => handleUpload(file, 'background_image_desktop', true, setUploadingLandscape, onSavedDesktop)}
+                                    onUpload={(file) => handleUpload(file, 'background_image_desktop', true, setUploadingLandscape, onSavedDesktop)}
                               />
                         </div>
                   </div>
