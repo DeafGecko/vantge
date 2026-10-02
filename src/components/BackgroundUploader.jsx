@@ -218,7 +218,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                         />
                         </div>
                         {/* Landscape — desktop (fills rest) */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 pl-[10px]">
                         <UploadZone
                               eventId={eventId}
                               label="Desktop · Landscape"
