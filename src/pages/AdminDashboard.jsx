@@ -578,8 +578,6 @@ export default function AdminDashboard() {
       supabase.from('events').select('*').order('created_at', { ascending: false }),
       supabase.from('media_queue').select('*').order('created_at', { ascending: false }).limit(500),
     ])
-    console.log('evRes:', evRes)
-    console.log('phRes:', phRes)
     const evList = evRes.data || []
     const phList = phRes.data || []
     // build event name lookup
