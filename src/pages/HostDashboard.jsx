@@ -300,7 +300,38 @@ export default function HostDashboard() {
 
                                           {/* Phone preview */}
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
-                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Live Preview</p>
+                                                <div className="flex items-center justify-between mb-4">
+                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Live Preview</p>
+                                                      <button
+                                                            onClick={toggleGallery}
+                                                            disabled={toggling}
+                                                            className={"flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border transition-all " +
+                                                                  (isUnlocked
+                                                                        ? "bg-[#DCFCE7] border-[#86EFAC] text-[#15803D]"
+                                                                        : "bg-[#F3F4F6] border-[#D1D5DB] text-[#6B7280]")}
+                                                      >
+                                                            {isUnlocked ? (
+                                                                  <>
+                                                                        {/* Open door icon */}
+                                                                        <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                                              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8" />
+                                                                              <path d="M14 2v6h6" />
+                                                                              <path d="M10 12h4" />
+                                                                        </svg>
+                                                                        Gallery Open
+                                                                  </>
+                                                            ) : (
+                                                                  <>
+                                                                        {/* Closed door / lock icon */}
+                                                                        <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                                              <rect x="3" y="11" width="18" height="11" rx="2" />
+                                                                              <path d="M7 11V7a5 5 0 0110 0v4" />
+                                                                        </svg>
+                                                                        Gallery Closed
+                                                                  </>
+                                                            )}
+                                                      </button>
+                                                </div>
                                                 <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} isUnlocked={isUnlocked} />
                                           </div>
 
