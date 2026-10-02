@@ -129,9 +129,7 @@ export default function Home() {
               {/* Cursive Beta sits to the right, same baseline */}
               <span className="ml-1 text-[#C0392B]" style={{ fontFamily: "'Caveat', cursive", fontSize: '17px', lineHeight: 1, verticalAlign: 'middle' }}>Beta</span>
             </span>
-            <a href="#notify" className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200">
-              Contact
-            </a>
+            <span className="text-sm text-[#6B6B63] cursor-default select-none opacity-40">Contact</span>
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
@@ -843,7 +841,7 @@ function SiteFooter() {
       heading: 'Company',
       links: [
         { label: 'About', comingSoon: true },
-        { label: 'Contact', href: '#notify' },
+        { label: 'Contact', comingSoon: true },
       ],
     },
     {
