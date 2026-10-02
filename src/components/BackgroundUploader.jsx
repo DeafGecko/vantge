@@ -163,11 +163,14 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
                               >
                                     <img src={currentImageUrl} alt="Background" className="w-full h-full object-cover" style={{ objectPosition: currentPosition || '50% 50%' }} />
                                     <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-                                    <div className="absolute inset-0 flex items-center justify-center gap-1.5 flex-wrap px-2">
-                                          <button onClick={() => setEditing(true)} className="bg-white text-[#1A1A18] text-[9px] font-bold uppercase tracking-widest rounded-full px-3 py-1.5 hover:bg-[#F7F5F0] shadow-sm">Adjust</button>
-                                          <button onClick={() => inputRef.current?.click()} disabled={uploading} className="bg-white text-[#1A1A18] text-[9px] font-bold uppercase tracking-widest rounded-full px-3 py-1.5 hover:bg-[#F7F5F0] shadow-sm">{uploading ? 'Uploading...' : 'Change'}</button>
-                                          <button onClick={handleRemove} disabled={removing} className="bg-white/80 text-[#C84A44] text-[9px] font-bold uppercase tracking-widest rounded-full px-3 py-1.5 hover:bg-white shadow-sm">{removing ? 'Removing...' : 'Remove'}</button>
-                                    </div>
+                              </div>
+                              {/* Action buttons below image */}
+                              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                                    <button onClick={() => setEditing(true)} className="text-[9px] font-bold uppercase tracking-widest text-[#5A5A52] hover:text-[#1A1A18] transition-colors">Adjust</button>
+                                    <span className="text-[#D1D0C8] text-[9px]">·</span>
+                                    <button onClick={() => inputRef.current?.click()} disabled={uploading} className="text-[9px] font-bold uppercase tracking-widest text-[#5A5A52] hover:text-[#1A1A18] transition-colors">{uploading ? 'Uploading...' : 'Change'}</button>
+                                    <span className="text-[#D1D0C8] text-[9px]">·</span>
+                                    <button onClick={handleRemove} disabled={removing} className="text-[9px] font-bold uppercase tracking-widest text-[#C84A44] hover:text-red-700 transition-colors">{removing ? 'Removing...' : 'Remove'}</button>
                               </div>
                               <div className="mt-2">
                                     <div className="flex items-center justify-between mb-1">
