@@ -7,7 +7,6 @@ import { getEventType } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
 import VantgeLogo from '../components/VantgeLogo'
 
-const DEFAULT_BG = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85'
 
 export default function EventGateway() {
       const { eventSlug } = useParams()
@@ -39,10 +38,10 @@ export default function EventGateway() {
       const theme = getTheme(event.theme)
       const c = theme.colors
       const selectedFontFamily = resolveFontFamily(event.font_family)
-      const bgImage = event.background_image || DEFAULT_BG
-      const bgPosition = event.background_position || '50% 40%'
-      const accentColor = c.accent
       const eventType = getEventType(event.event_type)
+      const bgImage = event.background_image || eventType.defaultBg
+      const bgPosition = event.background_position || '50% 50%'
+      const accentColor = c.accent
       const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
 
       return (

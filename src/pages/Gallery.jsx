@@ -11,7 +11,6 @@ import { uploadPhoto } from '../lib/uploadPhoto'
 import FontLoader from '../components/FontLoader'
 import VantgeLogo from '../components/VantgeLogo'
 
-const DEFAULT_BG = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85'
 const FAVORITES_KEY = (eventId) => `vantge_favs_${eventId}`
 
 function looksLikeVideo(url) {
@@ -589,10 +588,10 @@ export default function Gallery() {
   const theme = getTheme(event.theme)
   const c = theme.colors
   const selectedFontFamily = resolveFontFamily(event.font_family)
-  const bgImage = event.background_image || DEFAULT_BG
+  const eventType = getEventType(event.event_type)
+  const bgImage = event.background_image || eventType.defaultBg
   const bgPosition = event.background_position || '50% 50%'
   const accentColor = c.accent
-  const eventType = getEventType(event.event_type)
   const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
 
   const allowDownloads = event.allow_downloads ?? true

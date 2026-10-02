@@ -10,7 +10,6 @@ import VantgeLogo from '../components/VantgeLogo'
 
 const MAX_FILES = 10
 const VIDEO_LIMIT_SECONDS = 30
-const DEFAULT_BG = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85'
 
 function checkVideoDuration(file) {
       return new Promise((resolve) => {
@@ -138,10 +137,10 @@ export default function GuestUploader() {
       const theme = getTheme(event.theme)
       const c = theme.colors
       const selectedFontFamily = resolveFontFamily(event.font_family)
-      const bgImage = event.background_image || DEFAULT_BG
-      const bgPosition = event.background_position || '50% 40%'
-      const accentColor = c.accent
       const eventType = getEventType(event.event_type)
+      const bgImage = event.background_image || eventType.defaultBg
+      const bgPosition = event.background_position || '50% 50%'
+      const accentColor = c.accent
       const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
       const totalFiles = files.length
       const videoCount = files.filter(f => f.type.startsWith('video/')).length
