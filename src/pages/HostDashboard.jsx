@@ -382,7 +382,7 @@ export default function HostDashboard() {
 
                                                       {/* Logo */}
                                                       <div className="shrink-0 flex flex-col">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2"></p>
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2">Logo</p>
                                                             <LogoUploader
                                                                   eventId={event.id}
                                                                   currentLogoUrl={currentLogoUrl}
