@@ -207,8 +207,8 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Background Photo</p>
                   {/* Mobile portrait first (smaller), then landscape desktop (wider) fills remaining space */}
                   <div className="flex gap-4 items-start">
-                        {/* Portrait — mobile (fixed narrow width) */}
-                        <div className="shrink-0 w-[120px]">
+                        {/* Portrait — mobile (fixed width with room for tint slider) */}
+                        <div className="shrink-0 w-[180px]">
                         <UploadZone
                               eventId={eventId}
                               label="Mobile · Portrait"
