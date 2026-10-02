@@ -669,17 +669,6 @@ export default function Gallery() {
           </header>
         )}
 
-        {/* ── BACK BUTTON ── */}
-        <button
-          onClick={() => navigate(`/${eventSlug}`)}
-          className="fixed top-4 left-4 z-[150] flex items-center gap-1.5 text-sm font-bold px-3 py-2 rounded-full shadow-lg"
-          style={{ background: '#1A1A18', color: '#fff' }}
-        >
-          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7" />
-          </svg>
-          Back
-        </button>
 
         {/* ── EVENT HERO ── */}
         {!selectMode && (
@@ -689,6 +678,18 @@ export default function Gallery() {
             <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%)` }} />
 
             <div className="absolute inset-0 flex flex-col items-center justify-between py-5 text-center px-6">
+              {/* Back button — top left */}
+              <button
+                onClick={() => navigate(`/${eventSlug}`)}
+                className="absolute top-4 left-4 flex items-center gap-1.5 text-white text-sm font-bold"
+                style={{ textShadow: '0 1px 6px rgba(0,0,0,0.8)' }}
+              >
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5M12 5l-7 7 7 7" />
+                </svg>
+                Back
+              </button>
+
               {/* Brand logo — top center, links to home */}
               <a href="/" className="opacity-80 hover:opacity-100 transition-opacity">
                 <VantgeLogo size="sm" monoWhite />
