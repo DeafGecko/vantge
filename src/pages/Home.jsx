@@ -115,20 +115,19 @@ export default function Home() {
                 {item.label}
               </a>
             ))}
-            <a href="#notify" className="relative inline-flex flex-col items-center gap-0 text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200 group">
-              {/* Pricing text with handwritten scribble over it */}
-              <span className="relative">
+            <a href="#notify" className="relative text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200">
+              {/* Pricing with scribble line through it */}
+              <span className="relative inline-block">
                 Pricing
-                {/* Hand-drawn messy strikethrough */}
                 <svg className="absolute overflow-visible pointer-events-none" aria-hidden="true"
-                  style={{ top: '48%', left: '-4px', width: 'calc(100% + 8px)', height: '14px' }}
-                  viewBox="0 0 60 14" preserveAspectRatio="none">
-                  <path d="M1,8 C5,4 9,11 15,7 C20,4 25,10 31,6 C37,3 42,9 48,6 C52,4 56,8 59,6"
-                    stroke="#C0392B" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                  style={{ top: '50%', left: '-2px', width: 'calc(100% + 4px)', height: '6px', transform: 'translateY(-50%)' }}
+                  viewBox="0 0 58 6" preserveAspectRatio="none">
+                  <path d="M0,3 C10,1 20,5 30,3 C40,1 50,4 58,3"
+                    stroke="#C0392B" strokeWidth="2" fill="none" strokeLinecap="round" />
                 </svg>
               </span>
-              {/* Cursive "Beta" label below */}
-              <span className="text-[#C0392B] leading-none" style={{ fontFamily: "'Caveat', cursive", fontSize: '16px', marginTop: '1px' }}>Beta</span>
+              {/* Cursive Beta sits to the right, same baseline */}
+              <span className="ml-1 text-[#C0392B]" style={{ fontFamily: "'Caveat', cursive", fontSize: '17px', lineHeight: 1, verticalAlign: 'middle' }}>Beta</span>
             </a>
             <a href="#notify" className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200">
               Contact
