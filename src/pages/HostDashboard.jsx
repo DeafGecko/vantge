@@ -394,8 +394,8 @@ export default function HostDashboard() {
                                                       <div className="flex-1 min-w-0 flex flex-col">
                                                             <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2">Display Name</p>
                                                             <div className="flex gap-2 items-center">
-                                                                  <input
-                                                                        type="text"
+                                                                  <textarea
+                                                                        rows={2}
                                                                         value={currentEventName}
                                                                         onChange={(e) => setLocalEventName(e.target.value)}
                                                                         onBlur={async () => {
@@ -405,7 +405,7 @@ export default function HostDashboard() {
                                                                               setSavingName(false)
                                                                         }}
                                                                         placeholder="e.g. Rogers & Bottrell Wedding"
-                                                                        className="flex-1 min-w-0 bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal"
+                                                                        className="flex-1 min-w-0 bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal resize-none leading-snug"
                                                                   />
                                                                   {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse shrink-0">Saving…</span>}
                                                             </div>
