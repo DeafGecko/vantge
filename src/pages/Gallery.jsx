@@ -79,6 +79,7 @@ function UploadSheet({ event, accentColor, onClose, onUploaded }) {
   const [done, setDone] = useState(false)
   const [error, setError] = useState(null)
   const inputRef = useRef(null)
+  const cameraRef = useRef(null)
 
   async function handleUpload() {
     if (!files.length || !guestName.trim()) return
@@ -123,17 +124,25 @@ function UploadSheet({ event, accentColor, onClose, onUploaded }) {
                 className="w-full bg-white border border-[#E0D8C6] rounded-xl px-4 py-3 text-sm text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5]" />
             </div>
 
-            {/* File picker */}
+            {/* Hidden inputs */}
             <input ref={inputRef} type="file" accept="image/*,video/*" multiple className="hidden"
+              onChange={e => setFiles(Array.from(e.target.files || []))} />
+            <input ref={cameraRef} type="file" accept="image/*,video/*" capture="environment" className="hidden"
               onChange={e => setFiles(Array.from(e.target.files || []))} />
 
             {files.length === 0 ? (
-              <button onClick={() => inputRef.current?.click()}
-                className="w-full border-2 border-dashed border-[#D4CFBC] rounded-2xl py-8 flex flex-col items-center gap-2 text-[#9A9A8E] hover:border-[#B29746] hover:text-[#B29746] transition-colors">
-                <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="13" r="4"/></svg>
-                <span className="text-sm font-semibold">Choose photos or videos</span>
-                <span className="text-xs">Tap to open camera or library</span>
-              </button>
+              <div className="flex gap-2 mb-1">
+                <button onClick={() => cameraRef.current?.click()}
+                  className="flex-1 border-2 border-dashed border-[#D4CFBC] rounded-2xl py-6 flex flex-col items-center gap-2 text-[#9A9A8E] hover:border-[#B29746] hover:text-[#B29746] transition-colors">
+                  <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="13" r="4"/></svg>
+                  <span className="text-xs font-bold">Take Photo</span>
+                </button>
+                <button onClick={() => inputRef.current?.click()}
+                  className="flex-1 border-2 border-dashed border-[#D4CFBC] rounded-2xl py-6 flex flex-col items-center gap-2 text-[#9A9A8E] hover:border-[#B29746] hover:text-[#B29746] transition-colors">
+                  <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <span className="text-xs font-bold">Library</span>
+                </button>
+              </div>
             ) : (
               <div className="mb-3">
                 <div className="flex items-center justify-between mb-2">

@@ -28,6 +28,7 @@ export default function GuestUploader() {
       const navigate = useNavigate()
       const { event, loading, error } = useEvent(eventSlug)
       const fileInputRef = useRef(null)
+      const cameraInputRef = useRef(null)
 
       const [files, setFiles] = useState([])
       const [guestName, setGuestName] = useState('')
@@ -276,22 +277,36 @@ export default function GuestUploader() {
 
                               {/* File picker / preview */}
                               {files.length === 0 ? (
-                                    <button
-                                          onClick={() => fileInputRef.current?.click()}
-                                          className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 mb-3 text-left border border-white/15 transition-all active:scale-[0.98]"
-                                          style={{ backgroundColor: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-                                    >
-                                          <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
-                                                <svg width="20" height="20" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
-                                                </svg>
-                                          </span>
-                                          <div className="flex-1 min-w-0">
-                                                <p className="font-bold text-sm text-white">Choose photos or videos</p>
-                                                <p className="text-[11px] text-white/45 mt-0.5">Up to {MAX_FILES} files · Videos max 30s</p>
-                                          </div>
-                                          <svg className="text-white/30 shrink-0" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                    </button>
+                                    <div className="flex gap-2 mb-3">
+                                          {/* Take Photo — opens native camera */}
+                                          <button
+                                                onClick={() => cameraInputRef.current?.click()}
+                                                className="flex-1 flex flex-col items-center gap-2 rounded-2xl px-4 py-5 border border-white/15 transition-all active:scale-[0.97]"
+                                                style={{ backgroundColor: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(20px)' }}
+                                          >
+                                                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}>
+                                                      <svg width="22" height="22" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>
+                                                      </svg>
+                                                </span>
+                                                <p className="font-bold text-sm text-white">Take Photo</p>
+                                                <p className="text-[10px] text-white/40">Opens your camera</p>
+                                          </button>
+                                          {/* Choose from library */}
+                                          <button
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="flex-1 flex flex-col items-center gap-2 rounded-2xl px-4 py-5 border border-white/15 transition-all active:scale-[0.97]"
+                                                style={{ backgroundColor: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)' }}
+                                          >
+                                                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
+                                                      <svg width="22" height="22" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+                                                      </svg>
+                                                </span>
+                                                <p className="font-bold text-sm text-white">Library</p>
+                                                <p className="text-[10px] text-white/40">Up to {MAX_FILES} files</p>
+                                          </button>
+                                    </div>
                               ) : (
                                     <div
                                           className="rounded-2xl p-4 mb-3 border border-white/10"
@@ -391,11 +406,21 @@ export default function GuestUploader() {
                         </div>
                   </div>
 
+                  {/* Library picker — multiple files */}
                   <input
                         ref={fileInputRef}
                         type="file"
                         accept="image/*,video/*"
                         multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                  />
+                  {/* Native camera — single capture */}
+                  <input
+                        ref={cameraInputRef}
+                        type="file"
+                        accept="image/*,video/*"
+                        capture="environment"
                         onChange={handleFileSelect}
                         className="hidden"
                   />
