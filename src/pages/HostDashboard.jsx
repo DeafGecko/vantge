@@ -316,7 +316,7 @@ export default function HostDashboard() {
                               <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mb-7">
 
                                     {/* LEFT — phone preview + QR */}
-                                    <div className="md:col-span-4 flex flex-col gap-3 md:sticky md:top-20">
+                                    <div className="md:col-span-4 flex flex-col gap-3">
 
                                           {/* Phone preview */}
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
@@ -349,7 +349,7 @@ export default function HostDashboard() {
                                           <QRCodeSection eventSlug={event.event_slug} />
 
                                           {/* Guest Sharing controls */}
-                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col gap-3">
+                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col gap-3 flex-1">
                                                 <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Guest Sharing</p>
                                                 {[
                                                       { label: 'Allow Downloads', sub: 'Guests can save photos', value: allowDownloads, toggle: toggleAllowDownloads },
