@@ -1,10 +1,10 @@
 // src/pages/EventGateway.jsx
+import { useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useEvent } from '../hooks/useEvent'
 import { getTheme } from '../lib/themes'
 import { resolveFontFamily } from '../lib/fonts'
 import { getEventType } from '../lib/eventTypes'
-import { useDefaultBg } from '../hooks/useDefaultBg'
 import FontLoader from '../components/FontLoader'
 import VantgeLogo from '../components/VantgeLogo'
 
@@ -13,6 +13,13 @@ export default function EventGateway() {
       const { eventSlug } = useParams()
       const navigate = useNavigate()
       const { event, loading: eventLoading } = useEvent(eventSlug)
+      const cameraInputRef = useRef(null)
+
+      function handleCameraCapture(e) {
+            const file = e.target.files?.[0]
+            if (!file) return
+            navigate(`/${eventSlug}/upload`, { state: { capturedFile: file } })
+      }
 
       if (eventLoading) {
             return (
@@ -128,8 +135,16 @@ export default function EventGateway() {
                               <div className="w-full flex flex-col gap-2.5">
 
                                     {/* Open Camera — primary */}
+                                    <input
+                                          ref={cameraInputRef}
+                                          type="file"
+                                          accept="image/*,video/*"
+                                          capture="environment"
+                                          className="hidden"
+                                          onChange={handleCameraCapture}
+                                    />
                                     <button
-                                          onClick={() => navigate(`/${eventSlug}/camera`)}
+                                          onClick={() => cameraInputRef.current?.click()}
                                           className="w-full flex items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-all active:scale-[0.98] shadow-lg"
                                           style={{ backgroundColor: accentColor, color: '#fff' }}
                                     >

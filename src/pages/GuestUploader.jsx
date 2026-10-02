@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useEvent } from '../hooks/useEvent'
 import { uploadPhoto } from '../lib/uploadPhoto'
 import { getTheme } from '../lib/themes'
@@ -25,11 +25,17 @@ function checkVideoDuration(file) {
 export default function GuestUploader() {
       const { eventSlug } = useParams()
       const navigate = useNavigate()
+      const location = useLocation()
       const { event, loading, error } = useEvent(eventSlug)
       const fileInputRef = useRef(null)
       const cameraInputRef = useRef(null)
 
       const [files, setFiles] = useState([])
+
+      useEffect(() => {
+            const captured = location.state?.capturedFile
+            if (captured) setFiles([captured])
+      }, [])
       const [guestName, setGuestName] = useState('')
       const [caption, setCaption] = useState('')
       const [uploadState, setUploadState] = useState('idle')
