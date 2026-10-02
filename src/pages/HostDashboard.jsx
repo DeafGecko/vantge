@@ -43,6 +43,7 @@ export default function HostDashboard() {
       const [localTheme, setLocalTheme] = useState(null)
       const [localFont, setLocalFont] = useState(null)
       const [localBgImage, setLocalBgImage] = useState(null)
+      const [localBgImageDesktop, setLocalBgImageDesktop] = useState(null)
       const [localEventName, setLocalEventName] = useState(null)
       const [savingName, setSavingName] = useState(false)
       const [savingSettings, setSavingSettings] = useState(false)
@@ -79,6 +80,7 @@ export default function HostDashboard() {
       const currentFontId = localFont || event?.font_family || DEFAULT_FONT_ID
       const currentFont = getFont(currentFontId)
       const currentBgImage = localBgImage !== null ? localBgImage : event?.background_image ?? null
+      const currentBgImageDesktop = localBgImageDesktop !== null ? localBgImageDesktop : event?.background_image_desktop ?? null
       const currentEventName = localEventName !== null ? localEventName : event?.event_name ?? ''
       const currentBgPosition = localBgPosition !== null ? localBgPosition : event?.background_position ?? '50% 50%'
       const currentBgTint = localBgTint !== null ? localBgTint : event?.background_tint ?? 55
@@ -431,10 +433,12 @@ export default function HostDashboard() {
                                                 <BackgroundUploader
                                                       eventId={event.id}
                                                       currentImageUrl={currentBgImage}
+                                                      currentImageDesktopUrl={currentBgImageDesktop}
                                                       currentPosition={currentBgPosition}
                                                       currentTint={currentBgTint}
                                                       accentColor={currentTheme.colors.accent}
                                                       onSaved={(url, pos, tint) => { setLocalBgImage(url); setLocalBgPosition(pos); setLocalBgTint(tint) }}
+                                                      onSavedDesktop={(url) => setLocalBgImageDesktop(url)}
                                                 />
                                           </div>
 

@@ -1,11 +1,10 @@
 import { useState, useRef, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
-const MAX_BYTES = 50 * 1024 * 1024 // 50MB
+const MAX_BYTES = 50 * 1024 * 1024
 
 async function compressImage(file) {
       if (file.size <= MAX_BYTES) return file
-
       return new Promise((resolve) => {
             const img = new Image()
             const url = URL.createObjectURL(file)
@@ -13,25 +12,17 @@ async function compressImage(file) {
                   URL.revokeObjectURL(url)
                   const canvas = document.createElement('canvas')
                   let { width, height } = img
-
                   let scale = 1
-                  while ((width * height * 3 * scale * scale) > MAX_BYTES && scale > 0.1) {
-                        scale -= 0.05
-                  }
-
+                  while ((width * height * 3 * scale * scale) > MAX_BYTES && scale > 0.1) scale -= 0.05
                   canvas.width = Math.round(width * scale)
                   canvas.height = Math.round(height * scale)
                   canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
-
                   let quality = 0.92
                   const tryBlob = (q) => {
                         canvas.toBlob((blob) => {
                               if (!blob) return resolve(file)
-                              if (blob.size <= MAX_BYTES || q <= 0.3) {
-                                    resolve(new File([blob], file.name, { type: 'image/jpeg' }))
-                              } else {
-                                    tryBlob(q - 0.1)
-                              }
+                              if (blob.size <= MAX_BYTES || q <= 0.3) resolve(new File([blob], file.name, { type: 'image/jpeg' }))
+                              else tryBlob(q - 0.1)
                         }, 'image/jpeg', q)
                   }
                   tryBlob(quality)
@@ -40,7 +31,7 @@ async function compressImage(file) {
       })
 }
 
-export default function BackgroundUploader({ eventId, currentImageUrl, currentPosition, currentTint, accentColor, onSaved }) {
+function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosition, currentTint, accentColor, dbField, onSaved }) {
       const [uploading, setUploading] = useState(false)
       const [removing, setRemoving] = useState(false)
       const [editing, setEditing] = useState(false)
@@ -53,25 +44,16 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentPo
       const dragStart = useRef(null)
 
       const activeUrl = pendingUrl || currentImageUrl
+      const tintAlpha = (tint / 100).toFixed(2)
 
       async function handleFile(e) {
             const file = e.target.files?.[0]
             if (!file) return
-
             setUploading(true)
             const compressed = await compressImage(file)
-            const path = `backgrounds/${eventId}/bg-${Date.now()}.jpg`
-
-            const { error: uploadError } = await supabase.storage
-                  .from('event-media')
-                  .upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
-
-            if (uploadError) {
-                  alert('Upload failed: ' + uploadError.message)
-                  setUploading(false)
-                  return
-            }
-
+            const path = `backgrounds/${eventId}/${dbField}-${Date.now()}.jpg`
+            const { error: uploadError } = await supabase.storage.from('event-media').upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
+            if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
             const { data } = supabase.storage.from('event-media').getPublicUrl(path)
             setPendingUrl(data.publicUrl)
             setPosition('50% 50%')
@@ -95,32 +77,20 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentPo
             setDragging(true)
             setPosition(getPositionFromEvent(e, rect))
       }
-
       function onDragMove(e) {
             if (!dragging || !dragStart.current) return
             e.preventDefault()
             setPosition(getPositionFromEvent(e, dragStart.current))
       }
-
-      function onDragEnd() {
-            setDragging(false)
-            dragStart.current = null
-      }
+      function onDragEnd() { setDragging(false); dragStart.current = null }
 
       async function handleConfirm() {
             const urlToSave = pendingUrl || currentImageUrl
-            const { error } = await supabase
-                  .from('events')
-                  .update({ background_image: urlToSave, background_position: position, background_tint: tint })
-                  .eq('id', eventId)
-
-            if (error) {
-                  alert('Could not save: ' + error.message)
-            } else {
-                  onSaved(urlToSave, position, tint)
-                  setPendingUrl(null)
-                  setEditing(false)
-            }
+            const { error } = await supabase.from('events').update({ [dbField]: urlToSave, background_position: position, background_tint: tint }).eq('id', eventId)
+            if (error) { alert('Could not save: ' + error.message); return }
+            onSaved(urlToSave, position, tint)
+            setPendingUrl(null)
+            setEditing(false)
       }
 
       function handleCancel() {
@@ -132,167 +102,84 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentPo
 
       async function handleRemove() {
             setRemoving(true)
-            const { error } = await supabase
-                  .from('events')
-                  .update({ background_image: null, background_position: null, background_tint: 55 })
-                  .eq('id', eventId)
-            if (error) {
-                  alert('Could not remove: ' + error.message)
-            } else {
-                  onSaved(null, null, 55)
-                  setEditing(false)
-                  setPendingUrl(null)
-                  setTint(55)
-            }
+            const { error } = await supabase.from('events').update({ [dbField]: null }).eq('id', eventId)
+            if (error) { alert('Could not remove: ' + error.message) }
+            else { onSaved(null, currentPosition, currentTint); setEditing(false); setPendingUrl(null) }
             setRemoving(false)
       }
 
-      // Adjust tint on existing image without entering full edit mode
       async function saveTint(val) {
             setTint(val)
-            await supabase
-                  .from('events')
-                  .update({ background_tint: val })
-                  .eq('id', eventId)
+            await supabase.from('events').update({ background_tint: val }).eq('id', eventId)
             onSaved(currentImageUrl, currentPosition, val)
       }
 
-      const tintAlpha = (tint / 100).toFixed(2)
+      // Preview dimensions
+      const previewH = isLandscape ? 130 : 180
+      const previewW = isLandscape ? '100%' : 100
 
-      // Position + tint editor — shown after upload or clicking "Adjust"
-      if (editing && activeUrl) {
-            return (
-                  <div>
-                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Background Photo</p>
-                        <p className="text-xs text-[#88887E] mb-3">Drag to reposition. Adjust the tint to make text pop.</p>
-
-                        <div
-                              ref={editorRef}
-                              className="relative rounded-2xl overflow-hidden border-2 border-[#1A1A18] select-none"
-                              style={{ height: 220, cursor: dragging ? 'grabbing' : 'crosshair' }}
-                              onMouseDown={onDragStart}
-                              onMouseMove={onDragMove}
-                              onMouseUp={onDragEnd}
-                              onMouseLeave={onDragEnd}
-                              onTouchStart={onDragStart}
-                              onTouchMove={onDragMove}
-                              onTouchEnd={onDragEnd}
-                        >
-                              <img
-                                    src={activeUrl}
-                                    alt="Background"
-                                    className="w-full h-full object-cover pointer-events-none"
-                                    style={{ objectPosition: position }}
-                                    draggable={false}
-                              />
-                              {/* Live tint preview */}
-                              <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-                              {/* Sample text so host can judge readability */}
-                              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1">
-                                    <p className="text-[9px] font-bold tracking-widest uppercase text-white/60">Your tagline here</p>
-                                    <p className="text-xl font-black text-white drop-shadow-lg">Event Name</p>
-                              </div>
-                              {/* Crosshair dot */}
-                              <div
-                                    className="absolute w-5 h-5 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2"
-                                    style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: accentColor }}
-                              />
+      if (editing && activeUrl) return (
+            <div>
+                  <p className="text-[9px] text-[#88887E] mb-2">Drag to reposition.</p>
+                  <div
+                        ref={editorRef}
+                        className="relative rounded-2xl overflow-hidden border-2 border-[#1A1A18] select-none"
+                        style={{ height: previewH, cursor: dragging ? 'grabbing' : 'crosshair' }}
+                        onMouseDown={onDragStart} onMouseMove={onDragMove} onMouseUp={onDragEnd} onMouseLeave={onDragEnd}
+                        onTouchStart={onDragStart} onTouchMove={onDragMove} onTouchEnd={onDragEnd}
+                  >
+                        <img src={activeUrl} alt="Background" className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: position }} draggable={false} />
+                        <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1">
+                              <p className="text-[9px] font-bold tracking-widest uppercase text-white/60">Your tagline</p>
+                              <p className="text-lg font-black text-white drop-shadow-lg">Event Name</p>
                         </div>
-
-                        {/* Tint slider */}
-                        <div className="mt-4">
-                              <div className="flex items-center justify-between mb-2">
-                                    <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Black Tint</p>
-                                    <span className="text-[9px] font-bold text-[#5A5A52]">{tint}%</span>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                    <span className="text-[9px] text-[#B0AFA5]">None</span>
-                                    <input
-                                          type="range"
-                                          min={0}
-                                          max={90}
-                                          value={tint}
-                                          onChange={(e) => setTint(Number(e.target.value))}
-                                          className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
-                                    />
-                                    <span className="text-[9px] text-[#B0AFA5]">Dark</span>
-                              </div>
+                        <div className="absolute w-5 h-5 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2" style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: accentColor }} />
+                  </div>
+                  <div className="mt-3">
+                        <div className="flex items-center justify-between mb-1">
+                              <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Black Tint</p>
+                              <span className="text-[9px] font-bold text-[#5A5A52]">{tint}%</span>
                         </div>
-
-                        <div className="flex gap-3 mt-4">
-                              <button
-                                    onClick={handleConfirm}
-                                    className="flex-1 bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-2.5 hover:bg-black transition-all"
-                              >
-                                    Save
-                              </button>
-                              <button
-                                    onClick={handleCancel}
-                                    className="flex-1 border border-[#E8E4DA] text-[#5A5A52] text-[10px] font-bold uppercase tracking-widest rounded-full py-2.5 hover:border-[#88887E] transition-all"
-                              >
-                                    Cancel
-                              </button>
+                        <div className="flex items-center gap-3">
+                              <span className="text-[9px] text-[#B0AFA5]">None</span>
+                              <input type="range" min={0} max={90} value={tint} onChange={(e) => setTint(Number(e.target.value))} className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer" />
+                              <span className="text-[9px] text-[#B0AFA5]">Dark</span>
                         </div>
                   </div>
-            )
-      }
+                  <div className="flex gap-2 mt-3">
+                        <button onClick={handleConfirm} className="flex-1 bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-2 hover:bg-black transition-all">Save</button>
+                        <button onClick={handleCancel} className="flex-1 border border-[#E8E4DA] text-[#5A5A52] text-[10px] font-bold uppercase tracking-widest rounded-full py-2 hover:border-[#88887E] transition-all">Cancel</button>
+                  </div>
+            </div>
+      )
 
       return (
-            <div>
-                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Background Photo</p>
+            <div className="flex flex-col items-center gap-2">
+                  <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
 
                   {currentImageUrl ? (
-                        <div>
-                              <div className="relative rounded-2xl overflow-hidden border border-[#E8E4DA]" style={{ height: 150 }}>
-                                    <img
-                                          src={currentImageUrl}
-                                          alt="Background"
-                                          className="w-full h-full object-cover"
-                                          style={{ objectPosition: currentPosition || '50% 50%' }}
-                                    />
+                        <div className="w-full">
+                              <div
+                                    className="relative rounded-xl overflow-hidden border border-[#E8E4DA] mx-auto"
+                                    style={{ height: previewH, width: isLandscape ? '100%' : previewW }}
+                              >
+                                    <img src={currentImageUrl} alt="Background" className="w-full h-full object-cover" style={{ objectPosition: currentPosition || '50% 50%' }} />
                                     <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-                                    <div className="absolute inset-0 flex items-center justify-center gap-2 flex-wrap px-4">
-                                          <button
-                                                onClick={() => setEditing(true)}
-                                                className="bg-white text-[#1A1A18] text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-2 hover:bg-[#F7F5F0] transition-all shadow-sm"
-                                          >
-                                                Adjust
-                                          </button>
-                                          <button
-                                                onClick={() => inputRef.current?.click()}
-                                                disabled={uploading}
-                                                className="bg-white text-[#1A1A18] text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-2 hover:bg-[#F7F5F0] transition-all shadow-sm"
-                                          >
-                                                {uploading ? 'Uploading...' : 'Change'}
-                                          </button>
-                                          <button
-                                                onClick={handleRemove}
-                                                disabled={removing}
-                                                className="bg-white/80 text-[#C84A44] text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-2 hover:bg-white transition-all shadow-sm"
-                                          >
-                                                {removing ? 'Removing...' : 'Remove'}
-                                          </button>
+                                    <div className="absolute inset-0 flex items-center justify-center gap-1.5 flex-wrap px-2">
+                                          <button onClick={() => setEditing(true)} className="bg-white text-[#1A1A18] text-[9px] font-bold uppercase tracking-widest rounded-full px-3 py-1.5 hover:bg-[#F7F5F0] shadow-sm">Adjust</button>
+                                          <button onClick={() => inputRef.current?.click()} disabled={uploading} className="bg-white text-[#1A1A18] text-[9px] font-bold uppercase tracking-widest rounded-full px-3 py-1.5 hover:bg-[#F7F5F0] shadow-sm">{uploading ? 'Uploading...' : 'Change'}</button>
+                                          <button onClick={handleRemove} disabled={removing} className="bg-white/80 text-[#C84A44] text-[9px] font-bold uppercase tracking-widest rounded-full px-3 py-1.5 hover:bg-white shadow-sm">{removing ? 'Removing...' : 'Remove'}</button>
                                     </div>
                               </div>
-
-                              {/* Quick tint slider — always visible when photo is set */}
-                              <div className="mt-3">
-                                    <div className="flex items-center justify-between mb-1.5">
-                                          <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Black Tint</p>
+                              <div className="mt-2">
+                                    <div className="flex items-center justify-between mb-1">
+                                          <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5]">Tint</p>
                                           <span className="text-[9px] font-bold text-[#5A5A52]">{tint}%</span>
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
                                           <span className="text-[9px] text-[#B0AFA5]">None</span>
-                                          <input
-                                                type="range"
-                                                min={0}
-                                                max={90}
-                                                value={tint}
-                                                onChange={(e) => setTint(Number(e.target.value))}
-                                                onMouseUp={(e) => saveTint(Number(e.target.value))}
-                                                onTouchEnd={(e) => saveTint(Number(e.target.changedTouches[0]?.target.value ?? tint))}
-                                                className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
-                                          />
+                                          <input type="range" min={0} max={90} value={tint} onChange={(e) => setTint(Number(e.target.value))} onMouseUp={(e) => saveTint(Number(e.target.value))} onTouchEnd={(e) => saveTint(Number(e.target.changedTouches[0]?.target.value ?? tint))} className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer" />
                                           <span className="text-[9px] text-[#B0AFA5]">Dark</span>
                                     </div>
                               </div>
@@ -301,21 +188,49 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentPo
                         <button
                               onClick={() => inputRef.current?.click()}
                               disabled={uploading}
-                              className="w-full border-2 border-dashed border-[#E8E4DA] rounded-2xl p-6 text-center hover:border-[#1A1A18] transition-colors"
+                              className="border-2 border-dashed border-[#E8E4DA] rounded-xl flex flex-col items-center justify-center gap-2 hover:border-[#1A1A18] transition-colors"
+                              style={{ height: previewH, width: isLandscape ? '100%' : previewW }}
                         >
-                              <div className="w-10 h-10 rounded-xl bg-[#F7F5F0] flex items-center justify-center mx-auto mb-3">
-                                    <svg width="20" height="20" fill="none" stroke="#B0AFA5" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                              </div>
-                              <p className="text-sm font-bold text-[#1A1A18] mb-1">
-                                    {uploading ? 'Uploading...' : 'Upload background photo'}
-                              </p>
-                              <p className="text-xs text-[#B0AFA5]">
-                                    Use a <span className="font-bold text-[#1A1A18]">vertical (portrait)</span> photo for best results — landscape will be cropped
-                              </p>
+                              <svg width="24" height="24" fill="none" stroke="#B0AFA5" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                              <p className="text-[10px] font-bold text-[#B0AFA5] text-center px-2">{uploading ? 'Uploading...' : 'Upload photo'}</p>
                         </button>
                   )}
 
-                  <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+                  <p className="text-[10px] font-bold text-[#1A1A18] text-center">{label}</p>
+            </div>
+      )
+}
+
+export default function BackgroundUploader({ eventId, currentImageUrl, currentImageDesktopUrl, currentPosition, currentTint, accentColor, onSaved, onSavedDesktop }) {
+      return (
+            <div>
+                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Background Photo</p>
+                  <div className="grid grid-cols-2 gap-4 items-start">
+                        {/* Landscape — desktop */}
+                        <UploadZone
+                              eventId={eventId}
+                              label="Landscape · Desktop"
+                              isLandscape={true}
+                              currentImageUrl={currentImageDesktopUrl}
+                              currentPosition={currentPosition}
+                              currentTint={currentTint}
+                              accentColor={accentColor}
+                              dbField="background_image_desktop"
+                              onSaved={onSavedDesktop}
+                        />
+                        {/* Portrait — mobile */}
+                        <UploadZone
+                              eventId={eventId}
+                              label="Portrait · Mobile"
+                              isLandscape={false}
+                              currentImageUrl={currentImageUrl}
+                              currentPosition={currentPosition}
+                              currentTint={currentTint}
+                              accentColor={accentColor}
+                              dbField="background_image"
+                              onSaved={onSaved}
+                        />
+                  </div>
             </div>
       )
 }
