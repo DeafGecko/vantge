@@ -121,8 +121,14 @@ export default function HostDashboard() {
             setToggling(true)
             const newValue = !isUnlocked
             setLocalUnlocked(newValue)
-            const { error } = await supabase.from('events').update({ gallery_unlocked: newValue }).eq('id', event.id)
-            if (error) { setLocalUnlocked(!newValue); alert("Couldn't update gallery: " + error.message) }
+            const { data, error } = await supabase.from('events').update({ gallery_unlocked: newValue }).eq('id', event.id).select('gallery_unlocked').single()
+            if (error) {
+                  setLocalUnlocked(!newValue)
+                  alert("Couldn't update gallery: " + error.message)
+            } else if (data?.gallery_unlocked !== newValue) {
+                  setLocalUnlocked(!newValue)
+                  alert("Gallery update was blocked. Please sign out and sign back in, then try again.")
+            }
             setToggling(false)
       }
 
