@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
 const MAX_BYTES = 50 * 1024 * 1024
@@ -38,10 +38,8 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
       const [pendingUrl, setPendingUrl] = useState(null)
       const [position, setPosition] = useState(currentPosition || '50% 50%')
       const [tint, setTint] = useState(currentTint ?? 55)
-      const [dragging, setDragging] = useState(false)
       const editorRef = useRef(null)
       const inputRef = useRef(null)
-      const dragStart = useRef(null)
 
       const activeUrl = pendingUrl || currentImageUrl
       const tintAlpha = (tint / 100).toFixed(2)
@@ -62,27 +60,6 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
             if (inputRef.current) inputRef.current.value = ''
       }
 
-      const getPositionFromEvent = useCallback((e, rect) => {
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY
-            const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100))
-            const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100))
-            return `${Math.round(x)}% ${Math.round(y)}%`
-      }, [])
-
-      function onDragStart(e) {
-            e.preventDefault()
-            const rect = editorRef.current.getBoundingClientRect()
-            dragStart.current = rect
-            setDragging(true)
-            setPosition(getPositionFromEvent(e, rect))
-      }
-      function onDragMove(e) {
-            if (!dragging || !dragStart.current) return
-            e.preventDefault()
-            setPosition(getPositionFromEvent(e, dragStart.current))
-      }
-      function onDragEnd() { setDragging(false); dragStart.current = null }
 
       async function handleConfirm() {
             const urlToSave = pendingUrl || currentImageUrl
@@ -120,21 +97,33 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
 
       if (editing && activeUrl) return (
             <div className="w-full overflow-hidden">
-                  <p className="text-[9px] text-[#88887E] mb-2">Drag to reposition.</p>
+                  <p className="text-[9px] text-[#88887E] mb-2">Click to set the focus point — that area stays centered on all screens.</p>
                   <div
                         ref={editorRef}
                         className="relative rounded-2xl overflow-hidden border-2 border-[#1A1A18] select-none w-full"
-                        style={{ height: previewH, cursor: dragging ? 'grabbing' : 'crosshair' }}
-                        onMouseDown={onDragStart} onMouseMove={onDragMove} onMouseUp={onDragEnd} onMouseLeave={onDragEnd}
-                        onTouchStart={onDragStart} onTouchMove={onDragMove} onTouchEnd={onDragEnd}
+                        style={{ height: previewH, cursor: 'crosshair' }}
+                        onClick={(e) => {
+                              const rect = editorRef.current.getBoundingClientRect()
+                              const x = Math.round(((e.clientX - rect.left) / rect.width) * 100)
+                              const y = Math.round(((e.clientY - rect.top) / rect.height) * 100)
+                              setPosition(`${x}% ${y}%`)
+                        }}
+                        onTouchEnd={(e) => {
+                              const rect = editorRef.current.getBoundingClientRect()
+                              const touch = e.changedTouches[0]
+                              const x = Math.round(((touch.clientX - rect.left) / rect.width) * 100)
+                              const y = Math.round(((touch.clientY - rect.top) / rect.height) * 100)
+                              setPosition(`${x}% ${y}%`)
+                        }}
                   >
                         <img src={activeUrl} alt="Background" className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: position }} draggable={false} />
                         <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1 px-3">
-                              <p className="text-[8px] font-bold tracking-widest uppercase text-white/50">Your tagline</p>
-                              <p className="text-sm font-black text-white/70 text-center truncate w-full">Event Name</p>
+                        {/* Focus point crosshair */}
+                        <div className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2" style={{ left: position.split(' ')[0], top: position.split(' ')[1] }}>
+                              <div className="w-8 h-8 rounded-full border-2 border-white shadow-lg flex items-center justify-center" style={{ backgroundColor: `${accentColor}99` }}>
+                                    <svg width="10" height="10" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M2 12h4M18 12h4" strokeLinecap="round"/></svg>
+                              </div>
                         </div>
-                        <div className="absolute w-5 h-5 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2" style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: accentColor }} />
                   </div>
                   <div className="mt-3">
                         <div className="flex items-center justify-between mb-1">
