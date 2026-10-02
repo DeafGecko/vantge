@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { getEventType } from '../lib/eventTypes'
+import { useDefaultBg } from '../hooks/useDefaultBg'
 
 const MAX_BYTES = 50 * 1024 * 1024
 
@@ -103,9 +104,10 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
 
       async function handleRemove() {
             setRemoving(true)
-            const { error } = await supabase.from('events').update({ [dbField]: null }).eq('id', eventId)
+            const fallback = !isLandscape ? (defaultBg ?? null) : null
+            const { error } = await supabase.from('events').update({ [dbField]: fallback }).eq('id', eventId)
             if (error) { alert('Could not remove: ' + error.message) }
-            else { onSaved(null, currentPosition, currentTint); setEditing(false); setPendingUrl(null) }
+            else { onSaved(fallback, currentPosition, currentTint); setEditing(false); setPendingUrl(null) }
             setRemoving(false)
       }
 
@@ -117,7 +119,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
 
       // Preview dimensions
       const previewH = 180
-      const previewW = isLandscape ? '80%' : 100
+      const previewW = '100%'
 
       if (editing && activeUrl) return (
             <div className="w-full overflow-hidden">
@@ -133,7 +135,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
                         <div className="absolute w-6 h-6 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2" style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: `${accentColor}99` }} />
                   </div>
                   <p className="text-[9px] text-[#B0AFA5] mt-1.5 mb-2">Drag to reposition.</p>
-                  <div className="mt-1">
+                  <div className="mt-1" style={isLandscape ? { width: '80%', marginLeft: 'auto', marginRight: 'auto' } : {}}>
                         <div className="flex items-center justify-between mb-1">
                               <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Black Tint</p>
                               <span className="text-[9px] font-bold text-[#5A5A52]">{tint}%</span>
@@ -155,7 +157,7 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
             <div className="flex flex-col items-center gap-2 w-full">
                   <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
 
-                  {currentImageUrl ? (
+                  {currentImageUrl && currentImageUrl !== defaultBg ? (
                         <div className="w-full">
                               <div
                                     className="relative rounded-xl overflow-hidden border border-[#E8E4DA] mx-auto"
@@ -164,24 +166,44 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
                                     <img src={currentImageUrl} alt="Background" className="w-full h-full object-cover" style={{ objectPosition: currentPosition || '50% 50%' }} />
                                     <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
                               </div>
-                              {/* Action buttons below image */}
-                              <div className="flex items-center justify-center gap-1.5 mt-2 flex-wrap">
-                                    <button onClick={() => setEditing(true)} className="text-[9px] font-bold uppercase tracking-widest text-[#5A5A52] hover:text-[#1A1A18] transition-colors">Adjust</button>
-                                    <span className="text-[#D1D0C8] text-[9px]">·</span>
-                                    <button onClick={() => inputRef.current?.click()} disabled={uploading} className="text-[9px] font-bold uppercase tracking-widest text-[#5A5A52] hover:text-[#1A1A18] transition-colors">{uploading ? 'Uploading...' : 'Change'}</button>
-                                    <span className="text-[#D1D0C8] text-[9px]">·</span>
-                                    <button onClick={handleRemove} disabled={removing} className="text-[9px] font-bold uppercase tracking-widest text-[#C84A44] hover:text-red-700 transition-colors">{removing ? 'Removing...' : 'Remove'}</button>
+                              {/* Action buttons + tint — inset 10% on landscape */}
+                              <div>
+                                    <div className="flex items-center justify-center gap-1.5 mt-2 flex-wrap">
+                                          <button onClick={() => setEditing(true)} className="text-[9px] font-bold uppercase tracking-widest text-[#5A5A52] hover:text-[#1A1A18] transition-colors">Adjust</button>
+                                          <span className="text-[#D1D0C8] text-[9px]">·</span>
+                                          <button onClick={() => inputRef.current?.click()} disabled={uploading} className="text-[9px] font-bold uppercase tracking-widest text-[#5A5A52] hover:text-[#1A1A18] transition-colors">{uploading ? 'Uploading...' : 'Change'}</button>
+                                          <span className="text-[#D1D0C8] text-[9px]">·</span>
+                                          <button onClick={handleRemove} disabled={removing} className="text-[9px] font-bold uppercase tracking-widest text-[#C84A44] hover:text-red-700 transition-colors">{removing ? 'Removing...' : 'Remove'}</button>
+                                    </div>
+                                    <div className="mt-2">
+                                          <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-1">Tint</p>
+                                          <div className="flex items-center gap-2" style={{ marginLeft: isLandscape ? 50 : 0, marginRight: isLandscape ? 50 : 0 }}>
+                                                <span className="text-[9px] text-[#B0AFA5] shrink-0">None</span>
+                                                <input type="range" min={0} max={90} value={tint} onChange={(e) => setTint(Number(e.target.value))} onMouseUp={(e) => saveTint(Number(e.target.value))} onTouchEnd={(e) => saveTint(Number(e.target.changedTouches[0]?.target.value ?? tint))} className="flex-1 min-w-0 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer" />
+                                                <span className="text-[9px] text-[#B0AFA5] shrink-0">Dark</span>
+                                                <span className="text-[9px] font-bold text-[#5A5A52] shrink-0 ml-1">{tint}%</span>
+                                          </div>
+                                    </div>
                               </div>
-                              <div className="mt-2">
-                                    <div className="flex items-center justify-between mb-1">
-                                          <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5]">Tint</p>
-                                          <span className="text-[9px] font-bold text-[#5A5A52]">{tint}%</span>
+                        </div>
+                  ) : defaultBg ? (
+                        <div className="w-full">
+                              <div
+                                    className="relative rounded-xl overflow-hidden border border-[#E8E4DA] mx-auto cursor-pointer group"
+                                    style={{ height: previewH, width: previewW }}
+                                    onClick={() => inputRef.current?.click()}
+                              >
+                                    <img src={defaultBg} alt="Default background" className="w-full h-full object-cover" style={{ objectPosition: '50% 50%' }} />
+                                    <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <svg width="20" height="20" fill="none" stroke="white" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                          <p className="text-[9px] font-bold text-white uppercase tracking-widest">Upload photo</p>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                          <span className="text-[9px] text-[#B0AFA5]">None</span>
-                                          <input type="range" min={0} max={90} value={tint} onChange={(e) => setTint(Number(e.target.value))} onMouseUp={(e) => saveTint(Number(e.target.value))} onTouchEnd={(e) => saveTint(Number(e.target.changedTouches[0]?.target.value ?? tint))} className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer" />
-                                          <span className="text-[9px] text-[#B0AFA5]">Dark</span>
+                                    <div className="absolute bottom-2 left-0 right-0 flex justify-center pointer-events-none group-hover:hidden">
+                                          <span className="text-[8px] font-bold uppercase tracking-widest text-white/60 bg-black/40 px-2 py-0.5 rounded-full">Default</span>
                                     </div>
+                              </div>
+                              <div className="flex items-center justify-center mt-2">
+                                    <button onClick={() => inputRef.current?.click()} disabled={uploading} className="text-[9px] font-bold uppercase tracking-widest text-[#5A5A52] hover:text-[#1A1A18] transition-colors">{uploading ? 'Uploading...' : 'Upload photo'}</button>
                               </div>
                         </div>
                   ) : (
@@ -202,14 +224,14 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, c
 }
 
 export default function BackgroundUploader({ eventId, currentImageUrl, currentImageDesktopUrl, currentPosition, currentTint, accentColor, eventTypeId, onSaved, onSavedDesktop }) {
-      const defaultBg = getEventType(eventTypeId)?.defaultBg || null
+      const defaultBg = useDefaultBg(eventTypeId)
 
       return (
             <div>
                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Background Photo</p>
                   <div className="flex gap-4 items-start">
-                        {/* Portrait — mobile (fixed width with room for tint slider) */}
-                        <div className="shrink-0 w-[180px]">
+                        {/* Portrait — mobile */}
+                        <div className="flex-1 min-w-0 overflow-hidden">
                         <UploadZone
                               eventId={eventId}
                               label="Mobile · Portrait"
@@ -223,8 +245,8 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               onSaved={onSaved}
                         />
                         </div>
-                        {/* Landscape — desktop (fills rest) */}
-                        <div className="flex-1 min-w-0 pl-[10px]">
+                        {/* Landscape — desktop */}
+                        <div className="flex-1 min-w-0 overflow-hidden">
                         <UploadZone
                               eventId={eventId}
                               label="Desktop · Landscape"

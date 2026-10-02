@@ -42,8 +42,8 @@ export default function HostDashboard() {
       const [activeTab, setActiveTab] = useState(0)
       const [localTheme, setLocalTheme] = useState(null)
       const [localFont, setLocalFont] = useState(null)
-      const [localBgImage, setLocalBgImage] = useState(null)
-      const [localBgImageDesktop, setLocalBgImageDesktop] = useState(null)
+      const [localBgImage, setLocalBgImage] = useState(undefined)
+      const [localBgImageDesktop, setLocalBgImageDesktop] = useState(undefined)
       const [localEventName, setLocalEventName] = useState(null)
       const [savingName, setSavingName] = useState(false)
       const [savingSettings, setSavingSettings] = useState(false)
@@ -79,8 +79,8 @@ export default function HostDashboard() {
       const currentTheme = getTheme(currentThemeId)
       const currentFontId = localFont || event?.font_family || DEFAULT_FONT_ID
       const currentFont = getFont(currentFontId)
-      const currentBgImage = localBgImage !== null ? localBgImage : event?.background_image ?? null
-      const currentBgImageDesktop = localBgImageDesktop !== null ? localBgImageDesktop : event?.background_image_desktop ?? null
+      const currentBgImage = localBgImage !== undefined ? localBgImage : event?.background_image ?? null
+      const currentBgImageDesktop = localBgImageDesktop !== undefined ? localBgImageDesktop : event?.background_image_desktop ?? null
       const currentEventName = localEventName !== null ? localEventName : event?.event_name ?? ''
       const currentBgPosition = localBgPosition !== null ? localBgPosition : event?.background_position ?? '50% 50%'
       const currentBgTint = localBgTint !== null ? localBgTint : event?.background_tint ?? 55
@@ -94,6 +94,19 @@ export default function HostDashboard() {
                   if (data && data.approved === false) navigate('/pending', { replace: true })
             })
       }, [user, navigate])
+
+      useEffect(() => {
+            if (!event?.id || event.background_image) return
+            const eventType = event.event_type
+            const hardcodedFallback = getEventType(eventType)?.defaultBg ?? null
+            supabase.from('admin_branding').select('background_url').eq('event_type', eventType).maybeSingle().then(({ data }) => {
+                  const defaultImg = data?.background_url || hardcodedFallback
+                  if (!defaultImg) return
+                  supabase.from('events').update({ background_image: defaultImg }).eq('id', event.id).then(() => {
+                        setLocalBgImage(defaultImg)
+                  })
+            })
+      }, [event?.id, event?.background_image, event?.event_type])
 
       useEffect(() => {
             if (!event?.id) return
@@ -301,7 +314,7 @@ export default function HostDashboard() {
                               <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mb-7">
 
                                     {/* LEFT — phone preview + QR */}
-                                    <div className="md:col-span-4 flex flex-col gap-3 md:self-start md:sticky md:top-20">
+                                    <div className="md:col-span-4 flex flex-col gap-3 md:sticky md:top-20">
 
                                           {/* Phone preview */}
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
@@ -405,10 +418,25 @@ export default function HostDashboard() {
                                                                         onChange={async (e) => {
                                                                               const val = e.target.value
                                                                               setLocalEventType(val)
-                                                                              await updateEventSettings({ event_type: val })
+                                                                              const updates = { event_type: val || null }
+                                                                              const allDefaults = EVENT_TYPES.map(t => t.defaultBg)
+                                                                              const isUsingDefault = !currentBgImage || allDefaults.includes(currentBgImage)
+                                                                              if (isUsingDefault) {
+                                                                                    if (!val) {
+                                                                                          updates.background_image = null
+                                                                                          setLocalBgImage(null)
+                                                                                    } else {
+                                                                                          const { data } = await supabase.from('admin_branding').select('background_url').eq('event_type', val).maybeSingle()
+                                                                                          const newDefault = data?.background_url || getEventType(val)?.defaultBg || null
+                                                                                          updates.background_image = newDefault
+                                                                                          setLocalBgImage(newDefault)
+                                                                                    }
+                                                                              }
+                                                                              await updateEventSettings(updates)
                                                                         }}
                                                                         className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
                                                                   >
+                                                                        <option value="">— None —</option>
                                                                         {EVENT_TYPES.map((t) => (
                                                                               <option key={t.id} value={t.id}>
                                                                                     {t.label}
@@ -429,7 +457,7 @@ export default function HostDashboard() {
                                           </div>
 
                                           {/* Background photo */}
-                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm overflow-hidden">
                                                 <BackgroundUploader
                                                       eventId={event.id}
                                                       currentImageUrl={currentBgImage}
@@ -446,9 +474,9 @@ export default function HostDashboard() {
                                           {/* Font + Color side by side */}
                                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-                                                <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
-                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Title Font</p>
-                                                      <div className="flex flex-col gap-5">
+                                                <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm flex flex-col" style={{ height: 480 }}>
+                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3 shrink-0">Title Font</p>
+                                                      <div className="flex flex-col gap-5 overflow-y-auto flex-1">
                                                             {Object.entries(fontCategories).map(([catKey, fonts]) => (
                                                                   <div key={catKey}>
                                                                         <p className="text-[8px] font-bold text-[#C0BFB5] uppercase tracking-widest mb-1.5">
@@ -475,9 +503,9 @@ export default function HostDashboard() {
                                                       </div>
                                                 </div>
 
-                                                <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
-                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Color Palette</p>
-                                                      <div className="grid grid-cols-2 gap-2">
+                                                <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm flex flex-col" style={{ height: 480 }}>
+                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3 shrink-0">Color Palette</p>
+                                                      <div className="grid grid-cols-2 gap-2 overflow-y-auto flex-1">
                                                             {getAllThemes().map((theme) => (
                                                                   <ThemeOption
                                                                         key={theme.id}
@@ -736,6 +764,7 @@ function CreateEventOnboarding({ onCreated, signOut }) {
                         theme: 'warm_editorial',
                         font_family: DEFAULT_FONT_ID,
                         event_type: DEFAULT_EVENT_TYPE_ID,
+                        background_image: getEventType(DEFAULT_EVENT_TYPE_ID)?.defaultBg ?? null,
                   })
             if (insertError) {
                   setError(insertError.message)

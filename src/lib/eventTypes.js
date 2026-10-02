@@ -1,21 +1,5 @@
 export const EVENT_TYPES = [
       {
-            id: 'wedding',
-            label: 'Wedding',
-            icon: '💍',
-            tagline: 'Welcome to the celebration',
-            subline: 'Scan. Snap. Share.',
-            defaultBg: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85',
-      },
-      {
-            id: 'birthday',
-            label: 'Birthday',
-            icon: '🎂',
-            tagline: 'Join the birthday fun',
-            subline: 'Snap a moment. Make a memory.',
-            defaultBg: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1600&q=85',
-      },
-      {
             id: 'anniversary',
             label: 'Anniversary',
             icon: '🥂',
@@ -24,12 +8,12 @@ export const EVENT_TYPES = [
             defaultBg: 'https://images.unsplash.com/photo-1470756544705-1ba4b6b3c9d8?w=1600&q=85',
       },
       {
-            id: 'party',
-            label: 'Party',
-            icon: '🎉',
-            tagline: 'The party starts here',
-            subline: 'Snap. Share. Repeat.',
-            defaultBg: 'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=1600&q=85',
+            id: 'birthday',
+            label: 'Birthday',
+            icon: '🎂',
+            tagline: 'Join the birthday fun',
+            subline: 'Snap a moment. Make a memory.',
+            defaultBg: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1600&q=85',
       },
       {
             id: 'corporate',
@@ -54,6 +38,22 @@ export const EVENT_TYPES = [
             tagline: 'Celebrating an achievement',
             subline: 'Capture this moment forever.',
             defaultBg: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&q=85',
+      },
+      {
+            id: 'party',
+            label: 'Party',
+            icon: '🎉',
+            tagline: 'The party starts here',
+            subline: 'Snap. Share. Repeat.',
+            defaultBg: 'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=1600&q=85',
+      },
+      {
+            id: 'wedding',
+            label: 'Wedding',
+            icon: '💍',
+            tagline: 'Welcome to the celebration',
+            subline: 'Scan. Snap. Share.',
+            defaultBg: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=85',
       },
       {
             id: 'other',

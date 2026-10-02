@@ -493,12 +493,12 @@ function TrustBar() {
   return (
     <aside aria-label="Trusted by event professionals" className="border-y border-[#E8E4DC]">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <p className="text-center text-xs font-semibold tracking-[0.16em] uppercase text-[#1A1A18]/40 mb-6">
+        <p className="text-center text-xs font-semibold tracking-[0.16em] uppercase text-ink/40 mb-6">
           Perfect for every occasion
         </p>
         <ul ref={ref} className={`flex flex-wrap justify-center gap-8 md:gap-12 list-none p-0 m-0 ${inView ? 'vantge-trust-visible' : ''}`}>
           {items.map(({ icon: Icon, label }) => (
-            <li key={label} className="vantge-trust-item flex items-center gap-2 text-[#1A1A18]/40">
+            <li key={label} className="vantge-trust-item flex items-center gap-2 text-ink/40">
               <Icon size={18} aria-hidden="true" />
               <span className="text-sm font-medium">{label}</span>
             </li>

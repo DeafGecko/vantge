@@ -7,6 +7,7 @@ import { resolveFontFamily } from '../lib/fonts'
 import { getEventType } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
 import VantgeLogo from '../components/VantgeLogo'
+import { useResponsiveBg } from '../hooks/useResponsiveBg'
 
 
 export default function EventGateway() {
@@ -14,6 +15,7 @@ export default function EventGateway() {
       const navigate = useNavigate()
       const { event, loading: eventLoading } = useEvent(eventSlug)
       const cameraInputRef = useRef(null)
+      const _bgResponsive = useResponsiveBg(event?.background_image, event?.background_image_desktop)
 
       function handleCameraCapture(e) {
             const file = e.target.files?.[0]
@@ -47,7 +49,7 @@ export default function EventGateway() {
       const c = theme.colors
       const selectedFontFamily = resolveFontFamily(event.font_family)
       const eventType = getEventType(event.event_type)
-      const bgImage = event.background_image || eventType.defaultBg
+      const bgImage = _bgResponsive || eventType.defaultBg
       const bgPosition = event.background_position || '50% 50%'
       const accentColor = c.accent
       const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)

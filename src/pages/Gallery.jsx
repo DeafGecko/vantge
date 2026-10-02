@@ -10,6 +10,7 @@ import { getEventType } from '../lib/eventTypes'
 import { uploadPhoto } from '../lib/uploadPhoto'
 import FontLoader from '../components/FontLoader'
 import VantgeLogo from '../components/VantgeLogo'
+import { useResponsiveBg } from '../hooks/useResponsiveBg'
 
 const FAVORITES_KEY = (eventId) => `vantge_favs_${eventId}`
 
@@ -496,6 +497,7 @@ export default function Gallery() {
   })
   const [uploadOpen, setUploadOpen] = useState(false)
   const [toast, showToast] = useToast()
+  const _bgResponsive = useResponsiveBg(event?.background_image, event?.background_image_desktop)
 
   // Load favorites from localStorage
   useEffect(() => {
@@ -589,7 +591,7 @@ export default function Gallery() {
   const c = theme.colors
   const selectedFontFamily = resolveFontFamily(event.font_family)
   const eventType = getEventType(event.event_type)
-  const bgImage = event.background_image || eventType.defaultBg
+  const bgImage = _bgResponsive || eventType.defaultBg
   const bgPosition = event.background_position || '50% 50%'
   const accentColor = c.accent
   const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)

@@ -7,6 +7,7 @@ import { resolveFontFamily } from '../lib/fonts'
 import { getEventType } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
 import VantgeLogo from '../components/VantgeLogo'
+import { useResponsiveBg } from '../hooks/useResponsiveBg'
 
 const MAX_FILES = 10
 const VIDEO_LIMIT_SECONDS = 30
@@ -27,6 +28,7 @@ export default function GuestUploader() {
       const navigate = useNavigate()
       const location = useLocation()
       const { event, loading, error } = useEvent(eventSlug)
+      const _bgResponsive = useResponsiveBg(event?.background_image, event?.background_image_desktop)
       const fileInputRef = useRef(null)
       const cameraInputRef = useRef(null)
 
@@ -144,7 +146,7 @@ export default function GuestUploader() {
       const c = theme.colors
       const selectedFontFamily = resolveFontFamily(event.font_family)
       const eventType = getEventType(event.event_type)
-      const bgImage = event.background_image || eventType.defaultBg
+      const bgImage = _bgResponsive || eventType.defaultBg
       const bgPosition = event.background_position || '50% 50%'
       const accentColor = c.accent
       const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
