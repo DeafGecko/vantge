@@ -482,7 +482,7 @@ function TechTab({ photos }) {
 }
 
 // ── Users tab ─────────────────────────────────────────────────────────────────
-function UsersTab() {
+function UsersTab({ onBadgeRefresh }) {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -497,16 +497,19 @@ function UsersTab() {
   async function approve(id) {
     await supabase.from('profiles').update({ approved: true }).eq('id', id)
     fetchUsers()
+    onBadgeRefresh?.()
   }
 
   async function revoke(id) {
     await supabase.from('profiles').update({ approved: false }).eq('id', id)
     fetchUsers()
+    onBadgeRefresh?.()
   }
 
   async function reject(id) {
     await supabase.from('profiles').update({ approved: false, rejected: true }).eq('id', id)
     fetchUsers()
+    onBadgeRefresh?.()
   }
 
   const pending  = users.filter(u => !u.approved && !u.rejected)
@@ -796,9 +799,10 @@ export default function AdminDashboard() {
 
   // stats derived from live data
   const [pendingUsers, setPendingUsers] = useState(0)
-  useEffect(() => {
-    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('approved', false).then(({ count }) => setPendingUsers(count || 0))
+  const fetchPendingUsers = useCallback(() => {
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('approved', false).eq('rejected', false).then(({ count }) => setPendingUsers(count || 0))
   }, [])
+  useEffect(() => { fetchPendingUsers() }, [fetchPendingUsers])
 
   const [marketingCollectionIds, setMarketingCollectionIds] = useState(new Set())
   useEffect(() => {
@@ -903,7 +907,7 @@ export default function AdminDashboard() {
               {activeTab === 'events'     && <LiveEventsTab events={events} onEmergency={fetchData} />}
               {activeTab === 'photos'     && <PhotosTab photos={photos} onAction={fetchData} />}
               {activeTab === 'safety'     && <SafetyTab photos={photos} onAction={fetchData} />}
-              {activeTab === 'users'      && <UsersTab />}
+              {activeTab === 'users'      && <UsersTab onBadgeRefresh={fetchPendingUsers} />}
               {activeTab === 'marketing'  && <MarketingTab photos={photos} events={events} />}
               {activeTab === 'tech'       && <TechTab photos={photos} />}
             </>
