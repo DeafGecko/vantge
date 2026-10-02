@@ -648,7 +648,9 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
                                     {eventType?.tagline || 'Welcome to the celebration'}
                               </p>
                               <h3 className="font-extrabold leading-tight mb-3" style={{ color: txt, fontFamily: font.cssFamily, fontSize: '1.05rem' }}>
-                                    {eventName || 'Your Event'}
+                                    {(eventName || 'Your Event').split('\n').map((line, i) => (
+                                          <span key={i}>{line}{i < (eventName || 'Your Event').split('\n').length - 1 && <br />}</span>
+                                    ))}
                               </h3>
 
                               {isUnlocked ? (
