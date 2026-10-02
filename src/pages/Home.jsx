@@ -115,7 +115,7 @@ export default function Home() {
                 {item.label}
               </a>
             ))}
-            <a href="#notify" className="relative text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200">
+            <span className="relative text-sm text-[#6B6B63] cursor-default select-none">
               {/* Pricing with scribble line through it */}
               <span className="relative inline-block">
                 Pricing
@@ -128,7 +128,7 @@ export default function Home() {
               </span>
               {/* Cursive Beta sits to the right, same baseline */}
               <span className="ml-1 text-[#C0392B]" style={{ fontFamily: "'Caveat', cursive", fontSize: '17px', lineHeight: 1, verticalAlign: 'middle' }}>Beta</span>
-            </a>
+            </span>
             <a href="#notify" className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200">
               Contact
             </a>
