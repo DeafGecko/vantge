@@ -190,12 +190,14 @@ export default function HostDashboard() {
                                           >
                                                 {toggling ? "..." : isUnlocked ? (
                                                       <span style={{display:'flex',alignItems:'center',gap:6}}>
-                                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="-1 -1 26 26" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,overflow:'visible'}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0117 0"/></svg>
+                                                            {/* Open door */}
+                                                            <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24" style={{flexShrink:0}}><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h4v-2H6V5h12v13h-3v2h4a1 1 0 001-1V4a1 1 0 00-1-1z"/><path d="M11 7l-4 4 4 4v-3h5v-2h-5V7z"/></svg>
                                                             Gallery Open
                                                       </span>
                                                 ) : (
                                                       <span style={{display:'flex',alignItems:'center',gap:6}}>
-                                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="-1 -1 26 26" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,overflow:'visible'}}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                                                            {/* Closed door */}
+                                                            <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24" style={{flexShrink:0}}><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h14a1 1 0 001-1V4a1 1 0 00-1-1zm-2 15H7V5h10v13zm-4-6a1 1 0 100-2 1 1 0 000 2z"/></svg>
                                                             Gallery Closed
                                                       </span>
                                                 )}
@@ -246,14 +248,14 @@ export default function HostDashboard() {
                                                                   className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-ink hover:bg-[#F7F5F0] transition-colors border-b border-[#E8E4DA]"
                                                             >
                                                                   {isUnlocked
-                                                                        ? <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#16A34A]"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                                                                        : <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#B0AFA5]"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0117 0"/></svg>
+                                                                        ? <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" className="shrink-0 text-[#16A34A]"><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h4v-2H6V5h12v13h-3v2h4a1 1 0 001-1V4a1 1 0 00-1-1z"/><path d="M11 7l-4 4 4 4v-3h5v-2h-5V7z"/></svg>
+                                                                        : <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" className="shrink-0 text-[#B0AFA5]"><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h14a1 1 0 001-1V4a1 1 0 00-1-1zm-2 15H7V5h10v13zm-4-6a1 1 0 100-2 1 1 0 000 2z"/></svg>
                                                                   }
                                                                   {toggling ? "Updating..." : isUnlocked ? "Gallery Open" : "Gallery Closed"}
                                                             </button>
                                                             <button
                                                                   onClick={() => { scrollToPhotos(); setMenuOpen(false) }}
-                                                                  className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-[#1A1A18] hover:bg-[#F7F5F0] transition-colors border-b border-[#E8E4DA]"
+                                                                  className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-ink hover:bg-[#F7F5F0] transition-colors border-b border-[#E8E4DA]"
                                                             >
                                                                   <span className="relative">
                                                                         <Images size={16} />
@@ -312,19 +314,12 @@ export default function HostDashboard() {
                                                       >
                                                             {previewUnlocked ? (
                                                                   <>
-                                                                        <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                                              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8" />
-                                                                              <path d="M14 2v6h6" />
-                                                                              <path d="M10 12h4" />
-                                                                        </svg>
+                                                                        <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h4v-2H6V5h12v13h-3v2h4a1 1 0 001-1V4a1 1 0 00-1-1z"/><path d="M11 7l-4 4 4 4v-3h5v-2h-5V7z"/></svg>
                                                                         Gallery Open
                                                                   </>
                                                             ) : (
                                                                   <>
-                                                                        <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                                              <rect x="3" y="11" width="18" height="11" rx="2" />
-                                                                              <path d="M7 11V7a5 5 0 0110 0v4" />
-                                                                        </svg>
+                                                                        <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h14a1 1 0 001-1V4a1 1 0 00-1-1zm-2 15H7V5h10v13zm-4-6a1 1 0 100-2 1 1 0 000 2z"/></svg>
                                                                         Gallery Closed
                                                                   </>
                                                             )}
