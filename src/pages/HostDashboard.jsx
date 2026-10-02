@@ -437,6 +437,7 @@ export default function HostDashboard() {
                                                       currentPosition={currentBgPosition}
                                                       currentTint={currentBgTint}
                                                       accentColor={currentTheme.colors.accent}
+                                                      eventTypeId={currentEventTypeId}
                                                       onSaved={(url, pos, tint) => { setLocalBgImage(url); setLocalBgPosition(pos); setLocalBgTint(tint) }}
                                                       onSavedDesktop={(url) => setLocalBgImageDesktop(url)}
                                                 />

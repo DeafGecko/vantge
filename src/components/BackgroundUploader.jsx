@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { getEventType } from '../lib/eventTypes'
 
 const MAX_BYTES = 50 * 1024 * 1024
 
@@ -31,7 +32,7 @@ async function compressImage(file) {
       })
 }
 
-function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosition, currentTint, accentColor, dbField, onSaved }) {
+function UploadZone({ eventId, label, isLandscape, currentImageUrl, defaultBg, currentPosition, currentTint, accentColor, dbField, onSaved }) {
       const [uploading, setUploading] = useState(false)
       const [removing, setRemoving] = useState(false)
       const [editing, setEditing] = useState(false)
@@ -180,6 +181,19 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
                                     </div>
                               </div>
                         </div>
+                  ) : defaultBg ? (
+                        <div className="w-full">
+                              <div className="relative rounded-xl overflow-hidden border border-[#E8E4DA]" style={{ height: previewH, width: isLandscape ? '100%' : previewW }}>
+                                    <img src={defaultBg} alt="Default background" className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }} />
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-3">
+                                          <span className="text-[8px] font-bold uppercase tracking-widest text-white/50">Default photo</span>
+                                          <button onClick={() => inputRef.current?.click()} disabled={uploading} className="bg-white text-[#1A1A18] text-[9px] font-bold uppercase tracking-widest rounded-full px-3 py-1.5 hover:bg-[#F7F5F0] shadow-sm">
+                                                {uploading ? 'Uploading...' : 'Upload your own'}
+                                          </button>
+                                    </div>
+                              </div>
+                        </div>
                   ) : (
                         <button
                               onClick={() => inputRef.current?.click()}
@@ -197,11 +211,12 @@ function UploadZone({ eventId, label, isLandscape, currentImageUrl, currentPosit
       )
 }
 
-export default function BackgroundUploader({ eventId, currentImageUrl, currentImageDesktopUrl, currentPosition, currentTint, accentColor, onSaved, onSavedDesktop }) {
+export default function BackgroundUploader({ eventId, currentImageUrl, currentImageDesktopUrl, currentPosition, currentTint, accentColor, eventTypeId, onSaved, onSavedDesktop }) {
+      const defaultBg = getEventType(eventTypeId)?.defaultBg || null
+
       return (
             <div>
                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Background Photo</p>
-                  {/* Mobile portrait first (smaller), then landscape desktop (wider) fills remaining space */}
                   <div className="flex gap-4 items-start">
                         {/* Portrait — mobile (fixed width with room for tint slider) */}
                         <div className="shrink-0 w-[180px]">
@@ -210,6 +225,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               label="Mobile · Portrait"
                               isLandscape={false}
                               currentImageUrl={currentImageUrl}
+                              defaultBg={defaultBg}
                               currentPosition={currentPosition}
                               currentTint={currentTint}
                               accentColor={accentColor}
@@ -224,6 +240,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               label="Desktop · Landscape"
                               isLandscape={true}
                               currentImageUrl={currentImageDesktopUrl}
+                              defaultBg={defaultBg}
                               currentPosition={currentPosition}
                               currentTint={currentTint}
                               accentColor={accentColor}
