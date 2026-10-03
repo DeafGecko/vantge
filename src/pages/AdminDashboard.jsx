@@ -864,7 +864,7 @@ function BrandingTab({ marketingPhotos }) {
                   )}
                   <input
                     ref={el => fileRefs.current[typeId] = el}
-                    type="file" accept="image/png,image/jpeg,video/mp4" className="hidden"
+                    type="file" accept="image/*,video/mp4,video/mov,video/quicktime" className="hidden"
                     onChange={e => { handleFileUpload(typeId, e.target.files[0]); e.target.value = '' }}
                   />
                 </div>

@@ -48,7 +48,7 @@ function ZoneThumb({ label, imageUrl, defaultBg, currentTint, isActive, uploadin
 
       return (
             <div className="flex flex-col items-center gap-2 w-full">
-                  <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+                  <input ref={inputRef} type="file" accept="image/*,video/mp4,video/mov,video/quicktime" onChange={handleFile} className="hidden" />
                   <div
                         className={`relative rounded-xl overflow-hidden border-2 w-full cursor-pointer group transition-colors ${isActive ? 'border-[#1A1A18]' : 'border-[#E8E4DA]'}`}
                         style={{ height: 220 }}
@@ -159,7 +159,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
 
                         {/* LEFT — photo */}
                         <div className="flex-1 bg-[#1A1A18] relative flex items-center justify-center min-w-0">
-                              <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+                              <input ref={inputRef} type="file" accept="image/*,video/mp4,video/mov,video/quicktime" onChange={handleFile} className="hidden" />
                               {activeUrl ? (
                                     <div
                                           ref={editorRef}
