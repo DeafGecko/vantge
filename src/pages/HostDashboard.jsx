@@ -282,17 +282,17 @@ export default function HostDashboard() {
                                                                   <span className="relative">
                                                                         <Images size={16} />
                                                                         {pendingCount > 0 && (
-                                                                              <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] rounded-full bg-[#C84A44] text-white text-[8px] font-bold flex items-center justify-center">
+                                                                              <span className="absolute -top-1 -right-1 min-w-3.5 h-3.5 rounded-full bg-coral-text text-white text-[8px] font-bold flex items-center justify-center">
                                                                                     {pendingCount}
                                                                               </span>
                                                                         )}
                                                                   </span>
                                                                   Pending Reviews
-                                                                  {pendingCount > 0 && <span className="ml-auto text-[#C84A44] text-xs font-bold">{pendingCount}</span>}
+                                                                  {pendingCount > 0 && <span className="ml-auto text-coral-text text-xs font-bold">{pendingCount}</span>}
                                                             </button>
                                                             <button
                                                                   onClick={async () => { await signOut(); navigate('/login') }}
-                                                                  className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-medium text-[#88887E] hover:bg-[#F7F5F0] transition-colors"
+                                                                  className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-medium text-ink-muted hover:bg-[#F7F5F0] transition-colors"
                                                             >
                                                                   <LogOut size={16} />
                                                                   Sign Out
@@ -310,10 +310,10 @@ export default function HostDashboard() {
                               <div className="mb-5 flex items-end justify-between">
                                     <div>
                                           <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#B0AFA5] mb-0.5">Event Dashboard</p>
-                                          <h2 className="text-xl md:text-2xl font-black tracking-tight text-[#1A1A18]">{event.event_name}</h2>
+                                          <h2 className="text-xl md:text-2xl font-black tracking-tight text-ink">{event.event_name}</h2>
                                     </div>
                                     {savingSettings && (
-                                          <span className="text-[10px] font-bold text-[#C84A44] animate-pulse tracking-widest uppercase">Saving…</span>
+                                          <span className="text-[10px] font-bold text-coral-text animate-pulse tracking-widest uppercase">Saving…</span>
                                     )}
                               </div>
 
@@ -382,12 +382,13 @@ export default function HostDashboard() {
 
                                           {/* Logo | Display Name | Event Type */}
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
-                                                {/* Row 1 — controls all on same baseline */}
-                                                <div className="flex items-start gap-3">
+
+                                                {/* Row 1 — Logo + stacked Name/Type */}
+                                                <div className="flex items-start gap-4">
 
                                                       {/* Logo */}
-                                                      <div className="shrink-0 flex flex-col">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2">Logo</p>
+                                                      <div className="shrink-0 flex flex-col items-center gap-1.5">
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Logo</p>
                                                             <LogoUploader
                                                                   eventId={event.id}
                                                                   currentLogoUrl={currentLogoUrl}
@@ -395,10 +396,15 @@ export default function HostDashboard() {
                                                             />
                                                       </div>
 
-                                                      {/* Display Name — grows */}
-                                                      <div className="flex-1 min-w-0 flex flex-col">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2">Display Name</p>
-                                                            <div className="flex gap-2 items-center">
+                                                      {/* Right side: Display Name on top, Event Type below */}
+                                                      <div className="flex-1 min-w-0 flex flex-col gap-3">
+
+                                                            {/* Display Name */}
+                                                            <div>
+                                                                  <div className="flex items-center justify-between mb-1.5">
+                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Display Name</p>
+                                                                        {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse">Saving…</span>}
+                                                                  </div>
                                                                   <textarea
                                                                         value={currentEventName}
                                                                         onChange={(e) => setLocalEventName(e.target.value)}
@@ -409,59 +415,56 @@ export default function HostDashboard() {
                                                                               setSavingName(false)
                                                                         }}
                                                                         placeholder="e.g. Rogers & Bottrell Wedding"
-                                                                        style={{ height: 68 }}
-                                                                        className="flex-1 min-w-0 bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal resize-none leading-snug"
+                                                                        rows={2}
+                                                                        className="w-full bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal resize-none leading-snug"
                                                                   />
-                                                                  {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse shrink-0">Saving…</span>}
                                                             </div>
-                                                      </div>
 
-                                                      {/* Event Type */}
-                                                      <div className="shrink-0 w-36 flex flex-col">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-2">Event Type</p>
-                                                            <div className="relative">
-                                                                  <select
-                                                                        value={currentEventTypeId}
-                                                                        onChange={async (e) => {
-                                                                              const val = e.target.value
-                                                                              setLocalEventType(val)
-                                                                              const updates = { event_type: val || null }
-                                                                              const allDefaults = EVENT_TYPES.map(t => t.defaultBg)
-                                                                              const isUsingDefault = !currentBgImage || allDefaults.includes(currentBgImage) || currentBgImage === currentDefaultBg
-                                                                              if (isUsingDefault) {
-                                                                                    if (!val) {
-                                                                                          updates.background_image = null
-                                                                                          updates.background_image_desktop = null
-                                                                                          setLocalBgImage(null)
-                                                                                          setLocalBgImageDesktop(null)
-                                                                                    } else {
-                                                                                          const { data } = await supabase.from('admin_branding').select('background_url').eq('event_type', val).maybeSingle()
-                                                                                          const newDefault = data?.background_url || getEventType(val)?.defaultBg || null
-                                                                                          updates.background_image = newDefault
-                                                                                          updates.background_image_desktop = null
-                                                                                          setLocalBgImage(newDefault)
-                                                                                          setLocalBgImageDesktop(null)
+                                                            {/* Event Type */}
+                                                            <div>
+                                                                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Event Type</p>
+                                                                  <div className="relative">
+                                                                        <select
+                                                                              value={currentEventTypeId}
+                                                                              onChange={async (e) => {
+                                                                                    const val = e.target.value
+                                                                                    setLocalEventType(val)
+                                                                                    const updates = { event_type: val || null }
+                                                                                    const allDefaults = EVENT_TYPES.map(t => t.defaultBg)
+                                                                                    const isUsingDefault = !currentBgImage || allDefaults.includes(currentBgImage) || currentBgImage === currentDefaultBg
+                                                                                    if (isUsingDefault) {
+                                                                                          if (!val) {
+                                                                                                updates.background_image = null
+                                                                                                updates.background_image_desktop = null
+                                                                                                setLocalBgImage(null)
+                                                                                                setLocalBgImageDesktop(null)
+                                                                                          } else {
+                                                                                                const { data } = await supabase.from('admin_branding').select('background_url').eq('event_type', val).maybeSingle()
+                                                                                                const newDefault = data?.background_url || getEventType(val)?.defaultBg || null
+                                                                                                updates.background_image = newDefault
+                                                                                                updates.background_image_desktop = null
+                                                                                                setLocalBgImage(newDefault)
+                                                                                                setLocalBgImageDesktop(null)
+                                                                                          }
                                                                                     }
-                                                                              }
-                                                                              await updateEventSettings(updates)
-                                                                        }}
-                                                                        className="w-full h-[68px] appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
-                                                                  >
-                                                                        <option value="">— None —</option>
-                                                                        {EVENT_TYPES.map((t) => (
-                                                                              <option key={t.id} value={t.id}>
-                                                                                    {t.label}
-                                                                              </option>
-                                                                        ))}
-                                                                  </select>
-                                                                  <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B0AFA5]" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                                                                    await updateEventSettings(updates)
+                                                                              }}
+                                                                              className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
+                                                                        >
+                                                                              <option value="">— None —</option>
+                                                                              {EVENT_TYPES.map((t) => (
+                                                                                    <option key={t.id} value={t.id}>{t.label}</option>
+                                                                              ))}
+                                                                        </select>
+                                                                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B0AFA5]" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                                                  </div>
                                                             </div>
+
                                                       </div>
                                                 </div>
 
-                                                {/* Row 2 — tagline + title position */}
-                                                <div className="flex gap-3 mt-1.5 items-center">
-                                                      <div className="shrink-0 w-16" />
+                                                {/* Row 2 — title position, full width */}
+                                                <div className="mt-3 border-t border-[#F0EDE6] pt-3">
                                                       <div className="flex-1 min-w-0">
                                                             <div className="flex items-center justify-between mb-1.5">
                                                                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
@@ -482,7 +485,6 @@ export default function HostDashboard() {
                                                                   <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
                                                             </div>
                                                       </div>
-                                                      <p className="shrink-0 w-36 text-[10px] text-[#B0AFA5] text-center">{currentEventTypeId ? currentEventType.tagline : ''}</p>
                                                 </div>
                                           </div>
 
