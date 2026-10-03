@@ -103,22 +103,25 @@ export default function HostDashboard() {
       }, [user, navigate])
 
       useEffect(() => {
-            if (!event?.id || (event.background_image && event.background_image_desktop)) return
+            if (!event?.id) return
             const eventType = event.event_type
             const brandingKey = eventType || 'none'
             const hardcodedFallback = getEventType(eventType)?.defaultBg ?? null
+            const mobileMissing = !event.background_image
+            const desktopMissing = !event.background_image_desktop
+            if (!mobileMissing && !desktopMissing) return
             supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle().then(({ data }) => {
-                  const defaultImg = data?.background_url || hardcodedFallback
-                  if (!defaultImg) return
+                  const adminDefault = data?.background_url || hardcodedFallback
+                  if (!adminDefault) return
                   const updates = {}
-                  if (!event.background_image) updates.background_image = defaultImg
-                  if (!event.background_image_desktop) updates.background_image_desktop = defaultImg
+                  if (mobileMissing) updates.background_image = adminDefault
+                  if (desktopMissing) updates.background_image_desktop = adminDefault
                   supabase.from('events').update(updates).eq('id', event.id).then(() => {
-                        if (updates.background_image) setLocalBgImage(defaultImg)
-                        if (updates.background_image_desktop) setLocalBgImageDesktop(defaultImg)
+                        if (updates.background_image) setLocalBgImage(adminDefault)
+                        if (updates.background_image_desktop) setLocalBgImageDesktop(adminDefault)
                   })
             })
-      }, [event?.id, event?.background_image, event?.background_image_desktop, event?.event_type])
+      }, [event?.id, event?.event_type]) // eslint-disable-line react-hooks/exhaustive-deps
 
       useEffect(() => {
             if (!event?.id) return
