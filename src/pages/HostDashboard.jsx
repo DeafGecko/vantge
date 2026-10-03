@@ -107,15 +107,15 @@ export default function HostDashboard() {
             const eventType = event.event_type
             const brandingKey = eventType || 'none'
             const hardcodedFallback = getEventType(eventType)?.defaultBg ?? null
-            const mobileMissing = !event.background_image
-            const desktopMissing = !event.background_image_desktop
-            if (!mobileMissing && !desktopMissing) return
+            // A "custom" photo is one the host uploaded to supabase storage (backgrounds/ path)
+            const isCustom = (url) => url && url.includes('/backgrounds/')
             supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle().then(({ data }) => {
                   const adminDefault = data?.background_url || hardcodedFallback
                   if (!adminDefault) return
                   const updates = {}
-                  if (mobileMissing) updates.background_image = adminDefault
-                  if (desktopMissing) updates.background_image_desktop = adminDefault
+                  if (!isCustom(event.background_image)) updates.background_image = adminDefault
+                  if (!isCustom(event.background_image_desktop)) updates.background_image_desktop = adminDefault
+                  if (!Object.keys(updates).length) return
                   supabase.from('events').update(updates).eq('id', event.id).then(() => {
                         if (updates.background_image) setLocalBgImage(adminDefault)
                         if (updates.background_image_desktop) setLocalBgImageDesktop(adminDefault)
