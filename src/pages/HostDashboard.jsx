@@ -681,9 +681,9 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
 
                         {/* Title + buttons in one flex column — spacers control title position */}
                         <div className="relative z-10 h-full flex flex-col pt-8">
-                              <div style={{ flex: titlePosition }} />
-                              {titlePosition < 95 && <div className="text-center px-2">{titleBlock}</div>}
-                              <div style={{ flex: Math.max(0, 100 - titlePosition) }} />
+                              <div style={{ flex: Math.min(titlePosition, 94) }} />
+                              <div className="text-center px-2">{titleBlock}</div>
+                              <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
                               <div className="px-4 pb-4 text-center">
 
                                     {isUnlocked ? (

@@ -292,35 +292,24 @@ export default function GuestUploader() {
                               <div className="w-12" />
                         </div>
 
-                        {/* Top spacer — grows based on title position */}
+                        {/* Title block — flex spacers control vertical position, clamped to 94 max */}
                         {(() => {
                               const raw = event.title_position
-                              const posNum = isNaN(Number(raw)) ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 100) : Number(raw ?? 100)
-                              return <div style={{ flex: posNum }} />
-                        })()}
-
-                        {/* Title block — in normal flow, pushed by spacers */}
-                        {(() => {
-                              const raw = event.title_position
-                              const posNum = isNaN(Number(raw)) ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 100) : Number(raw ?? 100)
-                              if (posNum >= 95) return null
+                              const posNum = Math.min(94, isNaN(Number(raw)) ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 94) : Number(raw ?? 94))
                               return (
-                                    <div className="w-full max-w-md mx-auto px-5 text-center py-4">
-                                          <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-2">{eventType.tagline}</p>
-                                          <h1 className="text-3xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>
-                                                {(event.event_name || '').split('\n').map((line, i, arr) => (
-                                                      <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
-                                                ))}
-                                          </h1>
-                                    </div>
+                                    <>
+                                          <div style={{ flex: posNum }} />
+                                          <div className="w-full max-w-md mx-auto px-5 text-center py-4">
+                                                <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-2">{eventType.tagline}</p>
+                                                <h1 className="text-3xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>
+                                                      {(event.event_name || '').split('\n').map((line, i, arr) => (
+                                                            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+                                                      ))}
+                                                </h1>
+                                          </div>
+                                          <div style={{ flex: Math.max(0, 94 - posNum) }} />
+                                    </>
                               )
-                        })()}
-
-                        {/* Bottom spacer — shrinks as title moves down */}
-                        {(() => {
-                              const raw = event.title_position
-                              const posNum = isNaN(Number(raw)) ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 100) : Number(raw ?? 100)
-                              return <div style={{ flex: Math.max(0, 100 - posNum) }} />
                         })()}
 
                         {/* Bottom content */}
@@ -329,21 +318,6 @@ export default function GuestUploader() {
                               {/* Scan. Snap. Share. tagline just above buttons */}
                               <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 text-center">Scan · Snap · Share</p>
 
-                              {/* Event name at bottom when position >= 95 */}
-                              {(() => {
-                                    const raw = event.title_position
-                                    const posNum = isNaN(Number(raw)) ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 100) : Number(raw ?? 100)
-                                    return posNum >= 95
-                              })() && (
-                                    <div className="mb-4 text-center">
-                                          <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-1">{eventType.tagline}</p>
-                                          <h1 className="text-2xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>
-                                                {(event.event_name || '').split('\n').map((line, i, arr) => (
-                                                      <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
-                                                ))}
-                                          </h1>
-                                    </div>
-                              )}
 
                               {/* File picker / preview */}
                               {files.length === 0 ? (
