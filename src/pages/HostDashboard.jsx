@@ -103,18 +103,22 @@ export default function HostDashboard() {
       }, [user, navigate])
 
       useEffect(() => {
-            if (!event?.id || event.background_image) return
+            if (!event?.id || (event.background_image && event.background_image_desktop)) return
             const eventType = event.event_type
             const brandingKey = eventType || 'none'
             const hardcodedFallback = getEventType(eventType)?.defaultBg ?? null
             supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle().then(({ data }) => {
                   const defaultImg = data?.background_url || hardcodedFallback
                   if (!defaultImg) return
-                  supabase.from('events').update({ background_image: defaultImg }).eq('id', event.id).then(() => {
-                        setLocalBgImage(defaultImg)
+                  const updates = {}
+                  if (!event.background_image) updates.background_image = defaultImg
+                  if (!event.background_image_desktop) updates.background_image_desktop = defaultImg
+                  supabase.from('events').update(updates).eq('id', event.id).then(() => {
+                        if (updates.background_image) setLocalBgImage(defaultImg)
+                        if (updates.background_image_desktop) setLocalBgImageDesktop(defaultImg)
                   })
             })
-      }, [event?.id, event?.background_image, event?.event_type])
+      }, [event?.id, event?.background_image, event?.background_image_desktop, event?.event_type])
 
       useEffect(() => {
             if (!event?.id) return
@@ -435,9 +439,9 @@ export default function HostDashboard() {
                                                                                     const { data } = await supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle()
                                                                                     const newDefault = data?.background_url || getEventType(val)?.defaultBg || null
                                                                                     updates.background_image = newDefault
-                                                                                    updates.background_image_desktop = null
+                                                                                    updates.background_image_desktop = newDefault
                                                                                     setLocalBgImage(newDefault)
-                                                                                    setLocalBgImageDesktop(null)
+                                                                                    setLocalBgImageDesktop(newDefault)
                                                                                     await updateEventSettings(updates)
                                                                               }}
                                                                               className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
