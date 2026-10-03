@@ -299,12 +299,11 @@ export default function GuestUploader() {
                                     ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 100)
                                     : Number(raw ?? 100)
                               if (posNum >= 95) return <div className="flex-1" />
-                              const topPct = 8 + (posNum / 100) * 55
                               return (
                                     <>
                                           <div
                                                 className="absolute w-full max-w-md left-1/2 -translate-x-1/2 px-5 text-center py-6 z-10"
-                                                style={{ top: `${topPct}%`, transform: `translateX(-50%) translateY(-${posNum}%)` }}
+                                                style={{ top: `${8 + (posNum / 100) * 58}%` }}
                                           >
                                                 <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-2">{eventType.tagline}</p>
                                                 <h1 className="text-3xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>
