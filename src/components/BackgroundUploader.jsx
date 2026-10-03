@@ -262,7 +262,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                   <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex overflow-hidden">
 
                         {/* LEFT — device frame preview OR photo picker */}
-                        <div className="flex-1 bg-[#111] relative flex min-w-0 overflow-hidden">
+                        <div className="flex-1 bg-[#111] relative flex min-w-0">
                               <input ref={inputRef} type="file" accept="image/*,video/mp4,video/mov,video/quicktime" onChange={handleFile} className="hidden" />
 
                               {/* Photo picker panel — slides over device frame */}
