@@ -312,69 +312,6 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                                 </div>
                                           )}
 
-                                          {/* Library overlay on left side */}
-                                          {showChangePanel && (
-                                                <div className="absolute inset-0 bg-black/80 flex flex-col">
-                                                      {/* Tabs */}
-                                                      <div className="flex border-b border-white/10 px-4 pt-4 gap-4">
-                                                            <button
-                                                                  onClick={() => setChangeTab('library')}
-                                                                  className={`text-[10px] font-bold uppercase tracking-widest pb-2 border-b-2 transition-colors ${changeTab === 'library' ? 'border-white text-white' : 'border-transparent text-white/40 hover:text-white/70'}`}
-                                                            >
-                                                                  Vantge Library
-                                                            </button>
-                                                            <button
-                                                                  onClick={() => setChangeTab('upload')}
-                                                                  className={`text-[10px] font-bold uppercase tracking-widest pb-2 border-b-2 transition-colors ${changeTab === 'upload' ? 'border-white text-white' : 'border-transparent text-white/40 hover:text-white/70'}`}
-                                                            >
-                                                                  Upload
-                                                            </button>
-                                                            <div className="flex-1" />
-                                                            <button onClick={() => setShowChangePanel(false)} className="text-white/40 hover:text-white pb-2">
-                                                                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
-                                                            </button>
-                                                      </div>
-
-                                                      {/* Library grid */}
-                                                      {changeTab === 'library' && (
-                                                            <div className="flex-1 overflow-y-auto p-4">
-                                                                  <p className="text-[9px] text-white/40 mb-3 uppercase tracking-widest font-bold">Select a photo for your event</p>
-                                                                  <div className="grid grid-cols-2 gap-2">
-                                                                        {libraryPhotos.map((url, i) => (
-                                                                              <button
-                                                                                    key={i}
-                                                                                    onClick={() => handleLibraryPick(url)}
-                                                                                    className={`relative rounded-xl overflow-hidden aspect-video border-2 transition-all hover:scale-[1.02] ${pendingUrl === url ? 'border-white' : 'border-transparent'}`}
-                                                                              >
-                                                                                    <img src={url} alt="" className="w-full h-full object-cover" />
-                                                                                    {pendingUrl === url && (
-                                                                                          <div className="absolute inset-0 bg-white/20 flex items-center justify-center">
-                                                                                                <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-                                                                                                      <svg width="12" height="12" fill="none" stroke="#1A1A18" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                                                                                </div>
-                                                                                          </div>
-                                                                                    )}
-                                                                              </button>
-                                                                        ))}
-                                                                  </div>
-                                                            </div>
-                                                      )}
-
-                                                      {/* Upload tab */}
-                                                      {changeTab === 'upload' && (
-                                                            <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8">
-                                                                  <svg width="40" height="40" fill="none" stroke="white" strokeWidth="1.2" viewBox="0 0 24 24" className="opacity-40"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                                                  <p className="text-white/60 text-sm font-bold">Upload your own photo</p>
-                                                                  <button
-                                                                        onClick={() => inputRef.current?.click()}
-                                                                        className="bg-white text-[#1A1A18] text-[10px] font-bold uppercase tracking-widest rounded-full px-6 py-3 hover:bg-white/90 transition-all"
-                                                                  >
-                                                                        {uploading ? 'Uploading…' : 'Choose File'}
-                                                                  </button>
-                                                            </div>
-                                                      )}
-                                                </div>
-                                          )}
                                     </div>
                                     </div>
                               ) : (
@@ -469,7 +406,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                     {showChangePanel && (
                                           <div>
                                                 <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">Photo Source</p>
-                                                <p className="text-[10px] text-[#B0AFA5] leading-relaxed">Browse the Vantge library or upload your own photo on the left.</p>
+                                                <p className="text-[10px] text-[#B0AFA5] leading-relaxed">Select a photo from the library below.</p>
                                           </div>
                                     )}
                               </div>
@@ -481,6 +418,60 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                               </div>
                         </div>
                   </div>
+
+                  {/* Fullscreen photo picker modal */}
+                  {showChangePanel && (
+                        <div className="fixed inset-0 z-[200] bg-[#0E0E0C] flex flex-col">
+                              {/* Header */}
+                              <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 shrink-0">
+                                    <p className="text-white font-black text-base uppercase tracking-widest">
+                                          {eventTypeId ? eventTypeId.charAt(0).toUpperCase() + eventTypeId.slice(1) : 'Library'}
+                                    </p>
+                                    <div className="flex items-center gap-3">
+                                          <button
+                                                onClick={() => inputRef.current?.click()}
+                                                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white text-[11px] font-bold uppercase tracking-widest hover:bg-white/20 transition-colors"
+                                          >
+                                                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                                {uploading ? 'Uploading…' : 'Upload'}
+                                          </button>
+                                          <button onClick={() => setShowChangePanel(false)} className="text-white/40 hover:text-white transition-colors">
+                                                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+                                          </button>
+                                    </div>
+                              </div>
+
+                              {/* Photo grid */}
+                              <div className="flex-1 overflow-y-auto p-6">
+                                    {libraryPhotos.length === 0 ? (
+                                          <div className="flex flex-col items-center justify-center h-full gap-3 text-white/30">
+                                                <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21" strokeLinecap="round"/></svg>
+                                                <p className="text-sm font-bold">No library photos yet</p>
+                                                <p className="text-xs">Upload a photo using the button above</p>
+                                          </div>
+                                    ) : (
+                                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                                                {libraryPhotos.map((url, i) => (
+                                                      <button
+                                                            key={i}
+                                                            onClick={() => { handleLibraryPick(url); setShowChangePanel(false) }}
+                                                            className={`relative rounded-2xl overflow-hidden aspect-video border-2 transition-all hover:scale-[1.02] ${pendingUrl === url ? 'border-white' : 'border-transparent'}`}
+                                                      >
+                                                            <img src={url} alt="" className="w-full h-full object-cover" />
+                                                            {pendingUrl === url && (
+                                                                  <div className="absolute inset-0 bg-white/20 flex items-center justify-center">
+                                                                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+                                                                              <svg width="14" height="14" fill="none" stroke="#1A1A18" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                                        </div>
+                                                                  </div>
+                                                            )}
+                                                      </button>
+                                                ))}
+                                          </div>
+                                    )}
+                              </div>
+                        </div>
+                  )}
             </div>
       )
 }
