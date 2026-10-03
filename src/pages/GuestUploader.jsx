@@ -292,16 +292,41 @@ export default function GuestUploader() {
                               <div className="w-12" />
                         </div>
 
-                        <div className="flex-1" />
+                        {/* Title block — position controlled by host */}
+                        {(() => {
+                              const pos = event.title_position || 'bottom'
+                              const titleBlock = (
+                                    <div className="w-full max-w-md mx-auto px-5 text-center py-6">
+                                          <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-2">{eventType.tagline}</p>
+                                          <h1 className="text-3xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>
+                                                {(event.event_name || '').split('\n').map((line, i, arr) => (
+                                                      <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+                                                ))}
+                                          </h1>
+                                    </div>
+                              )
+                              if (pos === 'top') return <>{titleBlock}<div className="flex-1" /></>
+                              if (pos === 'center') return <><div className="flex-1" />{titleBlock}<div className="flex-1" /></>
+                              return <div className="flex-1" />
+                        })()}
 
                         {/* Bottom content */}
                         <div className="w-full max-w-md mx-auto px-5" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
 
-                              {/* Event label + title */}
-                              <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-2">{event.event_name}</p>
-                              <h1 className="text-2xl font-extrabold text-white leading-tight mb-5 whitespace-nowrap" style={{ fontFamily: selectedFontFamily }}>
-                                    Share your photos & videos.
-                              </h1>
+                              {/* Scan. Snap. Share. tagline just above buttons */}
+                              <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 text-center">Scan · Snap · Share</p>
+
+                              {/* Event name shown at bottom when title_position is bottom */}
+                              {(!event.title_position || event.title_position === 'bottom') && (
+                                    <div className="mb-4 text-center">
+                                          <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-1">{eventType.tagline}</p>
+                                          <h1 className="text-2xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>
+                                                {(event.event_name || '').split('\n').map((line, i, arr) => (
+                                                      <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+                                                ))}
+                                          </h1>
+                                    </div>
+                              )}
 
                               {/* File picker / preview */}
                               {files.length === 0 ? (

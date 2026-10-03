@@ -55,6 +55,7 @@ export default function HostDashboard() {
       const [localBgPosition, setLocalBgPosition] = useState(null)
       const [localBgTint, setLocalBgTint] = useState(null)
       const [localEventType, setLocalEventType] = useState(null)
+      const [localTitlePosition, setLocalTitlePosition] = useState(null)
       const [localLogoUrl, setLocalLogoUrl] = useState(undefined)
       const [localAllowDownloads, setLocalAllowDownloads] = useState(null)
       const [localAllowSharing, setLocalAllowSharing] = useState(null)
@@ -89,6 +90,7 @@ export default function HostDashboard() {
       const currentLogoUrl = localLogoUrl !== undefined ? localLogoUrl : event?.logo_url ?? null
       const currentEventType = getEventType(currentEventTypeId)
       const currentDefaultBg = useDefaultBg(currentEventTypeId)
+      const currentTitlePosition = localTitlePosition ?? event?.title_position ?? 'bottom'
 
       useEffect(() => {
             if (!user) return
@@ -454,10 +456,26 @@ export default function HostDashboard() {
                                                       </div>
                                                 </div>
 
-                                                {/* Row 2 — motto aligned under Event Type only */}
-                                                <div className="flex gap-3 mt-1.5">
-                                                      <div className="shrink-0 w-11" />
-                                                      <div className="flex-1 min-w-0" />
+                                                {/* Row 2 — tagline + title position */}
+                                                <div className="flex gap-3 mt-1.5 items-center">
+                                                      <div className="shrink-0 w-16" />
+                                                      <div className="flex-1 min-w-0">
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Title Position</p>
+                                                            <div className="flex gap-1.5">
+                                                                  {['top', 'center', 'bottom'].map((pos) => (
+                                                                        <button
+                                                                              key={pos}
+                                                                              onClick={async () => {
+                                                                                    setLocalTitlePosition(pos)
+                                                                                    await updateEventSettings({ title_position: pos })
+                                                                              }}
+                                                                              className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all ${currentTitlePosition === pos ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'bg-[#F7F5F0] text-[#B0AFA5] border-[#E8E4DA] hover:border-[#1A1A18]'}`}
+                                                                        >
+                                                                              {pos}
+                                                                        </button>
+                                                                  ))}
+                                                            </div>
+                                                      </div>
                                                       <p className="shrink-0 w-36 text-[10px] text-[#B0AFA5] text-center">{currentEventTypeId ? currentEventType.tagline : ''}</p>
                                                 </div>
                                           </div>
