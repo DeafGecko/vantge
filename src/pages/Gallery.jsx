@@ -522,20 +522,25 @@ export default function Gallery() {
   }, [])
 
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true)
+    let eventId = null
+
+    async function fetchData(isInitial = false) {
+      if (isInitial) setLoading(true)
       const { data: eventData, error: eventError } = await supabase
         .from('events').select('*').eq('event_slug', eventSlug).maybeSingle()
-      if (eventError || !eventData) { setError('Event not found'); setLoading(false); return }
-      setEvent(eventData)
-      if (!eventData.gallery_unlocked) { setLoading(false); return }
+      if (eventError || !eventData) { if (isInitial) { setError('Event not found'); setLoading(false) } return }
+      if (isInitial) setEvent(eventData)
+      eventId = eventData.id
+      if (!eventData.gallery_unlocked) { if (isInitial) setLoading(false); return }
       const { data: photoData, error: photoError } = await supabase
         .from('media_queue').select('*').eq('event_id', eventData.id).eq('status', 1).eq('is_admin_upload', false)
         .order('created_at', { ascending: false })
       if (!photoError) setPhotos(photoData || [])
-      setLoading(false)
+      if (isInitial) setLoading(false)
     }
-    fetchData()
+
+    fetchData(true)
+    const poll = setInterval(() => fetchData(false), 8000)
     const channel = supabase.channel(`gallery:${eventSlug}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'media_queue' }, (payload) => {
         if (payload.new.status === 1 && !payload.new.is_admin_upload) setPhotos(curr => [payload.new, ...curr])
@@ -543,7 +548,7 @@ export default function Gallery() {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'media_queue' }, (payload) => {
         if (payload.new.status === 1 && payload.old.status === 0 && !payload.new.is_admin_upload) setPhotos(curr => [payload.new, ...curr])
       }).subscribe()
-    return () => supabase.removeChannel(channel)
+    return () => { clearInterval(poll); supabase.removeChannel(channel) }
   }, [eventSlug])
 
   async function handleDownloadSelected() {

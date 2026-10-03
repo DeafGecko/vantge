@@ -280,7 +280,7 @@ export default function GuestUploader() {
                   <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
                   <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
 
-                  <div className="relative z-10 min-h-screen flex flex-col" style={{ minHeight: '100dvh' }}>
+                  <div className="relative z-10 flex flex-col" style={{ height: '100dvh', overflow: 'hidden auto' }}>
 
                         {/* Top bar */}
                         <div className="flex items-center justify-between px-5 pt-5 pb-2">

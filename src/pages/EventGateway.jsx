@@ -91,49 +91,50 @@ export default function EventGateway() {
                   <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)' }} />
 
                   {/* Scroll container */}
-                  <div className="relative z-10 min-h-screen flex flex-col">
+                  <div className="relative z-10 flex flex-col" style={{ height: '100dvh', overflow: 'hidden auto' }}>
 
                         {/* Top wordmark */}
-                        <div className="flex justify-center pt-6 pb-2">
+                        <div className="flex justify-center pt-6 pb-2 shrink-0">
                               <a href="/"><VantgeLogo size="sm" monoWhite /></a>
                         </div>
 
-                        {/* Spacer — pushes content to bottom */}
-                        <div className="flex-1" />
+                        {/* Title block — flex spacers control vertical position */}
+                        {(() => {
+                              const raw = event.title_position
+                              const posNum = Math.min(94, isNaN(Number(raw)) ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 94) : Number(raw ?? 94))
+                              return (
+                                    <>
+                                          <div style={{ flex: posNum }} />
+                                          <div className="w-full max-w-md mx-auto px-5 flex flex-col items-center text-center py-4 shrink-0">
+                                                <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50 mb-3">
+                                                      {eventType.tagline}
+                                                </p>
+                                                {event.logo_url && (
+                                                      <img
+                                                            src={event.logo_url}
+                                                            alt="Event logo"
+                                                            className="mx-auto mb-3 object-contain drop-shadow-lg"
+                                                            style={{ maxHeight: '56px', maxWidth: '160px' }}
+                                                      />
+                                                )}
+                                                <h1
+                                                      className="font-extrabold leading-tight text-white drop-shadow-lg mb-6"
+                                                      style={{
+                                                            fontFamily: selectedFontFamily,
+                                                            fontSize: 'clamp(1.8rem, 8vw, 3rem)',
+                                                            textShadow: '0 2px 20px rgba(0,0,0,0.6)',
+                                                      }}
+                                                >
+                                                      {event.event_name}
+                                                </h1>
+                                          </div>
+                                          <div style={{ flex: Math.max(0, 94 - posNum) }} />
+                                    </>
+                              )
+                        })()}
 
-                        {/* Bottom content panel */}
-                        <div
-                              className="w-full max-w-md mx-auto px-5 flex flex-col items-center text-center"
-                              style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
-                        >
-                              {/* Tagline */}
-                              <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50 mb-3">
-                                    {eventType.tagline}
-                              </p>
-
-                              {/* Logo */}
-                              {event.logo_url && (
-                                    <img
-                                          src={event.logo_url}
-                                          alt="Event logo"
-                                          className="mx-auto mb-3 object-contain drop-shadow-lg"
-                                          style={{ maxHeight: '56px', maxWidth: '160px' }}
-                                    />
-                              )}
-
-                              {/* Event name */}
-                              <h1
-                                    className="font-extrabold leading-tight text-white drop-shadow-lg mb-6"
-                                    style={{
-                                          fontFamily: selectedFontFamily,
-                                          fontSize: 'clamp(1.8rem, 8vw, 3rem)',
-                                          textShadow: '0 2px 20px rgba(0,0,0,0.6)',
-                                    }}
-                              >
-                                    {event.event_name}
-                              </h1>
-
-                              {/* Buttons */}
+                        {/* Buttons — pinned at bottom */}
+                        <div className="w-full max-w-md mx-auto px-5 shrink-0" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
                               <div className="w-full flex flex-col gap-2.5">
 
                                     {/* Open Camera — primary */}
@@ -212,3 +213,4 @@ export default function EventGateway() {
             </>
       )
 }
+
