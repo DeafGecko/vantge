@@ -773,11 +773,113 @@ const DEFAULT_BGS = {
   other:       'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600&q=85',
 }
 
+function LibraryModal({ typeId, label, onClose }) {
+  const [photos, setPhotos] = useState([])
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef(null)
+
+  useEffect(() => {
+    supabase.from('event_type_library').select('*').eq('event_type', typeId).order('sort_order').then(({ data }) => setPhotos(data || []))
+  }, [typeId])
+
+  async function handleUpload(files) {
+    if (!files.length) return
+    if (photos.length + files.length > 10) { alert(`Max 10 photos per type. You have ${photos.length}, can add ${10 - photos.length} more.`); return }
+    setUploading(true)
+    for (const file of files) {
+      const path = `library/${typeId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${file.name.split('.').pop()}`
+      const { error } = await supabase.storage.from('event-media').upload(path, file, { upsert: true })
+      if (!error) {
+        const { data: urlData } = supabase.storage.from('event-media').getPublicUrl(path)
+        const { data: row } = await supabase.from('event_type_library').insert({ event_type: typeId, photo_url: urlData.publicUrl, sort_order: photos.length }).select().single()
+        if (row) setPhotos(p => [...p, row])
+      }
+    }
+    setUploading(false)
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  async function handleDelete(id) {
+    await supabase.from('event_type_library').delete().eq('id', id)
+    setPhotos(p => p.filter(x => x.id !== id))
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={onClose}>
+      <div className="bg-[#1A1A18] border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <div>
+            <p className="text-white font-bold">{label} — Photo Library</p>
+            <p className="text-white/40 text-xs mt-0.5">{photos.length}/10 photos · Hosts see these as curated options</p>
+          </div>
+          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+          </button>
+        </div>
+
+        {/* Photo grid */}
+        <div className="p-5">
+          <div className="grid grid-cols-5 gap-3">
+            {photos.map(p => (
+              <div key={p.id} className="relative group aspect-square rounded-xl overflow-hidden bg-white/5">
+                <img src={p.photo_url} alt="" className="w-full h-full object-cover" />
+                <button
+                  onClick={() => handleDelete(p.id)}
+                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                >
+                  <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+                </button>
+              </div>
+            ))}
+            {/* Upload slot */}
+            {photos.length < 10 && (
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="aspect-square rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-1 hover:border-white/50 transition-colors disabled:opacity-40"
+              >
+                {uploading
+                  ? <svg width="18" height="18" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24" className="animate-spin opacity-50"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  : <svg width="18" height="18" fill="none" stroke="white" strokeWidth="1.5" viewBox="0 0 24 24" className="opacity-40"><path d="M12 5v14M5 12h14" strokeLinecap="round"/></svg>
+                }
+                <span className="text-white/30 text-[9px] font-bold uppercase tracking-widest">{uploading ? 'Uploading' : 'Add'}</span>
+              </button>
+            )}
+          </div>
+          <input ref={fileRef} type="file" accept="image/*,video/mp4" multiple className="hidden" onChange={e => handleUpload(Array.from(e.target.files || []))} />
+        </div>
+
+        <div className="px-5 pb-5">
+          <button onClick={onClose} className="w-full bg-white/10 text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3 hover:bg-white/20 transition-all">Done</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function BrandingTab({ marketingPhotos }) {
   const [overrides, setOverrides] = useState({})
   const [saving, setSaving] = useState({})
-  const [pickingFor, setPickingFor] = useState(null) // event type id
+  const [pickingFor, setPickingFor] = useState(null)
+  const [libraryFor, setLibraryFor] = useState(null) // event type id
+  const [libraryCounts, setLibraryCounts] = useState({})
+  const [libraryPreviews, setLibraryPreviews] = useState({})
   const fileRefs = useRef({})
+
+  useEffect(() => {
+    supabase.from('event_type_library').select('event_type, photo_url').order('sort_order').then(({ data }) => {
+      const counts = {}
+      const previews = {}
+      ;(data || []).forEach(r => {
+        counts[r.event_type] = (counts[r.event_type] || 0) + 1
+        if (!previews[r.event_type]) previews[r.event_type] = []
+        if (previews[r.event_type].length < 4) previews[r.event_type].push(r.photo_url)
+      })
+      setLibraryCounts(counts)
+      setLibraryPreviews(previews)
+    })
+  }, [libraryFor])
 
   useEffect(() => {
     supabase.from('admin_branding').select('*').then(({ data }) => {
@@ -870,6 +972,33 @@ function BrandingTab({ marketingPhotos }) {
                 </div>
               </div>
             </div>
+            {/* Library thumbnails strip */}
+            <div className="border-t border-white/[0.07] px-4 py-3 flex items-center gap-3">
+              <div className="flex gap-1.5">
+                {(libraryPreviews[typeId] || []).map((url, i) => (
+                  <div key={i} className="w-10 h-10 rounded-lg overflow-hidden bg-white/5 shrink-0">
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+                {!libraryCounts[typeId] && (
+                  <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                    <span className="text-white/20 text-[9px] font-bold">0</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="text-white/40 text-[10px]">
+                  {libraryCounts[typeId] ? `${libraryCounts[typeId]} library photo${libraryCounts[typeId] !== 1 ? 's' : ''}` : 'No library photos yet'}
+                </p>
+              </div>
+              <button
+                onClick={() => setLibraryFor(typeId)}
+                className="px-3 py-1.5 rounded-lg bg-white/10 text-white/70 text-[10px] font-bold hover:bg-white/20 transition-colors shrink-0"
+              >
+                Manage Library
+              </button>
+            </div>
+
             {/* Marketing collection picker */}
             {pickingFor === typeId && (
               <div className="border-t border-white/[0.07] p-3">
@@ -892,6 +1021,14 @@ function BrandingTab({ marketingPhotos }) {
           </div>
         )
       })}
+
+      {libraryFor && (
+        <LibraryModal
+          typeId={libraryFor}
+          label={EVENT_TYPE_LABELS[libraryFor]?.label || libraryFor}
+          onClose={() => setLibraryFor(null)}
+        />
+      )}
     </div>
   )
 }
