@@ -280,7 +280,7 @@ export default function GuestUploader() {
                   <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
                   <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
 
-                  <div className="relative z-10 min-h-screen flex flex-col">
+                  <div className="relative z-10 min-h-screen flex flex-col" style={{ minHeight: '100dvh' }}>
 
                         {/* Top bar */}
                         <div className="flex items-center justify-between px-5 pt-5 pb-2">
@@ -292,18 +292,19 @@ export default function GuestUploader() {
                               <div className="w-12" />
                         </div>
 
-                        {/* Title block — floats at numeric position 0 (top) to 100 (bottom) */}
+                        {/* Title block — absolutely positioned within the screen, 0=top 100=above buttons */}
                         {(() => {
                               const raw = event.title_position
                               const posNum = isNaN(Number(raw))
                                     ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 100)
                                     : Number(raw ?? 100)
                               if (posNum >= 95) return <div className="flex-1" />
+                              const topPct = 8 + (posNum / 100) * 55
                               return (
                                     <>
                                           <div
-                                                className="w-full max-w-md mx-auto px-5 text-center py-6"
-                                                style={{ marginTop: `${posNum}%`, transform: `translateY(-${posNum}%)` }}
+                                                className="absolute w-full max-w-md left-1/2 -translate-x-1/2 px-5 text-center py-6 z-10"
+                                                style={{ top: `${topPct}%`, transform: `translateX(-50%) translateY(-${posNum}%)` }}
                                           >
                                                 <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-2">{eventType.tagline}</p>
                                                 <h1 className="text-3xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>
