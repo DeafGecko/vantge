@@ -303,7 +303,7 @@ export default function GuestUploader() {
                                     <>
                                           <div
                                                 className="absolute w-full max-w-md left-1/2 -translate-x-1/2 px-5 text-center py-6 z-10"
-                                                style={{ top: `${8 + (posNum / 100) * 58}%` }}
+                                                style={{ top: `${8 + (posNum / 100) * 50}%` }}
                                           >
                                                 <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-2">{eventType.tagline}</p>
                                                 <h1 className="text-3xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>

@@ -682,7 +682,7 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
                         {/* Floating title block — position driven by 0-100 numeric prop */}
                         <div
                               className="absolute z-10 w-full text-center"
-                              style={{ top: `${8 + (titlePosition / 100) * 58}%` }}
+                              style={{ top: `${8 + (titlePosition / 100) * 50}%` }}
                         >
                               {titleBlock}
                         </div>
