@@ -679,17 +679,11 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
                         {hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${((bgTint ?? 55) / 100).toFixed(2)})` }} />}
                         {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
 
-                        {/* Floating title block — position driven by 0-100 numeric prop */}
-                        <div
-                              className="absolute z-10 w-full text-center"
-                              style={{ top: `${8 + (titlePosition / 100) * 50}%` }}
-                        >
-                              {titleBlock}
-                        </div>
-
-                        {/* Bottom buttons — always pinned */}
-                        <div className="relative z-10 h-full flex flex-col">
-                              <div className="flex-1" />
+                        {/* Title + buttons in one flex column — spacers control title position */}
+                        <div className="relative z-10 h-full flex flex-col pt-8">
+                              <div style={{ flex: titlePosition }} />
+                              {titlePosition < 95 && <div className="text-center px-2">{titleBlock}</div>}
+                              <div style={{ flex: Math.max(0, 100 - titlePosition) }} />
                               <div className="px-4 pb-4 text-center">
 
                                     {isUnlocked ? (
