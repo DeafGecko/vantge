@@ -826,7 +826,9 @@ function BrandingTab({ marketingPhotos }) {
               {/* Preview */}
               <div className="w-24 h-20 shrink-0 relative bg-white/[0.06] flex items-center justify-center">
                 {current
-                  ? <img src={current} alt={label} className="w-full h-full object-cover" />
+                  ? current.match(/\.mp4/i)
+                    ? <video src={current} className="w-full h-full object-cover" muted autoPlay loop playsInline />
+                    : <img src={current} alt={label} className="w-full h-full object-cover" />
                   : <span className="text-white/20 text-xs font-bold uppercase tracking-widest">None</span>
                 }
                 {isCustom && <div className="absolute top-1 left-1 bg-emerald-500 text-white text-[8px] font-bold px-1 rounded">CUSTOM</div>}
@@ -862,7 +864,7 @@ function BrandingTab({ marketingPhotos }) {
                   )}
                   <input
                     ref={el => fileRefs.current[typeId] = el}
-                    type="file" accept="image/*" className="hidden"
+                    type="file" accept="image/png,image/jpeg,video/mp4" className="hidden"
                     onChange={e => { handleFileUpload(typeId, e.target.files[0]); e.target.value = '' }}
                   />
                 </div>
