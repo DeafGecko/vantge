@@ -635,6 +635,8 @@ function UsersTab({ onBadgeRefresh }) {
 function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
   const [activeView, setActiveView] = useState('inbox') // 'inbox' | 'collection'
   const [collection, setCollection] = useState([])
+  const [uploading, setUploading] = useState(false)
+  const uploadInputRef = useRef(null)
   const [adding, setAdding] = useState({})
 
   async function fetchCollection() {
@@ -667,6 +669,22 @@ function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
     onBadgeRefresh?.()
   }
 
+  async function handleUpload(e) {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    e.target.value = ''
+    setUploading(true)
+    for (const file of files) {
+      const ext = file.name.split('.').pop()
+      const path = `marketing/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { data: storageData, error: storageError } = await supabase.storage.from('event-media').upload(path, file, { upsert: false })
+      if (storageError) continue
+      const { data: { publicUrl } } = supabase.storage.from('event-media').getPublicUrl(storageData.path)
+      await supabase.from('marketing_collection').insert({ original_url: publicUrl, thumbnail_url: publicUrl, is_video: file.type.startsWith('video/'), added_at: new Date().toISOString() })
+    }
+    setUploading(false)
+    fetchCollection()
+  }
 
   const collectionIds = new Set(collection.map(c => c.media_id))
   const approvedPhotos = photos.filter(p => p.status === 1)
@@ -676,7 +694,7 @@ function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
   return (
     <div className="space-y-4">
       {/* Tab switcher with badges */}
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <button
           onClick={() => setActiveView('inbox')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${activeView === 'inbox' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.05]'}`}
@@ -699,6 +717,19 @@ function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
             </span>
           )}
         </button>
+        {activeView === 'collection' && (
+          <>
+            <input ref={uploadInputRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleUpload} />
+            <button
+              onClick={() => uploadInputRef.current?.click()}
+              disabled={uploading}
+              className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 disabled:opacity-50 transition-colors"
+            >
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              {uploading ? 'Uploading…' : 'Upload'}
+            </button>
+          </>
+        )}
       </div>
 
       {/* ── Inbox view ── */}
