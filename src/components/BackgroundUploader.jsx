@@ -4,6 +4,82 @@ import { useDefaultBg } from '../hooks/useDefaultBg'
 
 const MAX_BYTES = 50 * 1024 * 1024
 
+// Curated Unsplash photos per event type (photo ID → full URL)
+const LIBRARY = {
+      anniversary: [
+            'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=1200&q=80',
+            'https://images.unsplash.com/photo-1518568740994-c1de148d8e22?w=1200&q=80',
+            'https://images.unsplash.com/photo-1464047736614-af63643285bf?w=1200&q=80',
+            'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1200&q=80',
+            'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&q=80',
+            'https://images.unsplash.com/photo-1582656447884-de8e48ab5b90?w=1200&q=80',
+      ],
+      birthday: [
+            'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&q=80',
+            'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
+            'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80',
+            'https://images.unsplash.com/photo-1464349153735-7db50ed83c84?w=1200&q=80',
+            'https://images.unsplash.com/photo-1585996487823-f621ff9a01d6?w=1200&q=80',
+            'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=1200&q=80',
+      ],
+      corporate: [
+            'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80',
+            'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1200&q=80',
+            'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=1200&q=80',
+            'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&q=80',
+            'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=1200&q=80',
+            'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1200&q=80',
+      ],
+      family: [
+            'https://images.unsplash.com/photo-1511895426328-dc8714191011?w=1200&q=80',
+            'https://images.unsplash.com/photo-1475503572774-15a45e5d60b9?w=1200&q=80',
+            'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&q=80',
+            'https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?w=1200&q=80',
+            'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1200&q=80',
+            'https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=1200&q=80',
+      ],
+      graduation: [
+            'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&q=80',
+            'https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?w=1200&q=80',
+            'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1200&q=80',
+            'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80',
+            'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=1200&q=80',
+            'https://images.unsplash.com/photo-1563459802257-2a97df940f11?w=1200&q=80',
+      ],
+      party: [
+            'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&q=80',
+            'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80',
+            'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80',
+            'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=1200&q=80',
+            'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=1200&q=80',
+            'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=1200&q=80',
+      ],
+      wedding: [
+            'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80',
+            'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=1200&q=80',
+            'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1200&q=80',
+            'https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=1200&q=80',
+            'https://images.unsplash.com/photo-1550005809-91ad75fb315f?w=1200&q=80',
+            'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=1200&q=80',
+      ],
+      other: [
+            'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&q=80',
+            'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80',
+            'https://images.unsplash.com/photo-1444628838545-ac4016a5418a?w=1200&q=80',
+            'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&q=80',
+            'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=1200&q=80',
+            'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80',
+      ],
+      none: [
+            'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&q=80',
+            'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80',
+            'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=1200&q=80',
+            'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&q=80',
+            'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80',
+            'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80',
+      ],
+}
+
 async function compressImage(file) {
       if (file.size <= MAX_BYTES) return file
       return new Promise((resolve) => {
@@ -81,13 +157,15 @@ function ZoneThumb({ label, imageUrl, defaultBg, currentTint, isActive, uploadin
 }
 
 // Full-screen modal editor — photo left, tools right
-function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, currentTint, accentColor, eventId, dbField, onSaved, onClose }) {
+function ZoneEditor({ label, imageUrl, defaultBg, currentPosition, currentTint, accentColor, eventId, dbField, eventTypeId, onSaved, onClose }) {
       const [position, setPosition] = useState(currentPosition || '50% 50%')
       const [tint, setTint] = useState(currentTint ?? 55)
       const [pendingUrl, setPendingUrl] = useState(null)
       const [uploading, setUploading] = useState(false)
       const [dragging, setDragging] = useState(false)
       const [activeToolIndex, setActiveToolIndex] = useState(0)
+      const [showChangePanel, setShowChangePanel] = useState(false)
+      const [changeTab, setChangeTab] = useState('library') // 'library' | 'upload'
       const editorRef = useRef(null)
       const dragStart = useRef(null)
       const inputRef = useRef(null)
@@ -95,6 +173,8 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       const activeUrl = pendingUrl || imageUrl || defaultBg
       const tintAlpha = (tint / 100).toFixed(2)
       const hasCustomPhoto = !!(pendingUrl || imageUrl)
+
+      const libraryPhotos = LIBRARY[eventTypeId] || LIBRARY.other
 
       const getPos = useCallback((e, rect) => {
             const clientX = e.touches ? e.touches[0].clientX : e.clientX
@@ -121,6 +201,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
             const file = e.target.files?.[0]
             if (!file) return
             setUploading(true)
+            setShowChangePanel(false)
             const compressed = await compressImage(file)
             const path = `backgrounds/${eventId}/${dbField}-${Date.now()}.jpg`
             const { error: uploadError } = await supabase.storage.from('event-media').upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
@@ -130,6 +211,13 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
             setPosition('50% 50%')
             setUploading(false)
             if (inputRef.current) inputRef.current.value = ''
+      }
+
+      function handleLibraryPick(url) {
+            setPendingUrl(url)
+            setPosition('50% 50%')
+            setShowChangePanel(false)
+            setActiveToolIndex(0)
       }
 
       async function handleConfirm() {
@@ -164,23 +252,87 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                     <div
                                           ref={editorRef}
                                           className="relative w-full h-full select-none"
-                                          style={{ cursor: dragging ? 'grabbing' : (activeToolIndex === 0 ? 'grab' : 'default') }}
-                                          onMouseDown={activeToolIndex === 0 ? onDragStart : undefined}
-                                          onMouseMove={activeToolIndex === 0 ? onDragMove : undefined}
-                                          onMouseUp={activeToolIndex === 0 ? onDragEnd : undefined}
-                                          onMouseLeave={activeToolIndex === 0 ? onDragEnd : undefined}
-                                          onTouchStart={activeToolIndex === 0 ? onDragStart : undefined}
-                                          onTouchMove={activeToolIndex === 0 ? onDragMove : undefined}
-                                          onTouchEnd={activeToolIndex === 0 ? onDragEnd : undefined}
+                                          style={{ cursor: dragging ? 'grabbing' : (activeToolIndex === 0 && !showChangePanel ? 'grab' : 'default') }}
+                                          onMouseDown={activeToolIndex === 0 && !showChangePanel ? onDragStart : undefined}
+                                          onMouseMove={activeToolIndex === 0 && !showChangePanel ? onDragMove : undefined}
+                                          onMouseUp={activeToolIndex === 0 && !showChangePanel ? onDragEnd : undefined}
+                                          onMouseLeave={activeToolIndex === 0 && !showChangePanel ? onDragEnd : undefined}
+                                          onTouchStart={activeToolIndex === 0 && !showChangePanel ? onDragStart : undefined}
+                                          onTouchMove={activeToolIndex === 0 && !showChangePanel ? onDragMove : undefined}
+                                          onTouchEnd={activeToolIndex === 0 && !showChangePanel ? onDragEnd : undefined}
                                     >
                                           <img src={activeUrl} alt="Background" className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: position }} draggable={false} />
                                           <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-                                          {activeToolIndex === 0 && (
+                                          {activeToolIndex === 0 && !showChangePanel && (
                                                 <div className="absolute w-7 h-7 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2" style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: `${accentColor}99` }} />
                                           )}
-                                          {activeToolIndex === 0 && (
+                                          {activeToolIndex === 0 && !showChangePanel && (
                                                 <div className="absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none">
                                                       <span className="text-[9px] font-bold text-white/60 uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">Drag to reposition</span>
+                                                </div>
+                                          )}
+
+                                          {/* Library overlay on left side */}
+                                          {showChangePanel && (
+                                                <div className="absolute inset-0 bg-black/80 flex flex-col">
+                                                      {/* Tabs */}
+                                                      <div className="flex border-b border-white/10 px-4 pt-4 gap-4">
+                                                            <button
+                                                                  onClick={() => setChangeTab('library')}
+                                                                  className={`text-[10px] font-bold uppercase tracking-widest pb-2 border-b-2 transition-colors ${changeTab === 'library' ? 'border-white text-white' : 'border-transparent text-white/40 hover:text-white/70'}`}
+                                                            >
+                                                                  Vantge Library
+                                                            </button>
+                                                            <button
+                                                                  onClick={() => setChangeTab('upload')}
+                                                                  className={`text-[10px] font-bold uppercase tracking-widest pb-2 border-b-2 transition-colors ${changeTab === 'upload' ? 'border-white text-white' : 'border-transparent text-white/40 hover:text-white/70'}`}
+                                                            >
+                                                                  Upload
+                                                            </button>
+                                                            <div className="flex-1" />
+                                                            <button onClick={() => setShowChangePanel(false)} className="text-white/40 hover:text-white pb-2">
+                                                                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+                                                            </button>
+                                                      </div>
+
+                                                      {/* Library grid */}
+                                                      {changeTab === 'library' && (
+                                                            <div className="flex-1 overflow-y-auto p-4">
+                                                                  <p className="text-[9px] text-white/40 mb-3 uppercase tracking-widest font-bold">Select a photo for your event</p>
+                                                                  <div className="grid grid-cols-2 gap-2">
+                                                                        {libraryPhotos.map((url, i) => (
+                                                                              <button
+                                                                                    key={i}
+                                                                                    onClick={() => handleLibraryPick(url)}
+                                                                                    className={`relative rounded-xl overflow-hidden aspect-video border-2 transition-all hover:scale-[1.02] ${pendingUrl === url ? 'border-white' : 'border-transparent'}`}
+                                                                              >
+                                                                                    <img src={url} alt="" className="w-full h-full object-cover" />
+                                                                                    {pendingUrl === url && (
+                                                                                          <div className="absolute inset-0 bg-white/20 flex items-center justify-center">
+                                                                                                <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                                                                                                      <svg width="12" height="12" fill="none" stroke="#1A1A18" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                                                                </div>
+                                                                                          </div>
+                                                                                    )}
+                                                                              </button>
+                                                                        ))}
+                                                                  </div>
+                                                            </div>
+                                                      )}
+
+                                                      {/* Upload tab */}
+                                                      {changeTab === 'upload' && (
+                                                            <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8">
+                                                                  <svg width="40" height="40" fill="none" stroke="white" strokeWidth="1.2" viewBox="0 0 24 24" className="opacity-40"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                                  <p className="text-white/60 text-sm font-bold">Upload your own photo</p>
+                                                                  <button
+                                                                        onClick={() => inputRef.current?.click()}
+                                                                        className="bg-white text-[#1A1A18] text-[10px] font-bold uppercase tracking-widest rounded-full px-6 py-3 hover:bg-white/90 transition-all"
+                                                                  >
+                                                                        {uploading ? 'Uploading…' : 'Choose File'}
+                                                                  </button>
+                                                            </div>
+                                                      )}
                                                 </div>
                                           )}
                                     </div>
@@ -207,19 +359,20 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                               <div className="flex flex-col gap-1 p-3 border-b border-[#E8E4DA]">
                                     {tools.map((tool, i) => {
                                           if (tool.id === 'delete' && !hasCustomPhoto) return null
-                                          const isActive = activeToolIndex === i
+                                          const isActive = activeToolIndex === i && tool.id !== 'change' && tool.id !== 'delete'
                                           return (
                                                 <button
                                                       key={tool.id}
                                                       onClick={() => {
-                                                            if (tool.id === 'change') { inputRef.current?.click(); return }
+                                                            if (tool.id === 'change') { setShowChangePanel(true); setChangeTab('library'); return }
                                                             if (tool.id === 'delete') { handleRemove(); return }
                                                             setActiveToolIndex(i)
+                                                            setShowChangePanel(false)
                                                       }}
                                                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
                                                             tool.id === 'delete'
                                                                   ? 'text-[#C84A44] hover:bg-red-50'
-                                                                  : isActive
+                                                                  : isActive || (tool.id === 'change' && showChangePanel)
                                                                         ? 'bg-[#1A1A18] text-white'
                                                                         : 'text-[#5A5A52] hover:bg-[#F7F5F0]'
                                                       }`}
@@ -233,7 +386,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
 
                               {/* Active tool content */}
                               <div className="flex-1 overflow-y-auto p-5">
-                                    {activeToolIndex === 0 && (
+                                    {activeToolIndex === 0 && !showChangePanel && (
                                           <div>
                                                 <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">Reposition</p>
                                                 <p className="text-[10px] text-[#B0AFA5] leading-relaxed">Drag the photo on the left to reposition the focus point.</p>
@@ -242,7 +395,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                                 </div>
                                           </div>
                                     )}
-                                    {activeToolIndex === 2 && (
+                                    {activeToolIndex === 2 && !showChangePanel && (
                                           <div>
                                                 <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-3">Black Tint</p>
                                                 <div className="flex items-center justify-between mb-2">
@@ -255,6 +408,12 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                                       onChange={(e) => setTint(Number(e.target.value))}
                                                       className="w-full accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
                                                 />
+                                          </div>
+                                    )}
+                                    {showChangePanel && (
+                                          <div>
+                                                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">Photo Source</p>
+                                                <p className="text-[10px] text-[#B0AFA5] leading-relaxed">Browse the Vantge library or upload your own photo on the left.</p>
                                           </div>
                                     )}
                               </div>
@@ -298,7 +457,6 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                         <div className="w-[30%] shrink-0">
                               <ZoneThumb
                                     label="Mobile · Portrait"
-                                    isLandscape={false}
                                     imageUrl={currentImageUrl}
                                     defaultBg={defaultBg}
                                     currentTint={currentTint}
@@ -311,7 +469,6 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                         <div className="flex-1 min-w-0">
                               <ZoneThumb
                                     label="Desktop · Landscape"
-                                    isLandscape={true}
                                     imageUrl={currentImageDesktopUrl}
                                     defaultBg={defaultBg}
                                     currentTint={currentTint}
@@ -327,7 +484,6 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                   {activeZone === 'portrait' && (
                         <ZoneEditor
                               label="Mobile · Portrait — Edit"
-                              isLandscape={false}
                               imageUrl={currentImageUrl}
                               defaultBg={defaultBg}
                               currentPosition={currentPosition}
@@ -335,6 +491,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               accentColor={accentColor}
                               eventId={eventId}
                               dbField="background_image"
+                              eventTypeId={eventTypeId}
                               onSaved={onSaved}
                               onClose={() => setActiveZone(null)}
                         />
@@ -342,7 +499,6 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                   {activeZone === 'landscape' && (
                         <ZoneEditor
                               label="Desktop · Landscape — Edit"
-                              isLandscape={true}
                               imageUrl={currentImageDesktopUrl}
                               defaultBg={defaultBg}
                               currentPosition={currentPosition}
@@ -350,6 +506,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               accentColor={accentColor}
                               eventId={eventId}
                               dbField="background_image_desktop"
+                              eventTypeId={eventTypeId}
                               onSaved={onSavedDesktop}
                               onClose={() => setActiveZone(null)}
                         />
