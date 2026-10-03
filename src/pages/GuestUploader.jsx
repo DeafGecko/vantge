@@ -292,22 +292,29 @@ export default function GuestUploader() {
                               <div className="w-12" />
                         </div>
 
-                        {/* Title block — position controlled by host */}
+                        {/* Title block — floats at numeric position 0 (top) to 100 (bottom) */}
                         {(() => {
-                              const pos = event.title_position || 'bottom'
-                              const titleBlock = (
-                                    <div className="w-full max-w-md mx-auto px-5 text-center py-6">
-                                          <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-2">{eventType.tagline}</p>
-                                          <h1 className="text-3xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>
-                                                {(event.event_name || '').split('\n').map((line, i, arr) => (
-                                                      <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
-                                                ))}
-                                          </h1>
-                                    </div>
+                              const raw = event.title_position
+                              const posNum = isNaN(Number(raw))
+                                    ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 100)
+                                    : Number(raw ?? 100)
+                              if (posNum >= 95) return <div className="flex-1" />
+                              return (
+                                    <>
+                                          <div
+                                                className="w-full max-w-md mx-auto px-5 text-center py-6"
+                                                style={{ marginTop: `${posNum}%`, transform: `translateY(-${posNum}%)` }}
+                                          >
+                                                <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-2">{eventType.tagline}</p>
+                                                <h1 className="text-3xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>
+                                                      {(event.event_name || '').split('\n').map((line, i, arr) => (
+                                                            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+                                                      ))}
+                                                </h1>
+                                          </div>
+                                          <div className="flex-1" />
+                                    </>
                               )
-                              if (pos === 'top') return <>{titleBlock}<div className="flex-1" /></>
-                              if (pos === 'center') return <><div className="flex-1" />{titleBlock}<div className="flex-1" /></>
-                              return <div className="flex-1" />
                         })()}
 
                         {/* Bottom content */}
@@ -316,8 +323,12 @@ export default function GuestUploader() {
                               {/* Scan. Snap. Share. tagline just above buttons */}
                               <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 text-center">Scan · Snap · Share</p>
 
-                              {/* Event name shown at bottom when title_position is bottom */}
-                              {(!event.title_position || event.title_position === 'bottom') && (
+                              {/* Event name at bottom when position >= 95 */}
+                              {(() => {
+                                    const raw = event.title_position
+                                    const posNum = isNaN(Number(raw)) ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 100) : Number(raw ?? 100)
+                                    return posNum >= 95
+                              })() && (
                                     <div className="mb-4 text-center">
                                           <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/45 mb-1">{eventType.tagline}</p>
                                           <h1 className="text-2xl font-extrabold text-white leading-tight" style={{ fontFamily: selectedFontFamily }}>

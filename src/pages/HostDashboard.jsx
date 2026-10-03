@@ -90,7 +90,10 @@ export default function HostDashboard() {
       const currentLogoUrl = localLogoUrl !== undefined ? localLogoUrl : event?.logo_url ?? null
       const currentEventType = getEventType(currentEventTypeId)
       const currentDefaultBg = useDefaultBg(currentEventTypeId)
-      const currentTitlePosition = localTitlePosition ?? event?.title_position ?? 'bottom'
+      const rawTitlePos = localTitlePosition ?? event?.title_position ?? '100'
+      const currentTitlePosition = isNaN(Number(rawTitlePos))
+            ? (rawTitlePos === 'top' ? 0 : rawTitlePos === 'center' ? 50 : 100)
+            : Number(rawTitlePos)
 
       useEffect(() => {
             if (!user) return
@@ -462,17 +465,17 @@ export default function HostDashboard() {
                                                       <div className="flex-1 min-w-0">
                                                             <div className="flex items-center justify-between mb-1.5">
                                                                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
-                                                                  <span className="text-[9px] font-bold text-[#5A5A52] capitalize">{currentTitlePosition}</span>
+                                                                  <span className="text-[9px] font-bold text-[#5A5A52]">{currentTitlePosition === 0 ? 'Top' : currentTitlePosition === 100 ? 'Bottom' : currentTitlePosition === 50 ? 'Center' : `${currentTitlePosition}%`}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                   <span className="text-[8px] text-[#B0AFA5]">Top</span>
                                                                   <input
-                                                                        type="range" min={0} max={2} step={1}
-                                                                        value={currentTitlePosition === 'top' ? 0 : currentTitlePosition === 'center' ? 1 : 2}
+                                                                        type="range" min={0} max={100} step={1}
+                                                                        value={currentTitlePosition}
                                                                         onChange={async (e) => {
-                                                                              const pos = ['top', 'center', 'bottom'][Number(e.target.value)]
-                                                                              setLocalTitlePosition(pos)
-                                                                              await updateEventSettings({ title_position: pos })
+                                                                              const val = e.target.value
+                                                                              setLocalTitlePosition(val)
+                                                                              await updateEventSettings({ title_position: val })
                                                                         }}
                                                                         className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
                                                                   />
@@ -636,7 +639,7 @@ function ThemeOption({ theme, isActive, onClick }) {
       )
 }
 
-function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked, titlePosition = 'bottom' }) {
+function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked, titlePosition = 100 }) {
       const c = theme.colors
       const hasBg = !!bgImage
       const txt = hasBg ? '#fff' : c.text
@@ -676,17 +679,22 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
                         {hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${((bgTint ?? 55) / 100).toFixed(2)})` }} />}
                         {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
 
-                        {/* Full-height flex column inside absolute container needs explicit h-full */}
-                        <div className="relative z-10 h-full flex flex-col">
-                              {/* Title position: top */}
-                              {titlePosition === 'top' && <div className="mt-8 text-center">{titleBlock}</div>}
-                              <div className="flex-1" />
-                              {/* Title position: center */}
-                              {titlePosition === 'center' && <div className="text-center">{titleBlock}</div>}
-                              <div className="flex-1" />
+                        {/* Floating title block — position driven by 0-100 numeric prop */}
+                        <div
+                              className="absolute z-10 w-full"
+                              style={{
+                                    top: `${titlePosition}%`,
+                                    transform: `translateY(-${titlePosition}%)`,
+                                    paddingTop: titlePosition === 0 ? '2rem' : 0,
+                              }}
+                        >
+                              {titleBlock}
+                        </div>
 
+                        {/* Bottom buttons — always pinned */}
+                        <div className="relative z-10 h-full flex flex-col">
+                              <div className="flex-1" />
                               <div className="px-4 pb-4 text-center">
-                                    {titlePosition === 'bottom' && <div className="mb-3">{titleBlock}</div>}
 
                                     {isUnlocked ? (
                                           <>
