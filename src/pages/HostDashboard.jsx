@@ -431,17 +431,13 @@ export default function HostDashboard() {
                                                                                     const val = e.target.value
                                                                                     setLocalEventType(val)
                                                                                     const updates = { event_type: val || null }
-                                                                                    const allDefaults = EVENT_TYPES.map(t => t.defaultBg)
-                                                                                    const isUsingDefault = !currentBgImage || allDefaults.includes(currentBgImage) || currentBgImage === currentDefaultBg
-                                                                                    if (isUsingDefault) {
-                                                                                          const brandingKey = val || 'none'
-                                                                                          const { data } = await supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle()
-                                                                                          const newDefault = data?.background_url || getEventType(val)?.defaultBg || null
-                                                                                          updates.background_image = newDefault
-                                                                                          updates.background_image_desktop = null
-                                                                                          setLocalBgImage(newDefault)
-                                                                                          setLocalBgImageDesktop(null)
-                                                                                    }
+                                                                                    const brandingKey = val || 'none'
+                                                                                    const { data } = await supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle()
+                                                                                    const newDefault = data?.background_url || getEventType(val)?.defaultBg || null
+                                                                                    updates.background_image = newDefault
+                                                                                    updates.background_image_desktop = null
+                                                                                    setLocalBgImage(newDefault)
+                                                                                    setLocalBgImageDesktop(null)
                                                                                     await updateEventSettings(updates)
                                                                               }}
                                                                               className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
