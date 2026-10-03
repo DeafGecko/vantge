@@ -111,6 +111,9 @@ function OverviewTab({ stats, events }) {
 // ── Live Events tab ───────────────────────────────────────────────────────────
 function LiveEventsTab({ events, onEmergency }) {
   const [confirm, setConfirm] = useState(null) // { event, action }
+  const [deleteTarget, setDeleteTarget] = useState(null) // event to delete
+  const [deleteInput, setDeleteInput] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   function triggerConfirm(event, action) { setConfirm({ event, action }) }
 
@@ -125,8 +128,48 @@ function LiveEventsTab({ events, onEmergency }) {
     onEmergency()
   }
 
+  async function executeDelete() {
+    if (!deleteTarget) return
+    setDeleting(true)
+    await supabase.from('media_queue').delete().eq('event_id', deleteTarget.id)
+    await supabase.from('events').delete().eq('id', deleteTarget.id)
+    setDeleting(false)
+    setDeleteTarget(null)
+    setDeleteInput('')
+    onEmergency()
+  }
+
   return (
     <div className="space-y-4">
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { setDeleteTarget(null); setDeleteInput('') }} />
+          <div className="relative bg-[#1A1A18] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-white font-bold text-base mb-1">Delete Event?</h3>
+            <p className="text-white/50 text-sm mb-4">This permanently deletes <span className="text-white font-semibold">{deleteTarget.event_name}</span> and all its photos. This cannot be undone.</p>
+            <p className="text-white/40 text-xs mb-2">Type the event name to confirm:</p>
+            <input
+              type="text"
+              value={deleteInput}
+              onChange={e => setDeleteInput(e.target.value)}
+              placeholder={deleteTarget.event_name}
+              className="w-full bg-white/[0.06] border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/20 mb-4 outline-none focus:border-red-400/50"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={executeDelete}
+                disabled={deleteInput.trim() !== deleteTarget.event_name.trim() || deleting}
+                className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-red-500/20 text-red-300 hover:bg-red-500/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                {deleting ? 'Deleting…' : 'Delete Forever'}
+              </button>
+              <button onClick={() => { setDeleteTarget(null); setDeleteInput('') }} className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white/50 hover:text-white/80 transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {confirm && (
         <ConfirmModal
           title={confirm.action === 'pause' ? (confirm.event.is_paused ? 'Resume uploads?' : 'Pause uploads?')
@@ -200,6 +243,12 @@ function LiveEventsTab({ events, onEmergency }) {
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${ev.is_locked ? 'bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25' : 'bg-red-500/15 text-red-300 hover:bg-red-500/25'}`}
                 >
                   {ev.is_locked ? '🔓 Unlock Event' : '🔒 Lock Event'}
+                </button>
+                <button
+                  onClick={() => { setDeleteTarget(ev); setDeleteInput('') }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors"
+                >
+                  🗑 Delete Event
                 </button>
               </div>
             </div>
