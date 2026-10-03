@@ -156,26 +156,27 @@ function ZoneThumb({ label, imageUrl, defaultBg, currentTint, isActive, uploadin
       )
 }
 
-// Full-screen modal editor — photo left, tools right
-function ZoneEditor({ label, imageUrl, defaultBg, currentPosition, currentTint, accentColor, eventId, dbField, eventTypeId, onSaved, onClose }) {
+// Full-screen modal editor — aspect-ratio preview left, tools right
+function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, currentTint, accentColor, eventId, dbField, eventTypeId, onSaved, onClose }) {
       const [position, setPosition] = useState(currentPosition || '50% 50%')
+      const [zoom, setZoom] = useState(100) // percent, 100 = fit
       const [tint, setTint] = useState(currentTint ?? 55)
       const [pendingUrl, setPendingUrl] = useState(null)
       const [uploading, setUploading] = useState(false)
       const [dragging, setDragging] = useState(false)
       const [activeToolIndex, setActiveToolIndex] = useState(0)
       const [showChangePanel, setShowChangePanel] = useState(false)
-      const [changeTab, setChangeTab] = useState('library') // 'library' | 'upload'
-      const editorRef = useRef(null)
+      const [changeTab, setChangeTab] = useState('library')
+      const frameRef = useRef(null)
       const dragStart = useRef(null)
       const inputRef = useRef(null)
 
       const activeUrl = pendingUrl || imageUrl || defaultBg
       const tintAlpha = (tint / 100).toFixed(2)
       const hasCustomPhoto = !!(pendingUrl || imageUrl)
-
       const libraryPhotos = LIBRARY[eventTypeId] || LIBRARY.other
 
+      // Drag-to-reposition: updates background-position
       const getPos = useCallback((e, rect) => {
             const clientX = e.touches ? e.touches[0].clientX : e.clientX
             const clientY = e.touches ? e.touches[0].clientY : e.clientY
@@ -186,7 +187,7 @@ function ZoneEditor({ label, imageUrl, defaultBg, currentPosition, currentTint, 
 
       function onDragStart(e) {
             e.preventDefault()
-            dragStart.current = editorRef.current.getBoundingClientRect()
+            dragStart.current = frameRef.current.getBoundingClientRect()
             setDragging(true)
             setPosition(getPos(e, dragStart.current))
       }
@@ -209,6 +210,7 @@ function ZoneEditor({ label, imageUrl, defaultBg, currentPosition, currentTint, 
             const { data } = supabase.storage.from('event-media').getPublicUrl(path)
             setPendingUrl(data.publicUrl)
             setPosition('50% 50%')
+            setZoom(100)
             setUploading(false)
             if (inputRef.current) inputRef.current.value = ''
       }
@@ -216,13 +218,18 @@ function ZoneEditor({ label, imageUrl, defaultBg, currentPosition, currentTint, 
       function handleLibraryPick(url) {
             setPendingUrl(url)
             setPosition('50% 50%')
+            setZoom(100)
             setShowChangePanel(false)
             setActiveToolIndex(0)
       }
 
       async function handleConfirm() {
             const urlToSave = pendingUrl || imageUrl || null
-            const { error } = await supabase.from('events').update({ [dbField]: urlToSave, background_position: position, background_tint: tint }).eq('id', eventId)
+            const { error } = await supabase.from('events').update({
+                  [dbField]: urlToSave,
+                  background_position: position,
+                  background_tint: tint,
+            }).eq('id', eventId)
             if (error) { alert('Could not save: ' + error.message); return }
             onSaved(urlToSave, position, tint)
             onClose()
@@ -245,26 +252,50 @@ function ZoneEditor({ label, imageUrl, defaultBg, currentPosition, currentTint, 
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                   <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex overflow-hidden">
 
-                        {/* LEFT — photo */}
-                        <div className="flex-1 bg-[#1A1A18] relative flex items-center justify-center min-w-0">
+                        {/* LEFT — device frame preview */}
+                        <div className="flex-1 bg-[#111] relative flex items-center justify-center min-w-0 p-8">
                               <input ref={inputRef} type="file" accept="image/*,video/mp4,video/mov,video/quicktime" onChange={handleFile} className="hidden" />
+
                               {activeUrl ? (
                                     <div
-                                          ref={editorRef}
-                                          className="relative w-full h-full select-none"
-                                          style={{ cursor: dragging ? 'grabbing' : (activeToolIndex === 0 && !showChangePanel ? 'grab' : 'default') }}
-                                          onMouseDown={activeToolIndex === 0 && !showChangePanel ? onDragStart : undefined}
-                                          onMouseMove={activeToolIndex === 0 && !showChangePanel ? onDragMove : undefined}
-                                          onMouseUp={activeToolIndex === 0 && !showChangePanel ? onDragEnd : undefined}
-                                          onMouseLeave={activeToolIndex === 0 && !showChangePanel ? onDragEnd : undefined}
-                                          onTouchStart={activeToolIndex === 0 && !showChangePanel ? onDragStart : undefined}
-                                          onTouchMove={activeToolIndex === 0 && !showChangePanel ? onDragMove : undefined}
-                                          onTouchEnd={activeToolIndex === 0 && !showChangePanel ? onDragEnd : undefined}
+                                          className={`relative shrink-0 border-[6px] border-white/80 ${isLandscape ? 'rounded-2xl' : 'rounded-[2.5rem]'}`}
+                                          style={isLandscape
+                                                ? { width: 'min(100%, 520px)', aspectRatio: '16/9', boxShadow: '0 0 0 2px rgba(255,255,255,0.15), 0 20px 60px rgba(0,0,0,0.6)' }
+                                                : { height: 'min(100%, 480px)', aspectRatio: '9/16', boxShadow: '0 0 0 2px rgba(255,255,255,0.15), 0 20px 60px rgba(0,0,0,0.6)' }
+                                          }
                                     >
-                                          <img src={activeUrl} alt="Background" className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: position }} draggable={false} />
+                                          {/* Phone notch */}
+                                          {!isLandscape && <div className="absolute top-2 left-1/2 -translate-x-1/2 w-14 h-3.5 bg-white/80 rounded-full z-20 pointer-events-none" />}
+                                          {/* Screen area — draggable */}
+                                          <div
+                                                className="absolute inset-0 overflow-hidden"
+                                                style={{ borderRadius: isLandscape ? '10px' : '34px', cursor: dragging ? 'grabbing' : (activeToolIndex === 0 && !showChangePanel ? 'grab' : 'default') }}
+                                                ref={frameRef}
+                                                onMouseDown={activeToolIndex === 0 && !showChangePanel ? onDragStart : undefined}
+                                                onMouseMove={activeToolIndex === 0 && !showChangePanel ? onDragMove : undefined}
+                                                onMouseUp={activeToolIndex === 0 && !showChangePanel ? onDragEnd : undefined}
+                                                onMouseLeave={activeToolIndex === 0 && !showChangePanel ? onDragEnd : undefined}
+                                                onTouchStart={activeToolIndex === 0 && !showChangePanel ? onDragStart : undefined}
+                                                onTouchMove={activeToolIndex === 0 && !showChangePanel ? onDragMove : undefined}
+                                                onTouchEnd={activeToolIndex === 0 && !showChangePanel ? onDragEnd : undefined}
+                                          >
+
+                                          <img
+                                                src={activeUrl}
+                                                alt="Background"
+                                                className="absolute inset-0 w-full h-full pointer-events-none"
+                                                style={{
+                                                      objectFit: 'cover',
+                                                      objectPosition: position,
+                                                      transform: `scale(${zoom / 100})`,
+                                                      transformOrigin: position,
+                                                }}
+                                                draggable={false}
+                                          />
                                           <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+
                                           {activeToolIndex === 0 && !showChangePanel && (
-                                                <div className="absolute w-7 h-7 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2" style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: `${accentColor}99` }} />
+                                                <div className="absolute w-6 h-6 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2 z-10" style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: `${accentColor}99` }} />
                                           )}
                                           {activeToolIndex === 0 && !showChangePanel && (
                                                 <div className="absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none">
@@ -336,10 +367,14 @@ function ZoneEditor({ label, imageUrl, defaultBg, currentPosition, currentTint, 
                                                 </div>
                                           )}
                                     </div>
+                                    </div>
                               ) : (
                                     <div className="flex flex-col items-center gap-3 text-white/30">
                                           <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                          <p className="text-xs font-bold uppercase tracking-widest">No photo</p>
+                                          <p className="text-xs font-bold uppercase tracking-widest">No photo — tap Change Photo to add one</p>
+                                          <button onClick={() => { setShowChangePanel(true); setChangeTab('library'); }} className="mt-2 bg-white text-[#1A1A18] text-[10px] font-bold uppercase tracking-widest rounded-full px-5 py-2.5 hover:bg-white/90 transition-all">
+                                                Choose Photo
+                                          </button>
                                     </div>
                               )}
                         </div>
@@ -387,11 +422,23 @@ function ZoneEditor({ label, imageUrl, defaultBg, currentPosition, currentTint, 
                               {/* Active tool content */}
                               <div className="flex-1 overflow-y-auto p-5">
                                     {activeToolIndex === 0 && !showChangePanel && (
-                                          <div>
-                                                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">Reposition</p>
-                                                <p className="text-[10px] text-[#B0AFA5] leading-relaxed">Drag the photo on the left to reposition the focus point.</p>
-                                                <div className="mt-3 text-[9px] text-[#B0AFA5]">
-                                                      <span className="font-bold">X:</span> {position.split(' ')[0]} &nbsp; <span className="font-bold">Y:</span> {position.split(' ')[1]}
+                                          <div className="flex flex-col gap-5">
+                                                <div>
+                                                      <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">Reposition</p>
+                                                      <p className="text-[10px] text-[#B0AFA5] leading-relaxed">Drag the photo to reposition the focus point.</p>
+                                                </div>
+                                                <div>
+                                                      <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-3">Zoom</p>
+                                                      <div className="flex items-center justify-between mb-2">
+                                                            <span className="text-[9px] text-[#B0AFA5]">Fit</span>
+                                                            <span className="text-[11px] font-bold text-[#1A1A18]">{zoom}%</span>
+                                                            <span className="text-[9px] text-[#B0AFA5]">2×</span>
+                                                      </div>
+                                                      <input
+                                                            type="range" min={100} max={200} step={1} value={zoom}
+                                                            onChange={(e) => setZoom(Number(e.target.value))}
+                                                            className="w-full accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
+                                                      />
                                                 </div>
                                           </div>
                                     )}
@@ -484,6 +531,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                   {activeZone === 'portrait' && (
                         <ZoneEditor
                               label="Mobile · Portrait — Edit"
+                              isLandscape={false}
                               imageUrl={currentImageUrl}
                               defaultBg={defaultBg}
                               currentPosition={currentPosition}
@@ -499,6 +547,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                   {activeZone === 'landscape' && (
                         <ZoneEditor
                               label="Desktop · Landscape — Edit"
+                              isLandscape={true}
                               imageUrl={currentImageDesktopUrl}
                               defaultBg={defaultBg}
                               currentPosition={currentPosition}
