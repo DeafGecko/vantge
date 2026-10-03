@@ -131,9 +131,13 @@ function LiveEventsTab({ events, onEmergency }) {
   async function executeDelete() {
     if (!deleteTarget) return
     setDeleting(true)
-    await supabase.from('media_queue').delete().eq('event_id', deleteTarget.id)
-    await supabase.from('events').delete().eq('id', deleteTarget.id)
+    const r1 = await supabase.from('media_queue').delete().eq('event_id', deleteTarget.id)
+    const r2 = await supabase.from('events').delete().eq('id', deleteTarget.id)
     setDeleting(false)
+    if (r1.error || r2.error) {
+      alert('Delete failed: ' + (r1.error?.message || r2.error?.message))
+      return
+    }
     setDeleteTarget(null)
     setDeleteInput('')
     onEmergency()
