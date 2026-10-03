@@ -344,7 +344,7 @@ export default function HostDashboard() {
                                                             )}
                                                       </button>
                                                 </div>
-                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage || currentDefaultBg} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} isUnlocked={previewUnlocked} />
+                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage || currentDefaultBg} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} isUnlocked={previewUnlocked} titlePosition={currentTitlePosition} />
                                           </div>
 
                                           {/* QR code */}
@@ -460,20 +460,23 @@ export default function HostDashboard() {
                                                 <div className="flex gap-3 mt-1.5 items-center">
                                                       <div className="shrink-0 w-16" />
                                                       <div className="flex-1 min-w-0">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Title Position</p>
-                                                            <div className="flex gap-1.5">
-                                                                  {['top', 'center', 'bottom'].map((pos) => (
-                                                                        <button
-                                                                              key={pos}
-                                                                              onClick={async () => {
-                                                                                    setLocalTitlePosition(pos)
-                                                                                    await updateEventSettings({ title_position: pos })
-                                                                              }}
-                                                                              className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all ${currentTitlePosition === pos ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'bg-[#F7F5F0] text-[#B0AFA5] border-[#E8E4DA] hover:border-[#1A1A18]'}`}
-                                                                        >
-                                                                              {pos}
-                                                                        </button>
-                                                                  ))}
+                                                            <div className="flex items-center justify-between mb-1.5">
+                                                                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
+                                                                  <span className="text-[9px] font-bold text-[#5A5A52] capitalize">{currentTitlePosition}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                  <span className="text-[8px] text-[#B0AFA5]">Top</span>
+                                                                  <input
+                                                                        type="range" min={0} max={2} step={1}
+                                                                        value={currentTitlePosition === 'top' ? 0 : currentTitlePosition === 'center' ? 1 : 2}
+                                                                        onChange={async (e) => {
+                                                                              const pos = ['top', 'center', 'bottom'][Number(e.target.value)]
+                                                                              setLocalTitlePosition(pos)
+                                                                              await updateEventSettings({ title_position: pos })
+                                                                        }}
+                                                                        className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
+                                                                  />
+                                                                  <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
                                                             </div>
                                                       </div>
                                                       <p className="shrink-0 w-36 text-[10px] text-[#B0AFA5] text-center">{currentEventTypeId ? currentEventType.tagline : ''}</p>
@@ -633,7 +636,7 @@ function ThemeOption({ theme, isActive, onClick }) {
       )
 }
 
-function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked }) {
+function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked, titlePosition = 'bottom' }) {
       const c = theme.colors
       const hasBg = !!bgImage
       const txt = hasBg ? '#fff' : c.text
@@ -642,34 +645,45 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
       const cardBg = hasBg ? 'rgba(255,255,255,0.15)' : c.surface
       const cardBorder = hasBg ? 'rgba(255,255,255,0.25)' : c.border
 
+      const titleBlock = (
+            <div className="text-center px-4 py-2">
+                  {logoUrl && (
+                        <img src={logoUrl} alt="Logo" className="mx-auto mb-1.5 max-h-8 max-w-[80px] object-contain" style={{ filter: hasBg ? 'brightness(0) invert(1)' : 'none' }} />
+                  )}
+                  <p className="text-[7px] font-bold uppercase tracking-widest mb-1" style={{ color: txtSubtle }}>
+                        {eventType?.tagline || 'Welcome to the celebration'}
+                  </p>
+                  <h3 className="font-extrabold leading-tight" style={{ color: txt, fontFamily: font.cssFamily, fontSize: '1.05rem' }}>
+                        {(eventName || 'Your Event').split('\n').map((line, i) => (
+                              <span key={i}>{line}{i < (eventName || 'Your Event').split('\n').length - 1 && <br />}</span>
+                        ))}
+                  </h3>
+            </div>
+      )
+
       return (
             <div className="mx-auto relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-[#1A1A18]" style={{ width: 220, height: 420 }}>
                   {/* Notch */}
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 w-14 h-4 bg-[#1A1A18] rounded-full z-20" />
 
-
                   <div
-                        className="absolute inset-0 flex flex-col justify-end"
+                        className="absolute inset-0 flex flex-col"
                         style={hasBg
                               ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition || '50% 50%' }
                               : { backgroundColor: c.bg }}
                   >
-                        {/* Cinematic gradient overlay */}
+                        {/* Overlays */}
                         {hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${((bgTint ?? 55) / 100).toFixed(2)})` }} />}
                         {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
 
-                        <div className="relative z-10 p-4 text-center">
-                              {logoUrl && (
-                                    <img src={logoUrl} alt="Logo" className="mx-auto mb-2 max-h-8 max-w-[80px] object-contain" style={{ filter: hasBg ? 'brightness(0) invert(1)' : 'none' }} />
-                              )}
-                              <p className="text-[7px] font-bold uppercase tracking-widest mb-2" style={{ color: txtSubtle }}>
-                                    {eventType?.tagline || 'Welcome to the celebration'}
-                              </p>
-                              <h3 className="font-extrabold leading-tight mb-3" style={{ color: txt, fontFamily: font.cssFamily, fontSize: '1.05rem' }}>
-                                    {(eventName || 'Your Event').split('\n').map((line, i) => (
-                                          <span key={i}>{line}{i < (eventName || 'Your Event').split('\n').length - 1 && <br />}</span>
-                                    ))}
-                              </h3>
+                        {/* Title position */}
+                        {titlePosition === 'top' && <div className="relative z-10 mt-8">{titleBlock}</div>}
+                        <div className="flex-1" />
+                        {titlePosition === 'center' && <div className="relative z-10">{titleBlock}</div>}
+                        <div className="flex-1" />
+
+                        <div className="relative z-10 px-4 pb-4 text-center">
+                              {titlePosition === 'bottom' && <div className="mb-3">{titleBlock}</div>}
 
                               {isUnlocked ? (
                                     <>
