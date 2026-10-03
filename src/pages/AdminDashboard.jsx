@@ -859,11 +859,29 @@ const DEFAULT_BGS = {
 function LibraryModal({ typeId, label, onClose }) {
   const [photos, setPhotos] = useState([])
   const [uploading, setUploading] = useState(false)
+  const [liveUrl, setLiveUrl] = useState(null)     // currently saved default
+  const [selectedUrl, setSelectedUrl] = useState(null) // pending selection
+  const [saving, setSaving] = useState(false)
   const fileRef = useRef(null)
 
   useEffect(() => {
     supabase.from('event_type_library').select('*').eq('event_type', typeId).order('sort_order').then(({ data }) => setPhotos(data || []))
+    supabase.from('admin_branding').select('background_url').eq('event_type', typeId).maybeSingle().then(({ data }) => {
+      setLiveUrl(data?.background_url || null)
+      setSelectedUrl(data?.background_url || null)
+    })
   }, [typeId])
+
+  async function handleSaveDefault() {
+    setSaving(true)
+    if (selectedUrl) {
+      await supabase.from('admin_branding').upsert({ event_type: typeId, background_url: selectedUrl }, { onConflict: 'event_type' })
+    } else {
+      await supabase.from('admin_branding').delete().eq('event_type', typeId)
+    }
+    setLiveUrl(selectedUrl)
+    setSaving(false)
+  }
 
   async function handleUpload(files) {
     if (!files.length) return
@@ -903,19 +921,35 @@ function LibraryModal({ typeId, label, onClose }) {
 
         {/* Photo grid */}
         <div className="p-5">
+          <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-3">Click a photo to set as default · Yellow = selected · Live badge = current default</p>
           <div className="grid grid-cols-5 gap-3">
-            {photos.map(p => (
-              <div key={p.id} className="relative group aspect-square rounded-xl overflow-hidden bg-white/5">
-                <img src={p.photo_url} alt="" className="w-full h-full object-cover" />
-                <button
-                  onClick={() => handleDelete(p.id)}
-                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+            {photos.map(p => {
+              const isSelected = selectedUrl === p.photo_url
+              const isLive = liveUrl === p.photo_url
+              return (
+                <div
+                  key={p.id}
+                  className={`relative group aspect-square rounded-xl overflow-hidden bg-white/5 cursor-pointer transition-all ${isSelected ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-[#1A1A18]' : 'hover:ring-2 hover:ring-white/30 hover:ring-offset-1 hover:ring-offset-[#1A1A18]'}`}
+                  onClick={() => setSelectedUrl(isSelected ? null : p.photo_url)}
                 >
-                  <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
-                </button>
-              </div>
-            ))}
-            {/* Upload slot */}
+                  <img src={p.photo_url} alt="" className="w-full h-full object-cover" />
+                  {isLive && (
+                    <span className="absolute top-1 left-1 bg-amber-400 text-black text-[8px] font-black px-1.5 py-0.5 rounded leading-tight">LIVE</span>
+                  )}
+                  {isSelected && (
+                    <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center">
+                      <svg width="10" height="10" fill="none" stroke="#1A1A18" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                  )}
+                  <button
+                    onClick={e => { e.stopPropagation(); handleDelete(p.id) }}
+                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                  >
+                    <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+                  </button>
+                </div>
+              )
+            })}
             {photos.length < 10 && (
               <button
                 onClick={() => fileRef.current?.click()}
@@ -933,8 +967,15 @@ function LibraryModal({ typeId, label, onClose }) {
           <input ref={fileRef} type="file" accept="image/*,video/mp4" multiple className="hidden" onChange={e => handleUpload(Array.from(e.target.files || []))} />
         </div>
 
-        <div className="px-5 pb-5">
-          <button onClick={onClose} className="w-full bg-white/10 text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3 hover:bg-white/20 transition-all">Done</button>
+        <div className="px-5 pb-5 flex gap-2">
+          <button
+            onClick={handleSaveDefault}
+            disabled={saving || selectedUrl === liveUrl}
+            className="flex-1 bg-amber-400 text-black text-[11px] font-bold uppercase tracking-widest rounded-full py-3 hover:bg-amber-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            {saving ? 'Saving…' : 'Set as Default'}
+          </button>
+          <button onClick={onClose} className="flex-1 bg-white/10 text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3 hover:bg-white/20 transition-all">Done</button>
         </div>
       </div>
     </div>
