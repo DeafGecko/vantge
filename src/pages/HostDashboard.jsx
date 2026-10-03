@@ -414,8 +414,8 @@ export default function HostDashboard() {
                                                                               await updateEventSettings({ event_name: currentEventName })
                                                                               setSavingName(false)
                                                                         }}
-                                                                        placeholder="e.g. Rogers & Bottrell Wedding"
-                                                                        rows={2}
+                                                                        placeholder="e.g. Columbia Deaf Church"
+                                                                        style={{ height: 68 }}
                                                                         className="w-full bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal resize-none leading-snug"
                                                                   />
                                                             </div>
