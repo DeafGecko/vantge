@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useDefaultBg } from '../hooks/useDefaultBg'
 
@@ -171,10 +171,19 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       const dragStart = useRef(null)
       const inputRef = useRef(null)
 
+      const [libraryPhotos, setLibraryPhotos] = useState(LIBRARY[eventTypeId] || LIBRARY.other || [])
+
+      useEffect(() => {
+            if (!eventTypeId) return
+            supabase.from('event_type_library').select('photo_url').eq('event_type', eventTypeId).order('sort_order')
+                  .then(({ data }) => {
+                        if (data && data.length > 0) setLibraryPhotos(data.map(r => r.photo_url))
+                  })
+      }, [eventTypeId])
+
       const activeUrl = pendingUrl || imageUrl || defaultBg
       const tintAlpha = (tint / 100).toFixed(2)
       const hasCustomPhoto = !!(pendingUrl || imageUrl)
-      const libraryPhotos = LIBRARY[eventTypeId] || LIBRARY.other
 
       // Drag-to-reposition: updates background-position
       const getPos = useCallback((e, rect) => {
