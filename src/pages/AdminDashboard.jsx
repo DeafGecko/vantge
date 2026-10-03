@@ -948,7 +948,13 @@ function BrandingTab({ marketingPhotos }) {
   const [libraryFor, setLibraryFor] = useState(null) // event type id
   const [libraryCounts, setLibraryCounts] = useState({})
   const [libraryPreviews, setLibraryPreviews] = useState({})
+  const [collectionPhotos, setCollectionPhotos] = useState([])
   const fileRefs = useRef({})
+
+  useEffect(() => {
+    supabase.from('marketing_collection').select('*').eq('is_video', false).order('added_at', { ascending: false })
+      .then(({ data }) => setCollectionPhotos(data || []))
+  }, [])
 
   useEffect(() => {
     supabase.from('event_type_library').select('event_type, photo_url').order('sort_order').then(({ data }) => {
@@ -996,7 +1002,10 @@ function BrandingTab({ marketingPhotos }) {
     setOverrides(o => { const n = { ...o }; delete n[eventType]; return n })
   }
 
-  const approvedPhotos = (marketingPhotos || []).filter(p => !p.is_video && p.status === 1)
+  const approvedPhotos = [
+    ...collectionPhotos.map(p => ({ id: 'mc-' + p.id, original_url: p.original_url, thumbnail_url: p.thumbnail_url, _isCollection: true })),
+    ...(marketingPhotos || []).filter(p => !p.is_video && p.status === 1),
+  ]
 
   return (
     <div className="space-y-3">
@@ -1087,13 +1096,14 @@ function BrandingTab({ marketingPhotos }) {
               <div className="border-t border-white/[0.07] p-3">
                 <p className="text-white/40 text-[10px] font-bold uppercase mb-2">Pick from Marketing Collection</p>
                 {approvedPhotos.length === 0
-                  ? <p className="text-white/25 text-xs">No approved photos in collection yet.</p>
+                  ? <p className="text-white/25 text-xs">No photos in collection yet. Upload photos in Marketing → My Collection.</p>
                   : (
                     <div className="flex gap-2 overflow-x-auto pb-1">
-                      {approvedPhotos.slice(0, 20).map(p => (
+                      {approvedPhotos.map(p => (
                         <button key={p.id} onClick={() => { saveUrl(typeId, p.original_url); setPickingFor(null) }}
-                          className="shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 transition-colors">
+                          className="shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 transition-colors relative">
                           <img src={p.thumbnail_url || p.original_url} alt="" className="w-full h-full object-cover" />
+                          {p._isCollection && <span className="absolute bottom-0.5 left-0.5 bg-amber-500/90 text-black text-[7px] font-black px-1 rounded leading-tight">★</span>}
                         </button>
                       ))}
                     </div>
