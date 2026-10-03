@@ -683,9 +683,8 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
                         <div
                               className="absolute z-10 w-full"
                               style={{
-                                    top: `${titlePosition}%`,
+                                    top: `${8 + (titlePosition / 100) * 64}%`,
                                     transform: `translateY(-${titlePosition}%)`,
-                                    paddingTop: titlePosition === 0 ? '2rem' : 0,
                               }}
                         >
                               {titleBlock}
