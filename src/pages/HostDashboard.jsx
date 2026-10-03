@@ -105,8 +105,9 @@ export default function HostDashboard() {
       useEffect(() => {
             if (!event?.id || event.background_image) return
             const eventType = event.event_type
+            const brandingKey = eventType || 'none'
             const hardcodedFallback = getEventType(eventType)?.defaultBg ?? null
-            supabase.from('admin_branding').select('background_url').eq('event_type', eventType).maybeSingle().then(({ data }) => {
+            supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle().then(({ data }) => {
                   const defaultImg = data?.background_url || hardcodedFallback
                   if (!defaultImg) return
                   supabase.from('events').update({ background_image: defaultImg }).eq('id', event.id).then(() => {
