@@ -872,10 +872,10 @@ function LibraryModal({ typeId, label, onClose }) {
     for (const file of files) {
       const path = `library/${typeId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${file.name.split('.').pop()}`
       const { data: storageData, error: storageError } = await supabase.storage.from('event-media').upload(path, file, { upsert: true })
-      if (storageError) { alert('Storage error: ' + storageError.message); continue }
+      if (storageError) continue
       const { data: urlData } = supabase.storage.from('event-media').getPublicUrl(storageData.path)
       const { data: row, error: dbError } = await supabase.from('event_type_library').insert({ event_type: typeId, photo_url: urlData.publicUrl, sort_order: photos.length }).select().single()
-      if (dbError) { alert('DB error: ' + dbError.message); continue }
+      if (dbError) continue
       if (row) setPhotos(p => [...p, row])
     }
     setUploading(false)
