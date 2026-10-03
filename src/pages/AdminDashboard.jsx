@@ -963,7 +963,7 @@ function BrandingTab({ marketingPhotos }) {
       ;(data || []).forEach(r => {
         counts[r.event_type] = (counts[r.event_type] || 0) + 1
         if (!previews[r.event_type]) previews[r.event_type] = []
-        if (previews[r.event_type].length < 4) previews[r.event_type].push(r.photo_url)
+        previews[r.event_type].push(r.photo_url)
       })
       setLibraryCounts(counts)
       setLibraryPreviews(previews)
@@ -1066,7 +1066,7 @@ function BrandingTab({ marketingPhotos }) {
             </div>
             {/* Library thumbnails strip */}
             <div className="border-t border-white/[0.07] px-4 py-3 flex items-center gap-3">
-              <div className="flex gap-1.5">
+              <div className="flex gap-1.5 overflow-x-auto flex-1 min-w-0" style={{ scrollbarWidth: 'none' }}>
                 {(libraryPreviews[typeId] || []).map((url, i) => (
                   <div key={i} className="w-10 h-10 rounded-lg overflow-hidden bg-white/5 shrink-0">
                     <img src={url} alt="" className="w-full h-full object-cover" />
@@ -1078,8 +1078,8 @@ function BrandingTab({ marketingPhotos }) {
                   </div>
                 )}
               </div>
-              <div className="flex-1">
-                <p className="text-white/40 text-[10px]">
+              <div className="shrink-0">
+                <p className="text-white/40 text-[10px] whitespace-nowrap">
                   {libraryCounts[typeId] ? `${libraryCounts[typeId]} library photo${libraryCounts[typeId] !== 1 ? 's' : ''}` : 'No library photos yet'}
                 </p>
               </div>
