@@ -293,7 +293,7 @@ export default function GuestUploader() {
                   <div className="relative z-10 flex flex-col" style={{ height: '100dvh', overflow: 'hidden auto' }}>
 
                         {/* Top bar */}
-                        <div className="flex items-center justify-between px-5 pt-5 pb-2">
+                        <div className="flex items-center justify-between px-6 pt-8 pb-2">
                               <button onClick={() => navigate(`/${eventSlug}`)} aria-label="Back to event" className="flex items-center gap-1.5 text-white/60 text-sm font-medium">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
                                     Back
@@ -323,8 +323,8 @@ export default function GuestUploader() {
                         })()}
 
                         {/* Bottom content — tan card panel */}
-                        <div className="w-full max-w-md mx-auto px-4 shrink-0" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
-                              <div className="rounded-3xl p-5 flex flex-col gap-4" style={{ backgroundColor: '#F7F5F0' }}>
+                        <div className="w-full max-w-md mx-auto px-6 shrink-0" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
+                              <div className="rounded-3xl p-6 flex flex-col gap-4" style={{ backgroundColor: '#F7F5F0' }}>
 
                                     <div>
                                           <h2 className="text-lg font-extrabold text-[#1A1A18] leading-tight">Add Photos</h2>
