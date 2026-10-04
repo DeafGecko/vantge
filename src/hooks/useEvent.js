@@ -56,8 +56,15 @@ export function useEvent(eventSlug) {
 
             fetchAndSubscribe()
 
+            // Polling fallback — re-fetch every 10s in case realtime misses updates
+            const poll = setInterval(async () => {
+                  const { data } = await supabase.from('events').select('*').eq('event_slug', eventSlug).maybeSingle()
+                  if (data) setEvent(data)
+            }, 10000)
+
             return () => {
                   if (channel) supabase.removeChannel(channel)
+                  clearInterval(poll)
             }
       }, [eventSlug])
 
