@@ -803,7 +803,7 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                                     <p className="text-[6px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
                                           {eventType?.tagline || ''}
                                     </p>
-                                    <h3 className="font-extrabold leading-tight text-white" style={{ fontSize: '0.42rem', fontFamily: font.cssFamily }}>
+                                    <h3 className="font-extrabold leading-tight text-white" style={{ fontSize: '0.55rem', fontFamily: font.cssFamily }}>
                                           {nameLines}
                                     </h3>
                               </div>
