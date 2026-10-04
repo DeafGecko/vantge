@@ -216,25 +216,25 @@ export default function HostUploader({ eventId }) {
 
                         {/* Thumbnails — fills full width, horizontal scroll when overflow */}
                         {preloaded.length > 0 && (
-                              <div className="border-t border-[#E8E4DA] overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-                                    <div className="flex h-20" style={{ minWidth: '100%', width: preloaded.length > 5 ? `${preloaded.length * 80}px` : '100%' }}>
+                              <div className="border-t border-[#E8E4DA] overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                                    <div style={{ display: 'flex', height: '80px', width: '100%', minWidth: preloaded.length > 5 ? `${preloaded.length * 80}px` : '100%' }}>
                                     {preloaded.map((item) => (
-                                          <div key={item.id} className="overflow-hidden bg-[#E8E4DC] relative" style={{ flex: preloaded.length <= 5 ? 1 : '0 0 80px' }}>
+                                          <div key={item.id} style={{ flex: preloaded.length <= 5 ? '1 1 0' : '0 0 80px', overflow: 'hidden', position: 'relative', backgroundColor: '#E8E4DC' }}>
                                                 {item.is_video ? (
                                                       <>
                                                             <img
                                                                   src={item.thumbnail_url || item.original_url}
                                                                   alt=""
-                                                                  className="w-full h-full object-cover"
+                                                                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                                                             />
-                                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                                  <div className="w-5 h-5 rounded-full bg-black/50 flex items-center justify-center">
+                                                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                         <svg width="7" height="7" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                                                   </div>
                                                             </div>
                                                       </>
                                                 ) : (
-                                                      <img src={item.original_url} alt="" className="w-full h-full object-cover" />
+                                                      <img src={item.original_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                                                 )}
                                           </div>
                                     ))}
