@@ -340,18 +340,18 @@ export default function HostUploader({ eventId, refreshKey }) {
                               </button>
                         </div>
 
-                        {/* Thumbnails — fills full width, horizontal scroll when overflow */}
+                        {/* Thumbnails — fixed 80×80 squares, scroll when overflow */}
                         {preloaded.length > 0 && (
                               <div
                                     className="border-t border-[#E8E4DA] overflow-x-auto"
                                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                               >
-                                    <div style={{ display: 'flex', height: '80px', width: '100%', minWidth: preloaded.length > 5 ? `${preloaded.length * 80}px` : '100%' }}>
+                                    <div style={{ display: 'flex', gap: 0 }}>
                                     {preloaded.map((item) => (
                                           <button
                                                 key={item.id}
                                                 onClick={() => setDeleteInitialId(item.id)}
-                                                style={{ flex: preloaded.length <= 5 ? '1 1 0' : '0 0 80px', overflow: 'hidden', position: 'relative', backgroundColor: '#E8E4DC', border: 'none', padding: 0, cursor: 'pointer' }}
+                                                style={{ flexShrink: 0, width: 80, height: 80, overflow: 'hidden', position: 'relative', backgroundColor: '#E8E4DC', border: 'none', padding: 0, cursor: 'pointer' }}
                                           >
                                                 {item.is_video ? (
                                                       <>
