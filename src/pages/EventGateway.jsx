@@ -100,7 +100,8 @@ export default function EventGateway() {
 
                         {/* Title block — flex spacers control vertical position */}
                         {(() => {
-                              const raw = event.title_position
+                              const isWide = window.innerWidth >= 768
+                              const raw = isWide ? (event.title_position_desktop ?? event.title_position) : event.title_position
                               const posNum = Math.min(94, isNaN(Number(raw)) ? (raw === 'top' ? 0 : raw === 'center' ? 50 : 94) : Number(raw ?? 94))
                               return (
                                     <>

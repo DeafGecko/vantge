@@ -56,6 +56,7 @@ export default function HostDashboard() {
       const [localBgTint, setLocalBgTint] = useState(null)
       const [localEventType, setLocalEventType] = useState(null)
       const [localTitlePosition, setLocalTitlePosition] = useState(null)
+      const [localTitlePositionDesktop, setLocalTitlePositionDesktop] = useState(null)
       const [localLogoUrl, setLocalLogoUrl] = useState(undefined)
       const [localAllowDownloads, setLocalAllowDownloads] = useState(null)
       const [localAllowSharing, setLocalAllowSharing] = useState(null)
@@ -95,6 +96,10 @@ export default function HostDashboard() {
       const currentTitlePosition = isNaN(Number(rawTitlePos))
             ? (rawTitlePos === 'top' ? 0 : rawTitlePos === 'center' ? 50 : 100)
             : Number(rawTitlePos)
+      const rawTitlePosDesktop = localTitlePositionDesktop ?? event?.title_position_desktop ?? rawTitlePos
+      const currentTitlePositionDesktop = isNaN(Number(rawTitlePosDesktop))
+            ? (rawTitlePosDesktop === 'top' ? 0 : rawTitlePosDesktop === 'center' ? 50 : 100)
+            : Number(rawTitlePosDesktop)
 
       useEffect(() => {
             if (!user) return
@@ -192,17 +197,25 @@ export default function HostDashboard() {
             setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
       }
 
-      const previewProps = {
+      const sharedPreviewProps = {
             theme: currentTheme,
             eventName: currentEventName,
             font: currentFont,
-            bgImage: currentBgImage || currentDefaultBg,
             bgPosition: currentBgPosition,
             bgTint: currentBgTint,
             eventType: currentEventType,
             logoUrl: currentLogoUrl,
             isUnlocked: previewUnlocked,
+      }
+      const previewProps = {
+            ...sharedPreviewProps,
+            bgImage: currentBgImage || currentDefaultBg,
             titlePosition: currentTitlePosition,
+      }
+      const previewPropsDesktop = {
+            ...sharedPreviewProps,
+            bgImage: currentBgImageDesktop || currentDefaultBg,
+            titlePosition: currentTitlePositionDesktop,
       }
 
       return (
@@ -369,7 +382,7 @@ export default function HostDashboard() {
                                                             <div className="flex flex-col items-center gap-1">
                                                                   {/* Screen — fixed 180px tall, 16:9 = 320px wide */}
                                                                   <div className="rounded-lg overflow-hidden border-4 border-ink shadow-xl relative" style={{ width: 320, height: 180 }}>
-                                                                        <EventPreview {...previewProps} device="desktop" />
+                                                                        <EventPreview {...previewPropsDesktop} device="desktop" />
                                                                   </div>
                                                                   {/* Monitor stand */}
                                                                   <div className="flex flex-col items-center">
@@ -502,11 +515,15 @@ export default function HostDashboard() {
                                                       </div>
                                                 </div>
 
-                                                {/* Row 2 — Title Position */}
-                                                <div className="mt-3 border-t border-[#F0EDE6] pt-3">
-                                                      <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center justify-between mb-1.5">
-                                                                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
+                                                {/* Row 2 — Title Position (mobile + desktop separate) */}
+                                                <div className="mt-3 border-t border-[#F0EDE6] pt-3 flex flex-col gap-2">
+                                                      {/* Mobile */}
+                                                      <div>
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                  <div className="flex items-center gap-1">
+                                                                        <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
+                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
+                                                                  </div>
                                                                   <span className="text-[9px] font-bold text-[#5A5A52]">{currentTitlePosition === 0 ? 'Top' : currentTitlePosition === 100 ? 'Bottom' : currentTitlePosition === 50 ? 'Center' : `${currentTitlePosition}%`}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2">
@@ -518,6 +535,30 @@ export default function HostDashboard() {
                                                                               const val = e.target.value
                                                                               setLocalTitlePosition(val)
                                                                               await updateEventSettings({ title_position: val })
+                                                                        }}
+                                                                        className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
+                                                                  />
+                                                                  <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
+                                                            </div>
+                                                      </div>
+                                                      {/* Desktop */}
+                                                      <div>
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                  <div className="flex items-center gap-1">
+                                                                        <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
+                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
+                                                                  </div>
+                                                                  <span className="text-[9px] font-bold text-[#5A5A52]">{currentTitlePositionDesktop === 0 ? 'Top' : currentTitlePositionDesktop === 100 ? 'Bottom' : currentTitlePositionDesktop === 50 ? 'Center' : `${currentTitlePositionDesktop}%`}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                  <span className="text-[8px] text-[#B0AFA5]">Top</span>
+                                                                  <input
+                                                                        type="range" min={0} max={100} step={1}
+                                                                        value={currentTitlePositionDesktop}
+                                                                        onChange={async (e) => {
+                                                                              const val = e.target.value
+                                                                              setLocalTitlePositionDesktop(val)
+                                                                              await updateEventSettings({ title_position_desktop: val })
                                                                         }}
                                                                         className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
                                                                   />
