@@ -413,13 +413,13 @@ export default function HostDashboard() {
                                                 ].map(({ label, sub, value, toggle }) => (
                                                       <div key={label} className="flex items-center justify-between gap-3">
                                                             <div>
-                                                                  <p className="text-sm font-semibold text-[#1A1A18]">{label}</p>
-                                                                  <p className="text-[11px] text-[#88887E]">{sub}</p>
+                                                                  <p className="text-sm font-semibold text-ink">{label}</p>
+                                                                  <p className="text-[11px] text-ink-muted">{sub}</p>
                                                             </div>
                                                             <button
                                                                   onClick={toggle}
                                                                   aria-label={label}
-                                                                  className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-[#1A1A18]' : 'bg-[#E0D8C6]'}`}
+                                                                  className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-ink' : 'bg-border'}`}
                                                             >
                                                                   <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0'}`} />
                                                             </button>
@@ -453,7 +453,7 @@ export default function HostDashboard() {
                                                             <div>
                                                                   <div className="flex items-center justify-between mb-1.5">
                                                                         <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Display Name</p>
-                                                                        {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse">Saving…</span>}
+                                                                        {savingName && <span className="text-[10px] font-bold text-coral-text animate-pulse">Saving…</span>}
                                                                   </div>
                                                                   <textarea
                                                                         value={currentEventName}
@@ -466,7 +466,7 @@ export default function HostDashboard() {
                                                                         }}
                                                                         placeholder="e.g. Columbia Deaf Church"
                                                                         style={{ height: 68 }}
-                                                                        className="w-full bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal resize-none leading-snug"
+                                                                        className="w-full bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-ink focus:outline-none focus:border-ink transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal resize-none leading-snug"
                                                                   />
                                                             </div>
 
@@ -488,7 +488,7 @@ export default function HostDashboard() {
                                                                                     setLocalBgImageDesktop(newDefault)
                                                                                     await updateEventSettings(updates)
                                                                               }}
-                                                                              className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
+                                                                              className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-ink focus:outline-none focus:border-ink transition-colors pr-8 cursor-pointer"
                                                                         >
                                                                               <option value="">— None —</option>
                                                                               {EVENT_TYPES.map((t) => (
@@ -601,8 +601,8 @@ export default function HostDashboard() {
                                                 <svg width="15" height="15" fill="none" stroke="#1A1A18" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                                           </div>
                                           <div>
-                                                <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest">Photos</p>
-                                                <p className="text-xl font-extrabold text-[#1A1A18] leading-tight">{approvedPhotoCount}</p>
+                                                <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Photos</p>
+                                                <p className="text-xl font-extrabold text-ink leading-tight">{approvedPhotoCount}</p>
                                           </div>
                                     </div>
                                     <div className="w-px h-10 bg-[#E8E4DA]" />
@@ -803,7 +803,7 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                                     <p className="text-[6px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
                                           {eventType?.tagline || ''}
                                     </p>
-                                    <h3 className="font-extrabold leading-tight text-white" style={{ fontSize: '0.7rem', fontFamily: font.cssFamily }}>
+                                    <h3 className="font-extrabold leading-tight text-white" style={{ fontSize: '0.42rem', fontFamily: font.cssFamily }}>
                                           {nameLines}
                                     </h3>
                               </div>
