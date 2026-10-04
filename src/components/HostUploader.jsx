@@ -214,12 +214,11 @@ export default function HostUploader({ eventId }) {
                               </button>
                         </div>
 
-                        {/* Thumbnails — 3-column grid, vertical scroll */}
+                        {/* Thumbnails — single row, fills left to right, horizontal scroll on overflow */}
                         {preloaded.length > 0 && (
-                              <div className="border-t border-[#E8E4DA]">
-                                    <div className="grid grid-cols-3 gap-0">
+                              <div className="border-t border-[#E8E4DA] flex overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
                                     {preloaded.map((item) => (
-                                          <div key={item.id} className="aspect-square overflow-hidden bg-[#E8E4DC] relative">
+                                          <div key={item.id} className="shrink-0 flex-1 min-w-[64px] h-16 overflow-hidden bg-[#E8E4DC] relative" style={{ maxWidth: preloaded.length <= 3 ? `${100/preloaded.length}%` : '64px' }}>
                                                 {item.is_video ? (
                                                       <>
                                                             <img
@@ -238,7 +237,6 @@ export default function HostUploader({ eventId }) {
                                                 )}
                                           </div>
                                     ))}
-                                    </div>
                               </div>
                         )}
                   </div>
