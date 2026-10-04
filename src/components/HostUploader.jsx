@@ -217,108 +217,127 @@ function GalleryModal({ items, onClose, onDeleted, initialId }) {
       const allSelected = selected.size === items.length
 
       return (
-            <div className="fixed inset-0 z-[100] flex flex-col" style={{ backgroundColor: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(10px)' }} onClick={onClose}>
-                  {/* Header */}
-                  <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center gap-3">
-                              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-                                    <svg width="12" height="12" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
-                              </button>
-                              <p className="text-white/70 text-xs font-bold uppercase tracking-widest">Pre-load Gallery</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                              {selectMode ? (
-                                    <>
-                                          <button onClick={() => setSelected(allSelected ? new Set() : new Set(items.map(i => i.id)))} className="text-xs font-bold text-[#B29746]">
-                                                {allSelected ? 'Deselect All' : 'Select All'}
-                                          </button>
-                                          <button onClick={exitSelect} className="text-xs font-bold text-white/50 hover:text-white transition-colors ml-2">Cancel</button>
-                                    </>
-                              ) : (
-                                    <button onClick={enterSelect} className="text-xs font-bold text-white border border-white/20 rounded-full px-3 py-1 hover:bg-white/10 transition-colors">Select</button>
-                              )}
-                        </div>
-                  </div>
+            <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={onClose}>
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                  <div
+                        className="relative w-full max-w-md bg-[#F8F5ED] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col"
+                        style={{ maxHeight: '90vh', paddingBottom: 'env(safe-area-inset-bottom)' }}
+                        onClick={e => e.stopPropagation()}
+                  >
+                        <div className="w-10 h-1 bg-[#D4CFBC] rounded-full mx-auto mt-4 mb-0 sm:hidden shrink-0" />
 
-                  {/* Main viewer */}
-                  {!selectMode && (
-                        <div className="flex-1 flex items-center justify-center relative min-h-0 px-4" onClick={e => e.stopPropagation()}>
-                              {/* Prev */}
-                              {viewIndex > 0 && (
-                                    <button onClick={prev} className="absolute left-4 z-10 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors">
-                                          <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                    </button>
-                              )}
-                              {/* Media */}
-                              <div className="w-full max-w-lg max-h-full flex items-center justify-center">
-                                    {current?.is_video ? (
-                                          <video src={current.original_url} controls autoPlay playsInline className="max-w-full max-h-[60vh] rounded-2xl object-contain" />
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 pt-4 pb-3 shrink-0">
+                              <div className="flex items-center gap-2">
+                                    <p className="text-sm font-black text-[#1A1A18]">Pre-load Gallery</p>
+                                    <span className="text-xs text-[#88887E]">{items.length} photo{items.length !== 1 ? 's' : ''}</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                    {selectMode ? (
+                                          <>
+                                                <button onClick={() => setSelected(allSelected ? new Set() : new Set(items.map(i => i.id)))} className="text-xs font-bold text-[#B29746]">
+                                                      {allSelected ? 'Deselect All' : 'Select All'}
+                                                </button>
+                                                <button onClick={exitSelect} className="text-xs font-bold text-[#88887E] hover:text-[#1A1A18] transition-colors">Cancel</button>
+                                          </>
                                     ) : (
-                                          <img src={current?.original_url} alt="" className="max-w-full max-h-[60vh] rounded-2xl object-contain" />
+                                          <button onClick={enterSelect} className="text-xs font-bold text-[#1A1A18] border border-[#E0D8C6] rounded-full px-3 py-1 hover:bg-[#F0EDE6] transition-colors">Select</button>
+                                    )}
+                                    <button onClick={onClose} className="text-[#B0AFA5] hover:text-[#1A1A18] transition-colors ml-1">
+                                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+                                    </button>
+                              </div>
+                        </div>
+
+                        {/* Main photo viewer */}
+                        {!selectMode && (
+                              <div className="relative bg-[#1A1A18] mx-4 rounded-2xl overflow-hidden shrink-0" style={{ aspectRatio: '1 / 1' }}>
+                                    {current?.is_video ? (
+                                          <video src={current.original_url} controls autoPlay playsInline className="w-full h-full object-contain" />
+                                    ) : (
+                                          <img src={current?.original_url} alt="" className="w-full h-full object-contain" />
+                                    )}
+                                    {viewIndex > 0 && (
+                                          <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors">
+                                                <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                          </button>
+                                    )}
+                                    {viewIndex < items.length - 1 && (
+                                          <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors">
+                                                <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                          </button>
                                     )}
                               </div>
-                              {/* Next */}
-                              {viewIndex < items.length - 1 && (
-                                    <button onClick={next} className="absolute right-4 z-10 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors">
-                                          <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        )}
+
+                        {/* Counter + delete row */}
+                        {!selectMode && (
+                              <div className="flex items-center justify-between px-5 py-2 shrink-0">
+                                    <p className="text-xs text-[#88887E] font-bold">{viewIndex + 1} / {items.length}</p>
+                                    <button onClick={enterSelect} className="flex items-center gap-1.5 text-xs font-bold text-[#C84A44] hover:text-red-700 transition-colors">
+                                          <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                                          Delete
                                     </button>
-                              )}
-                        </div>
-                  )}
+                              </div>
+                        )}
 
-                  {/* Counter + delete button (single view) */}
-                  {!selectMode && (
-                        <div className="flex items-center justify-between px-5 py-3 shrink-0" onClick={e => e.stopPropagation()}>
-                              <p className="text-white/40 text-xs font-bold">{viewIndex + 1} / {items.length}</p>
-                              <button onClick={enterSelect} className="flex items-center gap-1.5 text-xs font-bold text-red-400 hover:text-red-300 transition-colors">
-                                    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                                    Delete
-                              </button>
-                        </div>
-                  )}
+                        {/* Filmstrip */}
+                        {!selectMode && items.length > 1 && (
+                              <div className="overflow-x-auto px-4 pb-4 shrink-0" style={{ scrollbarWidth: 'none' }}>
+                                    <div className="flex gap-1.5">
+                                          {items.map((item, idx) => (
+                                                <button key={item.id} onClick={() => setViewIndex(idx)}
+                                                      className="shrink-0 w-12 h-12 rounded-lg overflow-hidden"
+                                                      style={{ opacity: idx === viewIndex ? 1 : 0.45, outline: idx === viewIndex ? '2px solid #1A1A18' : 'none', outlineOffset: '2px' }}>
+                                                      <img src={item.thumbnail_url || item.original_url} alt="" className="w-full h-full object-cover" />
+                                                </button>
+                                          ))}
+                                    </div>
+                              </div>
+                        )}
 
-                  {/* Select mode grid */}
-                  {selectMode && (
-                        <div className="flex-1 overflow-y-auto px-4 min-h-0" onClick={e => e.stopPropagation()}>
-                              <div className="grid grid-cols-4 gap-2 pb-4">
-                                    {items.map(item => {
-                                          const isSelected = selected.has(item.id)
-                                          return (
-                                                <button
-                                                      key={item.id}
-                                                      onClick={() => toggle(item.id)}
-                                                      className="relative aspect-square rounded-xl overflow-hidden bg-white/10 focus:outline-none"
-                                                      style={{ border: isSelected ? '2.5px solid white' : '2.5px solid transparent' }}
-                                                >
-                                                      {item.is_video ? (
-                                                            <>
-                                                                  <img src={item.thumbnail_url || item.original_url} alt="" className="w-full h-full object-cover" />
-                                                                  <div className="absolute inset-0 flex items-center justify-center">
-                                                                        <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                              <svg width="7" height="7" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        {/* Select mode grid */}
+                        {selectMode && (
+                              <div className="overflow-y-auto px-4 pb-2 min-h-0" style={{ maxHeight: '55vh' }}>
+                                    <div className="grid grid-cols-4 gap-2 pb-2">
+                                          {items.map(item => {
+                                                const isSelected = selected.has(item.id)
+                                                return (
+                                                      <button
+                                                            key={item.id}
+                                                            onClick={() => toggle(item.id)}
+                                                            className="relative aspect-square rounded-xl overflow-hidden bg-[#E8E4DC] focus:outline-none"
+                                                            style={{ border: isSelected ? '2.5px solid #1A1A18' : '2.5px solid transparent' }}
+                                                      >
+                                                            {item.is_video ? (
+                                                                  <>
+                                                                        <img src={item.thumbnail_url || item.original_url} alt="" className="w-full h-full object-cover" />
+                                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                                              <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                                    <svg width="7" height="7" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                              </div>
+                                                                        </div>
+                                                                  </>
+                                                            ) : (
+                                                                  <img src={item.original_url} alt="" className="w-full h-full object-cover" />
+                                                            )}
+                                                            {isSelected && (
+                                                                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                                        <div className="w-6 h-6 rounded-full bg-[#1A1A18] flex items-center justify-center">
+                                                                              <svg width="12" height="12" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                                                         </div>
                                                                   </div>
-                                                            </>
-                                                      ) : (
-                                                            <img src={item.original_url} alt="" className="w-full h-full object-cover" />
-                                                      )}
-                                                      {isSelected && (
-                                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                                                  <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-                                                                        <svg width="12" height="12" fill="none" stroke="#1A1A18" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                                                  </div>
-                                                            </div>
-                                                      )}
-                                                </button>
-                                          )
-                                    })}
+                                                            )}
+                                                      </button>
+                                                )
+                                          })}
+                                    </div>
                               </div>
-                        </div>
-                  )}
+                        )}
 
                   {/* Select mode action bar */}
                   {selectMode && (
-                        <div className="px-5 pb-8 pt-3 shrink-0" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }} onClick={e => e.stopPropagation()}>
+                        <div className="px-5 pt-3 pb-5 shrink-0">
                               <button
                                     onClick={handleDelete}
                                     disabled={!selected.size || deleting}
@@ -328,24 +347,7 @@ function GalleryModal({ items, onClose, onDeleted, initialId }) {
                               </button>
                         </div>
                   )}
-
-                  {/* Thumbnail filmstrip */}
-                  {!selectMode && items.length > 1 && (
-                        <div className="shrink-0 overflow-x-auto px-4 pb-6" style={{ scrollbarWidth: 'none', paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }} onClick={e => e.stopPropagation()}>
-                              <div className="flex gap-2">
-                                    {items.map((item, idx) => (
-                                          <button
-                                                key={item.id}
-                                                onClick={() => setViewIndex(idx)}
-                                                className="shrink-0 w-14 h-14 rounded-lg overflow-hidden"
-                                                style={{ opacity: idx === viewIndex ? 1 : 0.4, outline: idx === viewIndex ? '2px solid white' : 'none', outlineOffset: '2px' }}
-                                          >
-                                                <img src={item.thumbnail_url || item.original_url} alt="" className="w-full h-full object-cover" />
-                                          </button>
-                                    ))}
-                              </div>
-                        </div>
-                  )}
+                  </div>
             </div>
       )
 }
