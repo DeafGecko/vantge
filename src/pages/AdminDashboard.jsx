@@ -856,9 +856,77 @@ const DEFAULT_BGS = {
   other:       'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600&q=85',
 }
 
+const HARDCODED_LIBRARY = {
+  anniversary: [
+    'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=1200&q=80',
+    'https://images.unsplash.com/photo-1518568740994-c1de148d8e22?w=1200&q=80',
+    'https://images.unsplash.com/photo-1464047736614-af63643285bf?w=1200&q=80',
+    'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1200&q=80',
+    'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&q=80',
+    'https://images.unsplash.com/photo-1582656447884-de8e48ab5b90?w=1200&q=80',
+  ],
+  birthday: [
+    'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&q=80',
+    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
+    'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80',
+    'https://images.unsplash.com/photo-1464349153735-7db50ed83c84?w=1200&q=80',
+    'https://images.unsplash.com/photo-1585996487823-f621ff9a01d6?w=1200&q=80',
+    'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=1200&q=80',
+  ],
+  corporate: [
+    'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80',
+    'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1200&q=80',
+    'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=1200&q=80',
+    'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&q=80',
+    'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=1200&q=80',
+    'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1200&q=80',
+  ],
+  family: [
+    'https://images.unsplash.com/photo-1511895426328-dc8714191011?w=1200&q=80',
+    'https://images.unsplash.com/photo-1475503572774-15a45e5d60b9?w=1200&q=80',
+    'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&q=80',
+    'https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?w=1200&q=80',
+    'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=1200&q=80',
+    'https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=1200&q=80',
+  ],
+  graduation: [
+    'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&q=80',
+    'https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?w=1200&q=80',
+    'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1200&q=80',
+    'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80',
+    'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=1200&q=80',
+    'https://images.unsplash.com/photo-1563459802257-2a97df940f11?w=1200&q=80',
+  ],
+  party: [
+    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&q=80',
+    'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80',
+    'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80',
+    'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=1200&q=80',
+    'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=1200&q=80',
+    'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=1200&q=80',
+  ],
+  wedding: [
+    'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80',
+    'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=1200&q=80',
+    'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1200&q=80',
+    'https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=1200&q=80',
+    'https://images.unsplash.com/photo-1550005809-91ad75fb315f?w=1200&q=80',
+    'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=1200&q=80',
+  ],
+  other: [
+    'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&q=80',
+    'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&q=80',
+    'https://images.unsplash.com/photo-1444628838545-ac4016a5418a?w=1200&q=80',
+    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&q=80',
+    'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=1200&q=80',
+    'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&q=80',
+  ],
+}
+
 function LibraryModal({ typeId, label, onClose }) {
   const [photos, setPhotos] = useState([])
   const [uploading, setUploading] = useState(false)
+  const [seeding, setSeeding] = useState(false)
   const [liveUrl, setLiveUrl] = useState(null)     // currently saved default
   const [selectedUrl, setSelectedUrl] = useState(null) // pending selection
   const [saving, setSaving] = useState(false)
@@ -881,6 +949,20 @@ function LibraryModal({ typeId, label, onClose }) {
     }
     setLiveUrl(selectedUrl)
     setSaving(false)
+  }
+
+  async function handleSeedDefaults() {
+    const defaults = HARDCODED_LIBRARY[typeId]
+    if (!defaults?.length) return
+    setSeeding(true)
+    const existingUrls = new Set(photos.map(p => p.photo_url))
+    const toInsert = defaults.filter(url => !existingUrls.has(url))
+    const rows = toInsert.map((url, i) => ({ event_type: typeId, photo_url: url, sort_order: photos.length + i }))
+    if (rows.length) {
+      const { data } = await supabase.from('event_type_library').insert(rows).select()
+      if (data) setPhotos(p => [...p, ...data])
+    }
+    setSeeding(false)
   }
 
   async function handleUpload(files) {
@@ -913,9 +995,20 @@ function LibraryModal({ typeId, label, onClose }) {
             <p className="text-white font-bold">{label} — Photo Library</p>
             <p className="text-white/40 text-xs mt-0.5">{photos.length} photo{photos.length !== 1 ? 's' : ''} · Hosts see these as curated options</p>
           </div>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
-            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
-          </button>
+          <div className="flex items-center gap-2">
+            {HARDCODED_LIBRARY[typeId]?.length > 0 && (
+              <button
+                onClick={handleSeedDefaults}
+                disabled={seeding}
+                className="px-3 py-1.5 rounded-full bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white/20 transition-colors disabled:opacity-40"
+              >
+                {seeding ? 'Adding…' : 'Add Defaults'}
+              </button>
+            )}
+            <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+            </button>
+          </div>
         </div>
 
         {/* Photo grid */}
