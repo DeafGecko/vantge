@@ -60,7 +60,7 @@ export default function HostDashboard() {
       const [localAllowDownloads, setLocalAllowDownloads] = useState(null)
       const [localAllowSharing, setLocalAllowSharing] = useState(null)
       const [previewUnlocked, setPreviewUnlocked] = useState(true)
-      const [previewDevice, setPreviewDevice] = useState('mobile') // 'mobile' | 'desktop'
+      const [previewDevice, setPreviewDevice] = useState('mobile')
       const photoSectionRef = useRef(null)
 
       const allowDownloads = localAllowDownloads !== null ? localAllowDownloads : (event?.allow_downloads ?? true)
@@ -108,7 +108,6 @@ export default function HostDashboard() {
             const eventType = event.event_type
             const brandingKey = eventType || 'none'
             const hardcodedFallback = getEventType(eventType)?.defaultBg ?? null
-            // A "custom" photo is one the host uploaded to supabase storage (backgrounds/ path)
             const isCustom = (url) => url && url.includes('/backgrounds/')
             supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle().then(({ data }) => {
                   const adminDefault = data?.background_url || hardcodedFallback
@@ -188,11 +187,22 @@ export default function HostDashboard() {
 
       if (!event) return <CreateEventOnboarding onCreated={() => window.location.reload()} signOut={async () => { await signOut(); navigate('/login') }} />
 
-
-
       function scrollToPhotos() {
             setActiveTab(0)
             setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+      }
+
+      const previewProps = {
+            theme: currentTheme,
+            eventName: currentEventName,
+            font: currentFont,
+            bgImage: currentBgImage || currentDefaultBg,
+            bgPosition: currentBgPosition,
+            bgTint: currentBgTint,
+            eventType: currentEventType,
+            logoUrl: currentLogoUrl,
+            isUnlocked: previewUnlocked,
+            titlePosition: currentTitlePosition,
       }
 
       return (
@@ -200,11 +210,10 @@ export default function HostDashboard() {
                   <FontLoader fontId={currentFontId} />
                   <div className="min-h-screen bg-[#F7F5F0]">
 
-                        {/* HEADER — dark refined bar */}
+                        {/* HEADER */}
                         <header className="bg-ink sticky top-0 z-50">
                               <div className="max-w-6xl mx-auto px-5 md:px-8 h-14 flex items-center justify-between gap-4">
 
-                                    {/* Brand */}
                                     <div className="shrink-0">
                                           <VantgeLogo size="sm" variant="dark" />
                                     </div>
@@ -221,20 +230,17 @@ export default function HostDashboard() {
                                           >
                                                 {toggling ? "..." : isUnlocked ? (
                                                       <span style={{display:'flex',alignItems:'center',gap:6}}>
-                                                            {/* Open door */}
                                                             <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24" style={{flexShrink:0}}><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h4v-2H6V5h12v13h-3v2h4a1 1 0 001-1V4a1 1 0 00-1-1z"/><path d="M11 7l-4 4 4 4v-3h5v-2h-5V7z"/></svg>
                                                             Gallery Open
                                                       </span>
                                                 ) : (
                                                       <span style={{display:'flex',alignItems:'center',gap:6}}>
-                                                            {/* Closed door */}
                                                             <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24" style={{flexShrink:0}}><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h14a1 1 0 001-1V4a1 1 0 00-1-1zm-2 15H7V5h10v13zm-4-6a1 1 0 100-2 1 1 0 000 2z"/></svg>
                                                             Gallery Closed
                                                       </span>
                                                 )}
                                           </button>
 
-                                          {/* Notification badge */}
                                           <button
                                                 onClick={scrollToPhotos}
                                                 className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
@@ -329,10 +335,10 @@ export default function HostDashboard() {
                               {/* BENTO GRID */}
                               <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mb-7">
 
-                                    {/* LEFT — phone preview + QR */}
+                                    {/* LEFT — preview + QR */}
                                     <div className="md:col-span-4 flex flex-col gap-3">
 
-                                          {/* Phone preview */}
+                                          {/* Live Preview */}
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
                                                 <div className="flex items-center justify-between mb-4">
                                                       <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Live Preview</p>
@@ -356,35 +362,28 @@ export default function HostDashboard() {
                                                             )}
                                                       </button>
                                                 </div>
-                                                {previewDevice === 'mobile' ? (
-                                                      <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage || currentDefaultBg} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} isUnlocked={previewUnlocked} titlePosition={currentTitlePosition} />
+
+                                                {previewDevice === 'desktop' ? (
+                                                      <div className="w-full overflow-hidden rounded-xl" style={{ aspectRatio: '16/9' }}>
+                                                            <EventPreview {...previewProps} device="desktop" />
+                                                      </div>
                                                 ) : (
-                                                      <DesktopPreview
-                                                            theme={currentTheme}
-                                                            eventName={currentEventName}
-                                                            font={currentFont}
-                                                            bgImage={currentBgImage || currentDefaultBg}
-                                                            bgPosition={currentBgPosition}
-                                                            bgTint={currentBgTint}
-                                                            eventType={currentEventType}
-                                                            logoUrl={currentLogoUrl}
-                                                            isUnlocked={previewUnlocked}
-                                                            titlePosition={currentTitlePosition}
-                                                      />
+                                                      <EventPreview {...previewProps} device="mobile" />
                                                 )}
+
                                                 {/* Device toggle */}
                                                 <div className="flex items-center justify-center gap-2 mt-3">
                                                       <button
                                                             onClick={() => setPreviewDevice('mobile')}
                                                             title="Mobile preview"
-                                                            className={`p-2 rounded-lg transition-colors ${previewDevice === 'mobile' ? 'bg-[#1A1A18] text-white' : 'text-[#B0AFA5] hover:text-[#1A1A18]'}`}
+                                                            className={`p-2 rounded-lg transition-colors ${previewDevice === 'mobile' ? 'bg-ink text-white' : 'text-[#B0AFA5] hover:text-ink'}`}
                                                       >
                                                             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
                                                       </button>
                                                       <button
                                                             onClick={() => setPreviewDevice('desktop')}
                                                             title="Desktop preview"
-                                                            className={`p-2 rounded-lg transition-colors ${previewDevice === 'desktop' ? 'bg-[#1A1A18] text-white' : 'text-[#B0AFA5] hover:text-[#1A1A18]'}`}
+                                                            className={`p-2 rounded-lg transition-colors ${previewDevice === 'desktop' ? 'bg-ink text-white' : 'text-[#B0AFA5] hover:text-ink'}`}
                                                       >
                                                             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
                                                       </button>
@@ -437,10 +436,9 @@ export default function HostDashboard() {
                                                             />
                                                       </div>
 
-                                                      {/* Right side: Display Name on top, Event Type below */}
+                                                      {/* Display Name + Event Type */}
                                                       <div className="flex-1 min-w-0 flex flex-col gap-3">
 
-                                                            {/* Display Name */}
                                                             <div>
                                                                   <div className="flex items-center justify-between mb-1.5">
                                                                         <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Display Name</p>
@@ -461,7 +459,6 @@ export default function HostDashboard() {
                                                                   />
                                                             </div>
 
-                                                            {/* Event Type */}
                                                             <div>
                                                                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Event Type</p>
                                                                   <div className="relative">
@@ -494,7 +491,7 @@ export default function HostDashboard() {
                                                       </div>
                                                 </div>
 
-                                                {/* Row 2 — title position, full width */}
+                                                {/* Row 2 — Title Position */}
                                                 <div className="mt-3 border-t border-[#F0EDE6] pt-3">
                                                       <div className="flex-1 min-w-0">
                                                             <div className="flex items-center justify-between mb-1.5">
@@ -621,7 +618,6 @@ export default function HostDashboard() {
 
                               {/* PHOTO MANAGEMENT */}
                               <div ref={photoSectionRef} className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm overflow-hidden">
-                                    {/* Tab bar */}
                                     <div className="flex border-b border-[#E8E4DA] px-5">
                                           {[
                                                 { label: 'Pending', count: pendingCount },
@@ -655,169 +651,164 @@ export default function HostDashboard() {
       )
 }
 
+function themeColors(theme, hasBg) {
+      const c = theme.colors
+      return {
+            c,
+            txt: hasBg ? '#fff' : c.text,
+            txtMuted: hasBg ? 'rgba(255,255,255,0.7)' : c.textMuted,
+            txtSubtle: hasBg ? 'rgba(255,255,255,0.5)' : c.textSubtle,
+            cardBg: hasBg ? 'rgba(255,255,255,0.15)' : c.surface,
+            cardBorder: hasBg ? 'rgba(255,255,255,0.25)' : c.border,
+      }
+}
+
+function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked, titlePosition = 100 }) {
+      const hasBg = !!bgImage
+      const { c, txt, txtMuted, txtSubtle, cardBg, cardBorder } = themeColors(theme, hasBg)
+      const tintStyle = { backgroundColor: `rgba(0,0,0,${((bgTint ?? 55) / 100).toFixed(2)})` }
+      const bgStyle = hasBg
+            ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition || '50% 50%' }
+            : { backgroundColor: c.bg }
+
+      const isMobile = device === 'mobile'
+      const MOBILE_W = 176, MOBILE_H = 336
+
+
+      const nameLines = (eventName || 'Your Event').split('\n').map((line, i, arr) => (
+            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+      ))
+
+      const titleBlock = (
+            <div className={`text-center ${isMobile ? 'px-4 py-2' : 'px-8 py-2'}`}>
+                  {logoUrl && (
+                        <img
+                              src={logoUrl} alt="Logo"
+                              className={`mx-auto object-contain ${isMobile ? 'mb-1.5 max-h-8 max-w-20' : 'mb-2 max-h-10 max-w-25'}`}
+                              style={{ filter: hasBg ? 'brightness(0) invert(1)' : 'none' }}
+                        />
+                  )}
+                  <p className={`font-bold uppercase tracking-widest mb-1 ${isMobile ? 'text-[7px]' : 'text-[9px]'}`} style={{ color: txtSubtle }}>
+                        {eventType?.tagline || 'Welcome to the celebration'}
+                  </p>
+                  <h3
+                        className={`font-extrabold leading-tight ${isMobile ? '' : 'text-2xl'}`}
+                        style={{ color: txt, fontFamily: font.cssFamily, ...(isMobile ? { fontSize: '1.05rem' } : {}) }}
+                  >
+                        {nameLines}
+                  </h3>
+            </div>
+      )
+
+      const openButtons = isMobile ? (
+            <div className="flex flex-col gap-1.5">
+                  <div className="rounded-xl px-2.5 py-2 text-[8px] font-bold text-white flex items-center gap-1.5" style={{ backgroundColor: c.accent }}>
+                        <span className="w-4 h-4 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
+                              <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        </span>
+                        Open Camera
+                  </div>
+                  <div className="grid grid-cols-2 gap-1">
+                        <div className="rounded-xl px-2 py-1.5 text-[7px] font-bold flex items-center gap-1 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
+                              <svg width="8" height="8" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                              Upload
+                        </div>
+                        <div className="rounded-xl px-2 py-1.5 text-[7px] font-bold flex items-center gap-1 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
+                              <svg width="8" height="8" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                              Gallery
+                        </div>
+                  </div>
+            </div>
+      ) : (
+            <div className="flex gap-2 justify-center">
+                  <div className="rounded-xl px-4 py-2 text-[9px] font-bold text-white flex items-center gap-1.5" style={{ backgroundColor: c.accent }}>
+                        <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        Open Camera
+                  </div>
+                  <div className="rounded-xl px-4 py-2 text-[9px] font-bold flex items-center gap-1.5 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
+                        <svg width="10" height="10" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                        Upload
+                  </div>
+                  <div className="rounded-xl px-4 py-2 text-[9px] font-bold flex items-center gap-1.5 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
+                        <svg width="10" height="10" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                        Gallery
+                  </div>
+            </div>
+      )
+
+      const closedBlock = (
+            <>
+                  <p className={`font-semibold mb-1 ${isMobile ? 'text-[8px]' : 'text-[10px]'}`} style={{ color: 'rgba(255,255,255,0.75)' }}>This event is not open yet.</p>
+                  <p className={isMobile ? 'text-[7px]' : 'text-[9px]'} style={{ color: 'rgba(255,255,255,0.5)' }}>Check back soon.</p>
+            </>
+      )
+
+      const inner = (
+            <div className="w-full h-full relative" style={bgStyle}>
+                  {hasBg && <div className="absolute inset-0 pointer-events-none" style={tintStyle} />}
+                  {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
+                  <div className={`relative z-10 h-full flex flex-col ${isMobile ? 'pt-8' : ''}`}>
+                        <div style={{ flex: Math.min(titlePosition, 94) }} />
+                        <div className={isMobile ? 'text-center px-2' : ''}>{titleBlock}</div>
+                        <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
+                        <div className={`text-center ${isMobile ? 'px-4 pb-4' : 'px-8 pb-5'}`}>
+                              {isUnlocked ? (
+                                    <>
+                                          <p className={`mb-${isMobile ? '4' : '3'} ${isMobile ? 'text-[7px]' : 'text-[9px]'}`} style={{ color: txtMuted }}>Scan. Snap. Share.</p>
+                                          {openButtons}
+                                    </>
+                              ) : closedBlock}
+                        </div>
+                  </div>
+            </div>
+      )
+
+      if (isMobile) {
+            return (
+                  <div className="mx-auto relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-ink" style={{ width: MOBILE_W, height: MOBILE_H }}>
+                        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-14 h-4 bg-ink rounded-full z-20" />
+                        <div className="absolute inset-0" style={bgStyle}>
+                              {hasBg && <div className="absolute inset-0 pointer-events-none" style={tintStyle} />}
+                              {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
+                              <div className="relative z-10 h-full flex flex-col pt-8">
+                                    <div style={{ flex: Math.min(titlePosition, 94) }} />
+                                    <div className="text-center px-2">{titleBlock}</div>
+                                    <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
+                                    <div className="px-4 pb-4 text-center">
+                                          {isUnlocked ? (
+                                                <>
+                                                      <p className="text-[7px] mb-4" style={{ color: txtMuted }}>Scan. Snap. Share.</p>
+                                                      {openButtons}
+                                                </>
+                                          ) : closedBlock}
+                                    </div>
+                              </div>
+                        </div>
+                  </div>
+            )
+      }
+
+      return (
+            <div className="w-full h-full overflow-hidden">
+                  {inner}
+            </div>
+      )
+}
+
 function ThemeOption({ theme, isActive, onClick }) {
       return (
             <button
                   onClick={onClick}
                   className={"p-3 rounded-2xl border-2 text-left transition-all " +
-                        (isActive ? "border-[#1A1A18] bg-[#F7F5F0]" : "border-[#E8E4DA] bg-white hover:border-[#C0BFB5]")}
+                        (isActive ? "border-ink bg-[#F7F5F0]" : "border-[#E8E4DA] bg-white hover:border-[#C0BFB5]")}
             >
                   <div className="flex gap-1.5 mb-2">
                         <span className="w-4 h-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: theme.colors.accent }} />
                         <span className="w-4 h-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: theme.colors.bg }} />
                         <span className="w-4 h-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: theme.colors.surface }} />
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-tight text-[#1A1A18] leading-tight">{theme.name}</p>
+                  <p className="text-[10px] font-black uppercase tracking-tight text-ink leading-tight">{theme.name}</p>
             </button>
-      )
-}
-
-function DesktopPreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked, titlePosition = 100 }) {
-      const c = theme.colors
-      const hasBg = !!bgImage
-      const txt = hasBg ? '#fff' : c.text
-      const txtMuted = hasBg ? 'rgba(255,255,255,0.7)' : c.textMuted
-      const txtSubtle = hasBg ? 'rgba(255,255,255,0.5)' : c.textSubtle
-      const cardBg = hasBg ? 'rgba(255,255,255,0.15)' : c.surface
-      const cardBorder = hasBg ? 'rgba(255,255,255,0.25)' : c.border
-
-      return (
-            <div className="rounded-xl overflow-hidden border-4 border-[#1A1A18] shadow-2xl mx-auto" style={{ height: 336, width: Math.round(336 * 16 / 9) }}>
-                  <div className="w-full h-full relative" style={hasBg ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition || '50% 50%' } : { backgroundColor: c.bg }}>
-                        {hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${((bgTint ?? 55) / 100).toFixed(2)})` }} />}
-                        {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
-                        <div className="relative z-10 h-full flex flex-col">
-                              <div style={{ flex: Math.min(titlePosition, 94) }} />
-                              <div className="text-center px-8 py-2">
-                                    {logoUrl && (
-                                          <img src={logoUrl} alt="Logo" className="mx-auto mb-2 max-h-10 max-w-[100px] object-contain" style={{ filter: hasBg ? 'brightness(0) invert(1)' : 'none' }} />
-                                    )}
-                                    <p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: txtSubtle }}>{eventType?.tagline || 'Welcome to the celebration'}</p>
-                                    <h3 className="font-extrabold leading-tight text-2xl" style={{ color: txt, fontFamily: font.cssFamily }}>
-                                          {(eventName || 'Your Event').split('\n').map((line, i, arr) => (
-                                                <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
-                                          ))}
-                                    </h3>
-                              </div>
-                              <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
-                              <div className="px-8 pb-5 text-center">
-                                    {isUnlocked ? (
-                                          <>
-                                                <p className="text-[9px] mb-3" style={{ color: txtMuted }}>Scan. Snap. Share.</p>
-                                                <div className="flex gap-2 justify-center">
-                                                      <div className="rounded-xl px-4 py-2 text-[9px] font-bold text-white flex items-center gap-1.5" style={{ backgroundColor: c.accent }}>
-                                                            <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                                                            Open Camera
-                                                      </div>
-                                                      <div className="rounded-xl px-4 py-2 text-[9px] font-bold flex items-center gap-1.5 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
-                                                            <svg width="10" height="10" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>
-                                                            Upload
-                                                      </div>
-                                                      <div className="rounded-xl px-4 py-2 text-[9px] font-bold flex items-center gap-1.5 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
-                                                            <svg width="10" height="10" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>
-                                                            Gallery
-                                                      </div>
-                                                </div>
-                                          </>
-                                    ) : (
-                                          <>
-                                                <p className="text-[10px] font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>This event is not open yet.</p>
-                                                <p className="text-[9px]" style={{ color: 'rgba(255,255,255,0.5)' }}>Check back soon.</p>
-                                          </>
-                                    )}
-                              </div>
-                        </div>
-                  </div>
-            </div>
-      )
-}
-
-function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked, titlePosition = 100 }) {
-      const c = theme.colors
-      const hasBg = !!bgImage
-      const txt = hasBg ? '#fff' : c.text
-      const txtMuted = hasBg ? 'rgba(255,255,255,0.7)' : c.textMuted
-      const txtSubtle = hasBg ? 'rgba(255,255,255,0.5)' : c.textSubtle
-      const cardBg = hasBg ? 'rgba(255,255,255,0.15)' : c.surface
-      const cardBorder = hasBg ? 'rgba(255,255,255,0.25)' : c.border
-
-      const titleBlock = (
-            <div className="text-center px-4 py-2">
-                  {logoUrl && (
-                        <img src={logoUrl} alt="Logo" className="mx-auto mb-1.5 max-h-8 max-w-[80px] object-contain" style={{ filter: hasBg ? 'brightness(0) invert(1)' : 'none' }} />
-                  )}
-                  <p className="text-[7px] font-bold uppercase tracking-widest mb-1" style={{ color: txtSubtle }}>
-                        {eventType?.tagline || 'Welcome to the celebration'}
-                  </p>
-                  <h3 className="font-extrabold leading-tight" style={{ color: txt, fontFamily: font.cssFamily, fontSize: '1.05rem' }}>
-                        {(eventName || 'Your Event').split('\n').map((line, i) => (
-                              <span key={i}>{line}{i < (eventName || 'Your Event').split('\n').length - 1 && <br />}</span>
-                        ))}
-                  </h3>
-            </div>
-      )
-
-      return (
-            <div className="mx-auto relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-[#1A1A18]" style={{ width: 176, height: 336 }}>
-                  {/* Notch */}
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 w-14 h-4 bg-[#1A1A18] rounded-full z-20" />
-
-                  <div
-                        className="absolute inset-0"
-                        style={hasBg
-                              ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition || '50% 50%' }
-                              : { backgroundColor: c.bg }}
-                  >
-                        {/* Overlays */}
-                        {hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${((bgTint ?? 55) / 100).toFixed(2)})` }} />}
-                        {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
-
-                        {/* Title + buttons in one flex column — spacers control title position */}
-                        <div className="relative z-10 h-full flex flex-col pt-8">
-                              <div style={{ flex: Math.min(titlePosition, 94) }} />
-                              <div className="text-center px-2">{titleBlock}</div>
-                              <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
-                              <div className="px-4 pb-4 text-center">
-
-                                    {isUnlocked ? (
-                                          <>
-                                                <p className="text-[7px] mb-4" style={{ color: txtMuted }}>Scan. Snap. Share.</p>
-                                                <div className="flex flex-col gap-1.5">
-                                                      <div className="rounded-xl px-2.5 py-2 text-[8px] font-bold text-white flex items-center gap-1.5" style={{ backgroundColor: c.accent }}>
-                                                            <span className="w-4 h-4 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                                                                  <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                                        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
-                                                                        <circle cx="12" cy="13" r="4" />
-                                                                  </svg>
-                                                            </span>
-                                                            Open Camera
-                                                      </div>
-                                                      <div className="grid grid-cols-2 gap-1">
-                                                            <div className="rounded-xl px-2 py-1.5 text-[7px] font-bold flex items-center gap-1 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
-                                                                  <svg width="8" height="8" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                                        <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
-                                                                  </svg>
-                                                                  Upload
-                                                            </div>
-                                                            <div className="rounded-xl px-2 py-1.5 text-[7px] font-bold flex items-center gap-1 border" style={{ backgroundColor: cardBg, borderColor: cardBorder, color: txt }}>
-                                                                  <svg width="8" height="8" fill="none" stroke={hasBg ? '#fff' : c.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                                        <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
-                                                                  </svg>
-                                                                  Gallery
-                                                            </div>
-                                                      </div>
-                                                </div>
-                                          </>
-                                    ) : (
-                                          <>
-                                                <p className="text-[8px] font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>This event is not open yet.</p>
-                                                <p className="text-[7px]" style={{ color: 'rgba(255,255,255,0.5)' }}>Check back soon.</p>
-                                          </>
-                                    )}
-                              </div>
-                        </div>
-                  </div>
-            </div>
       )
 }
 
