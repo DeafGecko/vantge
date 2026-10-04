@@ -811,24 +811,41 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                               </div>
                               <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
                         </div>
-                        {/* Buttons pinned at bottom */}
-                        <div className="shrink-0 px-4 pb-3">
+                        {/* Buttons pinned at bottom — centered column matching real page */}
+                        <div className="shrink-0 pb-2" style={{ paddingLeft: '12%', paddingRight: '12%' }}>
                               {isUnlocked ? (
                                     <>
-                                          <p className="text-[6px] text-center text-white/50 mb-1.5">Scan · Snap · Share</p>
-                                          <div className="rounded-lg px-2.5 py-1.5 text-[7px] font-bold text-white flex items-center gap-1.5 mb-1.5 w-full" style={{ backgroundColor: c.accent }}>
-                                                <svg width="8" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                                                <span className="flex-1">Open Camera</span>
-                                                <span className="opacity-60">›</span>
-                                          </div>
-                                          <div className="grid grid-cols-2 gap-1">
-                                                <div className="rounded-lg px-2 py-1.5 text-[7px] font-bold text-white flex items-center gap-1 border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
-                                                      <svg width="7" height="7" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                                                      Upload
+                                          <p className="text-[6px] text-center text-white/50 mb-1">Scan · Snap · Share</p>
+                                          {/* Open Camera */}
+                                          <div className="rounded-xl px-2 py-1.5 text-white flex items-center gap-1.5 mb-1" style={{ backgroundColor: c.accent }}>
+                                                <span className="w-5 h-5 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}>
+                                                      <svg width="8" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                                </span>
+                                                <div className="flex-1">
+                                                      <p className="text-[7px] font-bold leading-tight">Open Camera</p>
+                                                      <p className="text-[5px] opacity-70">Take a photo right now</p>
                                                 </div>
-                                                <div className="rounded-lg px-2 py-1.5 text-[7px] font-bold text-white flex items-center gap-1 border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
-                                                      <svg width="7" height="7" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                                                      Gallery
+                                                <svg className="opacity-50 shrink-0" width="6" height="6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                          </div>
+                                          {/* Upload + Gallery */}
+                                          <div className="grid grid-cols-2 gap-1">
+                                                <div className="rounded-xl px-2 py-1.5 flex items-center gap-1.5 border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
+                                                      <span className="w-4 h-4 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                                                            <svg width="7" height="7" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                                      </span>
+                                                      <div>
+                                                            <p className="text-[7px] font-bold text-white leading-tight">Upload</p>
+                                                            <p className="text-[5px] text-white/55">From gallery</p>
+                                                      </div>
+                                                </div>
+                                                <div className="rounded-xl px-2 py-1.5 flex items-center gap-1.5 border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
+                                                      <span className="w-4 h-4 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                                                            <svg width="7" height="7" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                                                      </span>
+                                                      <div>
+                                                            <p className="text-[7px] font-bold text-white leading-tight">Gallery</p>
+                                                            <p className="text-[5px] text-white/55">View photos</p>
+                                                      </div>
                                                 </div>
                                           </div>
                                     </>
