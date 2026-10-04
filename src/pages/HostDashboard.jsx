@@ -659,12 +659,12 @@ export default function HostDashboard() {
                                           {/* Font + Color side by side */}
                                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-                                                <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm flex flex-col">
-                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3 shrink-0">Title Font</p>
-                                                      <div className="flex flex-col gap-4">
+                                                <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm overflow-hidden flex flex-col">
+                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-4 pt-4 pb-3 shrink-0">Title Font</p>
+                                                      <div className="flex flex-col divide-y-2 divide-[#F0EDE6]">
                                                             {Object.entries(fontCategories).map(([catKey, fonts]) => (
-                                                                  <div key={catKey}>
-                                                                        <p className="text-[8px] font-bold text-[#C0BFB5] uppercase tracking-widest mb-1.5">
+                                                                  <div key={catKey} className="px-4 py-3">
+                                                                        <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">
                                                                               {categoryLabels[catKey]}
                                                                         </p>
                                                                         <div className="grid grid-cols-3 gap-1.5">
