@@ -841,7 +841,7 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                                     {logoUrl && (
                                           <img src={logoUrl} alt="Logo" className="mx-auto mb-1 object-contain" style={{ maxHeight: 18, maxWidth: 56, filter: 'brightness(0) invert(1)' }} />
                                     )}
-                                    <p className="text-[6px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                                    <p className="text-[4px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
                                           {eventType?.tagline || ''}
                                     </p>
                                     <h3 className="font-extrabold leading-tight text-white" style={{ fontSize: '0.55rem', fontFamily: font.cssFamily }}>
