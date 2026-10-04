@@ -754,25 +754,6 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
             </>
       )
 
-      const inner = (
-            <div className="w-full h-full relative" style={bgStyle}>
-                  {hasBg && <div className="absolute inset-0 pointer-events-none" style={tintStyle} />}
-                  {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
-                  <div className={`relative z-10 h-full flex flex-col ${isMobile ? 'pt-8' : ''}`}>
-                        <div style={{ flex: Math.min(titlePosition, 94) }} />
-                        <div className={isMobile ? 'text-center px-2' : ''}>{titleBlock}</div>
-                        <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
-                        <div className={`text-center ${isMobile ? 'px-4 pb-4' : 'px-8 pb-5'}`}>
-                              {isUnlocked ? (
-                                    <>
-                                          <p className={`mb-${isMobile ? '4' : '3'} ${isMobile ? 'text-[7px]' : 'text-[9px]'}`} style={{ color: txtMuted }}>Scan. Snap. Share.</p>
-                                          {openButtons}
-                                    </>
-                              ) : closedBlock}
-                        </div>
-                  </div>
-            </div>
-      )
 
       if (isMobile) {
             return (
@@ -799,9 +780,66 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
             )
       }
 
+      // Desktop — matches actual EventGateway layout exactly
       return (
-            <div className="absolute inset-0 overflow-hidden">
-                  {inner}
+            <div className="absolute inset-0 overflow-hidden" style={bgStyle}>
+                  {/* Tint */}
+                  <div className="absolute inset-0" style={tintStyle} />
+                  {/* Bottom gradient so buttons always pop */}
+                  <div className="absolute inset-x-0 bottom-0" style={{ height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
+                  {/* Content */}
+                  <div className="absolute inset-0 flex flex-col">
+                        {/* Vantge wordmark top center */}
+                        <div className="flex justify-center pt-2 pb-1 shrink-0">
+                              <svg width="48" height="10" viewBox="0 0 120 24" fill="white" opacity="0.9">
+                                    <text x="0" y="18" fontSize="18" fontWeight="800" fontFamily="sans-serif" letterSpacing="2">VANTGE</text>
+                              </svg>
+                        </div>
+                        {/* Title block with flex spacers */}
+                        <div className="flex-1 flex flex-col">
+                              <div style={{ flex: Math.min(titlePosition, 94) }} />
+                              <div className="text-center px-4">
+                                    {logoUrl && (
+                                          <img src={logoUrl} alt="Logo" className="mx-auto mb-1 object-contain" style={{ maxHeight: 20, maxWidth: 60, filter: 'brightness(0) invert(1)' }} />
+                                    )}
+                                    <p className="text-[6px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                                          {eventType?.tagline || ''}
+                                    </p>
+                                    <h3 className="font-extrabold leading-tight text-white" style={{ fontSize: '0.75rem', fontFamily: font.cssFamily }}>
+                                          {nameLines}
+                                    </h3>
+                              </div>
+                              <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
+                        </div>
+                        {/* Buttons pinned at bottom */}
+                        <div className="shrink-0 px-4 pb-3">
+                              {isUnlocked ? (
+                                    <>
+                                          <p className="text-[6px] text-center text-white/50 mb-1.5">Scan · Snap · Share</p>
+                                          <div className="rounded-lg px-2.5 py-1.5 text-[7px] font-bold text-white flex items-center gap-1.5 mb-1.5 w-full" style={{ backgroundColor: c.accent }}>
+                                                <svg width="8" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                                <span className="flex-1">Open Camera</span>
+                                                <span className="opacity-60">›</span>
+                                          </div>
+                                          <div className="grid grid-cols-2 gap-1">
+                                                <div className="rounded-lg px-2 py-1.5 text-[7px] font-bold text-white flex items-center gap-1 border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
+                                                      <svg width="7" height="7" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                                      Upload
+                                                </div>
+                                                <div className="rounded-lg px-2 py-1.5 text-[7px] font-bold text-white flex items-center gap-1 border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
+                                                      <svg width="7" height="7" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                                                      Gallery
+                                                </div>
+                                          </div>
+                                    </>
+                              ) : (
+                                    <div className="text-center">
+                                          <p className="text-[7px] font-semibold text-white/75 mb-0.5">This event is not open yet.</p>
+                                          <p className="text-[6px] text-white/50">Check back soon.</p>
+                                    </div>
+                              )}
+                        </div>
+                  </div>
             </div>
       )
 }
