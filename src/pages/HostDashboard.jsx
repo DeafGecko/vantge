@@ -757,7 +757,7 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
 
       if (isMobile) {
             return (
-                  <div className="mx-auto relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-ink" style={{ width: MOBILE_W, height: MOBILE_H }}>
+                  <div className="mx-auto relative rounded-[1.2rem] overflow-hidden shadow-2xl border-4 border-ink" style={{ width: MOBILE_W, height: MOBILE_H }}>
                         <div className="absolute top-3 left-1/2 -translate-x-1/2 w-14 h-4 bg-ink rounded-full z-20" />
                         <div className="absolute inset-0" style={bgStyle}>
                               {hasBg && <div className="absolute inset-0 pointer-events-none" style={tintStyle} />}
