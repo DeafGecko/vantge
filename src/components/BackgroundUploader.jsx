@@ -246,7 +246,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       async function handleRemove() {
             const { error } = await supabase.from('events').update({ [dbField]: null }).eq('id', eventId)
             if (error) { alert('Could not remove: ' + error.message) }
-            else { onSaved(null, currentPosition, currentTint); onClose() }
+            else { onSaved(null, currentPosition, currentTint); setShowChangePanel(true) }
       }
 
       const tools = [
