@@ -166,7 +166,6 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       const [dragging, setDragging] = useState(false)
       const [activeToolIndex, setActiveToolIndex] = useState(0)
       const [showChangePanel, setShowChangePanel] = useState(false)
-      const [changeTab, setChangeTab] = useState('library')
       const frameRef = useRef(null)
       const dragStart = useRef(null)
       const inputRef = useRef(null)
@@ -286,27 +285,27 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                                       </button>
                                                 </div>
                                           </div>
-                                          {/* Photos — horizontal scroll row */}
-                                          <div className="flex-1 flex items-center px-4 overflow-x-auto overflow-y-hidden">
+                                          {/* Photos — 3-column grid, vertical scroll */}
+                                          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
                                                 {libraryPhotos.length === 0 ? (
-                                                      <div className="flex flex-col items-center justify-center w-full gap-3 text-white/30">
+                                                      <div className="flex flex-col items-center justify-center h-full gap-3 text-white/30">
                                                             <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21" strokeLinecap="round"/></svg>
                                                             <p className="text-xs font-bold">No photos yet — upload above</p>
                                                       </div>
                                                 ) : (
-                                                      <div className="flex gap-3 py-2">
+                                                      <div className="grid grid-cols-3 gap-2">
                                                             {libraryPhotos.map((url, i) => (
                                                                   <button
                                                                         key={i}
                                                                         onClick={() => { handleLibraryPick(url); setShowChangePanel(false) }}
-                                                                        className={`relative shrink-0 rounded-xl overflow-hidden border-2 transition-all hover:scale-[1.02] ${pendingUrl === url ? 'border-white' : 'border-white/10'}`}
-                                                                        style={{ width: '160px', height: '100px' }}
+                                                                        className={`relative rounded-lg overflow-hidden border-2 transition-all hover:scale-[1.02] ${pendingUrl === url ? 'border-white' : 'border-white/10'}`}
+                                                                        style={{ aspectRatio: '3/2' }}
                                                                   >
                                                                         <img src={url} alt="" className="w-full h-full object-cover" />
                                                                         {pendingUrl === url && (
                                                                               <div className="absolute inset-0 bg-white/20 flex items-center justify-center">
-                                                                                    <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-                                                                                          <svg width="12" height="12" fill="none" stroke="#1A1A18" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                                                    <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center">
+                                                                                          <svg width="10" height="10" fill="none" stroke="#1A1A18" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                                                                     </div>
                                                                               </div>
                                                                         )}
@@ -374,7 +373,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                     <div className="flex flex-col items-center gap-3 text-white/30">
                                           <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                           <p className="text-xs font-bold uppercase tracking-widest">No photo — tap Change Photo to add one</p>
-                                          <button onClick={() => { setShowChangePanel(true); setChangeTab('library'); }} className="mt-2 bg-white text-[#1A1A18] text-[10px] font-bold uppercase tracking-widest rounded-full px-5 py-2.5 hover:bg-white/90 transition-all">
+                                          <button onClick={() => { setShowChangePanel(true); }} className="mt-2 bg-white text-[#1A1A18] text-[10px] font-bold uppercase tracking-widest rounded-full px-5 py-2.5 hover:bg-white/90 transition-all">
                                                 Choose Photo
                                           </button>
                                     </div>
@@ -402,7 +401,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                                 <button
                                                       key={tool.id}
                                                       onClick={() => {
-                                                            if (tool.id === 'change') { setShowChangePanel(true); setChangeTab('library'); return }
+                                                            if (tool.id === 'change') { setShowChangePanel(true); return }
                                                             if (tool.id === 'delete') { handleRemove(); return }
                                                             setActiveToolIndex(i)
                                                             setShowChangePanel(false)
