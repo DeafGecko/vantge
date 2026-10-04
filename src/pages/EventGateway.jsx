@@ -183,7 +183,7 @@ export default function EventGateway() {
 
                         {/* Buttons — pinned at bottom */}
                         <div className="w-full max-w-md mx-auto px-5 shrink-0" style={{ paddingBottom: 'max(calc(2rem + 10px), env(safe-area-inset-bottom))' }}>
-                              <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 text-center">Scan · Snap · Share</p>
+                              <p className="text-white/50 text-xs font-bold uppercase tracking-widest text-center" style={{ marginBottom: '13px' }}>Scan · Snap · Share</p>
                               <div className="w-full flex flex-col gap-2.5">
 
                                     {/* Open Camera — primary */}
@@ -254,7 +254,7 @@ export default function EventGateway() {
                                     </div>
                               </div>
 
-                              <p className="text-[9px] text-white/25 mt-5 tracking-widest uppercase">
+                              <p className="text-[9px] text-white/25 mt-5 tracking-widest uppercase text-center">
                                     powered by vantge
                               </p>
                         </div>
