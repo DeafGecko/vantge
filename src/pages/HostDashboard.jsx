@@ -366,15 +366,15 @@ export default function HostDashboard() {
                                                 {/* Fixed-height container so card never changes size */}
                                                 <div className="flex items-center justify-center" style={{ height: 336 }}>
                                                       {previewDevice === 'desktop' ? (
-                                                            <div className="flex flex-col items-center" style={{ height: 336 }}>
-                                                                  {/* Screen — 16:9 at max height that leaves room for stand */}
-                                                                  <div className="rounded-lg overflow-hidden border-4 border-ink shadow-xl flex-1 relative" style={{ aspectRatio: '16/9', maxHeight: 300 }}>
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                  {/* Screen — fixed 180px tall, 16:9 = 320px wide */}
+                                                                  <div className="rounded-lg overflow-hidden border-4 border-ink shadow-xl relative" style={{ width: 320, height: 180 }}>
                                                                         <div className="absolute inset-0">
                                                                               <EventPreview {...previewProps} device="desktop" />
                                                                         </div>
                                                                   </div>
                                                                   {/* Monitor stand */}
-                                                                  <div className="flex flex-col items-center shrink-0">
+                                                                  <div className="flex flex-col items-center">
                                                                         <div className="w-8 h-2 bg-ink rounded-b" />
                                                                         <div className="w-16 h-1.5 bg-ink rounded" />
                                                                   </div>
