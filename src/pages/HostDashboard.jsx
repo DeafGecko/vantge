@@ -60,6 +60,7 @@ export default function HostDashboard() {
       const [localAllowDownloads, setLocalAllowDownloads] = useState(null)
       const [localAllowSharing, setLocalAllowSharing] = useState(null)
       const [previewUnlocked, setPreviewUnlocked] = useState(true)
+      const [previewDevice, setPreviewDevice] = useState('mobile') // 'mobile' | 'desktop'
       const photoSectionRef = useRef(null)
 
       const allowDownloads = localAllowDownloads !== null ? localAllowDownloads : (event?.allow_downloads ?? true)
@@ -355,7 +356,51 @@ export default function HostDashboard() {
                                                             )}
                                                       </button>
                                                 </div>
-                                                <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage || currentDefaultBg} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} isUnlocked={previewUnlocked} titlePosition={currentTitlePosition} />
+                                                {previewDevice === 'mobile' ? (
+                                                      <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage || currentDefaultBg} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} isUnlocked={previewUnlocked} titlePosition={currentTitlePosition} />
+                                                ) : (
+                                                      <div className="w-full rounded-xl overflow-hidden border-4 border-[#1A1A18] shadow-2xl" style={{ aspectRatio: '16/9' }}>
+                                                            <div className="w-full h-full relative" style={currentBgImage || currentDefaultBg ? { backgroundImage: `url(${currentBgImage || currentDefaultBg})`, backgroundSize: 'cover', backgroundPosition: currentBgPosition || '50% 50%' } : { backgroundColor: currentTheme.colors.bg }}>
+                                                                  <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${((currentBgTint ?? 55) / 100).toFixed(2)})` }} />
+                                                                  <div className="relative z-10 h-full flex flex-col">
+                                                                        <div className="flex justify-center pt-3">
+                                                                              <div className="w-4 h-4 rounded-full bg-white/20" />
+                                                                        </div>
+                                                                        <div style={{ flex: Math.min(currentTitlePosition, 94) }} />
+                                                                        <div className="text-center px-6 py-2">
+                                                                              <p className="text-[8px] font-bold uppercase tracking-widest text-white/50 mb-1">{currentEventType?.tagline || ''}</p>
+                                                                              <h3 className="font-extrabold text-white leading-tight text-lg">{currentEventName || 'Your Event'}</h3>
+                                                                        </div>
+                                                                        <div style={{ flex: Math.max(0, 94 - currentTitlePosition) }} />
+                                                                        <div className="px-6 pb-4 text-center">
+                                                                              <p className="text-[7px] text-white/50 mb-2">Scan · Snap · Share</p>
+                                                                              <div className="flex gap-2 justify-center">
+                                                                                    <div className="rounded-lg px-3 py-1.5 text-[8px] font-bold text-white" style={{ backgroundColor: currentTheme.colors.accent }}>Open Camera</div>
+                                                                                    <div className="rounded-lg px-3 py-1.5 text-[8px] font-bold text-white/70 border border-white/20">Upload</div>
+                                                                                    <div className="rounded-lg px-3 py-1.5 text-[8px] font-bold text-white/70 border border-white/20">Gallery</div>
+                                                                              </div>
+                                                                        </div>
+                                                                  </div>
+                                                            </div>
+                                                      </div>
+                                                )}
+                                                {/* Device toggle */}
+                                                <div className="flex items-center justify-center gap-2 mt-3">
+                                                      <button
+                                                            onClick={() => setPreviewDevice('mobile')}
+                                                            title="Mobile preview"
+                                                            className={`p-2 rounded-lg transition-colors ${previewDevice === 'mobile' ? 'bg-[#1A1A18] text-white' : 'text-[#B0AFA5] hover:text-[#1A1A18]'}`}
+                                                      >
+                                                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
+                                                      </button>
+                                                      <button
+                                                            onClick={() => setPreviewDevice('desktop')}
+                                                            title="Desktop preview"
+                                                            className={`p-2 rounded-lg transition-colors ${previewDevice === 'desktop' ? 'bg-[#1A1A18] text-white' : 'text-[#B0AFA5] hover:text-[#1A1A18]'}`}
+                                                      >
+                                                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
+                                                      </button>
+                                                </div>
                                           </div>
 
                                           {/* QR code */}
@@ -665,7 +710,7 @@ function ThemePreview({ theme, eventName, font, bgImage, bgPosition, bgTint, eve
       )
 
       return (
-            <div className="mx-auto relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-[#1A1A18]" style={{ width: 220, height: 420 }}>
+            <div className="mx-auto relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-[#1A1A18]" style={{ width: 176, height: 336 }}>
                   {/* Notch */}
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 w-14 h-4 bg-[#1A1A18] rounded-full z-20" />
 
