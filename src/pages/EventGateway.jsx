@@ -181,8 +181,11 @@ export default function EventGateway() {
                               )
                         })()}
 
-                        {/* Buttons — pinned at bottom */}
-                        <div className="w-full max-w-md mx-auto px-5 shrink-0" style={{ paddingBottom: 'max(calc(2rem + 10px), env(safe-area-inset-bottom))', marginBottom: '30px' }}>
+                        {/* Spacer pushes buttons to bottom */}
+                        <div className="flex-1" />
+
+                        {/* Buttons — always at bottom */}
+                        <div className="w-full max-w-md mx-auto px-5 shrink-0" style={{ paddingBottom: 'max(calc(2rem + 40px), env(safe-area-inset-bottom))' }}>
                               <p className="text-white/50 text-xs font-bold uppercase tracking-widest text-center" style={{ marginBottom: '13px' }}>Scan · Snap · Share</p>
                               <div className="w-full flex flex-col gap-2.5">
 
