@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getThumbnailUrl, getFullSizeUrl } from '../lib/cloudinary'
 
-export default function PhotoManager({ eventId, status }) {
+export default function PhotoManager({ eventId, status, onAdminPhotoDeleted }) {
       const [photos, setPhotos] = useState([])
       const [loading, setLoading] = useState(true)
       const [error, setError] = useState(null)
@@ -105,6 +105,7 @@ export default function PhotoManager({ eventId, status }) {
             }
             const { error } = await supabase.from('media_queue').delete().eq('id', photo.id)
             if (error) { alert(`Delete failed: ${error.message}`); window.location.reload() }
+            if (photo.is_admin_upload) onAdminPhotoDeleted?.()
       }
 
       function toggleSelect(id) {
@@ -134,6 +135,7 @@ export default function PhotoManager({ eventId, status }) {
             }
             const { error } = await supabase.from('media_queue').delete().in('id', ids)
             if (error) { alert(`Delete failed: ${error.message}`); window.location.reload() }
+            if (targets.some(p => p.is_admin_upload)) onAdminPhotoDeleted?.()
             setBulkDeleting(false)
       }
 

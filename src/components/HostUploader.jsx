@@ -287,7 +287,7 @@ function DeleteModal({ items, onClose, onDeleted, initialId }) {
       )
 }
 
-export default function HostUploader({ eventId }) {
+export default function HostUploader({ eventId, refreshKey }) {
       const [open, setOpen] = useState(false)
       const [deleteInitialId, setDeleteInitialId] = useState(null)
       const [preloaded, setPreloaded] = useState([])
@@ -302,7 +302,7 @@ export default function HostUploader({ eventId }) {
                   .eq('status', 1)
                   .order('created_at', { ascending: false })
                   .then(({ data }) => setPreloaded(data || []))
-      }, [eventId])
+      }, [eventId, refreshKey])
 
       function refreshPreloaded() {
             supabase

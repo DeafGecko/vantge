@@ -60,6 +60,7 @@ export default function HostDashboard() {
       const [localLogoUrl, setLocalLogoUrl] = useState(undefined)
       const [localAllowDownloads, setLocalAllowDownloads] = useState(null)
       const [localAllowSharing, setLocalAllowSharing] = useState(null)
+      const [preloadRefreshKey, setPreloadRefreshKey] = useState(0)
       const [localRequireApproval, setLocalRequireApproval] = useState(null)
       const [localUploadLimit, setLocalUploadLimit] = useState(undefined)
       const [localPasscode, setLocalPasscode] = useState(undefined)
@@ -704,7 +705,7 @@ export default function HostDashboard() {
                                           </div>
 
                                           {/* Host uploader */}
-                                          <HostUploader eventId={event.id} />
+                                          <HostUploader eventId={event.id} refreshKey={preloadRefreshKey} />
                                     </div>
                               </div>
 
@@ -766,7 +767,7 @@ export default function HostDashboard() {
                                           ))}
                                     </div>
                                     <div className="p-4">
-                                          <PhotoManager key={activeTab} eventId={event.id} status={activeTab} />
+                                          <PhotoManager key={activeTab} eventId={event.id} status={activeTab} onAdminPhotoDeleted={() => setPreloadRefreshKey(k => k + 1)} />
                                     </div>
                               </div>
 
