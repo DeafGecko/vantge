@@ -369,9 +369,7 @@ export default function HostDashboard() {
                                                             <div className="flex flex-col items-center gap-1">
                                                                   {/* Screen — fixed 180px tall, 16:9 = 320px wide */}
                                                                   <div className="rounded-lg overflow-hidden border-4 border-ink shadow-xl relative" style={{ width: 320, height: 180 }}>
-                                                                        <div className="absolute inset-0">
-                                                                              <EventPreview {...previewProps} device="desktop" />
-                                                                        </div>
+                                                                        <EventPreview {...previewProps} device="desktop" />
                                                                   </div>
                                                                   {/* Monitor stand */}
                                                                   <div className="flex flex-col items-center">
@@ -802,7 +800,7 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
       }
 
       return (
-            <div className="w-full h-full overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden">
                   {inner}
             </div>
       )
