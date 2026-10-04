@@ -322,141 +322,129 @@ export default function GuestUploader() {
                               )
                         })()}
 
-                        {/* Bottom content */}
-                        <div className="w-full max-w-md mx-auto px-5" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
+                        {/* Bottom content — tan card panel */}
+                        <div className="w-full max-w-md mx-auto px-4 shrink-0" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
+                              <div className="rounded-3xl p-5 flex flex-col gap-4" style={{ backgroundColor: '#F7F5F0' }}>
 
-                              {/* Scan. Snap. Share. tagline just above buttons */}
-                              <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 text-center">Scan · Snap · Share</p>
-
-
-                              {/* File picker / preview */}
-                              {files.length === 0 ? (
-                                    <div className="flex gap-2 mb-3">
-                                          {/* Take Photo — opens native camera */}
-                                          <button
-                                                onClick={() => cameraInputRef.current?.click()}
-                                                className="flex-1 flex flex-col items-center gap-2 rounded-2xl px-4 py-5 border border-white/15 transition-all active:scale-[0.97]"
-                                                style={{ backgroundColor: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(20px)' }}
-                                          >
-                                                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}>
-                                                      <svg width="22" height="22" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>
-                                                      </svg>
-                                                </span>
-                                                <p className="font-bold text-sm text-white">Take Photo</p>
-                                                <p className="text-[10px] text-white/40">Opens your camera</p>
-                                          </button>
-                                          {/* Choose from library */}
-                                          <button
-                                                onClick={() => fileInputRef.current?.click()}
-                                                className="flex-1 flex flex-col items-center gap-2 rounded-2xl px-4 py-5 border border-white/15 transition-all active:scale-[0.97]"
-                                                style={{ backgroundColor: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)' }}
-                                          >
-                                                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
-                                                      <svg width="22" height="22" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                                                            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
-                                                      </svg>
-                                                </span>
-                                                <p className="font-bold text-sm text-white">Library</p>
-                                                <p className="text-[10px] text-white/40">Up to {MAX_FILES} files</p>
-                                          </button>
+                                    <div>
+                                          <h2 className="text-lg font-extrabold text-[#1A1A18] leading-tight">Add Photos</h2>
+                                          <p className="text-[11px] text-[#88887E] mt-0.5">Share your photos from {event.event_name}</p>
                                     </div>
-                              ) : (
-                                    <div
-                                          className="rounded-2xl p-4 mb-3 border border-white/10"
-                                          style={{ backgroundColor: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-                                    >
-                                          {/* Summary row */}
-                                          <div className="flex items-center justify-between mb-3">
-                                                <p className="text-white text-sm font-bold">
-                                                      {photoCount > 0 && `${photoCount} photo${photoCount > 1 ? 's' : ''}`}
-                                                      {photoCount > 0 && videoCount > 0 && ' · '}
-                                                      {videoCount > 0 && `${videoCount} video${videoCount > 1 ? 's' : ''}`}
-                                                </p>
+
+                                    {/* File picker / preview */}
+                                    {files.length === 0 ? (
+                                          <div className="flex gap-2">
+                                                <button
+                                                      onClick={() => cameraInputRef.current?.click()}
+                                                      className="flex-1 flex flex-col items-center gap-2 rounded-2xl px-3 py-4 border-2 border-dashed border-[#D4CFC4] bg-[#EFEDE8] transition-all active:scale-[0.97]"
+                                                >
+                                                      <span className="w-10 h-10 rounded-xl bg-[#E8E4DA] flex items-center justify-center">
+                                                            <svg width="20" height="20" fill="none" stroke="#88887E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>
+                                                            </svg>
+                                                      </span>
+                                                      <p className="font-bold text-sm text-[#1A1A18]">Take Photo</p>
+                                                </button>
                                                 <button
                                                       onClick={() => fileInputRef.current?.click()}
-                                                      className="text-[11px] font-bold text-white/50 hover:text-white/80 transition-colors"
+                                                      className="flex-1 flex flex-col items-center gap-2 rounded-2xl px-3 py-4 border-2 border-dashed border-[#D4CFC4] bg-[#EFEDE8] transition-all active:scale-[0.97]"
                                                 >
-                                                      Change
+                                                      <span className="w-10 h-10 rounded-xl bg-[#E8E4DA] flex items-center justify-center">
+                                                            <svg width="20" height="20" fill="none" stroke="#88887E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                                  <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+                                                            </svg>
+                                                      </span>
+                                                      <p className="font-bold text-sm text-[#1A1A18]">Library</p>
                                                 </button>
                                           </div>
-
-                                          {/* Thumbnails */}
-                                          <div className="grid grid-cols-4 gap-1.5">
-                                                {files.map((file, i) => (
-                                                      <div key={i} className="aspect-square rounded-lg overflow-hidden relative bg-white/10">
-                                                            {file.type.startsWith('video/') ? (
-                                                                  <>
-                                                                        <video src={URL.createObjectURL(file)} className="w-full h-full object-cover" muted playsInline preload="metadata" />
-                                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                                              <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
-                                                                                    <svg width="9" height="9" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                                                              </div>
-                                                                        </div>
-                                                                  </>
-                                                            ) : (
-                                                                  <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
-                                                            )}
-                                                      </div>
-                                                ))}
-                                          </div>
-                                    </div>
-                              )}
-
-                              {/* Error */}
-                              {fileError && (
-                                    <div className="rounded-xl px-4 py-3 mb-3 flex items-start gap-2.5 border border-red-500/30" style={{ backgroundColor: 'rgba(220,38,38,0.15)' }}>
-                                          <svg width="14" height="14" fill="none" stroke="#f87171" strokeWidth="2" viewBox="0 0 24 24" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                          <p className="text-red-300 text-xs">{fileError}</p>
-                                    </div>
-                              )}
-
-                              {/* Name input */}
-                              <div className="mb-2.5">
-                                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Your name <span className="text-red-400">*</span></p>
-                                    <input
-                                          type="text"
-                                          value={guestName}
-                                          onChange={(e) => setGuestName(e.target.value)}
-                                          placeholder="Required — so the host knows it's from you"
-                                          className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 outline-none border border-white/10 focus:border-white/30 transition-colors"
-                                          style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}
-                                    />
-                              </div>
-
-                              {/* Caption input */}
-                              <div className="mb-3">
-                                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Caption</p>
-                                    <input
-                                          type="text"
-                                          value={caption}
-                                          onChange={(e) => setCaption(e.target.value)}
-                                          placeholder="Optional — add a message to your photo"
-                                          maxLength={200}
-                                          className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 outline-none border border-white/10 focus:border-white/30 transition-colors"
-                                          style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}
-                                    />
-                              </div>
-
-                              {/* Send button */}
-                              <button
-                                    onClick={files.length > 0 ? handleUpload : () => fileInputRef.current?.click()}
-                                    disabled={files.length > 0 && !guestName.trim()}
-                                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-50"
-                                    style={{ backgroundColor: accentColor }}
-                              >
-                                    {files.length > 0 ? (
-                                          <>
-                                                <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                                Send {totalFiles} {totalFiles === 1 ? 'file' : 'files'}
-                                          </>
                                     ) : (
-                                          <>
-                                                <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                                                Choose files
-                                          </>
+                                          <div className="rounded-2xl p-3 bg-[#EFEDE8] border border-[#E0DBD0]">
+                                                <div className="flex items-center justify-between mb-2.5">
+                                                      <p className="text-sm font-bold text-[#1A1A18]">
+                                                            {photoCount > 0 && `${photoCount} photo${photoCount > 1 ? 's' : ''}`}
+                                                            {photoCount > 0 && videoCount > 0 && ' · '}
+                                                            {videoCount > 0 && `${videoCount} video${videoCount > 1 ? 's' : ''}`}
+                                                      </p>
+                                                      <button onClick={() => fileInputRef.current?.click()} className="text-[11px] font-bold text-[#88887E] hover:text-[#1A1A18] transition-colors">
+                                                            Change
+                                                      </button>
+                                                </div>
+                                                <div className="grid grid-cols-4 gap-1.5">
+                                                      {files.map((file, i) => (
+                                                            <div key={i} className="aspect-square rounded-lg overflow-hidden relative bg-[#E0DBD0]">
+                                                                  {file.type.startsWith('video/') ? (
+                                                                        <>
+                                                                              <video src={URL.createObjectURL(file)} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                                                                              <div className="absolute inset-0 flex items-center justify-center">
+                                                                                    <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
+                                                                                          <svg width="9" height="9" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                                    </div>
+                                                                              </div>
+                                                                        </>
+                                                                  ) : (
+                                                                        <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
+                                                                  )}
+                                                            </div>
+                                                      ))}
+                                                </div>
+                                          </div>
                                     )}
-                              </button>
+
+                                    {/* Error */}
+                                    {fileError && (
+                                          <div className="rounded-xl px-4 py-3 flex items-start gap-2.5 bg-red-50 border border-red-200">
+                                                <svg width="14" height="14" fill="none" stroke="#ef4444" strokeWidth="2" viewBox="0 0 24 24" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                                <p className="text-red-600 text-xs">{fileError}</p>
+                                          </div>
+                                    )}
+
+                                    {/* Name input */}
+                                    <div>
+                                          <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-1.5">Your Name <span className="text-red-400">*</span></p>
+                                          <input
+                                                type="text"
+                                                value={guestName}
+                                                onChange={(e) => setGuestName(e.target.value)}
+                                                placeholder="So the host knows it's from you"
+                                                className="w-full rounded-xl px-4 py-3 text-sm text-[#1A1A18] placeholder-[#B0AFA5] outline-none border border-[#E0DBD0] focus:border-[#1A1A18] transition-colors bg-white"
+                                          />
+                                    </div>
+
+                                    {/* Caption input */}
+                                    <div>
+                                          <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-1.5">Caption <span className="text-[#D4CFC4]">(optional)</span></p>
+                                          <input
+                                                type="text"
+                                                value={caption}
+                                                onChange={(e) => setCaption(e.target.value)}
+                                                placeholder="Add a message to your photo"
+                                                maxLength={200}
+                                                className="w-full rounded-xl px-4 py-3 text-sm text-[#1A1A18] placeholder-[#B0AFA5] outline-none border border-[#E0DBD0] focus:border-[#1A1A18] transition-colors bg-white"
+                                          />
+                                    </div>
+
+                                    {/* Send button */}
+                                    <button
+                                          onClick={files.length > 0 ? handleUpload : () => fileInputRef.current?.click()}
+                                          disabled={files.length > 0 && !guestName.trim()}
+                                          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-40"
+                                          style={{ backgroundColor: accentColor }}
+                                    >
+                                          {files.length > 0 ? (
+                                                <>
+                                                      <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                      Share Photos
+                                                </>
+                                          ) : (
+                                                <>
+                                                      <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                                      Choose Photos
+                                                </>
+                                          )}
+                                    </button>
+
+                                    <p className="text-[10px] text-[#B0AFA5] text-center leading-relaxed">By uploading, you agree your photos may be used by the event host for promotional purposes.</p>
+                              </div>
                         </div>
                   </div>
 
