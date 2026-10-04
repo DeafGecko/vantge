@@ -885,7 +885,6 @@ function LibraryModal({ typeId, label, onClose }) {
 
   async function handleUpload(files) {
     if (!files.length) return
-    if (photos.length + files.length > 10) { alert(`Max 10 photos per type. You have ${photos.length}, can add ${10 - photos.length} more.`); return }
     setUploading(true)
     for (const file of files) {
       const path = `library/${typeId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${file.name.split('.').pop()}`
@@ -912,7 +911,7 @@ function LibraryModal({ typeId, label, onClose }) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
           <div>
             <p className="text-white font-bold">{label} — Photo Library</p>
-            <p className="text-white/40 text-xs mt-0.5">{photos.length}/10 photos · Hosts see these as curated options</p>
+            <p className="text-white/40 text-xs mt-0.5">{photos.length} photo{photos.length !== 1 ? 's' : ''} · Hosts see these as curated options</p>
           </div>
           <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
             <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
@@ -922,7 +921,7 @@ function LibraryModal({ typeId, label, onClose }) {
         {/* Photo grid */}
         <div className="p-5">
           <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-3">Click a photo to set as default · Yellow = selected · Live badge = current default</p>
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-1">
             {photos.map(p => {
               const isSelected = selectedUrl === p.photo_url
               const isLive = liveUrl === p.photo_url
@@ -950,7 +949,7 @@ function LibraryModal({ typeId, label, onClose }) {
                 </div>
               )
             })}
-            {photos.length < 10 && (
+            {(
               <button
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading}
