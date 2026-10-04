@@ -877,10 +877,8 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                               {hasBg && <div className="absolute inset-0 pointer-events-none" style={tintStyle} />}
                               {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
                               <div className="relative z-10 h-full flex flex-col pt-8">
-                                    <div className="flex justify-center pb-1 shrink-0">
-                                          <svg width="36" height="8" viewBox="0 0 110 20" fill="white" opacity="0.85">
-                                                <text x="0" y="15" fontSize="15" fontWeight="800" fontFamily="sans-serif" letterSpacing="2">VANTGE</text>
-                                          </svg>
+                                    <div className="w-full text-center pb-1 shrink-0">
+                                          <span className="text-[7px] font-black tracking-[0.2em] uppercase text-white/85">Vantge</span>
                                     </div>
                                     <div style={{ flex: Math.min(titlePosition, 94) }} />
                                     <div className="text-center px-2">{titleBlock}</div>
@@ -907,10 +905,8 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                   {/* Same flex column as mobile, content centered in narrow column */}
                   <div className="absolute inset-0 flex flex-col items-center">
                         {/* Wordmark */}
-                        <div className="flex justify-center pt-2 pb-1 shrink-0">
-                              <svg width="44" height="9" viewBox="0 0 110 20" fill="white" opacity="0.85">
-                                    <text x="0" y="15" fontSize="15" fontWeight="800" fontFamily="sans-serif" letterSpacing="2">VANTGE</text>
-                              </svg>
+                        <div className="w-full text-center pt-2 pb-1 shrink-0">
+                              <span className="text-[7px] font-black tracking-[0.2em] uppercase text-white/85">Vantge</span>
                         </div>
                         {/* Title — same narrow column as mobile */}
                         <div className="flex-1 flex flex-col w-full items-center">
