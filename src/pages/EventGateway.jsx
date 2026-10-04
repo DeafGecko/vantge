@@ -182,7 +182,7 @@ export default function EventGateway() {
                         })()}
 
                         {/* Buttons — pinned at bottom */}
-                        <div className="w-full max-w-md mx-auto px-5 shrink-0" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
+                        <div className="w-full max-w-md mx-auto px-5 shrink-0" style={{ paddingBottom: 'max(calc(2rem + 10px), env(safe-area-inset-bottom))' }}>
                               <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-3 text-center">Scan · Snap · Share</p>
                               <div className="w-full flex flex-col gap-2.5">
 
