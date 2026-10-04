@@ -443,73 +443,73 @@ export default function HostDashboard() {
                                           <QRCodeSection eventSlug={event.event_slug} />
 
                                           {/* Guest Controls */}
-                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col gap-4">
-                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Guest Controls</p>
+                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] shadow-sm flex flex-col flex-1">
+                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-5 pt-5 pb-4">Guest Controls</p>
 
-                                                {/* Toggles */}
-                                                {[
-                                                      { label: 'Allow Downloads', sub: 'Guests can save photos', value: allowDownloads, toggle: toggleAllowDownloads },
-                                                      { label: 'Allow Sharing', sub: 'Guests can share photos', value: allowSharing, toggle: toggleAllowSharing },
-                                                      { label: 'Require Approval', sub: 'You approve each photo before it appears', value: requireApproval, toggle: toggleRequireApproval },
-                                                ].map(({ label, sub, value, toggle }) => (
-                                                      <div key={label} className="flex items-center justify-between gap-3">
-                                                            <div>
-                                                                  <p className="text-sm font-semibold text-ink">{label}</p>
-                                                                  <p className="text-[11px] text-ink-muted">{sub}</p>
+                                                {/* Section 1 — Toggles */}
+                                                <div className="px-5 pb-5 flex flex-col gap-4 border-b-2 border-[#F0EDE6]">
+                                                      {[
+                                                            { label: 'Allow Downloads', sub: 'Guests can save photos', value: allowDownloads, toggle: toggleAllowDownloads },
+                                                            { label: 'Allow Sharing', sub: 'Guests can share photos', value: allowSharing, toggle: toggleAllowSharing },
+                                                            { label: 'Require Approval', sub: 'You approve each photo before it appears', value: requireApproval, toggle: toggleRequireApproval },
+                                                      ].map(({ label, sub, value, toggle }) => (
+                                                            <div key={label} className="flex items-center justify-between gap-3">
+                                                                  <div>
+                                                                        <p className="text-sm font-semibold text-ink">{label}</p>
+                                                                        <p className="text-[11px] text-ink-muted">{sub}</p>
+                                                                  </div>
+                                                                  <button
+                                                                        onClick={toggle}
+                                                                        aria-label={label}
+                                                                        className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-ink' : 'bg-border'}`}
+                                                                  >
+                                                                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                                  </button>
                                                             </div>
-                                                            <button
-                                                                  onClick={toggle}
-                                                                  aria-label={label}
-                                                                  className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-ink' : 'bg-border'}`}
-                                                            >
-                                                                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0'}`} />
-                                                            </button>
-                                                      </div>
-                                                ))}
+                                                      ))}
+                                                </div>
 
-                                                <div className="border-t border-[#E8E4DA] pt-4 flex flex-col gap-4">
-                                                      {/* Upload limit */}
-                                                      <div>
-                                                            <p className="text-sm font-semibold text-ink mb-0.5">Upload Limit per Guest</p>
-                                                            <p className="text-[11px] text-ink-muted mb-2">Max photos a guest can submit</p>
-                                                            <div className="flex gap-2 flex-wrap">
-                                                                  {[null, 5, 10, 20, 30].map((v) => (
-                                                                        <button
-                                                                              key={v ?? 'unlimited'}
-                                                                              onClick={() => saveUploadLimit(v)}
-                                                                              className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${uploadLimit === v ? 'bg-ink text-white border-ink' : 'bg-white text-ink border-[#E8E4DA] hover:border-ink'}`}
-                                                                        >
-                                                                              {v === null ? 'Unlimited' : v}
-                                                                        </button>
-                                                                  ))}
-                                                            </div>
+                                                {/* Section 2 — Upload Limit */}
+                                                <div className="px-5 py-5 border-b-2 border-[#F0EDE6]">
+                                                      <p className="text-sm font-semibold text-ink mb-0.5">Upload Limit per Guest</p>
+                                                      <p className="text-[11px] text-ink-muted mb-3">Max photos a guest can submit</p>
+                                                      <div className="flex gap-2 flex-wrap">
+                                                            {[null, 5, 10, 20, 30].map((v) => (
+                                                                  <button
+                                                                        key={v ?? 'unlimited'}
+                                                                        onClick={() => saveUploadLimit(v)}
+                                                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${uploadLimit === v ? 'bg-ink text-white border-ink' : 'bg-white text-ink border-[#E8E4DA] hover:border-ink'}`}
+                                                                  >
+                                                                        {v === null ? 'Unlimited' : v}
+                                                                  </button>
+                                                            ))}
                                                       </div>
+                                                </div>
 
-                                                      {/* Passcode */}
-                                                      <div>
-                                                            <p className="text-sm font-semibold text-ink mb-0.5">Guest Passcode</p>
-                                                            <p className="text-[11px] text-ink-muted mb-2">Guests must enter this to access the event</p>
-                                                            <div className="flex gap-2">
-                                                                  <input
-                                                                        type="text"
-                                                                        value={passcode}
-                                                                        onChange={(e) => setLocalPasscode(e.target.value)}
-                                                                        onBlur={(e) => savePasscode(e.target.value)}
-                                                                        placeholder="No passcode"
-                                                                        maxLength={20}
-                                                                        className="flex-1 border border-[#E8E4DA] rounded-xl px-3 py-2 text-sm text-ink placeholder-[#B0AFA5] focus:outline-none focus:border-ink transition-colors"
-                                                                  />
-                                                                  {passcode ? (
-                                                                        <button
-                                                                              onClick={() => savePasscode('')}
-                                                                              className="px-3 py-2 rounded-xl border border-[#E8E4DA] text-[11px] font-bold text-[#C84A44] hover:border-[#C84A44] transition-colors"
-                                                                        >
-                                                                              Clear
-                                                                        </button>
-                                                                  ) : null}
-                                                            </div>
-                                                            {savingPasscode && <p className="text-[10px] text-ink-muted mt-1 animate-pulse">Saving…</p>}
+                                                {/* Section 3 — Passcode */}
+                                                <div className="px-5 py-5 flex-1">
+                                                      <p className="text-sm font-semibold text-ink mb-0.5">Guest Passcode</p>
+                                                      <p className="text-[11px] text-ink-muted mb-3">Guests must enter this to access the event</p>
+                                                      <div className="flex gap-2">
+                                                            <input
+                                                                  type="text"
+                                                                  value={passcode}
+                                                                  onChange={(e) => setLocalPasscode(e.target.value)}
+                                                                  onBlur={(e) => savePasscode(e.target.value)}
+                                                                  placeholder="No passcode"
+                                                                  maxLength={20}
+                                                                  className="flex-1 border border-[#E8E4DA] rounded-xl px-3 py-2 text-sm text-ink placeholder-[#B0AFA5] focus:outline-none focus:border-ink transition-colors"
+                                                            />
+                                                            {passcode ? (
+                                                                  <button
+                                                                        onClick={() => savePasscode('')}
+                                                                        className="px-3 py-2 rounded-xl border border-[#E8E4DA] text-[11px] font-bold text-[#C84A44] hover:border-[#C84A44] transition-colors"
+                                                                  >
+                                                                        Clear
+                                                                  </button>
+                                                            ) : null}
                                                       </div>
+                                                      {savingPasscode && <p className="text-[10px] text-ink-muted mt-1 animate-pulse">Saving…</p>}
                                                 </div>
                                           </div>
                                     </div>
@@ -597,7 +597,7 @@ export default function HostDashboard() {
                                                                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
                                                                         <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
                                                                   </div>
-                                                                  <span className="text-[9px] font-bold text-[#5A5A52]">{currentTitlePosition === 0 ? 'Top' : currentTitlePosition === 100 ? 'Bottom' : currentTitlePosition === 50 ? 'Center' : `${currentTitlePosition}%`}</span>
+                                                                  <span className="text-[9px] font-bold text-ink-soft">{currentTitlePosition === 0 ? 'Top' : currentTitlePosition === 100 ? 'Bottom' : currentTitlePosition === 50 ? 'Center' : `${currentTitlePosition}%`}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                   <span className="text-[8px] text-[#B0AFA5]">Top</span>
@@ -609,7 +609,7 @@ export default function HostDashboard() {
                                                                               setLocalTitlePosition(val)
                                                                               await updateEventSettings({ title_position: val })
                                                                         }}
-                                                                        className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
+                                                                        className="flex-1 accent-ink h-1.5 rounded-full cursor-pointer"
                                                                   />
                                                                   <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
                                                             </div>
@@ -633,7 +633,7 @@ export default function HostDashboard() {
                                                                               setLocalTitlePositionDesktop(val)
                                                                               await updateEventSettings({ title_position_desktop: val })
                                                                         }}
-                                                                        className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
+                                                                        className="flex-1 accent-ink h-1.5 rounded-full cursor-pointer"
                                                                   />
                                                                   <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
                                                             </div>
