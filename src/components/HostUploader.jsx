@@ -200,8 +200,8 @@ export default function HostUploader({ eventId }) {
 
       return (
             <>
-                  <div className="bg-white rounded-2xl border border-[#E0D8C6] p-4 shadow-sm">
-                        <div className="flex items-center justify-between mb-3">
+                  <div className="bg-white rounded-2xl border border-[#E0D8C6] shadow-sm overflow-hidden">
+                        <div className="flex items-center justify-between p-4 mb-0">
                               <div>
                                     <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest mb-0.5">Pre-load Gallery</p>
                                     <p className="text-[11px] text-[#88887E]">Photos go straight to Live Gallery</p>
@@ -214,11 +214,11 @@ export default function HostUploader({ eventId }) {
                               </button>
                         </div>
 
-                        {/* Thumbnails — flush left, horizontal scroll */}
+                        {/* Thumbnails — full width edge to edge, horizontal scroll */}
                         {preloaded.length > 0 && (
-                              <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                              <div className="flex gap-0 overflow-x-auto border-t border-[#E8E4DA]" style={{ scrollbarWidth: 'none' }}>
                                     {preloaded.map((item) => (
-                                          <div key={item.id} className="shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-[#E8E4DC] relative">
+                                          <div key={item.id} className="shrink-0 w-16 h-16 overflow-hidden bg-[#E8E4DC] relative">
                                                 {item.is_video ? (
                                                       <>
                                                             <img
