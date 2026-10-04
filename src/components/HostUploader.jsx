@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { uploadPhoto } from '../lib/uploadPhoto'
+import { supabase } from '../lib/supabase'
 
 const VIDEO_LIMIT_SECONDS = 30
 
@@ -170,22 +171,76 @@ function UploadModal({ eventId, onClose }) {
 
 export default function HostUploader({ eventId }) {
       const [open, setOpen] = useState(false)
+      const [preloaded, setPreloaded] = useState([])
+
+      useEffect(() => {
+            if (!eventId) return
+            supabase
+                  .from('media_queue')
+                  .select('id, original_url, thumbnail_url, is_video')
+                  .eq('event_id', eventId)
+                  .eq('is_admin_upload', true)
+                  .eq('status', 1)
+                  .order('created_at', { ascending: false })
+                  .then(({ data }) => setPreloaded(data || []))
+      }, [eventId])
+
+      function handleClose() {
+            setOpen(false)
+            // Refresh thumbnails after upload
+            supabase
+                  .from('media_queue')
+                  .select('id, original_url, thumbnail_url, is_video')
+                  .eq('event_id', eventId)
+                  .eq('is_admin_upload', true)
+                  .eq('status', 1)
+                  .order('created_at', { ascending: false })
+                  .then(({ data }) => setPreloaded(data || []))
+      }
 
       return (
             <>
-                  <div className="bg-white rounded-2xl border border-[#E0D8C6] p-5 flex items-center justify-between">
-                        <div>
-                              <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest mb-0.5">Pre-load Gallery</p>
-                              <p className="text-[11px] text-[#88887E]">Upload photos or videos directly to the Live Gallery</p>
+                  <div className="bg-white rounded-2xl border border-[#E0D8C6] p-4 shadow-sm">
+                        <div className="flex items-center justify-between mb-3">
+                              <div>
+                                    <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest mb-0.5">Pre-load Gallery</p>
+                                    <p className="text-[11px] text-[#88887E]">Photos go straight to Live Gallery</p>
+                              </div>
+                              <button
+                                    onClick={() => setOpen(true)}
+                                    className="shrink-0 ml-4 bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-2.5 hover:bg-black transition-all"
+                              >
+                                    Add Photos
+                              </button>
                         </div>
-                        <button
-                              onClick={() => setOpen(true)}
-                              className="shrink-0 ml-4 bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-2.5 hover:bg-black transition-all"
-                        >
-                              Add Photos
-                        </button>
+
+                        {/* Thumbnails — flush left, horizontal scroll */}
+                        {preloaded.length > 0 && (
+                              <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                                    {preloaded.map((item) => (
+                                          <div key={item.id} className="shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-[#E8E4DC] relative">
+                                                {item.is_video ? (
+                                                      <>
+                                                            <img
+                                                                  src={item.thumbnail_url || item.original_url}
+                                                                  alt=""
+                                                                  className="w-full h-full object-cover"
+                                                            />
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                  <div className="w-5 h-5 rounded-full bg-black/50 flex items-center justify-center">
+                                                                        <svg width="7" height="7" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                  </div>
+                                                            </div>
+                                                      </>
+                                                ) : (
+                                                      <img src={item.original_url} alt="" className="w-full h-full object-cover" />
+                                                )}
+                                          </div>
+                                    ))}
+                              </div>
+                        )}
                   </div>
-                  {open && <UploadModal eventId={eventId} onClose={() => setOpen(false)} />}
+                  {open && <UploadModal eventId={eventId} onClose={handleClose} />}
             </>
       )
 }
