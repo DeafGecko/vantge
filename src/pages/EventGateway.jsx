@@ -1,5 +1,5 @@
 // src/pages/EventGateway.jsx
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useEvent } from '../hooks/useEvent'
 import { getTheme } from '../lib/themes'
@@ -16,6 +16,9 @@ export default function EventGateway() {
       const { event, loading: eventLoading } = useEvent(eventSlug)
       const cameraInputRef = useRef(null)
       const _bgResponsive = useResponsiveBg(event?.background_image, event?.background_image_desktop)
+      const [passcodeInput, setPasscodeInput] = useState('')
+      const [passcodeError, setPasscodeError] = useState(false)
+      const [passcodeUnlocked, setPasscodeUnlocked] = useState(false)
 
       function handleCameraCapture(e) {
             const file = e.target.files?.[0]
@@ -53,6 +56,50 @@ export default function EventGateway() {
       const bgPosition = event.background_position || '50% 50%'
       const accentColor = c.accent
       const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
+
+      // Passcode gate
+      const requiredPasscode = event.guest_passcode?.trim()
+      if (requiredPasscode && !passcodeUnlocked) {
+            return (
+                  <>
+                        <FontLoader fontId={event.font_family} />
+                        <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                        <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }} />
+                        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6">
+                              <a href="/"><VantgeLogo size="sm" monoWhite /></a>
+                              <div className="mt-8 w-full max-w-xs flex flex-col items-center gap-4">
+                                    <h2 className="text-white font-extrabold text-2xl text-center" style={{ fontFamily: selectedFontFamily }}>{event.event_name}</h2>
+                                    <p className="text-white/50 text-sm text-center">Enter the event passcode to continue</p>
+                                    <input
+                                          type="text"
+                                          value={passcodeInput}
+                                          onChange={(e) => { setPasscodeInput(e.target.value); setPasscodeError(false) }}
+                                          onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                      if (passcodeInput.trim().toLowerCase() === requiredPasscode.toLowerCase()) setPasscodeUnlocked(true)
+                                                      else setPasscodeError(true)
+                                                }
+                                          }}
+                                          placeholder="Passcode"
+                                          className={`w-full text-center rounded-2xl px-4 py-3.5 text-sm font-bold bg-white/10 border text-white placeholder-white/30 focus:outline-none transition-colors ${passcodeError ? 'border-red-400' : 'border-white/20 focus:border-white/60'}`}
+                                    />
+                                    {passcodeError && <p className="text-red-400 text-xs font-bold">Incorrect passcode. Try again.</p>}
+                                    <button
+                                          onClick={() => {
+                                                if (passcodeInput.trim().toLowerCase() === requiredPasscode.toLowerCase()) setPasscodeUnlocked(true)
+                                                else setPasscodeError(true)
+                                          }}
+                                          className="w-full rounded-2xl px-4 py-3.5 text-sm font-bold text-white transition-all active:scale-[0.98]"
+                                          style={{ backgroundColor: accentColor }}
+                                    >
+                                          Continue
+                                    </button>
+                              </div>
+                        </div>
+                  </>
+            )
+      }
 
       if (!event.gallery_unlocked) return (
             <>

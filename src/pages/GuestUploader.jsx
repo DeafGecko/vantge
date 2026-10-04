@@ -81,6 +81,12 @@ export default function GuestUploader() {
       async function handleUpload() {
             if (!event || !files.length) return
 
+            // Enforce guest upload limit
+            if (event.guest_upload_limit != null && files.length > event.guest_upload_limit) {
+                  setFileError(`This event allows a maximum of ${event.guest_upload_limit} photo${event.guest_upload_limit === 1 ? '' : 's'} per guest.`)
+                  return
+            }
+
             setUploadState('uploading')
             setCurrentIndex(0)
             setSuccessCount(0)
@@ -88,6 +94,9 @@ export default function GuestUploader() {
 
             let succeeded = 0
             const failures = []
+
+            // Auto-approve if host has not enabled require_approval
+            const uploadStatus = event.require_approval ? 0 : 1
 
             for (let i = 0; i < files.length; i++) {
                   setCurrentIndex(i)
@@ -100,6 +109,7 @@ export default function GuestUploader() {
                         guestName,
                         caption,
                         is_video: isVideo,
+                        status: uploadStatus,
                   })
 
                   if (result.success) {

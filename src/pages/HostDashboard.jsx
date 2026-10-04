@@ -60,12 +60,19 @@ export default function HostDashboard() {
       const [localLogoUrl, setLocalLogoUrl] = useState(undefined)
       const [localAllowDownloads, setLocalAllowDownloads] = useState(null)
       const [localAllowSharing, setLocalAllowSharing] = useState(null)
+      const [localRequireApproval, setLocalRequireApproval] = useState(null)
+      const [localUploadLimit, setLocalUploadLimit] = useState(undefined)
+      const [localPasscode, setLocalPasscode] = useState(undefined)
+      const [savingPasscode, setSavingPasscode] = useState(false)
       const [previewUnlocked, setPreviewUnlocked] = useState(true)
       const [previewDevice, setPreviewDevice] = useState('mobile')
       const photoSectionRef = useRef(null)
 
       const allowDownloads = localAllowDownloads !== null ? localAllowDownloads : (event?.allow_downloads ?? true)
       const allowSharing = localAllowSharing !== null ? localAllowSharing : (event?.allow_sharing ?? true)
+      const requireApproval = localRequireApproval !== null ? localRequireApproval : (event?.require_approval ?? false)
+      const uploadLimit = localUploadLimit !== undefined ? localUploadLimit : (event?.guest_upload_limit ?? null)
+      const passcode = localPasscode !== undefined ? localPasscode : (event?.guest_passcode ?? '')
 
       async function toggleAllowDownloads() {
             const newVal = !allowDownloads
@@ -76,6 +83,24 @@ export default function HostDashboard() {
             const newVal = !allowSharing
             setLocalAllowSharing(newVal)
             await updateEventSettings({ allow_sharing: newVal })
+      }
+      async function toggleRequireApproval() {
+            const newVal = !requireApproval
+            setLocalRequireApproval(newVal)
+            await updateEventSettings({ require_approval: newVal })
+      }
+      async function saveUploadLimit(val) {
+            const parsed = val === '' || val === null ? null : parseInt(val, 10)
+            const clean = isNaN(parsed) ? null : parsed
+            setLocalUploadLimit(clean)
+            await updateEventSettings({ guest_upload_limit: clean })
+      }
+      async function savePasscode(val) {
+            setSavingPasscode(true)
+            const clean = val.trim() || null
+            setLocalPasscode(val)
+            await updateEventSettings({ guest_passcode: clean })
+            setSavingPasscode(false)
       }
 
       const isUnlocked = localUnlocked !== null ? localUnlocked : event?.gallery_unlocked
@@ -417,12 +442,15 @@ export default function HostDashboard() {
                                           {/* QR code */}
                                           <QRCodeSection eventSlug={event.event_slug} />
 
-                                          {/* Guest Sharing controls */}
-                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col gap-3 flex-1">
-                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Guest Sharing</p>
+                                          {/* Guest Controls */}
+                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col gap-4">
+                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Guest Controls</p>
+
+                                                {/* Toggles */}
                                                 {[
                                                       { label: 'Allow Downloads', sub: 'Guests can save photos', value: allowDownloads, toggle: toggleAllowDownloads },
                                                       { label: 'Allow Sharing', sub: 'Guests can share photos', value: allowSharing, toggle: toggleAllowSharing },
+                                                      { label: 'Require Approval', sub: 'You approve each photo before it appears', value: requireApproval, toggle: toggleRequireApproval },
                                                 ].map(({ label, sub, value, toggle }) => (
                                                       <div key={label} className="flex items-center justify-between gap-3">
                                                             <div>
@@ -438,6 +466,51 @@ export default function HostDashboard() {
                                                             </button>
                                                       </div>
                                                 ))}
+
+                                                <div className="border-t border-[#E8E4DA] pt-4 flex flex-col gap-4">
+                                                      {/* Upload limit */}
+                                                      <div>
+                                                            <p className="text-sm font-semibold text-ink mb-0.5">Upload Limit per Guest</p>
+                                                            <p className="text-[11px] text-ink-muted mb-2">Max photos a guest can submit</p>
+                                                            <div className="flex gap-2 flex-wrap">
+                                                                  {[null, 5, 10, 20, 30].map((v) => (
+                                                                        <button
+                                                                              key={v ?? 'unlimited'}
+                                                                              onClick={() => saveUploadLimit(v)}
+                                                                              className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${uploadLimit === v ? 'bg-ink text-white border-ink' : 'bg-white text-ink border-[#E8E4DA] hover:border-ink'}`}
+                                                                        >
+                                                                              {v === null ? 'Unlimited' : v}
+                                                                        </button>
+                                                                  ))}
+                                                            </div>
+                                                      </div>
+
+                                                      {/* Passcode */}
+                                                      <div>
+                                                            <p className="text-sm font-semibold text-ink mb-0.5">Guest Passcode</p>
+                                                            <p className="text-[11px] text-ink-muted mb-2">Guests must enter this to access the event</p>
+                                                            <div className="flex gap-2">
+                                                                  <input
+                                                                        type="text"
+                                                                        value={passcode}
+                                                                        onChange={(e) => setLocalPasscode(e.target.value)}
+                                                                        onBlur={(e) => savePasscode(e.target.value)}
+                                                                        placeholder="No passcode"
+                                                                        maxLength={20}
+                                                                        className="flex-1 border border-[#E8E4DA] rounded-xl px-3 py-2 text-sm text-ink placeholder-[#B0AFA5] focus:outline-none focus:border-ink transition-colors"
+                                                                  />
+                                                                  {passcode ? (
+                                                                        <button
+                                                                              onClick={() => savePasscode('')}
+                                                                              className="px-3 py-2 rounded-xl border border-[#E8E4DA] text-[11px] font-bold text-[#C84A44] hover:border-[#C84A44] transition-colors"
+                                                                        >
+                                                                              Clear
+                                                                        </button>
+                                                                  ) : null}
+                                                            </div>
+                                                            {savingPasscode && <p className="text-[10px] text-ink-muted mt-1 animate-pulse">Saving…</p>}
+                                                      </div>
+                                                </div>
                                           </div>
                                     </div>
 
