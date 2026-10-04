@@ -359,7 +359,7 @@ export default function HostDashboard() {
                                                 {previewDevice === 'mobile' ? (
                                                       <ThemePreview theme={currentTheme} eventName={currentEventName} font={currentFont} bgImage={currentBgImage || currentDefaultBg} bgPosition={currentBgPosition} bgTint={currentBgTint} eventType={currentEventType} logoUrl={currentLogoUrl} isUnlocked={previewUnlocked} titlePosition={currentTitlePosition} />
                                                 ) : (
-                                                      <div className="w-full rounded-xl overflow-hidden border-4 border-[#1A1A18] shadow-2xl" style={{ aspectRatio: '16/9' }}>
+                                                      <div className="rounded-xl overflow-hidden border-4 border-[#1A1A18] shadow-2xl mx-auto" style={{ height: 336, width: Math.round(336 * 16 / 9) }}>
                                                             <div className="w-full h-full relative" style={currentBgImage || currentDefaultBg ? { backgroundImage: `url(${currentBgImage || currentDefaultBg})`, backgroundSize: 'cover', backgroundPosition: currentBgPosition || '50% 50%' } : { backgroundColor: currentTheme.colors.bg }}>
                                                                   <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${((currentBgTint ?? 55) / 100).toFixed(2)})` }} />
                                                                   <div className="relative z-10 h-full flex flex-col">
