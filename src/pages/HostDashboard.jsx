@@ -796,7 +796,7 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                         {/* Title — same narrow column as mobile */}
                         <div className="flex-1 flex flex-col w-full items-center">
                               <div style={{ flex: Math.min(titlePosition, 94) }} />
-                              <div className="text-center px-4" style={{ maxWidth: 190 }}>
+                              <div className="text-center px-4" style={{ maxWidth: 150 }}>
                                     {logoUrl && (
                                           <img src={logoUrl} alt="Logo" className="mx-auto mb-1 object-contain" style={{ maxHeight: 18, maxWidth: 56, filter: 'brightness(0) invert(1)' }} />
                                     )}
@@ -810,7 +810,7 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                               <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
                         </div>
                         {/* Buttons — same narrow column as mobile */}
-                        <div className="shrink-0 pb-2 w-full" style={{ maxWidth: 190, paddingLeft: 8, paddingRight: 8 }}>
+                        <div className="shrink-0 pb-2 w-full" style={{ maxWidth: 150, paddingLeft: 8, paddingRight: 8 }}>
                               {isUnlocked ? (
                                     <>
                                           <div className="rounded-xl px-2 py-1.5 text-white flex items-center gap-1.5 mb-1" style={{ backgroundColor: c.accent }}>
