@@ -169,8 +169,127 @@ function UploadModal({ eventId, onClose }) {
       )
 }
 
+function DeleteModal({ items, onClose, onDeleted, initialId }) {
+      const [selected, setSelected] = useState(new Set(initialId ? [initialId] : []))
+      const [deleting, setDeleting] = useState(false)
+
+      function toggle(id) {
+            setSelected(prev => {
+                  const next = new Set(prev)
+                  next.has(id) ? next.delete(id) : next.add(id)
+                  return next
+            })
+      }
+
+      function selectAll() {
+            setSelected(new Set(items.map(i => i.id)))
+      }
+
+      function clearAll() {
+            setSelected(new Set())
+      }
+
+      async function handleDelete() {
+            if (!selected.size) return
+            setDeleting(true)
+            const ids = Array.from(selected)
+            const { error } = await supabase.from('media_queue').delete().in('id', ids)
+            setDeleting(false)
+            if (!error) {
+                  onDeleted(ids)
+                  onClose()
+            }
+      }
+
+      const allSelected = selected.size === items.length
+
+      return (
+            <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={onClose}>
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                  <div
+                        className="relative w-full max-w-md bg-[#F8F5ED] rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl"
+                        style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+                        onClick={e => e.stopPropagation()}
+                  >
+                        <div className="w-10 h-1 bg-[#D4CFBC] rounded-full mx-auto mb-5 sm:hidden" />
+
+                        <div className="flex items-center justify-between mb-1">
+                              <h2 className="text-lg font-black text-[#1A1A18]">Manage Photos</h2>
+                              <button onClick={onClose} className="text-[#B0AFA5] hover:text-[#1A1A18] transition-colors">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+                              </button>
+                        </div>
+                        <p className="text-sm text-[#6B6B63] mb-4">Tap photos to select, then delete selected.</p>
+
+                        <div className="flex items-center justify-between mb-3">
+                              <p className="text-xs font-bold text-[#88887E] uppercase tracking-widest">
+                                    {selected.size > 0 ? `${selected.size} selected` : `${items.length} photo${items.length !== 1 ? 's' : ''}`}
+                              </p>
+                              <button
+                                    onClick={allSelected ? clearAll : selectAll}
+                                    className="text-xs font-bold text-[#B29746]"
+                              >
+                                    {allSelected ? 'Deselect All' : 'Select All'}
+                              </button>
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto pb-1">
+                              {items.map(item => {
+                                    const isSelected = selected.has(item.id)
+                                    return (
+                                          <button
+                                                key={item.id}
+                                                onClick={() => toggle(item.id)}
+                                                className="relative aspect-square rounded-xl overflow-hidden bg-[#E8E4DC] focus:outline-none"
+                                                style={{ border: isSelected ? '2.5px solid #1A1A18' : '2.5px solid transparent' }}
+                                          >
+                                                {item.is_video ? (
+                                                      <>
+                                                            <img src={item.thumbnail_url || item.original_url} alt="" className="w-full h-full object-cover" />
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                        <svg width="7" height="7" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                  </div>
+                                                            </div>
+                                                      </>
+                                                ) : (
+                                                      <img src={item.original_url} alt="" className="w-full h-full object-cover" />
+                                                )}
+                                                {isSelected && (
+                                                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                            <div className="w-6 h-6 rounded-full bg-ink flex items-center justify-center">
+                                                                  <svg width="12" height="12" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                            </div>
+                                                      </div>
+                                                )}
+                                          </button>
+                                    )
+                              })}
+                        </div>
+
+                        <div className="flex gap-2 mt-5">
+                              <button
+                                    onClick={handleDelete}
+                                    disabled={!selected.size || deleting}
+                                    className="flex-1 bg-red-600 text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3.5 disabled:opacity-40 hover:bg-red-700 transition-all"
+                              >
+                                    {deleting ? 'Deleting…' : `Delete${selected.size > 0 ? ` ${selected.size}` : ''}`}
+                              </button>
+                              <button
+                                    onClick={onClose}
+                                    className="px-4 border border-border text-ink-muted text-[11px] font-bold uppercase tracking-widest rounded-full hover:border-ink-muted transition-all"
+                              >
+                                    Cancel
+                              </button>
+                        </div>
+                  </div>
+            </div>
+      )
+}
+
 export default function HostUploader({ eventId }) {
       const [open, setOpen] = useState(false)
+      const [deleteInitialId, setDeleteInitialId] = useState(null)
       const [preloaded, setPreloaded] = useState([])
 
       useEffect(() => {
@@ -185,9 +304,7 @@ export default function HostUploader({ eventId }) {
                   .then(({ data }) => setPreloaded(data || []))
       }, [eventId])
 
-      function handleClose() {
-            setOpen(false)
-            // Refresh thumbnails after upload
+      function refreshPreloaded() {
             supabase
                   .from('media_queue')
                   .select('id, original_url, thumbnail_url, is_video')
@@ -198,12 +315,21 @@ export default function HostUploader({ eventId }) {
                   .then(({ data }) => setPreloaded(data || []))
       }
 
+      function handleClose() {
+            setOpen(false)
+            refreshPreloaded()
+      }
+
+      function handleDeleted(ids) {
+            setPreloaded(prev => prev.filter(i => !ids.includes(i.id)))
+      }
+
       return (
             <>
                   <div className="bg-white rounded-2xl border border-[#E0D8C6] shadow-sm overflow-hidden">
                         <div className="flex items-center justify-between p-4 mb-0">
                               <div>
-                                    <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest mb-0.5">Pre-load Gallery</p>
+                                    <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-0.5">Pre-load Gallery</p>
                                     <p className="text-[11px] text-[#88887E]">Photos go straight to Live Gallery</p>
                               </div>
                               <button
@@ -216,10 +342,17 @@ export default function HostUploader({ eventId }) {
 
                         {/* Thumbnails — fills full width, horizontal scroll when overflow */}
                         {preloaded.length > 0 && (
-                              <div className="border-t border-[#E8E4DA] overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                              <div
+                                    className="border-t border-[#E8E4DA] overflow-x-auto"
+                                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                              >
                                     <div style={{ display: 'flex', height: '80px', width: '100%', minWidth: preloaded.length > 5 ? `${preloaded.length * 80}px` : '100%' }}>
                                     {preloaded.map((item) => (
-                                          <div key={item.id} style={{ flex: preloaded.length <= 5 ? '1 1 0' : '0 0 80px', overflow: 'hidden', position: 'relative', backgroundColor: '#E8E4DC' }}>
+                                          <button
+                                                key={item.id}
+                                                onClick={() => setDeleteInitialId(item.id)}
+                                                style={{ flex: preloaded.length <= 5 ? '1 1 0' : '0 0 80px', overflow: 'hidden', position: 'relative', backgroundColor: '#E8E4DC', border: 'none', padding: 0, cursor: 'pointer' }}
+                                          >
                                                 {item.is_video ? (
                                                       <>
                                                             <img
@@ -236,13 +369,21 @@ export default function HostUploader({ eventId }) {
                                                 ) : (
                                                       <img src={item.original_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                                                 )}
-                                          </div>
+                                          </button>
                                     ))}
                                     </div>
                               </div>
                         )}
                   </div>
                   {open && <UploadModal eventId={eventId} onClose={handleClose} />}
+                  {deleteInitialId !== null && preloaded.length > 0 && (
+                        <DeleteModal
+                              items={preloaded}
+                              onClose={() => setDeleteInitialId(null)}
+                              onDeleted={handleDeleted}
+                              initialId={deleteInitialId}
+                        />
+                  )}
             </>
       )
 }

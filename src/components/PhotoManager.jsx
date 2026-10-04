@@ -9,6 +9,9 @@ export default function PhotoManager({ eventId, status }) {
       const [toast, setToast] = useState(null)
       const [confirmDelete, setConfirmDelete] = useState(null)
       const [modalPhoto, setModalPhoto] = useState(null)
+      const [selectMode, setSelectMode] = useState(false)
+      const [selected, setSelected] = useState(new Set())
+      const [bulkDeleting, setBulkDeleting] = useState(false)
 
       useEffect(() => {
             if (!eventId) return
@@ -104,6 +107,36 @@ export default function PhotoManager({ eventId, status }) {
             if (error) { alert(`Delete failed: ${error.message}`); window.location.reload() }
       }
 
+      function toggleSelect(id) {
+            setSelected(prev => {
+                  const next = new Set(prev)
+                  next.has(id) ? next.delete(id) : next.add(id)
+                  return next
+            })
+      }
+
+      function exitSelectMode() {
+            setSelectMode(false)
+            setSelected(new Set())
+      }
+
+      async function handleBulkDelete() {
+            if (!selected.size) return
+            setBulkDeleting(true)
+            const ids = Array.from(selected)
+            const targets = photos.filter(p => ids.includes(p.id))
+            setPhotos(prev => prev.filter(p => !ids.includes(p.id)))
+            exitSelectMode()
+            for (const photo of targets) {
+                  if (photo.storage_path && !photo.storage_path.startsWith('fake/')) {
+                        await supabase.storage.from('event-media').remove([photo.storage_path])
+                  }
+            }
+            const { error } = await supabase.from('media_queue').delete().in('id', ids)
+            if (error) { alert(`Delete failed: ${error.message}`); window.location.reload() }
+            setBulkDeleting(false)
+      }
+
       if (loading) return <div className="text-center py-12"><p className="text-sm text-[#5A5A52]">Loading photos...</p></div>
 
       if (error) return <div className="bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B] text-sm rounded-lg px-4 py-3">Error: {error}</div>
@@ -129,21 +162,70 @@ export default function PhotoManager({ eventId, status }) {
 
       return (
             <div>
-                  <div className="flex items-baseline justify-between mb-3">
+                  <div className="flex items-center justify-between mb-3">
                         <h2 className="text-sm font-extrabold text-[#1A1A18]">
                               {status === 0 ? 'Pending approval' : status === 1 ? 'Live gallery' : 'Trash'}
                         </h2>
-                        <span className="text-xs text-[#C84A44] font-semibold tracking-wide uppercase">
-                              {photos.length} {photos.length === 1 ? 'item' : 'items'}
-                        </span>
+                        <div className="flex items-center gap-3">
+                              {selectMode && (
+                                    <span className="text-xs text-[#88887E]">
+                                          {selected.size} selected
+                                    </span>
+                              )}
+                              <span className="text-xs text-[#C84A44] font-semibold tracking-wide uppercase">
+                                    {photos.length} {photos.length === 1 ? 'item' : 'items'}
+                              </span>
+                              {selectMode ? (
+                                    <button
+                                          onClick={exitSelectMode}
+                                          className="text-xs font-bold text-[#88887E] hover:text-[#1A1A18] transition-colors"
+                                    >
+                                          Cancel
+                                    </button>
+                              ) : (
+                                    <button
+                                          onClick={() => setSelectMode(true)}
+                                          className="text-xs font-bold text-[#1A1A18] border border-[#E0D8C6] rounded-full px-3 py-1 hover:bg-[#F4F3F0] transition-colors"
+                                    >
+                                          Select
+                                    </button>
+                              )}
+                        </div>
                   </div>
 
-                  {/* Compact grid — click to expand */}
+                  {/* Compact grid — click to expand or select */}
                   <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1.5">
                         {photos.map((photo) => (
-                              <MiniCard key={photo.id} photo={photo} onClick={() => setModalPhoto(photo)} />
+                              <MiniCard
+                                    key={photo.id}
+                                    photo={photo}
+                                    selectMode={selectMode}
+                                    selected={selected.has(photo.id)}
+                                    onClick={() => selectMode ? toggleSelect(photo.id) : setModalPhoto(photo)}
+                              />
                         ))}
                   </div>
+
+                  {/* Bulk action bar */}
+                  {selectMode && selected.size > 0 && (
+                        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-[#1A1A18] text-white rounded-full pl-5 pr-2 py-2 shadow-2xl">
+                              <span className="text-sm font-medium whitespace-nowrap">{selected.size} selected</span>
+                              <button
+                                    onClick={handleBulkDelete}
+                                    disabled={bulkDeleting}
+                                    className="bg-[#C84A44] hover:bg-red-700 text-white text-sm font-bold rounded-full px-4 py-1.5 transition-colors disabled:opacity-50"
+                              >
+                                    {bulkDeleting ? 'Deleting…' : 'Delete'}
+                              </button>
+                              <button
+                                    onClick={() => setSelected(new Set(photos.map(p => p.id)))}
+                                    className="text-white/60 hover:text-white text-sm font-bold px-2 py-1.5 transition-colors"
+                              >
+                                    All
+                              </button>
+                              <button onClick={exitSelectMode} className="text-white/40 hover:text-white w-8 h-8 flex items-center justify-center text-lg" aria-label="Cancel">×</button>
+                        </div>
+                  )}
 
                   <Toast toast={toast} onUndo={handleUndo} onDismiss={() => setToast(null)} />
 
@@ -177,12 +259,13 @@ function looksLikeVideo(url) {
 }
 
 // ─── MINI THUMBNAIL CARD ──────────────────────────────────────────────────────
-function MiniCard({ photo, onClick }) {
+function MiniCard({ photo, onClick, selectMode, selected }) {
       const isVideo = photo.is_video || looksLikeVideo(photo.original_url)
       return (
             <button onClick={onClick}
-                  className="relative aspect-square rounded-xl overflow-hidden bg-[#F4F3F0] group focus:outline-none focus:ring-2 focus:ring-[#1A1A18]"
-                  aria-label={`View ${isVideo ? 'video' : 'photo'} by ${photo.guest_name || 'Anonymous'}`}>
+                  className="relative aspect-square rounded-xl overflow-hidden bg-[#F4F3F0] group focus:outline-none"
+                  style={{ outline: selected ? '2.5px solid #1A1A18' : 'none', outlineOffset: '-2px' }}
+                  aria-label={`${selectMode ? 'Select' : 'View'} ${isVideo ? 'video' : 'photo'} by ${photo.guest_name || 'Anonymous'}`}>
                   {isVideo ? (
                         photo.thumbnail_url
                               ? <img src={photo.thumbnail_url} alt="" className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" loading="lazy" />
@@ -191,17 +274,27 @@ function MiniCard({ photo, onClick }) {
                         <img src={getThumbnailUrl(photo.original_url)} alt=""
                               className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" loading="lazy" />
                   )}
-                  {isVideo && (
+                  {isVideo && !selectMode && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                               <div className="w-6 h-6 rounded-full bg-black/55 flex items-center justify-center">
                                     <svg width="8" height="8" fill="white" viewBox="0 0 24 24" style={{ marginLeft: 1 }}><path d="M8 5v14l11-7z"/></svg>
                               </div>
                         </div>
                   )}
-                  {/* Hover zoom hint */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                        <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" strokeLinecap="round"/><path d="M11 8v6M8 11h6" strokeLinecap="round"/></svg>
-                  </div>
+                  {/* Select mode overlay */}
+                  {selectMode && (
+                        <div className={`absolute inset-0 transition-colors ${selected ? 'bg-black/30' : 'bg-black/0 group-hover:bg-black/10'}`}>
+                              <div className={`absolute top-1.5 right-1.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selected ? 'bg-[#1A1A18] border-[#1A1A18]' : 'bg-white/70 border-white'}`}>
+                                    {selected && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                              </div>
+                        </div>
+                  )}
+                  {/* Hover zoom hint — only when not selecting */}
+                  {!selectMode && (
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                              <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" strokeLinecap="round"/><path d="M11 8v6M8 11h6" strokeLinecap="round"/></svg>
+                        </div>
+                  )}
             </button>
       )
 }
