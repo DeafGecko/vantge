@@ -621,7 +621,7 @@ export default function HostDashboard() {
                                                                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
                                                                         <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
                                                                   </div>
-                                                                  <span className="text-[9px] font-bold text-[#5A5A52]">{currentTitlePositionDesktop === 0 ? 'Top' : currentTitlePositionDesktop === 100 ? 'Bottom' : currentTitlePositionDesktop === 50 ? 'Center' : `${currentTitlePositionDesktop}%`}</span>
+                                                                  <span className="text-[9px] font-bold text-ink-soft">{currentTitlePositionDesktop === 0 ? 'Top' : currentTitlePositionDesktop === 100 ? 'Bottom' : currentTitlePositionDesktop === 50 ? 'Center' : `${currentTitlePositionDesktop}%`}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                   <span className="text-[8px] text-[#B0AFA5]">Top</span>
@@ -877,6 +877,11 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                               {hasBg && <div className="absolute inset-0 pointer-events-none" style={tintStyle} />}
                               {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
                               <div className="relative z-10 h-full flex flex-col pt-8">
+                                    <div className="flex justify-center pb-1 shrink-0">
+                                          <svg width="36" height="8" viewBox="0 0 110 20" fill="white" opacity="0.85">
+                                                <text x="0" y="15" fontSize="15" fontWeight="800" fontFamily="sans-serif" letterSpacing="2">VANTGE</text>
+                                          </svg>
+                                    </div>
                                     <div style={{ flex: Math.min(titlePosition, 94) }} />
                                     <div className="text-center px-2">{titleBlock}</div>
                                     <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
