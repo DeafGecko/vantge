@@ -780,43 +780,39 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
             )
       }
 
-      // Desktop — matches actual EventGateway layout exactly
+      // Desktop — same layout as mobile, just 16:9 background
       return (
             <div className="absolute inset-0 overflow-hidden" style={bgStyle}>
-                  {/* Tint */}
                   <div className="absolute inset-0" style={tintStyle} />
-                  {/* Bottom gradient so buttons always pop */}
-                  <div className="absolute inset-x-0 bottom-0" style={{ height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
-                  {/* Content */}
-                  <div className="absolute inset-0 flex flex-col">
-                        {/* Vantge wordmark top center */}
+                  <div className="absolute inset-x-0 bottom-0" style={{ height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)' }} />
+                  {/* Same flex column as mobile, content centered in narrow column */}
+                  <div className="absolute inset-0 flex flex-col items-center">
+                        {/* Wordmark */}
                         <div className="flex justify-center pt-2 pb-1 shrink-0">
-                              <svg width="48" height="10" viewBox="0 0 120 24" fill="white" opacity="0.9">
-                                    <text x="0" y="18" fontSize="18" fontWeight="800" fontFamily="sans-serif" letterSpacing="2">VANTGE</text>
+                              <svg width="44" height="9" viewBox="0 0 110 20" fill="white" opacity="0.85">
+                                    <text x="0" y="15" fontSize="15" fontWeight="800" fontFamily="sans-serif" letterSpacing="2">VANTGE</text>
                               </svg>
                         </div>
-                        {/* Title block with flex spacers */}
-                        <div className="flex-1 flex flex-col">
+                        {/* Title — same narrow column as mobile */}
+                        <div className="flex-1 flex flex-col w-full items-center">
                               <div style={{ flex: Math.min(titlePosition, 94) }} />
-                              <div className="text-center px-4">
+                              <div className="text-center px-4" style={{ maxWidth: 160 }}>
                                     {logoUrl && (
-                                          <img src={logoUrl} alt="Logo" className="mx-auto mb-1 object-contain" style={{ maxHeight: 20, maxWidth: 60, filter: 'brightness(0) invert(1)' }} />
+                                          <img src={logoUrl} alt="Logo" className="mx-auto mb-1 object-contain" style={{ maxHeight: 18, maxWidth: 56, filter: 'brightness(0) invert(1)' }} />
                                     )}
                                     <p className="text-[6px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
                                           {eventType?.tagline || ''}
                                     </p>
-                                    <h3 className="font-extrabold leading-tight text-white" style={{ fontSize: '0.75rem', fontFamily: font.cssFamily }}>
+                                    <h3 className="font-extrabold leading-tight text-white" style={{ fontSize: '0.7rem', fontFamily: font.cssFamily }}>
                                           {nameLines}
                                     </h3>
                               </div>
                               <div style={{ flex: Math.max(0, 94 - titlePosition) }} />
                         </div>
-                        {/* Buttons pinned at bottom — centered column matching real page */}
-                        <div className="shrink-0 pb-2" style={{ paddingLeft: '12%', paddingRight: '12%' }}>
+                        {/* Buttons — same narrow column as mobile */}
+                        <div className="shrink-0 pb-2 w-full" style={{ maxWidth: 160, paddingLeft: 8, paddingRight: 8 }}>
                               {isUnlocked ? (
                                     <>
-                                          <p className="text-[6px] text-center text-white/50 mb-1">Scan · Snap · Share</p>
-                                          {/* Open Camera */}
                                           <div className="rounded-xl px-2 py-1.5 text-white flex items-center gap-1.5 mb-1" style={{ backgroundColor: c.accent }}>
                                                 <span className="w-5 h-5 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}>
                                                       <svg width="8" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -827,7 +823,6 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                                                 </div>
                                                 <svg className="opacity-50 shrink-0" width="6" height="6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                           </div>
-                                          {/* Upload + Gallery */}
                                           <div className="grid grid-cols-2 gap-1">
                                                 <div className="rounded-xl px-2 py-1.5 flex items-center gap-1.5 border border-white/20" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
                                                       <span className="w-4 h-4 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
