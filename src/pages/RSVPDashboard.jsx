@@ -1073,6 +1073,16 @@ export default function RSVPDashboard() {
   const [design, setDesign] = useState({ themeId: 'warm_editorial', fontId: DEFAULT_FONT_ID, eventId: null })
   const [previewDevice, setPreviewDevice] = useState('mobile')
 
+  // Guest controls state
+  const [localAllowDownloads,  setLocalAllowDownloads]  = useState(null)
+  const [localAllowSharing,    setLocalAllowSharing]    = useState(null)
+  const [localRequireApproval, setLocalRequireApproval] = useState(null)
+  const [localUploadLimit,     setLocalUploadLimit]     = useState(undefined)
+  const [localPasscode,        setLocalPasscode]        = useState(undefined)
+  const [savingPasscode,       setSavingPasscode]       = useState(false)
+  const [qrCopied,             setQrCopied]             = useState(false)
+  const qrRef = useRef(null)
+
   useEffect(() => {
     if (!authLoading && !user) navigate('/login')
   }, [authLoading, user, navigate])
@@ -1092,6 +1102,51 @@ export default function RSVPDashboard() {
 
   function mergeLocal(u) {
     setLocalEvent(e => ({ ...(e || event), ...u }))
+  }
+
+  // Derived guest control values (fall back to event DB values)
+  const allowDownloads  = localAllowDownloads  !== null      ? localAllowDownloads  : (ev?.allow_downloads  ?? true)
+  const allowSharing    = localAllowSharing    !== null      ? localAllowSharing    : (ev?.allow_sharing    ?? true)
+  const requireApproval = localRequireApproval !== null      ? localRequireApproval : (ev?.require_approval ?? false)
+  const uploadLimit     = localUploadLimit     !== undefined ? localUploadLimit     : (ev?.guest_upload_limit ?? null)
+  const passcode        = localPasscode        !== undefined ? localPasscode        : (ev?.guest_passcode   ?? '')
+
+  async function saveEventField(fields) {
+    if (!ev?.id) return
+    await supabase.from('events').update(fields).eq('id', ev.id)
+    mergeLocal(fields)
+  }
+  async function toggleAllowDownloads()  { const v = !allowDownloads;  setLocalAllowDownloads(v);  await saveEventField({ allow_downloads: v }) }
+  async function toggleAllowSharing()    { const v = !allowSharing;    setLocalAllowSharing(v);    await saveEventField({ allow_sharing: v }) }
+  async function toggleRequireApproval() { const v = !requireApproval; setLocalRequireApproval(v); await saveEventField({ require_approval: v }) }
+  async function saveUploadLimit(val)    { setLocalUploadLimit(val);    await saveEventField({ guest_upload_limit: val }) }
+  async function savePasscode(val) {
+    const clean = val.trim()
+    setLocalPasscode(clean)
+    setSavingPasscode(true)
+    await saveEventField({ guest_passcode: clean || null })
+    setSavingPasscode(false)
+  }
+
+  function downloadQR() {
+    const svg = qrRef.current?.querySelector('svg')
+    if (!svg) return
+    const svgData = new XMLSerializer().serializeToString(svg)
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    const img = new Image()
+    img.onload = () => {
+      canvas.width = 800; canvas.height = 800
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 800, 800)
+      ctx.drawImage(img, 100, 100, 600, 600)
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url; a.download = `${ev?.event_slug}-rsvp-qr.png`; a.click()
+        URL.revokeObjectURL(url)
+      })
+    }
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgData)
   }
 
   if (authLoading || eventLoading) {
@@ -1199,6 +1254,93 @@ export default function RSVPDashboard() {
                 </button>
               </div>
             </div>
+
+            {/* QR code card */}
+            {ev && (
+              <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col items-center gap-4">
+                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] self-start">Scan to Share</p>
+                <div ref={qrRef} className="bg-[#F7F5F0] p-4 rounded-2xl">
+                  <QRCodeSVG value={`${window.location.origin}/${ev.event_slug}/rsvp`} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
+                </div>
+                <div className="w-full flex items-center gap-2 bg-[#F7F5F0] border border-[#E8E4DA] rounded-xl px-3 py-2.5">
+                  <span className="flex-1 text-[10px] text-[#6B6B63] truncate font-mono">
+                    {window.location.origin}/{ev.event_slug}/rsvp
+                  </span>
+                  <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/${ev.event_slug}/rsvp`); setQrCopied(true); setTimeout(() => setQrCopied(false), 2000) }}
+                    aria-label="Copy link" className="shrink-0 text-[#B0AFA5] hover:text-[#1A1A18] transition-colors">
+                    {qrCopied
+                      ? <svg width="14" height="14" fill="none" stroke="#22c55e" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      : <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    }
+                  </button>
+                </div>
+                <button onClick={downloadQR}
+                  className="w-full bg-[#1A1A18] hover:bg-black text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-3 transition-all">
+                  Download QR PNG
+                </button>
+              </div>
+            )}
+
+            {/* Guest Controls card */}
+            {ev && (
+              <div className="bg-white rounded-3xl border border-[#E8E4DA] shadow-sm flex flex-col">
+                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-5 pt-5 pb-4">Guest Controls</p>
+
+                {/* Toggles */}
+                <div className="px-5 pb-5 flex flex-col gap-4 border-b-2 border-[#F0EDE6]">
+                  {[
+                    { label: 'Allow Downloads',  sub: 'Guests can save photos',                      value: allowDownloads,  toggle: toggleAllowDownloads },
+                    { label: 'Allow Sharing',    sub: 'Guests can share photos',                     value: allowSharing,    toggle: toggleAllowSharing },
+                    { label: 'Require Approval', sub: 'You approve each photo before it appears',    value: requireApproval, toggle: toggleRequireApproval },
+                  ].map(({ label, sub, value, toggle }) => (
+                    <div key={label} className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-[#1A1A18]">{label}</p>
+                        <p className="text-[11px] text-[#88887E]">{sub}</p>
+                      </div>
+                      <button onClick={toggle} aria-label={label}
+                        className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-[#1A1A18]' : 'bg-[#E0D8C6]'}`}>
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0'}`} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Upload Limit */}
+                <div className="px-5 py-5 border-b-2 border-[#F0EDE6]">
+                  <p className="text-sm font-semibold text-[#1A1A18] mb-0.5">Upload Limit per Guest</p>
+                  <p className="text-[11px] text-[#88887E] mb-3">Max photos a guest can submit</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {[null, 5, 10, 20, 30].map((v) => (
+                      <button key={v ?? 'unlimited'} onClick={() => saveUploadLimit(v)}
+                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${uploadLimit === v ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'bg-white text-[#1A1A18] border-[#E8E4DA] hover:border-[#1A1A18]'}`}>
+                        {v === null ? 'Unlimited' : v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Passcode */}
+                <div className="px-5 py-5">
+                  <p className="text-sm font-semibold text-[#1A1A18] mb-0.5">Guest Passcode</p>
+                  <p className="text-[11px] text-[#88887E] mb-3">Guests must enter this to access the event</p>
+                  <div className="flex gap-2">
+                    <input type="text" value={passcode}
+                      onChange={(e) => setLocalPasscode(e.target.value)}
+                      onBlur={(e) => savePasscode(e.target.value)}
+                      placeholder="No passcode" maxLength={20}
+                      className="flex-1 border border-[#E8E4DA] rounded-xl px-3 py-2 text-sm text-[#1A1A18] placeholder-[#B0AFA5] focus:outline-none focus:border-[#1A1A18] transition-colors" />
+                    {passcode ? (
+                      <button onClick={() => savePasscode('')}
+                        className="px-3 py-2 rounded-xl border border-[#E8E4DA] text-[11px] font-bold text-[#C84A44] hover:border-[#C84A44] transition-colors">
+                        Clear
+                      </button>
+                    ) : null}
+                  </div>
+                  {savingPasscode && <p className="text-[10px] text-[#88887E] mt-1 animate-pulse">Saving…</p>}
+                </div>
+              </div>
+            )}
 
           </div>
 

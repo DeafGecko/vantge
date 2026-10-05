@@ -636,9 +636,9 @@ export default function GuestRSVP() {
     )
   }
 
-  const theme = getTheme(event.theme)
+  const theme = getTheme(event.rsvp_theme || event.theme)
   const c = theme.colors
-  const fontFamily = resolveFontFamily(event.font_family)
+  const fontFamily = resolveFontFamily(event.rsvp_font || event.font_family)
   const eventType = getEventType(event.event_type)
   const bgImage = bg || eventType.defaultBg
   const bgPosition = event.background_position || '50% 50%'
@@ -660,7 +660,7 @@ export default function GuestRSVP() {
 
   return (
     <>
-      <FontLoader fontId={event.font_family} />
+      <FontLoader fontId={event.rsvp_font || event.font_family} />
       <div className="min-h-screen bg-[#F4F3F0]">
 
         {/* ── Hero banner ─────────────────────────────────────── */}
@@ -680,11 +680,8 @@ export default function GuestRSVP() {
           <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
             <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/60 mb-1">You're Invited</p>
             <h1 className="font-extrabold text-white leading-tight mb-1" style={{ fontFamily, fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>
-              {event.event_name}
+              {event.rsvp_host_display_name || event.event_name}
             </h1>
-            {event.rsvp_host_display_name && (
-              <p className="text-sm text-white/80 mb-3">Hosted by {event.rsvp_host_display_name}</p>
-            )}
             <div className="flex flex-col gap-1">
               {eventDateStr && (
                 <div className="flex items-center gap-2 text-sm text-white/80">
