@@ -60,11 +60,10 @@ function Sel({ value, onChange, options }) {
 
 // ── Tabs ─────────────────────────────────────────────────────
 const TABS = [
-  { id: 'setup',       label: 'Event Setup' },
-  { id: 'design',      label: 'Design' },
-  { id: 'invitations', label: 'Invitations' },
-  { id: 'responses',   label: 'Responses' },
-  { id: 'food',        label: 'Food Sign-up' },
+  { id: 'setup',     label: 'Event Setup' },
+  { id: 'design',    label: 'Design' },
+  { id: 'responses', label: 'Responses' },
+  { id: 'food',      label: 'Food Sign-up' },
 ]
 
 const ALL_THEMES = getAllThemes()
@@ -1363,7 +1362,6 @@ export default function RSVPDashboard() {
             {/* Tab content */}
             {activeTab === 'setup'       && <SetupTab       event={ev} onSaved={mergeLocal} />}
             {activeTab === 'design'      && <DesignTab      event={ev} design={design} onChange={setDesign} onSaved={() => mergeLocal({ rsvp_theme: design.themeId, rsvp_font: design.fontId })} onLocalUpdate={mergeLocal} />}
-            {activeTab === 'invitations' && <InvitationsTab event={ev} />}
             {activeTab === 'responses'   && <ResponsesTab   event={ev} />}
             {activeTab === 'food'        && <FoodTab        event={ev} />}
           </div>
