@@ -48,9 +48,10 @@ export default function HostHub() {
       </div>
 
       {/* Dashboard cards */}
-      <div className={`w-full max-w-sm flex flex-col gap-4 ${rsvpEnabled ? '' : ''}`}>
+      <div className="w-full max-w-sm flex flex-col gap-3">
 
-        {/* Gallery card — always shown */}
+        {/* Gallery */}
+        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-white/25 px-1 mb-1">Gallery</p>
         <Link to="/dashboard"
           className="group relative bg-white/[0.06] hover:bg-white/[0.10] border border-white/10 hover:border-white/20 rounded-3xl p-6 flex items-center gap-5 transition-all">
           <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/15 transition-colors">
@@ -68,6 +69,10 @@ export default function HostHub() {
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
         </Link>
+
+        {/* RSVP */}
+        <div className="h-px bg-white/[0.06] my-3" />
+        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-white/25 px-1 mb-1">RSVP</p>
 
         {/* RSVP card — shown once rsvp_enabled */}
         {rsvpEnabled ? (
