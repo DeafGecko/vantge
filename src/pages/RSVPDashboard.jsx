@@ -794,6 +794,63 @@ function DesignTab({ design, onChange, onSaved }) {
   )
 }
 
+// ── RSVP Desktop Preview (16:9 browser mockup) ───────────────
+function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily }) {
+  const name  = event.rsvp_host_display_name || event.event_name
+  const date  = event.rsvp_event_date
+    ? new Date(event.rsvp_event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null
+  const loc   = event.rsvp_location
+  const bg    = theme?.colors?.bg     || '#F8F5ED'
+  const acc   = theme?.colors?.accent || '#1A1A18'
+  const bdr   = theme?.colors?.border || '#E0D8C6'
+  const muted = theme?.colors?.textSubtle || '#88887E'
+
+  return (
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Hero */}
+      <div style={{ position: 'relative', height: 80, flexShrink: 0 }}>
+        {bgImage
+          ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          : <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />
+        }
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 8, textAlign: 'center' }}>
+          <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
+          <p style={{ fontSize: 11, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
+          {date && <p style={{ fontSize: 5, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{date}{loc ? ` · ${loc}` : ''}</p>}
+        </div>
+      </div>
+      {/* Body — two column */}
+      <div style={{ flex: 1, display: 'flex', gap: 8, padding: '8px 12px', overflow: 'hidden' }}>
+        {/* Left — form */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted }}>RSVP</p>
+          {['I\'m Going ✓', 'Maybe', 'Can\'t Attend'].map((label, i) => (
+            <div key={label} style={{ background: i === 0 ? acc : 'white', border: `1px solid ${bdr}`, borderRadius: 4, padding: '3px 6px', textAlign: 'center' }}>
+              <p style={{ fontSize: 5, fontWeight: 700, color: i === 0 ? 'white' : muted }}>{label}</p>
+            </div>
+          ))}
+        </div>
+        {/* Right — food teaser */}
+        {(event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only') && (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted }}>{event.food_heading || 'Food Sign-up'}</p>
+            {['Main dish', 'Side dish', 'Dessert'].map(item => (
+              <div key={item} style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 4, padding: '3px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <p style={{ fontSize: 5, color: muted }}>{item}</p>
+                <div style={{ background: acc, borderRadius: 3, padding: '1px 4px' }}>
+                  <p style={{ fontSize: 4, color: 'white', fontWeight: 700 }}>Claim</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── RSVP Live Preview (phone mockup) ─────────────────────────
 function RSVPPreview({ event, bgImage, theme, fontCssFamily }) {
   const name  = event.rsvp_host_display_name || event.event_name
@@ -875,6 +932,7 @@ export default function RSVPDashboard() {
   const [localEvent, setLocalEvent] = useState(null)
   const [bgImage, setBgImage] = useState(null)
   const [design, setDesign] = useState({ themeId: 'warm_editorial', fontId: DEFAULT_FONT_ID, eventId: null })
+  const [previewDevice, setPreviewDevice] = useState('mobile')
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/login')
@@ -985,9 +1043,34 @@ export default function RSVPDashboard() {
             <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
               <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Live Preview</p>
               <div className="flex items-center justify-center" style={{ height: 336 }}>
-                <RSVPPreview event={ev} bgImage={bgImage}
-                  theme={ALL_THEMES.find(t => t.id === design.themeId)}
-                  fontCssFamily={getFont(design.fontId)?.cssFamily} />
+                {previewDevice === 'desktop' ? (
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="rounded-lg overflow-hidden border-4 border-[#1A1A18] shadow-xl relative" style={{ width: 300, height: 188 }}>
+                      <RSVPPreviewDesktop event={ev} bgImage={bgImage}
+                        theme={ALL_THEMES.find(t => t.id === design.themeId)}
+                        fontCssFamily={getFont(design.fontId)?.cssFamily} />
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-8 h-2 bg-[#1A1A18] rounded-b" />
+                      <div className="w-16 h-1.5 bg-[#1A1A18] rounded" />
+                    </div>
+                  </div>
+                ) : (
+                  <RSVPPreview event={ev} bgImage={bgImage}
+                    theme={ALL_THEMES.find(t => t.id === design.themeId)}
+                    fontCssFamily={getFont(design.fontId)?.cssFamily} />
+                )}
+              </div>
+              {/* Device toggle */}
+              <div className="flex items-center justify-center gap-2 mt-3">
+                <button onClick={() => setPreviewDevice('mobile')} title="Mobile preview"
+                  className={`p-2 rounded-lg transition-colors ${previewDevice === 'mobile' ? 'bg-[#1A1A18] text-white' : 'text-[#B0AFA5] hover:text-[#1A1A18]'}`}>
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
+                </button>
+                <button onClick={() => setPreviewDevice('desktop')} title="Desktop preview"
+                  className={`p-2 rounded-lg transition-colors ${previewDevice === 'desktop' ? 'bg-[#1A1A18] text-white' : 'text-[#B0AFA5] hover:text-[#1A1A18]'}`}>
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
+                </button>
               </div>
             </div>
 
