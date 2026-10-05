@@ -689,8 +689,8 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
   const [localBgPosition, setLocalBgPosition] = useState(event.background_position ?? 50)
   const [localBgTint,     setLocalBgTint]     = useState(event.background_tint ?? 0)
   const [localLogoUrl,    setLocalLogoUrl]    = useState(event.logo_url ?? null)
-  const [localTitlePos,   setLocalTitlePos]   = useState(event.title_position ?? 50)
-  const [localTitlePosD,  setLocalTitlePosD]  = useState(event.title_position_desktop ?? 50)
+  const [localTitlePos,   setLocalTitlePos]   = useState(event.rsvp_title_position ?? 50)
+  const [localTitlePosD,  setLocalTitlePosD]  = useState(event.rsvp_title_position_desktop ?? 50)
   const [saving, setSaving]     = useState(false)
   const [saved,  setSaved]      = useState(false)
 
@@ -789,7 +789,7 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
             <div className="flex items-center gap-2">
               <span className="text-[8px] text-[#B0AFA5]">Top</span>
               <input type="range" min={0} max={100} step={1} value={localTitlePos}
-                onChange={async (e) => { const val = e.target.value; setLocalTitlePos(val); await saveField({ title_position: val }) }}
+                onChange={async (e) => { const val = e.target.value; setLocalTitlePos(val); await saveField({ rsvp_title_position: val }) }}
                 className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
               />
               <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
@@ -807,7 +807,7 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
             <div className="flex items-center gap-2">
               <span className="text-[8px] text-[#B0AFA5]">Top</span>
               <input type="range" min={0} max={100} step={1} value={localTitlePosD}
-                onChange={async (e) => { const val = e.target.value; setLocalTitlePosD(val); await saveField({ title_position_desktop: val }) }}
+                onChange={async (e) => { const val = e.target.value; setLocalTitlePosD(val); await saveField({ rsvp_title_position_desktop: val }) }}
                 className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
               />
               <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
