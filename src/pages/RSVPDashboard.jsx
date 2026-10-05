@@ -897,133 +897,163 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
   )
 }
 
-// ── RSVP Desktop Preview (16:9 browser mockup) ───────────────
-function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily, bodyTint }) {
+// ── Shared preview screen renderer ───────────────────────────
+function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }) {
   const name  = event.rsvp_host_display_name || event.event_name
   const date  = event.rsvp_event_date
     ? new Date(event.rsvp_event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null
   const loc   = event.rsvp_location
-  const bg    = theme?.colors?.bg     || '#F8F5ED'
-  const acc   = theme?.colors?.accent || '#1A1A18'
-  const bdr   = theme?.colors?.border || '#E0D8C6'
+  const bg    = theme?.colors?.bg        || '#F8F5ED'
+  const acc   = theme?.colors?.accent    || '#1A1A18'
+  const txt   = theme?.colors?.text      || '#1A1A18'
+  const bdr   = theme?.colors?.border    || '#E0D8C6'
   const muted = theme?.colors?.textSubtle || '#88887E'
-  const bodyBg = bodyTint || bg
+  const showFood = event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only'
 
-  return (
+  if (step === 0) return (
     <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* Hero — full width, ~60% height */}
-      <div style={{ position: 'relative', flex: '0 0 60%' }}>
-        {bgImage
-          ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />
-        }
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.55) 100%)' }} />
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 10, textAlign: 'center' }}>
+      <div style={{ position: 'relative', flex: '0 0 55%' }}>
+        {bgImage ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.65) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', padding: '0 8px 8px', textAlign: 'center' }}>
           <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
-          <p style={{ fontSize: 12, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
-          {date && <p style={{ fontSize: 5, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{date}</p>}
+          <p style={{ fontSize: isDesktop ? 11 : 13, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
+          {date && <p style={{ fontSize: 5.5, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{date}</p>}
         </div>
       </div>
-      {/* Body — centered 50% column, buttons at bottom */}
-      <div style={{ flex: 1, background: bodyBg, display: 'flex', justifyContent: 'center', padding: '6px 0 8px' }}>
-        <div style={{ width: '55%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          {/* Map row */}
-          {loc && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 3, paddingTop: 3 }}>
-              <svg width="7" height="7" fill="none" stroke={acc} strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <p style={{ fontSize: 5, color: muted, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 80 }}>{loc}</p>
+      <div style={{ flex: 1, background: bg, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '6px 10px', gap: 5 }}>
+        {event.rsvp_description && <p style={{ fontSize: 5, color: muted, lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{event.rsvp_description}</p>}
+        {loc && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'white', border: `1px solid ${bdr}`, borderRadius: 5, padding: '3px 6px' }}>
+            <svg width="7" height="7" fill="none" stroke={acc} strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <p style={{ fontSize: 5.5, color: txt, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{loc}</p>
+          </div>
+        )}
+        <div style={{ background: acc, borderRadius: 6, padding: '5px 8px', textAlign: 'center', marginTop: 2 }}>
+          <p style={{ fontSize: 7, fontWeight: 800, color: 'white' }}>RSVP Now →</p>
+        </div>
+      </div>
+    </div>
+  )
+
+  if (step === 1) return (
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', flex: '0 0 30%' }}>
+        {bgImage ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%)' }} />
+        <div style={{ position: 'absolute', bottom: 5, left: 0, right: 0, textAlign: 'center' }}>
+          <p style={{ fontSize: isDesktop ? 8 : 9, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit' }}>{name}</p>
+        </div>
+      </div>
+      <div style={{ flex: 1, background: bg, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '6px 10px 8px', gap: 5 }}>
+        <p style={{ fontSize: 7, fontWeight: 900, color: txt }}>Will you be there?</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ background: acc, borderRadius: 6, padding: '5px 8px', textAlign: 'center' }}>
+            <p style={{ fontSize: 7, fontWeight: 800, color: 'white' }}>I'm Going</p>
+          </div>
+          {event.rsvp_allow_maybe !== false && (
+            <div style={{ background: 'white', border: `1.5px solid ${bdr}`, borderRadius: 6, padding: '5px 8px', textAlign: 'center' }}>
+              <p style={{ fontSize: 7, fontWeight: 700, color: muted }}>Maybe</p>
             </div>
           )}
-          {/* RSVP buttons at bottom */}
-          <div style={{ display: 'flex', gap: 4 }}>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {["I'm Going ✓", 'Maybe', "Can't Attend"].map((label, i) => (
-                <div key={label} style={{ background: i === 0 ? acc : 'white', border: `1px solid ${bdr}`, borderRadius: 3, padding: '2.5px 5px', textAlign: 'center' }}>
-                  <p style={{ fontSize: 5, fontWeight: 700, color: i === 0 ? 'white' : muted }}>{label}</p>
-                </div>
-              ))}
-            </div>
-            {(event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only') && (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <p style={{ fontSize: 4, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted }}>{event.food_heading || 'Food Sign-up'}</p>
-                {['Main dish', 'Side dish', 'Dessert'].map(item => (
-                  <div key={item} style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 3, padding: '2.5px 5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <p style={{ fontSize: 4, color: muted }}>{item}</p>
-                    <div style={{ background: acc, borderRadius: 2, padding: '1px 3px' }}>
-                      <p style={{ fontSize: 3.5, color: 'white', fontWeight: 700 }}>Claim</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div style={{ background: 'white', border: `1.5px solid ${bdr}`, borderRadius: 6, padding: '5px 8px', textAlign: 'center' }}>
+            <p style={{ fontSize: 7, fontWeight: 700, color: muted }}>Can't Attend</p>
           </div>
         </div>
+        <div style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 5, padding: '4px 6px' }}>
+          <p style={{ fontSize: 5, color: '#C9C5BC' }}>Your name…</p>
+        </div>
+      </div>
+    </div>
+  )
+
+  if (step === 2 && showFood) return (
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ padding: '8px 10px 4px' }}>
+        <p style={{ fontSize: 8, fontWeight: 900, color: txt }}>{event.food_heading || 'Food Sign-up'}</p>
+        <p style={{ fontSize: 5, color: muted, marginTop: 1 }}>Choose something to bring</p>
+      </div>
+      <div style={{ flex: 1, padding: '4px 10px', display: 'flex', flexDirection: 'column', gap: 4, overflow: 'hidden' }}>
+        {[{ label: 'Main dish', spots: '2 spots' }, { label: 'Side dish', spots: 'Open' }, { label: 'Dessert', spots: '1 spot' }, { label: 'Drinks', spots: 'Open' }].map(item => (
+          <div key={item.label} style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 6, padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ width: 14, height: 14, background: '#F4F3F0', borderRadius: 3, flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 6, fontWeight: 700, color: txt }}>{item.label}</p>
+              <p style={{ fontSize: 4.5, color: muted }}>{item.spots}</p>
+            </div>
+            <div style={{ background: 'white', border: `1.5px solid ${acc}`, borderRadius: 4, padding: '2px 5px' }}>
+              <p style={{ fontSize: 5, fontWeight: 700, color: acc }}>Choose</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 14px', gap: 6, textAlign: 'center' }}>
+      <div style={{ width: 32, height: 32, borderRadius: '50%', background: acc + '22', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg width="14" height="14" fill="none" stroke={acc} strokeWidth="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <div>
+        <p style={{ fontSize: 9, fontWeight: 900, color: txt, fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>See you there!</p>
+        <p style={{ fontSize: 5.5, color: muted, marginTop: 3 }}>Your RSVP has been received. We can't wait to celebrate with you.</p>
+      </div>
+      <div style={{ background: acc, borderRadius: 6, padding: '5px 14px', marginTop: 4 }}>
+        <p style={{ fontSize: 6, fontWeight: 800, color: 'white' }}>Done</p>
+      </div>
+    </div>
+  )
+}
+
+// ── RSVP Desktop Preview (16:9 browser mockup) ───────────────
+function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily, previewStep, onStepChange }) {
+  const showFood = event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only'
+  const totalSteps = showFood ? 3 : 3
+  const acc = theme?.colors?.accent || '#1A1A18'
+
+  return (
+    <div style={{ width: '100%', height: '100%', background: '#F4F3F0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Step selector bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '5px 0', background: 'white', borderBottom: '1px solid #E8E4DA', flexShrink: 0 }}>
+        {Array.from({ length: totalSteps }).map((_, i) => (
+          <button key={i} onClick={() => onStepChange(i)}
+            style={{ width: i === previewStep ? 20 : 7, height: 7, borderRadius: 4, background: i === previewStep ? acc : '#D4CFBC', border: 'none', cursor: 'pointer', transition: 'all 0.2s', padding: 0 }} />
+        ))}
+      </div>
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        <PreviewScreen step={previewStep} event={event} bgImage={bgImage} theme={theme} fontCssFamily={fontCssFamily} isDesktop />
       </div>
     </div>
   )
 }
 
 // ── RSVP Live Preview (phone mockup) ─────────────────────────
-function RSVPPreview({ event, bgImage, theme, fontCssFamily, bodyTint }) {
-  const name  = event.rsvp_host_display_name || event.event_name
-  const date  = event.rsvp_event_date
-    ? new Date(event.rsvp_event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    : null
-  const loc   = event.rsvp_location
-  const bg    = theme?.colors?.bg    || '#F8F5ED'
-  const acc   = theme?.colors?.accent || '#1A1A18'
-  const txt   = theme?.colors?.text   || '#1A1A18'
-  const bdr   = theme?.colors?.border || '#E0D8C6'
-  const muted = theme?.colors?.textSubtle || '#88887E'
-  const bodyBg = bodyTint || bg
+function RSVPPreview({ event, bgImage, theme, fontCssFamily, previewStep, onStepChange }) {
+  const showFood = event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only'
+  const totalSteps = showFood ? 3 : 3
+  const acc = theme?.colors?.accent || '#1A1A18'
+  const stepOnInvite = previewStep === 0
 
   return (
     <div className="relative mx-auto"
       style={{ width: 160, height: 320, background: '#111', borderRadius: 22, boxShadow: '0 0 0 3px #333, 0 8px 32px rgba(0,0,0,0.4)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
-      {/* Hero — big photo area ~60% */}
-      <div style={{ position: 'relative', flex: '0 0 58%' }}>
-        {bgImage ? (
-          <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-        ) : (
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />
-        )}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.65) 100%)' }} />
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 10, paddingLeft: 8, paddingRight: 8, textAlign: 'center' }}>
-          <p style={{ fontSize: 6, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
-          <p style={{ fontSize: 14, fontWeight: 800, color: 'white', lineHeight: 1.2, fontFamily: fontCssFamily || 'inherit' }}>{name}</p>
-          {date && <p style={{ fontSize: 6, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{date}</p>}
-        </div>
+      {/* Step dots at top */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '7px 0 5px', background: stepOnInvite ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', flexShrink: 0, zIndex: 10 }}>
+        {Array.from({ length: totalSteps }).map((_, i) => (
+          <button key={i} onClick={() => onStepChange(i)}
+            style={{ width: i === previewStep ? 20 : 6, height: 6, borderRadius: 3, background: i === previewStep ? (stepOnInvite ? 'white' : acc) : (stepOnInvite ? 'rgba(255,255,255,0.4)' : '#D4CFBC'), border: 'none', cursor: 'pointer', transition: 'all 0.2s', padding: 0 }} />
+        ))}
       </div>
 
-      {/* Body — location + RSVP buttons, vertically centered together */}
-      <div style={{ flex: 1, background: bodyBg, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '6px 10px 10px', gap: 8 }}>
-        {/* Map pin row */}
-        {loc && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <svg width="9" height="9" fill="none" stroke={acc} strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <p style={{ fontSize: 7, color: muted, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 120 }}>{loc}</p>
-          </div>
-        )}
-
-        {/* RSVP buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-          <div style={{ background: acc, borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
-            <p style={{ fontSize: 7, fontWeight: 800, color: 'white', letterSpacing: '0.08em', textTransform: 'uppercase' }}>I'm Going ✓</p>
-          </div>
-          {event.rsvp_allow_maybe !== false && (
-            <div style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
-              <p style={{ fontSize: 7, fontWeight: 700, color: muted }}>Maybe</p>
-            </div>
-          )}
-          <div style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
-            <p style={{ fontSize: 7, fontWeight: 700, color: txt }}>Can't Attend</p>
-          </div>
-        </div>
+      {/* Screen content */}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        <PreviewScreen step={previewStep} event={event} bgImage={bgImage} theme={theme} fontCssFamily={fontCssFamily} isDesktop={false} />
       </div>
 
-      <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', width: 40, height: 3, background: 'rgba(255,255,255,0.25)', borderRadius: 2 }} />
+      <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', width: 40, height: 3, background: 'rgba(0,0,0,0.15)', borderRadius: 2, zIndex: 10 }} />
     </div>
   )
 }
@@ -1037,6 +1067,7 @@ export default function RSVPDashboard() {
   const [localEvent, setLocalEvent] = useState(null)
   const [design, setDesign] = useState({ themeId: 'warm_editorial', fontId: DEFAULT_FONT_ID, eventId: null })
   const [previewDevice, setPreviewDevice] = useState('mobile')
+  const [previewStep, setPreviewStep] = useState(0)
 
   // Guest controls state
   const [localAllowDownloads,  setLocalAllowDownloads]  = useState(null)
@@ -1210,7 +1241,8 @@ export default function RSVPDashboard() {
                       <RSVPPreviewDesktop event={ev} bgImage={ev?.background_image_desktop || ev?.background_image}
                         theme={ALL_THEMES.find(t => t.id === design.themeId)}
                         fontCssFamily={getFont(design.fontId)?.cssFamily}
-                        bodyTint={ev?.rsvp_body_tint || ''} />
+                        previewStep={previewStep}
+                        onStepChange={setPreviewStep} />
                     </div>
                     <div className="flex flex-col items-center">
                       <div className="w-8 h-2 bg-[#1A1A18] rounded-b" />
@@ -1221,7 +1253,8 @@ export default function RSVPDashboard() {
                   <RSVPPreview event={ev} bgImage={ev?.background_image}
                     theme={ALL_THEMES.find(t => t.id === design.themeId)}
                     fontCssFamily={getFont(design.fontId)?.cssFamily}
-                    bodyTint={ev?.rsvp_body_tint || ''} />
+                    previewStep={previewStep}
+                    onStepChange={setPreviewStep} />
                 )}
               </div>
               {/* Device toggle */}

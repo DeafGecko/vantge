@@ -374,8 +374,15 @@ function FoodSignup({ event, accentColor }) {
             <div key={item.id} className="py-3.5 first:pt-0 last:pb-0">
               <div className="flex items-center gap-3">
                 {/* Icon placeholder */}
-                <div className="w-12 h-12 rounded-xl bg-[#F4F3F0] flex items-center justify-center shrink-0 text-lg">
-                  {item.category === 'Main dish' ? '🍽️' : item.category === 'Side dish' ? '🥗' : item.category === 'Dessert' ? '🍰' : item.category === 'Drinks' ? '🥤' : '🍴'}
+                <div className="w-12 h-12 rounded-xl bg-[#F4F3F0] flex items-center justify-center shrink-0">
+                  <svg width="20" height="20" fill="none" stroke="#88887E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    {item.category === 'Drinks'
+                      ? <><path d="M8 2h8l-1 7H9L8 2z"/><path d="M9 9c0 5 6 5 6 0"/><path d="M12 14v6"/><path d="M9 20h6"/></>
+                      : item.category === 'Dessert'
+                      ? <><circle cx="12" cy="11" r="5"/><path d="M12 2v2"/><path d="M4.2 7.5l1.7 1"/><path d="M18.1 7.5l-1.7 1"/><path d="M7 20h10"/><path d="M12 16v4"/></>
+                      : <><path d="M3 11l19-9-9 19-2-8-8-2z"/></>
+                    }
+                  </svg>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-[#1A1A18]">{item.name}</p>
@@ -536,7 +543,7 @@ function ConfirmationScreen({ event, rsvpResult, accentColor, fontFamily, onEdit
     navigator.clipboard.writeText(editUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
   }
 
-  const label = rsvpResult.response === 'going' ? 'See you there! 🎉' : rsvpResult.response === 'maybe' ? 'Thanks for letting us know!' : 'Thanks for responding'
+  const label = rsvpResult.response === 'going' ? 'See you there!' : rsvpResult.response === 'maybe' ? 'Thanks for letting us know!' : 'Thanks for responding'
   const sub = rsvpResult.response === 'going'
     ? `You're in${rsvpResult.party_size > 1 ? ` with ${rsvpResult.party_size} guests` : ''}. We can't wait to see you.`
     : rsvpResult.response === 'maybe'
@@ -545,8 +552,13 @@ function ConfirmationScreen({ event, rsvpResult, accentColor, fontFamily, onEdit
 
   return (
     <div className="bg-white rounded-2xl border border-[#E0D8C6] p-8 flex flex-col items-center text-center gap-4">
-      <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl" style={{ backgroundColor: accentColor + '20' }}>
-        {rsvpResult.response === 'going' ? '🎉' : rsvpResult.response === 'maybe' ? '🤔' : '💛'}
+      <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: accentColor + '20' }}>
+        {rsvpResult.response === 'going'
+          ? <svg width="28" height="28" fill="none" stroke={accentColor} strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          : rsvpResult.response === 'maybe'
+          ? <svg width="28" height="28" fill="none" stroke={accentColor} strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 015.12 2.12c0 2-3 3-3 3" strokeLinecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="2.5" strokeLinecap="round"/></svg>
+          : <svg width="28" height="28" fill="none" stroke={accentColor} strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="3" strokeLinecap="round"/><line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="3" strokeLinecap="round"/></svg>
+        }
       </div>
       <div>
         <h2 className="text-xl font-black text-[#1A1A18]" style={{ fontFamily }}>{label}</h2>
@@ -733,9 +745,9 @@ function RSVPStep({ event, accentColor, existingResponse, onSuccess, onBack }) {
         {/* Big response buttons */}
         <div className="flex flex-col gap-2">
           {[
-            { value: 'going', label: "I'm Going 🎉" },
-            ...(event.rsvp_allow_maybe !== false ? [{ value: 'maybe', label: 'Maybe 🤔' }] : []),
-            { value: 'not_going', label: "Can't Attend 💛" },
+            { value: 'going', label: "I'm Going" },
+            ...(event.rsvp_allow_maybe !== false ? [{ value: 'maybe', label: 'Maybe' }] : []),
+            { value: 'not_going', label: "Can't Attend" },
           ].map(opt => (
             <button
               key={opt.value}
@@ -821,33 +833,43 @@ function RSVPStep({ event, accentColor, existingResponse, onSuccess, onBack }) {
 }
 
 // ── Step 3: Food list ─────────────────────────────────────────
-function FoodStep({ event, accentColor, rsvpResult, onBack, onDone }) {
+function FoodStep({ event, accentColor, bgImage, bgPosition, rsvpResult, onBack, onDone }) {
   return (
-    <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-5">
-      <div className="bg-white rounded-2xl border border-[#E0D8C6] px-5 py-4">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-6 h-6 rounded-full flex items-center justify-center text-sm" style={{ backgroundColor: accentColor + '20' }}>✓</div>
-          <p className="text-sm font-bold text-[#1A1A18]">RSVP received!</p>
+    <div className="relative min-h-screen">
+      {/* Background photo at 75% opacity */}
+      {bgImage && (
+        <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition, opacity: 0.25 }} />
+      )}
+      <div className="fixed inset-0 -z-10 bg-[#F4F3F0]/80" />
+
+      <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-5">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-[#E0D8C6] px-5 py-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: accentColor + '20' }}>
+              <svg width="12" height="12" fill="none" stroke={accentColor} strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <p className="text-sm font-bold text-[#1A1A18]">RSVP received!</p>
+          </div>
+          <p className="text-xs text-[#88887E]">
+            {rsvpResult.response === 'going' ? `See you there, ${rsvpResult.guest_name}.` : `Thanks for letting us know, ${rsvpResult.guest_name}.`}
+          </p>
         </div>
-        <p className="text-xs text-[#88887E]">
-          {rsvpResult.response === 'going' ? `See you there, ${rsvpResult.guest_name}! 🎉` : `Thanks for letting us know, ${rsvpResult.guest_name}.`}
-        </p>
+
+        <FoodSignup event={event} accentColor={accentColor} />
+
+        <button
+          onClick={onDone}
+          className="w-full rounded-2xl py-3.5 text-sm font-bold text-white transition-all active:scale-[0.98]"
+          style={{ backgroundColor: accentColor }}
+        >
+          Done
+        </button>
+
+        <button onClick={onBack} className="flex items-center justify-center gap-1.5 text-sm text-[#88887E] hover:text-[#1A1A18] transition-colors">
+          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          Back
+        </button>
       </div>
-
-      <FoodSignup event={event} accentColor={accentColor} />
-
-      <button
-        onClick={onDone}
-        className="w-full rounded-2xl py-3.5 text-sm font-bold text-white transition-all active:scale-[0.98]"
-        style={{ backgroundColor: accentColor }}
-      >
-        Done
-      </button>
-
-      <button onClick={onBack} className="flex items-center justify-center gap-1.5 text-sm text-[#88887E] hover:text-[#1A1A18] transition-colors">
-        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        Back
-      </button>
     </div>
   )
 }
@@ -975,6 +997,8 @@ export default function GuestRSVP() {
           <FoodStep
             event={event}
             accentColor={accentColor}
+            bgImage={bgImage}
+            bgPosition={bgPosition}
             rsvpResult={rsvpResult}
             onBack={() => setStep('rsvp')}
             onDone={() => setStep('done')}
