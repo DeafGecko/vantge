@@ -1032,15 +1032,15 @@ function RSVPPreview({ event, bgImage, theme, fontCssFamily, bodyTint }) {
         </div>
       </div>
 
-      {/* Body — location + RSVP buttons */}
-      <div style={{ flex: 1, background: bodyBg, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '8px 10px 12px' }}>
+      {/* Body — location + RSVP buttons, vertically centered together */}
+      <div style={{ flex: 1, background: bodyBg, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '6px 10px 10px', gap: 8 }}>
         {/* Map pin row */}
-        {loc ? (
+        {loc && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <svg width="9" height="9" fill="none" stroke={acc} strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <p style={{ fontSize: 7, color: muted, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 120 }}>{loc}</p>
           </div>
-        ) : <div />}
+        )}
 
         {/* RSVP buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
