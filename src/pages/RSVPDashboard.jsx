@@ -812,8 +812,9 @@ function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily }) {
   const muted = theme?.colors?.textSubtle || '#88887E'
 
   return (
+    // Full viewport bg, content capped at 50% width centered
     <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* Hero */}
+      {/* Hero — full width */}
       <div style={{ position: 'relative', height: 80, flexShrink: 0 }}>
         {bgImage
           ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -826,31 +827,33 @@ function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily }) {
           {date && <p style={{ fontSize: 5, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{date}{loc ? ` · ${loc}` : ''}</p>}
         </div>
       </div>
-      {/* Body — two column */}
-      <div style={{ flex: 1, display: 'flex', gap: 8, padding: '8px 12px', overflow: 'hidden' }}>
-        {/* Left — form */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted }}>RSVP</p>
-          {['I\'m Going ✓', 'Maybe', 'Can\'t Attend'].map((label, i) => (
-            <div key={label} style={{ background: i === 0 ? acc : 'white', border: `1px solid ${bdr}`, borderRadius: 4, padding: '3px 6px', textAlign: 'center' }}>
-              <p style={{ fontSize: 5, fontWeight: 700, color: i === 0 ? 'white' : muted }}>{label}</p>
-            </div>
-          ))}
-        </div>
-        {/* Right — food teaser */}
-        {(event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only') && (
+      {/* Body — centered 50% column */}
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', overflow: 'hidden', padding: '8px 0' }}>
+        <div style={{ width: '50%', display: 'flex', gap: 6, overflow: 'hidden' }}>
+          {/* RSVP column */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted }}>{event.food_heading || 'Food Sign-up'}</p>
-            {['Main dish', 'Side dish', 'Dessert'].map(item => (
-              <div key={item} style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 4, padding: '3px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <p style={{ fontSize: 5, color: muted }}>{item}</p>
-                <div style={{ background: acc, borderRadius: 3, padding: '1px 4px' }}>
-                  <p style={{ fontSize: 4, color: 'white', fontWeight: 700 }}>Claim</p>
-                </div>
+            <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted }}>RSVP</p>
+            {["I'm Going ✓", 'Maybe', "Can't Attend"].map((label, i) => (
+              <div key={label} style={{ background: i === 0 ? acc : 'white', border: `1px solid ${bdr}`, borderRadius: 4, padding: '3px 6px', textAlign: 'center' }}>
+                <p style={{ fontSize: 5, fontWeight: 700, color: i === 0 ? 'white' : muted }}>{label}</p>
               </div>
             ))}
           </div>
-        )}
+          {/* Food column — only if enabled */}
+          {(event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only') && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted }}>{event.food_heading || 'Food Sign-up'}</p>
+              {['Main dish', 'Side dish', 'Dessert'].map(item => (
+                <div key={item} style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 4, padding: '3px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <p style={{ fontSize: 5, color: muted }}>{item}</p>
+                  <div style={{ background: acc, borderRadius: 3, padding: '1px 4px' }}>
+                    <p style={{ fontSize: 4, color: 'white', fontWeight: 700 }}>Claim</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
