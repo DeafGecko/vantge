@@ -934,7 +934,7 @@ function SiteFooter() {
     {
       heading: 'Resources',
       links: [
-        { label: 'Free RSVP & Food Sign-up', href: '/rsvp-dashboard' },
+        { label: 'Free RSVP & Food Sign-up', comingSoon: true },
         { label: 'Help Center', comingSoon: true },
         { label: 'Privacy', comingSoon: true },
         { label: 'Terms', comingSoon: true },

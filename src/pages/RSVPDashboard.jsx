@@ -8,10 +8,9 @@ import { supabase } from '../lib/supabase'
 import VantgeLogo from '../components/VantgeLogo'
 import { getAllThemes } from '../lib/themes'
 import { getFontsByCategory, getFont, getAllFonts, getGoogleFontsUrl, DEFAULT_FONT_ID } from '../lib/fonts'
-import { EVENT_TYPES, getEventType } from '../lib/eventTypes'
+import { EVENT_TYPES } from '../lib/eventTypes'
 import BackgroundUploader from '../components/BackgroundUploader'
 import LogoUploader from '../components/LogoUploader'
-import HostUploader from '../components/HostUploader'
 
 // ── Design tokens (match HostDashboard) ──────────────────────
 function Card({ children, className = '' }) {
@@ -727,8 +726,8 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
   const [localLogoUrl,    setLocalLogoUrl]    = useState(event.logo_url ?? null)
   const [localTitlePos,   setLocalTitlePos]   = useState(event.title_position ?? 50)
   const [localTitlePosD,  setLocalTitlePosD]  = useState(event.title_position_desktop ?? 50)
-  const [saving, setSaving] = useState(false)
-  const [saved,  setSaved]  = useState(false)
+  const [saving, setSaving]     = useState(false)
+  const [saved,  setSaved]      = useState(false)
 
   async function saveField(fields) {
     await supabase.from('events').update(fields).eq('id', event.id)
@@ -742,7 +741,11 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
       rsvp_font:  design.fontId,
     }).eq('id', event.id)
     setSaving(false)
-    if (!error) { onSaved?.(); setSaved(true); setTimeout(() => setSaved(false), 2500) }
+    if (!error) {
+      onSaved?.()
+      onLocalUpdate?.({ rsvp_theme: design.themeId, rsvp_font: design.fontId })
+      setSaved(true); setTimeout(() => setSaved(false), 2500)
+    }
   }
 
   const catLabels = { elegant: 'Elegant & Script', modern: 'Modern & Clean', display: 'Display & Bold' }
@@ -899,21 +902,20 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
 
         <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm overflow-hidden flex flex-col">
           <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-4 pt-4 pb-3 shrink-0">Color Palette</p>
-          <div className="flex flex-col gap-1.5 px-4 pb-4">
+          <div className="grid grid-cols-2 gap-2 px-4 pb-4">
             {ALL_THEMES.map(theme => {
               const selected = design.themeId === theme.id
               return (
                 <button key={theme.id} onClick={() => onChange({ ...design, themeId: theme.id })}
-                  className={`flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-left transition-all ${
-                    selected ? 'border-[#1A1A18] bg-[#F4F3F0]' : 'border-[#E8E4DA] hover:border-[#C9BFA8]'
+                  className={`flex flex-col items-start gap-1.5 rounded-2xl border-2 px-3 py-3 text-left transition-all ${
+                    selected ? 'border-[#1A1A18] bg-[#F4F3F0]' : 'border-[#E8E4DA] hover:border-[#C9BFA8] bg-white'
                   }`}>
-                  <div className="flex gap-0.5 shrink-0">
+                  <div className="flex gap-1 shrink-0">
                     {[theme.colors.accent, theme.colors.bg, theme.colors.text].map((c, i) => (
-                      <div key={i} className="w-3 h-3 rounded-full border border-black/10" style={{ background: c }} />
+                      <div key={i} className="w-4 h-4 rounded-full border border-black/10" style={{ background: c }} />
                     ))}
                   </div>
-                  <span className="text-[11px] font-bold text-[#1A1A18] truncate leading-tight">{theme.name}</span>
-                  {selected && <svg className="ml-auto shrink-0" width="11" height="11" fill="#1A1A18" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>}
+                  <span className="text-[10px] font-black text-[#1A1A18] uppercase tracking-wider leading-tight">{theme.name}</span>
                 </button>
               )
             })}
@@ -921,9 +923,6 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
         </div>
 
       </div>
-
-      {/* Pre-load gallery */}
-      <HostUploader eventId={event.id} />
 
       <button onClick={saveDesign} disabled={saving}
         className="w-full bg-[#1A1A18] text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3.5 hover:bg-black transition-all disabled:opacity-50">
@@ -934,7 +933,7 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
 }
 
 // ── RSVP Desktop Preview (16:9 browser mockup) ───────────────
-function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily }) {
+function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily, bodyTint }) {
   const name  = event.rsvp_host_display_name || event.event_name
   const date  = event.rsvp_event_date
     ? new Date(event.rsvp_event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -944,6 +943,7 @@ function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily }) {
   const acc   = theme?.colors?.accent || '#1A1A18'
   const bdr   = theme?.colors?.border || '#E0D8C6'
   const muted = theme?.colors?.textSubtle || '#88887E'
+  const bodyBg = bodyTint || bg
 
   return (
     <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -957,35 +957,42 @@ function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily }) {
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 10, textAlign: 'center' }}>
           <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
           <p style={{ fontSize: 12, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
-          {date && <p style={{ fontSize: 5, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{date}{loc ? ` · ${loc}` : ''}</p>}
+          {date && <p style={{ fontSize: 5, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{date}</p>}
         </div>
       </div>
       {/* Body — centered 50% column, buttons at bottom */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', padding: '6px 0 8px' }}>
-        <div style={{ width: '50%', display: 'flex', gap: 6 }}>
-          {/* RSVP column */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 3 }}>
-            <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted, marginBottom: 1 }}>RSVP</p>
-            {["I'm Going ✓", 'Maybe', "Can't Attend"].map((label, i) => (
-              <div key={label} style={{ background: i === 0 ? acc : 'white', border: `1px solid ${bdr}`, borderRadius: 4, padding: '3px 6px', textAlign: 'center' }}>
-                <p style={{ fontSize: 5, fontWeight: 700, color: i === 0 ? 'white' : muted }}>{label}</p>
-              </div>
-            ))}
-          </div>
-          {/* Food column — only if enabled */}
-          {(event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only') && (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 3 }}>
-              <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted, marginBottom: 1 }}>{event.food_heading || 'Food Sign-up'}</p>
-              {['Main dish', 'Side dish', 'Dessert'].map(item => (
-                <div key={item} style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 4, padding: '3px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <p style={{ fontSize: 5, color: muted }}>{item}</p>
-                  <div style={{ background: acc, borderRadius: 3, padding: '1px 4px' }}>
-                    <p style={{ fontSize: 4, color: 'white', fontWeight: 700 }}>Claim</p>
-                  </div>
+      <div style={{ flex: 1, background: bodyBg, display: 'flex', justifyContent: 'center', padding: '6px 0 8px' }}>
+        <div style={{ width: '55%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          {/* Map row */}
+          {loc && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3, paddingTop: 3 }}>
+              <svg width="7" height="7" fill="none" stroke={acc} strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <p style={{ fontSize: 5, color: muted, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 80 }}>{loc}</p>
+            </div>
+          )}
+          {/* RSVP buttons at bottom */}
+          <div style={{ display: 'flex', gap: 4 }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {["I'm Going ✓", 'Maybe', "Can't Attend"].map((label, i) => (
+                <div key={label} style={{ background: i === 0 ? acc : 'white', border: `1px solid ${bdr}`, borderRadius: 3, padding: '2.5px 5px', textAlign: 'center' }}>
+                  <p style={{ fontSize: 5, fontWeight: 700, color: i === 0 ? 'white' : muted }}>{label}</p>
                 </div>
               ))}
             </div>
-          )}
+            {(event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only') && (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <p style={{ fontSize: 4, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted }}>{event.food_heading || 'Food Sign-up'}</p>
+                {['Main dish', 'Side dish', 'Dessert'].map(item => (
+                  <div key={item} style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 3, padding: '2.5px 5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <p style={{ fontSize: 4, color: muted }}>{item}</p>
+                    <div style={{ background: acc, borderRadius: 2, padding: '1px 3px' }}>
+                      <p style={{ fontSize: 3.5, color: 'white', fontWeight: 700 }}>Claim</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -993,7 +1000,7 @@ function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily }) {
 }
 
 // ── RSVP Live Preview (phone mockup) ─────────────────────────
-function RSVPPreview({ event, bgImage, theme, fontCssFamily }) {
+function RSVPPreview({ event, bgImage, theme, fontCssFamily, bodyTint }) {
   const name  = event.rsvp_host_display_name || event.event_name
   const date  = event.rsvp_event_date
     ? new Date(event.rsvp_event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -1004,16 +1011,14 @@ function RSVPPreview({ event, bgImage, theme, fontCssFamily }) {
   const txt   = theme?.colors?.text   || '#1A1A18'
   const bdr   = theme?.colors?.border || '#E0D8C6'
   const muted = theme?.colors?.textSubtle || '#88887E'
-
-  // Phone is 160×320; hero ~60% = 192px, body fills the rest
-  const heroH = 192
+  const bodyBg = bodyTint || bg
 
   return (
     <div className="relative mx-auto"
       style={{ width: 160, height: 320, background: '#111', borderRadius: 22, boxShadow: '0 0 0 3px #333, 0 8px 32px rgba(0,0,0,0.4)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
-      {/* Hero — big photo area */}
-      <div style={{ position: 'relative', height: heroH, flexShrink: 0 }}>
+      {/* Hero — big photo area ~60% */}
+      <div style={{ position: 'relative', flex: '0 0 58%' }}>
         {bgImage ? (
           <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
@@ -1023,12 +1028,21 @@ function RSVPPreview({ event, bgImage, theme, fontCssFamily }) {
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 10, paddingLeft: 8, paddingRight: 8, textAlign: 'center' }}>
           <p style={{ fontSize: 6, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
           <p style={{ fontSize: 14, fontWeight: 800, color: 'white', lineHeight: 1.2, fontFamily: fontCssFamily || 'inherit' }}>{name}</p>
-          {date && <p style={{ fontSize: 6, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{date}{loc ? ` · ${loc}` : ''}</p>}
+          {date && <p style={{ fontSize: 6, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{date}</p>}
         </div>
       </div>
 
-      {/* Body — RSVP buttons pushed to bottom */}
-      <div style={{ flex: 1, background: bg, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 10px 12px' }}>
+      {/* Body — location + RSVP buttons */}
+      <div style={{ flex: 1, background: bodyBg, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '8px 10px 12px' }}>
+        {/* Map pin row */}
+        {loc ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <svg width="9" height="9" fill="none" stroke={acc} strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <p style={{ fontSize: 7, color: muted, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 120 }}>{loc}</p>
+          </div>
+        ) : <div />}
+
+        {/* RSVP buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
           <div style={{ background: acc, borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
             <p style={{ fontSize: 7, fontWeight: 800, color: 'white', letterSpacing: '0.08em', textTransform: 'uppercase' }}>I'm Going ✓</p>
@@ -1056,7 +1070,6 @@ export default function RSVPDashboard() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('setup')
   const [localEvent, setLocalEvent] = useState(null)
-  const [bgImage, setBgImage] = useState(null)
   const [design, setDesign] = useState({ themeId: 'warm_editorial', fontId: DEFAULT_FONT_ID, eventId: null })
   const [previewDevice, setPreviewDevice] = useState('mobile')
 
@@ -1064,11 +1077,9 @@ export default function RSVPDashboard() {
     if (!authLoading && !user) navigate('/login')
   }, [authLoading, user, navigate])
 
-  // Restore saved bg + design from localStorage / event
   useEffect(() => {
     if (event?.id) {
-      const saved = localStorage.getItem(`rsvp_bg_${event.id}`)
-      if (saved) setBgImage(saved)
+      setLocalEvent(event)
       setDesign({
         eventId: event.id,
         themeId: event.rsvp_theme || 'warm_editorial',
@@ -1079,21 +1090,8 @@ export default function RSVPDashboard() {
 
   const ev = localEvent || event
 
-  function handleBgUpload(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev2 => {
-      const url = ev2.target.result
-      setBgImage(url)
-      if (event?.id) localStorage.setItem(`rsvp_bg_${event.id}`, url)
-    }
-    reader.readAsDataURL(file)
-  }
-
-  function clearBg() {
-    setBgImage(null)
-    if (event?.id) localStorage.removeItem(`rsvp_bg_${event.id}`)
+  function mergeLocal(u) {
+    setLocalEvent(e => ({ ...(e || event), ...u }))
   }
 
   if (authLoading || eventLoading) {
@@ -1172,9 +1170,10 @@ export default function RSVPDashboard() {
                 {previewDevice === 'desktop' ? (
                   <div className="flex flex-col items-center gap-1">
                     <div className="rounded-lg overflow-hidden border-4 border-[#1A1A18] shadow-xl relative" style={{ width: 300, height: 188 }}>
-                      <RSVPPreviewDesktop event={ev} bgImage={bgImage}
+                      <RSVPPreviewDesktop event={ev} bgImage={ev?.background_image_desktop || ev?.background_image}
                         theme={ALL_THEMES.find(t => t.id === design.themeId)}
-                        fontCssFamily={getFont(design.fontId)?.cssFamily} />
+                        fontCssFamily={getFont(design.fontId)?.cssFamily}
+                        bodyTint={ev?.rsvp_body_tint || ''} />
                     </div>
                     <div className="flex flex-col items-center">
                       <div className="w-8 h-2 bg-[#1A1A18] rounded-b" />
@@ -1182,9 +1181,10 @@ export default function RSVPDashboard() {
                     </div>
                   </div>
                 ) : (
-                  <RSVPPreview event={ev} bgImage={bgImage}
+                  <RSVPPreview event={ev} bgImage={ev?.background_image}
                     theme={ALL_THEMES.find(t => t.id === design.themeId)}
-                    fontCssFamily={getFont(design.fontId)?.cssFamily} />
+                    fontCssFamily={getFont(design.fontId)?.cssFamily}
+                    bodyTint={ev?.rsvp_body_tint || ''} />
                 )}
               </div>
               {/* Device toggle */}
@@ -1198,48 +1198,6 @@ export default function RSVPDashboard() {
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
                 </button>
               </div>
-            </div>
-
-            {/* Background photo picker */}
-            <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
-              <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Invitation Background</p>
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                {/* Default option */}
-                <button onClick={clearBg}
-                  className={`relative rounded-xl overflow-hidden border-2 transition-all ${!bgImage ? 'border-[#1A1A18]' : 'border-transparent hover:border-[#E0D8C6]'}`}
-                  style={{ height: 72 }}>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1"
-                    style={{ background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }}>
-                    <p className="text-white font-black text-[9px] tracking-widest uppercase">Default</p>
-                  </div>
-                  {!bgImage && <div className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-white flex items-center justify-center">
-                    <svg width="8" height="8" fill="#1A1A18" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                  </div>}
-                </button>
-
-                {/* Upload option */}
-                <label className={`relative rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${bgImage ? 'border-[#1A1A18]' : 'border-dashed border-[#D4CFBC] hover:border-[#1A1A18]'}`}
-                  style={{ height: 72 }}>
-                  <input type="file" accept="image/*" className="sr-only" onChange={handleBgUpload} />
-                  {bgImage ? (
-                    <>
-                      <img src={bgImage} alt="" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/20" />
-                      <div className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-white flex items-center justify-center">
-                        <svg width="8" height="8" fill="#1A1A18" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#F8F5ED]">
-                      <svg width="16" height="16" fill="none" stroke="#B0AFA5" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                      <p className="text-[9px] font-bold text-[#B0AFA5] uppercase tracking-wider">Upload</p>
-                    </div>
-                  )}
-                </label>
-              </div>
-              <p className="text-[10px] text-[#B0AFA5] leading-relaxed">
-                Shows behind your event name on the invitation page.
-              </p>
             </div>
 
           </div>
@@ -1261,8 +1219,8 @@ export default function RSVPDashboard() {
             </div>
 
             {/* Tab content */}
-            {activeTab === 'setup'       && <SetupTab       event={ev} onSaved={u => setLocalEvent(e => ({ ...e, ...u }))} />}
-            {activeTab === 'design'      && <DesignTab      event={ev} design={design} onChange={setDesign} onSaved={() => setLocalEvent(e => ({ ...e, rsvp_theme: design.themeId, rsvp_font: design.fontId }))} onLocalUpdate={u => setLocalEvent(e => ({ ...e, ...u }))} />}
+            {activeTab === 'setup'       && <SetupTab       event={ev} onSaved={mergeLocal} />}
+            {activeTab === 'design'      && <DesignTab      event={ev} design={design} onChange={setDesign} onSaved={() => mergeLocal({ rsvp_theme: design.themeId, rsvp_font: design.fontId })} onLocalUpdate={mergeLocal} />}
             {activeTab === 'invitations' && <InvitationsTab event={ev} />}
             {activeTab === 'responses'   && <ResponsesTab   event={ev} />}
             {activeTab === 'food'        && <FoodTab        event={ev} />}
