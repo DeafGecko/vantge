@@ -6,9 +6,12 @@ import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
 import VantgeLogo from '../components/VantgeLogo'
-import FontLoader from '../components/FontLoader'
 import { getAllThemes } from '../lib/themes'
-import { getFontsByCategory, getFont, getGoogleFontsUrl, DEFAULT_FONT_ID } from '../lib/fonts'
+import { getFontsByCategory, getFont, getAllFonts, getGoogleFontsUrl, DEFAULT_FONT_ID } from '../lib/fonts'
+import { EVENT_TYPES, getEventType } from '../lib/eventTypes'
+import BackgroundUploader from '../components/BackgroundUploader'
+import LogoUploader from '../components/LogoUploader'
+import HostUploader from '../components/HostUploader'
 
 // ── Design tokens (match HostDashboard) ──────────────────────
 function Card({ children, className = '' }) {
@@ -67,6 +70,15 @@ const TABS = [
 
 const ALL_THEMES = getAllThemes()
 const FONT_CATEGORIES = getFontsByCategory()
+
+// Pre-load all Google Fonts (same as GalleryDashboard)
+getAllFonts().forEach((font) => {
+  const id = `font-loader-${font.id}`
+  if (document.getElementById(id)) return
+  const link = document.createElement('link')
+  link.id = id; link.rel = 'stylesheet'; link.href = getGoogleFontsUrl(font.id)
+  document.head.appendChild(link)
+})
 
 // ── Setup Tab ─────────────────────────────────────────────────
 function SetupTab({ event, onSaved }) {
@@ -704,58 +716,178 @@ function FoodTab({ event }) {
 }
 
 // ── Design Tab ────────────────────────────────────────────────
-function DesignTab({ design, onChange, onSaved }) {
+function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
+  const [savingName, setSavingName]   = useState(false)
+  const [localName,  setLocalName]    = useState(event.event_name ?? '')
+  const [localType,  setLocalType]    = useState(event.event_type ?? '')
+  const [localBgMobile,   setLocalBgMobile]   = useState(event.background_image ?? null)
+  const [localBgDesktop,  setLocalBgDesktop]  = useState(event.background_image_desktop ?? null)
+  const [localBgPosition, setLocalBgPosition] = useState(event.background_position ?? 50)
+  const [localBgTint,     setLocalBgTint]     = useState(event.background_tint ?? 0)
+  const [localLogoUrl,    setLocalLogoUrl]    = useState(event.logo_url ?? null)
+  const [localTitlePos,   setLocalTitlePos]   = useState(event.title_position ?? 50)
+  const [localTitlePosD,  setLocalTitlePosD]  = useState(event.title_position_desktop ?? 50)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved]   = useState(false)
+  const [saved,  setSaved]  = useState(false)
 
-  // Load Google Font for preview
-  useEffect(() => {
-    if (!design.fontId) return
-    const font = getFont(design.fontId)
-    if (!font) return
-    const id = `rsvp-font-${font.id}`
-    if (document.getElementById(id)) return
-    const link = document.createElement('link')
-    link.id = id; link.rel = 'stylesheet'
-    link.href = getGoogleFontsUrl(font.id)
-    document.head.appendChild(link)
-  }, [design.fontId])
+  async function saveField(fields) {
+    await supabase.from('events').update(fields).eq('id', event.id)
+    onLocalUpdate?.(fields)
+  }
 
-  async function save() {
+  async function saveDesign() {
     setSaving(true)
     const { error } = await supabase.from('events').update({
       rsvp_theme: design.themeId,
       rsvp_font:  design.fontId,
-    }).eq('id', design.eventId)
+    }).eq('id', event.id)
     setSaving(false)
     if (!error) { onSaved?.(); setSaved(true); setTimeout(() => setSaved(false), 2500) }
   }
 
   const catLabels = { elegant: 'Elegant & Script', modern: 'Modern & Clean', display: 'Display & Bold' }
+  const currentTheme = ALL_THEMES.find(t => t.id === design.themeId)
 
   return (
     <div className="space-y-4">
 
-      {/* Two-column layout: Font left, Color right */}
-      <div className="grid grid-cols-2 gap-4 items-start">
+      {/* Logo | Display Name | Event Type | Title Position */}
+      <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+        <div className="flex items-start gap-4">
+          {/* Logo */}
+          <div className="shrink-0 flex flex-col items-center gap-1.5">
+            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Logo</p>
+            <LogoUploader
+              eventId={event.id}
+              currentLogoUrl={localLogoUrl}
+              onSaved={(url) => { setLocalLogoUrl(url); onLocalUpdate?.({ logo_url: url }) }}
+            />
+          </div>
+          {/* Display Name + Event Type */}
+          <div className="flex-1 min-w-0 flex flex-col gap-3">
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Display Name</p>
+                {savingName && <span className="text-[10px] font-bold text-[#C84A44] animate-pulse">Saving…</span>}
+              </div>
+              <textarea
+                value={localName}
+                onChange={(e) => setLocalName(e.target.value)}
+                onBlur={async () => {
+                  if (localName === event.event_name) return
+                  setSavingName(true)
+                  await saveField({ event_name: localName })
+                  setSavingName(false)
+                }}
+                placeholder="e.g. The Johnson Family"
+                style={{ height: 68 }}
+                className="w-full bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal resize-none leading-snug"
+              />
+            </div>
+            <div>
+              <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Event Type</p>
+              <div className="relative">
+                <select
+                  value={localType}
+                  onChange={async (e) => {
+                    const val = e.target.value
+                    setLocalType(val)
+                    await saveField({ event_type: val || null })
+                  }}
+                  className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
+                >
+                  <option value="">— None —</option>
+                  {EVENT_TYPES.map((t) => (
+                    <option key={t.id} value={t.id}>{t.label}</option>
+                  ))}
+                </select>
+                <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B0AFA5]" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        {/* LEFT — Title font */}
-        <Card className="p-5">
-          <SectionLabel>Title Font</SectionLabel>
-          <div className="space-y-4 mt-3">
-            {Object.entries(FONT_CATEGORIES).map(([cat, fonts]) => (
-              <div key={cat}>
-                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">{catLabels[cat]}</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {fonts.map(font => {
+        {/* Title Position sliders */}
+        <div className="mt-3 border-t border-[#F0EDE6] pt-3 flex flex-col gap-2">
+          {/* Mobile */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1">
+                <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
+                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
+              </div>
+              <span className="text-[9px] font-bold text-[#88887E]">{localTitlePos == 0 ? 'Top' : localTitlePos == 100 ? 'Bottom' : localTitlePos == 50 ? 'Center' : `${localTitlePos}%`}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[8px] text-[#B0AFA5]">Top</span>
+              <input type="range" min={0} max={100} step={1} value={localTitlePos}
+                onChange={async (e) => { const val = e.target.value; setLocalTitlePos(val); await saveField({ title_position: val }) }}
+                className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
+              />
+              <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
+            </div>
+          </div>
+          {/* Desktop */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1">
+                <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
+                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
+              </div>
+              <span className="text-[9px] font-bold text-[#88887E]">{localTitlePosD == 0 ? 'Top' : localTitlePosD == 100 ? 'Bottom' : localTitlePosD == 50 ? 'Center' : `${localTitlePosD}%`}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[8px] text-[#B0AFA5]">Top</span>
+              <input type="range" min={0} max={100} step={1} value={localTitlePosD}
+                onChange={async (e) => { const val = e.target.value; setLocalTitlePosD(val); await saveField({ title_position_desktop: val }) }}
+                className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
+              />
+              <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Background Photo — Mobile Portrait + Desktop Landscape */}
+      <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm overflow-hidden">
+        <BackgroundUploader
+          eventId={event.id}
+          currentImageUrl={localBgMobile}
+          currentImageDesktopUrl={localBgDesktop}
+          currentPosition={localBgPosition}
+          currentTint={localBgTint}
+          accentColor={currentTheme?.colors?.accent}
+          eventTypeId={localType}
+          onSaved={(url, pos, tint) => {
+            setLocalBgMobile(url); setLocalBgPosition(pos); setLocalBgTint(tint)
+            onLocalUpdate?.({ background_image: url, background_position: pos, background_tint: tint })
+          }}
+          onSavedDesktop={(url) => {
+            setLocalBgDesktop(url)
+            onLocalUpdate?.({ background_image_desktop: url })
+          }}
+        />
+      </div>
+
+      {/* Font + Color side by side */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+        <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm overflow-hidden flex flex-col">
+          <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-4 pt-4 pb-3 shrink-0">Title Font</p>
+          <div className="flex flex-col divide-y-2 divide-[#F0EDE6]">
+            {Object.entries(FONT_CATEGORIES).map(([catKey, fonts], idx) => (
+              <div key={catKey} className={`px-4 py-3${idx > 0 ? ' pt-[22px]' : ''}`}>
+                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">{catLabels[catKey]}</p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {fonts.map((font) => {
                     const selected = design.fontId === font.id
                     return (
                       <button key={font.id} onClick={() => onChange({ ...design, fontId: font.id })}
-                        className={`rounded-xl border-2 p-2.5 flex flex-col items-center gap-1 transition-all ${
-                          selected ? 'border-[#1A1A18] bg-[#F4F3F0]' : 'border-[#E0D8C6] hover:border-[#C9BFA8]'
+                        className={`rounded-xl border-2 p-2 flex flex-col items-center gap-1 transition-all ${
+                          selected ? 'border-[#1A1A18] bg-[#F4F3F0]' : 'border-[#E8E4DA] hover:border-[#C9BFA8]'
                         }`}>
-                        <span style={{ fontFamily: font.cssFamily, fontSize: 22, lineHeight: 1, fontWeight: font.weight }}>Aa</span>
-                        <span className="text-[8px] font-bold text-[#88887E] uppercase tracking-wider text-center leading-tight">{font.name}</span>
+                        <span style={{ fontFamily: font.cssFamily, fontSize: 20, lineHeight: 1, fontWeight: font.weight }}>Aa</span>
+                        <span className="text-[7px] font-bold text-[#88887E] uppercase tracking-wider text-center leading-tight">{font.name}</span>
                       </button>
                     )
                   })}
@@ -763,18 +895,17 @@ function DesignTab({ design, onChange, onSaved }) {
               </div>
             ))}
           </div>
-        </Card>
+        </div>
 
-        {/* RIGHT — Color palette */}
-        <Card className="p-5">
-          <SectionLabel>Color Palette</SectionLabel>
-          <div className="flex flex-col gap-2 mt-3">
+        <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm overflow-hidden flex flex-col">
+          <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-4 pt-4 pb-3 shrink-0">Color Palette</p>
+          <div className="flex flex-col gap-1.5 px-4 pb-4">
             {ALL_THEMES.map(theme => {
               const selected = design.themeId === theme.id
               return (
                 <button key={theme.id} onClick={() => onChange({ ...design, themeId: theme.id })}
                   className={`flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-left transition-all ${
-                    selected ? 'border-[#1A1A18] bg-[#F4F3F0]' : 'border-[#E0D8C6] hover:border-[#C9BFA8]'
+                    selected ? 'border-[#1A1A18] bg-[#F4F3F0]' : 'border-[#E8E4DA] hover:border-[#C9BFA8]'
                   }`}>
                   <div className="flex gap-0.5 shrink-0">
                     {[theme.colors.accent, theme.colors.bg, theme.colors.text].map((c, i) => (
@@ -787,11 +918,14 @@ function DesignTab({ design, onChange, onSaved }) {
               )
             })}
           </div>
-        </Card>
+        </div>
 
       </div>
 
-      <button onClick={save} disabled={saving}
+      {/* Pre-load gallery */}
+      <HostUploader eventId={event.id} />
+
+      <button onClick={saveDesign} disabled={saving}
         className="w-full bg-[#1A1A18] text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3.5 hover:bg-black transition-all disabled:opacity-50">
         {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save design'}
       </button>
@@ -812,27 +946,26 @@ function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily }) {
   const muted = theme?.colors?.textSubtle || '#88887E'
 
   return (
-    // Full viewport bg, content capped at 50% width centered
     <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* Hero — full width */}
-      <div style={{ position: 'relative', height: 80, flexShrink: 0 }}>
+      {/* Hero — full width, ~60% height */}
+      <div style={{ position: 'relative', flex: '0 0 60%' }}>
         {bgImage
           ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
           : <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />
         }
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%)' }} />
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 8, textAlign: 'center' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.55) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 10, textAlign: 'center' }}>
           <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
-          <p style={{ fontSize: 11, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
+          <p style={{ fontSize: 12, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
           {date && <p style={{ fontSize: 5, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{date}{loc ? ` · ${loc}` : ''}</p>}
         </div>
       </div>
-      {/* Body — centered 50% column */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', overflow: 'hidden', padding: '8px 0' }}>
-        <div style={{ width: '50%', display: 'flex', gap: 6, overflow: 'hidden' }}>
+      {/* Body — centered 50% column, buttons at bottom */}
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', padding: '6px 0 8px' }}>
+        <div style={{ width: '50%', display: 'flex', gap: 6 }}>
           {/* RSVP column */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted }}>RSVP</p>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 3 }}>
+            <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted, marginBottom: 1 }}>RSVP</p>
             {["I'm Going ✓", 'Maybe', "Can't Attend"].map((label, i) => (
               <div key={label} style={{ background: i === 0 ? acc : 'white', border: `1px solid ${bdr}`, borderRadius: 4, padding: '3px 6px', textAlign: 'center' }}>
                 <p style={{ fontSize: 5, fontWeight: 700, color: i === 0 ? 'white' : muted }}>{label}</p>
@@ -841,8 +974,8 @@ function RSVPPreviewDesktop({ event, bgImage, theme, fontCssFamily }) {
           </div>
           {/* Food column — only if enabled */}
           {(event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only') && (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted }}>{event.food_heading || 'Food Sign-up'}</p>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 3 }}>
+              <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: muted, marginBottom: 1 }}>{event.food_heading || 'Food Sign-up'}</p>
               {['Main dish', 'Side dish', 'Dessert'].map(item => (
                 <div key={item} style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 4, padding: '3px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <p style={{ fontSize: 5, color: muted }}>{item}</p>
@@ -872,61 +1005,46 @@ function RSVPPreview({ event, bgImage, theme, fontCssFamily }) {
   const bdr   = theme?.colors?.border || '#E0D8C6'
   const muted = theme?.colors?.textSubtle || '#88887E'
 
+  // Phone is 160×320; hero ~60% = 192px, body fills the rest
+  const heroH = 192
+
   return (
     <div className="relative mx-auto"
-      style={{ width: 160, height: 320, background: '#111', borderRadius: 22, boxShadow: '0 0 0 3px #333, 0 8px 32px rgba(0,0,0,0.4)', overflow: 'hidden' }}>
+      style={{ width: 160, height: 320, background: '#111', borderRadius: 22, boxShadow: '0 0 0 3px #333, 0 8px 32px rgba(0,0,0,0.4)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
-      {/* Hero banner */}
-      <div className="relative w-full" style={{ height: 110 }}>
+      {/* Hero — big photo area */}
+      <div style={{ position: 'relative', height: heroH, flexShrink: 0 }}>
         {bgImage ? (
-          <img src={bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />
         )}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%)' }} />
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-2 px-2 text-center">
-          <p style={{ fontSize: 7, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
-          <p style={{ fontSize: 13, fontWeight: 800, color: 'white', lineHeight: 1.2, fontFamily: fontCssFamily || 'inherit' }}>{name}</p>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.65) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 10, paddingLeft: 8, paddingRight: 8, textAlign: 'center' }}>
+          <p style={{ fontSize: 6, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
+          <p style={{ fontSize: 14, fontWeight: 800, color: 'white', lineHeight: 1.2, fontFamily: fontCssFamily || 'inherit' }}>{name}</p>
+          {date && <p style={{ fontSize: 6, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{date}{loc ? ` · ${loc}` : ''}</p>}
         </div>
       </div>
 
-      {/* Body */}
-      <div style={{ background: bg, padding: '8px 10px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginBottom: 8 }}>
-          {date && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <div style={{ width: 12, height: 12, background: acc, borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="7" height="7" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              </div>
-              <p style={{ fontSize: 7, color: muted, fontWeight: 600 }}>{date}</p>
-            </div>
-          )}
-          {loc && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <div style={{ width: 12, height: 12, background: acc, borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="7" height="7" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              </div>
-              <p style={{ fontSize: 7, color: muted, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 110 }}>{loc}</p>
-            </div>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ background: acc, borderRadius: 8, padding: '5px 8px', textAlign: 'center' }}>
-            <p style={{ fontSize: 7, fontWeight: 800, color: 'white', letterSpacing: '0.1em', textTransform: 'uppercase' }}>I'm Going ✓</p>
+      {/* Body — RSVP buttons pushed to bottom */}
+      <div style={{ flex: 1, background: bg, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 10px 12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <div style={{ background: acc, borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
+            <p style={{ fontSize: 7, fontWeight: 800, color: 'white', letterSpacing: '0.08em', textTransform: 'uppercase' }}>I'm Going ✓</p>
           </div>
           {event.rsvp_allow_maybe !== false && (
-            <div style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 8, padding: '5px 8px', textAlign: 'center' }}>
+            <div style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
               <p style={{ fontSize: 7, fontWeight: 700, color: muted }}>Maybe</p>
             </div>
           )}
-          <div style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 8, padding: '5px 8px', textAlign: 'center' }}>
+          <div style={{ background: 'white', border: `1px solid ${bdr}`, borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
             <p style={{ fontSize: 7, fontWeight: 700, color: txt }}>Can't Attend</p>
           </div>
         </div>
       </div>
 
-      <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', width: 40, height: 3, background: 'rgba(255,255,255,0.3)', borderRadius: 2 }} />
+      <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', width: 40, height: 3, background: 'rgba(255,255,255,0.25)', borderRadius: 2 }} />
     </div>
   )
 }
@@ -1144,7 +1262,7 @@ export default function RSVPDashboard() {
 
             {/* Tab content */}
             {activeTab === 'setup'       && <SetupTab       event={ev} onSaved={u => setLocalEvent(e => ({ ...e, ...u }))} />}
-            {activeTab === 'design'      && <DesignTab      design={design} onChange={setDesign} onSaved={() => setLocalEvent(e => ({ ...e, rsvp_theme: design.themeId, rsvp_font: design.fontId }))} />}
+            {activeTab === 'design'      && <DesignTab      event={ev} design={design} onChange={setDesign} onSaved={() => setLocalEvent(e => ({ ...e, rsvp_theme: design.themeId, rsvp_font: design.fontId }))} onLocalUpdate={u => setLocalEvent(e => ({ ...e, ...u }))} />}
             {activeTab === 'invitations' && <InvitationsTab event={ev} />}
             {activeTab === 'responses'   && <ResponsesTab   event={ev} />}
             {activeTab === 'food'        && <FoodTab        event={ev} />}
