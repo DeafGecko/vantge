@@ -736,55 +736,60 @@ function DesignTab({ design, onChange, onSaved }) {
   return (
     <div className="space-y-4">
 
-      {/* Color palettes */}
-      <Card className="p-5">
-        <SectionLabel>Color Palette</SectionLabel>
-        <div className="grid grid-cols-2 gap-2 mt-3">
-          {ALL_THEMES.map(theme => {
-            const selected = design.themeId === theme.id
-            return (
-              <button key={theme.id} onClick={() => onChange({ ...design, themeId: theme.id })}
-                className={`flex items-center gap-3 rounded-xl border-2 px-3 py-2.5 text-left transition-all ${
-                  selected ? 'border-[#1A1A18] bg-[#F4F3F0]' : 'border-[#E0D8C6] hover:border-[#C9BFA8]'
-                }`}>
-                <div className="flex gap-1 shrink-0">
-                  {[theme.colors.accent, theme.colors.bg, theme.colors.text].map((c, i) => (
-                    <div key={i} className="w-3.5 h-3.5 rounded-full border border-black/10" style={{ background: c }} />
-                  ))}
-                </div>
-                <span className="text-xs font-bold text-[#1A1A18] truncate">{theme.name}</span>
-                {selected && <svg className="ml-auto shrink-0" width="12" height="12" fill="#1A1A18" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>}
-              </button>
-            )
-          })}
-        </div>
-      </Card>
+      {/* Two-column layout: Font left, Color right */}
+      <div className="grid grid-cols-2 gap-4 items-start">
 
-      {/* Title font */}
-      <Card className="p-5">
-        <SectionLabel>Title Font</SectionLabel>
-        <div className="space-y-4 mt-3">
-          {Object.entries(FONT_CATEGORIES).map(([cat, fonts]) => (
-            <div key={cat}>
-              <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">{catLabels[cat]}</p>
-              <div className="grid grid-cols-3 gap-2">
-                {fonts.map(font => {
-                  const selected = design.fontId === font.id
-                  return (
-                    <button key={font.id} onClick={() => onChange({ ...design, fontId: font.id })}
-                      className={`rounded-xl border-2 p-2.5 flex flex-col items-center gap-1 transition-all ${
-                        selected ? 'border-[#1A1A18] bg-[#F4F3F0]' : 'border-[#E0D8C6] hover:border-[#C9BFA8]'
-                      }`}>
-                      <span style={{ fontFamily: font.cssFamily, fontSize: 22, lineHeight: 1, fontWeight: font.weight }}>Aa</span>
-                      <span className="text-[8px] font-bold text-[#88887E] uppercase tracking-wider text-center leading-tight">{font.name}</span>
-                    </button>
-                  )
-                })}
+        {/* LEFT — Title font */}
+        <Card className="p-5">
+          <SectionLabel>Title Font</SectionLabel>
+          <div className="space-y-4 mt-3">
+            {Object.entries(FONT_CATEGORIES).map(([cat, fonts]) => (
+              <div key={cat}>
+                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">{catLabels[cat]}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {fonts.map(font => {
+                    const selected = design.fontId === font.id
+                    return (
+                      <button key={font.id} onClick={() => onChange({ ...design, fontId: font.id })}
+                        className={`rounded-xl border-2 p-2.5 flex flex-col items-center gap-1 transition-all ${
+                          selected ? 'border-[#1A1A18] bg-[#F4F3F0]' : 'border-[#E0D8C6] hover:border-[#C9BFA8]'
+                        }`}>
+                        <span style={{ fontFamily: font.cssFamily, fontSize: 22, lineHeight: 1, fontWeight: font.weight }}>Aa</span>
+                        <span className="text-[8px] font-bold text-[#88887E] uppercase tracking-wider text-center leading-tight">{font.name}</span>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </Card>
+
+        {/* RIGHT — Color palette */}
+        <Card className="p-5">
+          <SectionLabel>Color Palette</SectionLabel>
+          <div className="flex flex-col gap-2 mt-3">
+            {ALL_THEMES.map(theme => {
+              const selected = design.themeId === theme.id
+              return (
+                <button key={theme.id} onClick={() => onChange({ ...design, themeId: theme.id })}
+                  className={`flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-left transition-all ${
+                    selected ? 'border-[#1A1A18] bg-[#F4F3F0]' : 'border-[#E0D8C6] hover:border-[#C9BFA8]'
+                  }`}>
+                  <div className="flex gap-0.5 shrink-0">
+                    {[theme.colors.accent, theme.colors.bg, theme.colors.text].map((c, i) => (
+                      <div key={i} className="w-3 h-3 rounded-full border border-black/10" style={{ background: c }} />
+                    ))}
+                  </div>
+                  <span className="text-[11px] font-bold text-[#1A1A18] truncate leading-tight">{theme.name}</span>
+                  {selected && <svg className="ml-auto shrink-0" width="11" height="11" fill="#1A1A18" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>}
+                </button>
+              )
+            })}
+          </div>
+        </Card>
+
+      </div>
 
       <button onClick={save} disabled={saving}
         className="w-full bg-[#1A1A18] text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3.5 hover:bg-black transition-all disabled:opacity-50">
