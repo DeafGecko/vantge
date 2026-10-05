@@ -186,21 +186,41 @@ function SetupTab({ event, onSaved }) {
       {/* Date & time */}
       <Card className="p-5 space-y-4">
         <SectionLabel>Date & Time</SectionLabel>
-        <FieldRow label="Event date & start time">
-          <input type="datetime-local" value={form.rsvp_event_date} onChange={e => set('rsvp_event_date')(e.target.value)}
-            className="w-full rounded-xl border border-[#E0D8C6] px-4 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C9BFA8]" />
-        </FieldRow>
-        <FieldRow label="End time (optional)">
-          <input type="datetime-local" value={form.rsvp_end_time} onChange={e => set('rsvp_end_time')(e.target.value)}
-            className="w-full rounded-xl border border-[#E0D8C6] px-4 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C9BFA8]" />
-        </FieldRow>
-        <FieldRow label="Timezone">
-          <Sel value={form.rsvp_timezone} onChange={set('rsvp_timezone')} options={timezones} />
-        </FieldRow>
-        <FieldRow label="RSVP deadline (optional)">
-          <input type="datetime-local" value={form.rsvp_deadline} onChange={e => set('rsvp_deadline')(e.target.value)}
-            className="w-full rounded-xl border border-[#E0D8C6] px-4 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C9BFA8]" />
-        </FieldRow>
+
+        {/* Row 1 — Start + End time */}
+        <div className="grid grid-cols-2 gap-3">
+          <FieldRow label="Start time">
+            <input type="datetime-local" value={form.rsvp_event_date} onChange={e => set('rsvp_event_date')(e.target.value)}
+              className="w-full rounded-xl border border-[#E0D8C6] px-3 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C9BFA8]" />
+          </FieldRow>
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <input type="checkbox" id="show_end_time"
+                checked={!!form.rsvp_end_time}
+                onChange={e => { if (!e.target.checked) set('rsvp_end_time')('') }}
+                className="w-3.5 h-3.5 rounded accent-[#1A1A18] cursor-pointer" />
+              <label htmlFor="show_end_time" className="text-xs font-bold text-[#88887E] uppercase tracking-widest cursor-pointer">End time</label>
+            </div>
+            {form.rsvp_end_time !== undefined && (
+              <input type="datetime-local" value={form.rsvp_end_time}
+                onChange={e => set('rsvp_end_time')(e.target.value)}
+                disabled={!form.rsvp_end_time && form.rsvp_end_time !== ' '}
+                onClick={() => { if (!form.rsvp_end_time) set('rsvp_end_time')(' ') }}
+                className="w-full rounded-xl border border-[#E0D8C6] px-3 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C9BFA8] disabled:opacity-40 disabled:bg-[#F4F3F0]" />
+            )}
+          </div>
+        </div>
+
+        {/* Row 2 — Timezone + RSVP deadline */}
+        <div className="grid grid-cols-2 gap-3">
+          <FieldRow label="Timezone">
+            <Sel value={form.rsvp_timezone} onChange={set('rsvp_timezone')} options={timezones} />
+          </FieldRow>
+          <FieldRow label="RSVP deadline (optional)">
+            <input type="datetime-local" value={form.rsvp_deadline} onChange={e => set('rsvp_deadline')(e.target.value)}
+              className="w-full rounded-xl border border-[#E0D8C6] px-3 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C9BFA8]" />
+          </FieldRow>
+        </div>
       </Card>
 
       {/* RSVP options */}
