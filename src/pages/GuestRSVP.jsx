@@ -566,6 +566,292 @@ function ConfirmationScreen({ event, rsvpResult, accentColor, fontFamily, onEdit
   )
 }
 
+// ── Hero Banner (shared across steps) ────────────────────────
+function HeroBanner({ event, bgImage, bgPosition, tintAlpha, fontFamily, accentColor }) {
+  const eventDateStr = fmt(event.rsvp_event_date, event.rsvp_timezone)
+  return (
+    <div className="relative w-full" style={{ height: 'clamp(240px, 40vw, 360px)' }}>
+      {bgImage && (
+        <div className="absolute inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+      )}
+      <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+      <div className="absolute inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)' }} />
+      <div className="absolute top-4 left-4">
+        <a href="/"><VantgeLogo size="sm" monoWhite /></a>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
+        <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/60 mb-1">You're Invited</p>
+        <h1 className="font-extrabold text-white leading-tight mb-2" style={{ fontFamily, fontSize: 'clamp(1.6rem, 5vw, 2.5rem)' }}>
+          {event.rsvp_host_display_name || event.event_name}
+        </h1>
+        <div className="flex flex-col gap-1">
+          {eventDateStr && (
+            <div className="flex items-center gap-2 text-sm text-white/80">
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {eventDateStr}
+            </div>
+          )}
+          {event.rsvp_location && (
+            <div className="flex items-center gap-2 text-sm text-white/80">
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {event.rsvp_location}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Step 1: Event details / advertisement ────────────────────
+function InviteStep({ event, accentColor, fontFamily, deadlineStr, onNext }) {
+  const pastDeadline = isPastDeadline(event.rsvp_deadline)
+  return (
+    <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-5">
+      {/* Description card */}
+      {event.rsvp_description && (
+        <div className="bg-white rounded-2xl border border-[#E0D8C6] px-5 py-4">
+          <p className="text-sm text-[#5A5A52] leading-relaxed">{event.rsvp_description}</p>
+        </div>
+      )}
+
+      {/* Details card */}
+      <div className="bg-white rounded-2xl border border-[#E0D8C6] divide-y divide-[#F4F3F0]">
+        {event.rsvp_location && (
+          <a
+            href={`https://maps.google.com/?q=${encodeURIComponent(event.rsvp_location)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-4 px-5 py-4 hover:bg-[#F8F5ED] transition-colors group"
+          >
+            <div className="w-9 h-9 rounded-xl bg-[#F4F3F0] flex items-center justify-center shrink-0 group-hover:bg-[#E8E4DA] transition-colors">
+              <svg width="16" height="16" fill="none" stroke="#C84A44" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-[#88887E] uppercase tracking-widest">Location</p>
+              <p className="text-sm font-semibold text-[#1A1A18] truncate">{event.rsvp_location}</p>
+            </div>
+            <svg width="14" height="14" fill="none" stroke="#B0AFA5" strokeWidth="2" viewBox="0 0 24 24" className="shrink-0"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </a>
+        )}
+        {deadlineStr && (
+          <div className="flex items-center gap-4 px-5 py-4">
+            <div className="w-9 h-9 rounded-xl bg-[#F4F3F0] flex items-center justify-center shrink-0">
+              <svg width="16" height="16" fill="none" stroke="#5A5A52" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-[#88887E] uppercase tracking-widest">RSVP Deadline</p>
+              <p className="text-sm font-semibold text-[#1A1A18]">{deadlineStr}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* CTA */}
+      {pastDeadline ? (
+        <div className="bg-[#F4F3F0] rounded-2xl px-5 py-4 text-center">
+          <p className="text-sm font-bold text-[#88887E]">RSVP deadline has passed</p>
+          <p className="text-xs text-[#B0AFA5] mt-1">This event is no longer accepting RSVPs.</p>
+        </div>
+      ) : (
+        <button
+          onClick={onNext}
+          className="w-full rounded-2xl py-4 text-base font-black text-white transition-all active:scale-[0.98] shadow-sm"
+          style={{ backgroundColor: accentColor }}
+        >
+          RSVP Now →
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ── Step 2: RSVP response ─────────────────────────────────────
+function RSVPStep({ event, accentColor, existingResponse, onSuccess, onBack }) {
+  const [response, setResponse] = useState(existingResponse?.response || 'going')
+  const [name, setName] = useState(existingResponse?.guest_name || '')
+  const [email, setEmail] = useState('')
+  const [partySize, setPartySize] = useState(existingResponse?.party_size || 1)
+  const [guestNames, setGuestNames] = useState(existingResponse?.guest_names || '')
+  const [note, setNote] = useState(existingResponse?.note || '')
+  const [showGuestNames, setShowGuestNames] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [errors, setErrors] = useState({})
+  const isEdit = !!existingResponse
+
+  function validate() {
+    const e = {}
+    if (!name.trim()) e.name = 'Name is required'
+    if (event.rsvp_collect_email && !email.trim()) e.email = 'Email is required'
+    if (event.rsvp_collect_email && email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = 'Enter a valid email'
+    return e
+  }
+
+  async function handleSubmit() {
+    const e = validate()
+    if (Object.keys(e).length) { setErrors(e); return }
+    setSubmitting(true)
+    setErrors({})
+    try {
+      let result
+      if (isEdit) {
+        const { data, error } = await supabase
+          .from('rsvp_responses')
+          .update({ response, guest_name: name.trim(), party_size: partySize, guest_names: guestNames.trim() || null, note: note.trim() || null, updated_at: new Date().toISOString() })
+          .eq('id', existingResponse.id)
+          .select('id, edit_token')
+          .single()
+        if (error) throw error
+        result = data
+      } else {
+        const { data, error } = await supabase
+          .from('rsvp_responses')
+          .insert({ event_id: event.id, response, guest_name: name.trim(), party_size: partySize, guest_names: guestNames.trim() || null, note: note.trim() || null })
+          .select('id, edit_token')
+          .single()
+        if (error) throw error
+        result = data
+        if (email.trim()) {
+          await supabase.from('rsvp_contacts').insert({ response_id: result.id, email: email.trim() })
+        }
+      }
+      onSuccess({ ...result, guest_name: name.trim(), response, party_size: partySize })
+    } catch (err) {
+      setErrors({ submit: err.message || 'Something went wrong. Please try again.' })
+    }
+    setSubmitting(false)
+  }
+
+  return (
+    <div className="max-w-lg mx-auto px-4 py-8">
+      <div className="bg-white rounded-2xl border border-[#E0D8C6] p-6 flex flex-col gap-5">
+        <div>
+          <h2 className="text-xl font-black text-[#1A1A18] mb-1">Will you be there?</h2>
+          <p className="text-sm text-[#88887E]">Let the host know if you can make it.</p>
+        </div>
+
+        {/* Big response buttons */}
+        <div className="flex flex-col gap-2">
+          {[
+            { value: 'going', label: "I'm Going 🎉" },
+            ...(event.rsvp_allow_maybe !== false ? [{ value: 'maybe', label: 'Maybe 🤔' }] : []),
+            { value: 'not_going', label: "Can't Attend 💛" },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setResponse(opt.value)}
+              className={`w-full rounded-xl px-5 py-3.5 text-base font-bold border-2 transition-all text-left ${
+                response === opt.value ? 'text-white border-transparent' : 'bg-white text-[#5A5A52] border-[#E0D8C6] hover:border-[#C9BFA8]'
+              }`}
+              style={response === opt.value ? { backgroundColor: accentColor, borderColor: accentColor } : {}}
+            >
+              {response === opt.value && <span className="mr-2">✓</span>}
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="border-t border-[#F4F3F0] pt-4 flex flex-col gap-4">
+          <FieldInput label="Your name" value={name} onChange={setName} placeholder="Jordan Taylor" required error={errors.name} />
+          {event.rsvp_collect_email && (
+            <FieldInput label="Your email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" required error={errors.email} />
+          )}
+
+          {response !== 'not_going' && (
+            <div className="border border-[#E0D8C6] rounded-xl px-4 py-3.5">
+              <HeadcountStepper value={partySize} onChange={setPartySize} />
+            </div>
+          )}
+
+          {response !== 'not_going' && (event.rsvp_headcount_mode === 'names' || event.rsvp_headcount_mode === 'both') && (
+            <div>
+              <button
+                onClick={() => setShowGuestNames(v => !v)}
+                className="flex items-center gap-2 text-sm font-semibold text-[#5A5A52] hover:text-[#1A1A18] transition-colors"
+              >
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d={showGuestNames ? 'M18 15l-6-6-6 6' : 'M6 9l6 6 6-6'} strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Add guest names (optional)
+              </button>
+              {showGuestNames && (
+                <textarea
+                  value={guestNames}
+                  onChange={e => setGuestNames(e.target.value)}
+                  placeholder="One name per line"
+                  rows={3}
+                  className="mt-2 w-full rounded-xl border border-[#E0D8C6] px-4 py-3 text-sm text-[#1A1A18] placeholder-[#B0AFA5] focus:outline-none focus:border-[#C9BFA8] resize-none"
+                />
+              )}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-semibold text-[#1A1A18] mb-1.5">Note <span className="text-[#88887E] font-normal">(optional)</span></label>
+            <textarea
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="Any message for the host…"
+              rows={2}
+              className="w-full rounded-xl border border-[#E0D8C6] px-4 py-3 text-sm text-[#1A1A18] placeholder-[#B0AFA5] focus:outline-none focus:border-[#C9BFA8] resize-none"
+            />
+          </div>
+
+          {errors.submit && (
+            <div className="rounded-xl bg-[#FEF2F2] border border-[#FECACA] px-4 py-3 text-sm text-[#C84A44]">{errors.submit}</div>
+          )}
+
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="w-full rounded-xl py-3.5 text-sm font-bold text-white transition-all active:scale-[0.98] disabled:opacity-50"
+            style={{ backgroundColor: accentColor }}
+          >
+            {submitting ? 'Sending…' : isEdit ? 'Update RSVP' : 'Send RSVP'}
+          </button>
+        </div>
+      </div>
+
+      <button onClick={onBack} className="mt-4 flex items-center gap-1.5 text-sm text-[#88887E] hover:text-[#1A1A18] transition-colors">
+        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        Back to details
+      </button>
+    </div>
+  )
+}
+
+// ── Step 3: Food list ─────────────────────────────────────────
+function FoodStep({ event, accentColor, rsvpResult, onBack, onDone }) {
+  return (
+    <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-5">
+      <div className="bg-white rounded-2xl border border-[#E0D8C6] px-5 py-4">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-6 h-6 rounded-full flex items-center justify-center text-sm" style={{ backgroundColor: accentColor + '20' }}>✓</div>
+          <p className="text-sm font-bold text-[#1A1A18]">RSVP received!</p>
+        </div>
+        <p className="text-xs text-[#88887E]">
+          {rsvpResult.response === 'going' ? `See you there, ${rsvpResult.guest_name}! 🎉` : `Thanks for letting us know, ${rsvpResult.guest_name}.`}
+        </p>
+      </div>
+
+      <FoodSignup event={event} accentColor={accentColor} />
+
+      <button
+        onClick={onDone}
+        className="w-full rounded-2xl py-3.5 text-sm font-bold text-white transition-all active:scale-[0.98]"
+        style={{ backgroundColor: accentColor }}
+      >
+        Done
+      </button>
+
+      <button onClick={onBack} className="flex items-center justify-center gap-1.5 text-sm text-[#88887E] hover:text-[#1A1A18] transition-colors">
+        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        Back
+      </button>
+    </div>
+  )
+}
+
 // ── Main Page ─────────────────────────────────────────────────
 export default function GuestRSVP() {
   const { eventSlug } = useParams()
@@ -575,12 +861,12 @@ export default function GuestRSVP() {
   const { event, loading: eventLoading } = useEvent(eventSlug)
   const bg = useResponsiveBg(event?.background_image, event?.background_image_desktop)
 
-  const [activeTab, setActiveTab] = useState('rsvp')
-  const [rsvpSuccess, setRsvpSuccess] = useState(null)
+  // step: 'invite' | 'rsvp' | 'food' | 'done'
+  const [step, setStep] = useState('invite')
+  const [rsvpResult, setRsvpResult] = useState(null)
   const [existingResponse, setExistingResponse] = useState(null)
   const [editLoading, setEditLoading] = useState(!!editToken)
 
-  // Load existing response for edit flow
   useEffect(() => {
     if (!editToken) return
     setEditLoading(true)
@@ -590,7 +876,7 @@ export default function GuestRSVP() {
       .eq('edit_token', editToken)
       .maybeSingle()
       .then(({ data }) => {
-        if (data) setExistingResponse(data)
+        if (data) { setExistingResponse(data); setStep('rsvp') }
         setEditLoading(false)
       })
   }, [editToken])
@@ -645,128 +931,70 @@ export default function GuestRSVP() {
   const accentColor = c.accent
   const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
 
-  const showRSVP = event.rsvp_mode === 'rsvp_only' || event.rsvp_mode === 'rsvp_and_food'
   const showFood = event.food_enabled && (event.rsvp_mode === 'food_only' || event.rsvp_mode === 'rsvp_and_food')
-  const showPhotos = event.gallery_unlocked
-
-  const tabs = [
-    ...(showRSVP ? [{ id: 'rsvp', label: 'RSVP' }] : []),
-    ...(showFood ? [{ id: 'food', label: event.food_heading || 'Food Sign-up' }] : []),
-    ...(showPhotos ? [{ id: 'photos', label: 'Photos' }] : []),
-  ]
-
   const deadlineStr = fmtDeadline(event.rsvp_deadline, event.rsvp_timezone)
-  const eventDateStr = fmt(event.rsvp_event_date, event.rsvp_timezone)
+
+  function handleRsvpSuccess(result) {
+    setRsvpResult(result)
+    if (showFood && result.response !== 'not_going') {
+      setStep('food')
+    } else {
+      setStep('done')
+    }
+  }
+
+  const heroProps = { event, bgImage, bgPosition, tintAlpha, fontFamily, accentColor }
 
   return (
     <>
       <FontLoader fontId={event.rsvp_font || event.font_family} />
       <div className="min-h-screen bg-[#F4F3F0]">
+        <HeroBanner {...heroProps} />
 
-        {/* ── Hero banner ─────────────────────────────────────── */}
-        <div className="relative w-full" style={{ height: 'clamp(220px, 35vw, 320px)' }}>
-          {bgImage && (
-            <div className="absolute inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
-          )}
-          <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-          <div className="absolute inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }} />
-
-          {/* Logo */}
-          <div className="absolute top-4 left-4">
-            <a href="/"><VantgeLogo size="sm" monoWhite /></a>
-          </div>
-
-          {/* Event info overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
-            <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/60 mb-1">You're Invited</p>
-            <h1 className="font-extrabold text-white leading-tight mb-1" style={{ fontFamily, fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>
-              {event.rsvp_host_display_name || event.event_name}
-            </h1>
-            <div className="flex flex-col gap-1">
-              {eventDateStr && (
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  {eventDateStr}
-                </div>
-              )}
-              {event.rsvp_location && (
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  {event.rsvp_location}
-                </div>
-              )}
-              {deadlineStr && (
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8l-4 4-2-2"/></svg>
-                  RSVP by {deadlineStr}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Tab bar ─────────────────────────────────────────── */}
-        {tabs.length > 1 && (
-          <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} accent={accentColor} />
+        {step === 'invite' && (
+          <InviteStep
+            event={event}
+            accentColor={accentColor}
+            fontFamily={fontFamily}
+            deadlineStr={deadlineStr}
+            onNext={() => setStep('rsvp')}
+          />
         )}
 
-        {/* ── Content ─────────────────────────────────────────── */}
-        <div className="max-w-5xl mx-auto px-4 py-6">
-          {/* Description */}
-          {event.rsvp_description && (
-            <p className="text-sm text-[#5A5A52] mb-5 max-w-xl">{event.rsvp_description}</p>
-          )}
+        {step === 'rsvp' && (
+          <RSVPStep
+            event={event}
+            accentColor={accentColor}
+            existingResponse={existingResponse}
+            onSuccess={handleRsvpSuccess}
+            onBack={() => setStep('invite')}
+          />
+        )}
 
-          <div className="grid md:grid-cols-2 gap-5 items-start">
-            {/* Left column */}
-            <div>
-              {activeTab === 'rsvp' && showRSVP && (
-                rsvpSuccess ? (
-                  <ConfirmationScreen
-                    event={event}
-                    rsvpResult={rsvpSuccess}
-                    accentColor={accentColor}
-                    fontFamily={fontFamily}
-                    onEdit={() => { setExistingResponse(rsvpSuccess); setRsvpSuccess(null) }}
-                  />
-                ) : (
-                  <RSVPForm
-                    event={event}
-                    accentColor={accentColor}
-                    existingResponse={existingResponse}
-                    onSuccess={setRsvpSuccess}
-                  />
-                )
-              )}
-              {activeTab === 'food' && showFood && <FoodSignup event={event} accentColor={accentColor} />}
-              {activeTab === 'photos' && showPhotos && <PhotosTab event={event} eventSlug={eventSlug} accentColor={accentColor} />}
-            </div>
+        {step === 'food' && (
+          <FoodStep
+            event={event}
+            accentColor={accentColor}
+            rsvpResult={rsvpResult}
+            onBack={() => setStep('rsvp')}
+            onDone={() => setStep('done')}
+          />
+        )}
 
-            {/* Right column — food shown alongside RSVP on desktop */}
-            {activeTab === 'rsvp' && showFood && (
-              <div className="hidden md:block">
-                <FoodSignup event={event} accentColor={accentColor} />
-              </div>
-            )}
-
-            {/* Food shown below RSVP on mobile */}
-            {activeTab === 'rsvp' && showFood && (
-              <div className="md:hidden">
-                <FoodSignup event={event} accentColor={accentColor} />
-              </div>
-            )}
+        {step === 'done' && (
+          <div className="max-w-lg mx-auto px-4 py-8">
+            <ConfirmationScreen
+              event={event}
+              rsvpResult={rsvpResult}
+              accentColor={accentColor}
+              fontFamily={fontFamily}
+              onEdit={() => { setExistingResponse(rsvpResult); setRsvpResult(null); setStep('rsvp') }}
+            />
           </div>
-
-          {/* Photos row — always below on RSVP tab */}
-          {activeTab === 'rsvp' && showPhotos && (
-            <div className="mt-5">
-              <PhotosTab event={event} eventSlug={eventSlug} accentColor={accentColor} />
-            </div>
-          )}
-        </div>
+        )}
 
         {/* ── Vantge promo footer ──────────────────────────────── */}
-        <div className="max-w-5xl mx-auto px-4 pb-10 mt-4">
+        <div className="max-w-lg mx-auto px-4 pb-10 mt-4">
           <div className="flex items-center justify-between bg-white rounded-2xl border border-[#E0D8C6] px-5 py-4 flex-wrap gap-3">
             <div className="flex items-center gap-3">
               <VantgeLogo size="xs" />

@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase'
 import VantgeLogo from '../components/VantgeLogo'
 import { getAllThemes } from '../lib/themes'
 import { getFontsByCategory, getFont, getAllFonts, getGoogleFontsUrl, DEFAULT_FONT_ID } from '../lib/fonts'
-import { EVENT_TYPES } from '../lib/eventTypes'
+import { EVENT_TYPES, getEventType } from '../lib/eventTypes'
 import BackgroundUploader from '../components/BackgroundUploader'
 import LogoUploader from '../components/LogoUploader'
 
@@ -41,10 +41,39 @@ function TextInput({ value, onChange, placeholder, type = 'text', rows }) {
   if (rows) return <textarea value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows} className={cls + ' resize-none'} />
   return <input type={type} value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={cls} />
 }
-function FieldRow({ label, children }) {
+function InfoTip({ text }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <span className="relative inline-flex items-center ml-1.5">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        className="w-4 h-4 rounded-full bg-[#E8E4DA] hover:bg-[#D4CFBC] flex items-center justify-center transition-colors shrink-0"
+        aria-label="More info"
+      >
+        <svg width="8" height="8" fill="none" stroke="#88887E" strokeWidth="2.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="8" strokeWidth="3" strokeLinecap="round"/>
+          <line x1="12" y1="12" x2="12" y2="16" strokeLinecap="round"/>
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute left-6 top-0 z-50 w-56 bg-[#1A1A18] text-white text-[11px] leading-relaxed rounded-xl px-3 py-2.5 shadow-xl">
+          {text}
+          <div className="absolute left-[-5px] top-1.5 w-2.5 h-2.5 bg-[#1A1A18] rotate-45 rounded-sm" />
+        </div>
+      )}
+    </span>
+  )
+}
+function FieldRow({ label, children, info }) {
   return (
     <div>
-      <p className="text-xs font-bold text-[#88887E] uppercase tracking-widest mb-1.5">{label}</p>
+      <div className="flex items-center mb-1.5">
+        <p className="text-xs font-bold text-[#88887E] uppercase tracking-widest">{label}</p>
+        {info && <InfoTip text={info} />}
+      </div>
       {children}
     </div>
   )
@@ -62,8 +91,8 @@ function Sel({ value, onChange, options }) {
 const TABS = [
   { id: 'setup',     label: 'Event Setup' },
   { id: 'design',    label: 'Design' },
-  { id: 'responses', label: 'Responses' },
   { id: 'food',      label: 'Food Sign-up' },
+  { id: 'responses', label: 'Responses' },
 ]
 
 const ALL_THEMES = getAllThemes()
@@ -191,7 +220,7 @@ function SetupTab({ event, onSaved }) {
         <FieldRow label="Host display name">
           <TextInput value={form.rsvp_host_display_name} onChange={set('rsvp_host_display_name')} placeholder="e.g. The Johnson Family" />
         </FieldRow>
-        <FieldRow label="Description (optional)">
+        <FieldRow label="Description (optional)" info="This message appears on your invitation page — use it to greet guests, share dress code, parking notes, or anything they need to know before RSVPing.">
           <TextInput value={form.rsvp_description} onChange={set('rsvp_description')} placeholder="A short note for your guests…" rows={2} />
         </FieldRow>
         <FieldRow label="Location">
@@ -297,148 +326,24 @@ function SetupTab({ event, onSaved }) {
   )
 }
 
-// ── Invitations Tab ───────────────────────────────────────────
-function InvitationsTab({ event }) {
-  const guestUrl = `${window.location.origin}/${event.event_slug}/rsvp`
-  const [copied, setCopied]     = useState(false)
-  const [textCopied, setTextCopied] = useState(false)
-  const qrRef = useRef(null)
-
-  function copy(text, setter) {
-    navigator.clipboard.writeText(text).then(() => { setter(true); setTimeout(() => setter(false), 2000) })
-  }
-
-  const inviteText = [
-    `You're invited to ${event.event_name}!`,
-    event.rsvp_host_display_name ? `Hosted by ${event.rsvp_host_display_name}` : null,
-    event.rsvp_event_date ? `📅 ${new Date(event.rsvp_event_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}` : null,
-    event.rsvp_location ? `📍 ${event.rsvp_location}` : null,
-    event.rsvp_deadline ? `RSVP by ${new Date(event.rsvp_deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}` : null,
-    '',
-    `RSVP here: ${guestUrl}`,
-  ].filter(l => l !== null).join('\n')
-
-  const mailtoHref = `mailto:?subject=${encodeURIComponent(`You're invited: ${event.event_name}`)}&body=${encodeURIComponent(inviteText)}`
-
-  async function nativeShare() {
-    if (!navigator.share) return
-    try { await navigator.share({ title: `You're invited: ${event.event_name}`, text: inviteText, url: guestUrl }) }
-    catch {}
-  }
-
-  function downloadQR() {
-    const svg = qrRef.current?.querySelector('svg')
-    if (!svg) return
-    const svgData = new XMLSerializer().serializeToString(svg)
-    const blob = new Blob([svgData], { type: 'image/svg+xml' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = `rsvp-qr-${event.event_slug}.svg`; a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const isPublished = event.rsvp_status === 'published'
-
-  return (
-    <div className="space-y-4">
-
-      {!isPublished && (
-        <div className="rounded-2xl bg-[#FEF9EC] border border-[#F5D97A] px-5 py-4 flex items-start gap-3">
-          <svg width="16" height="16" fill="none" stroke="#B29746" strokeWidth="2" viewBox="0 0 24 24" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <p className="text-sm text-[#8B7224]">
-            Your invitation is in <strong>Draft</strong> mode. Go to <strong>Event Setup</strong> and set the status to <strong>Published</strong> before sharing.
-          </p>
-        </div>
-      )}
-
-      {/* Guest link */}
-      <Card className="p-5">
-        <SectionLabel>Guest RSVP Link</SectionLabel>
-        <div className="mt-3 flex items-center gap-2 bg-[#F8F5ED] rounded-xl px-4 py-3">
-          <p className="flex-1 text-xs text-[#5A5A52] truncate font-mono">{guestUrl}</p>
-          <button onClick={() => copy(guestUrl, setCopied)} className="text-xs font-bold text-[#1A1A18] shrink-0 hover:text-black transition-colors">
-            {copied ? '✓ Copied' : 'Copy'}
-          </button>
-        </div>
-      </Card>
-
-      {/* QR code — standalone, dedicated */}
-      <Card className="p-5">
-        <SectionLabel>RSVP QR Code</SectionLabel>
-        <p className="text-xs text-[#88887E] mt-1 mb-4">Guests scan this to open the RSVP page directly. Print it, add it to an invite, or display it at the door.</p>
-        <div className="flex flex-col items-center gap-4">
-          <div ref={qrRef} className="bg-white p-4 rounded-2xl border border-[#E0D8C6] inline-block">
-            <QRCodeSVG value={guestUrl} size={180} includeMargin={false} />
-          </div>
-          <div className="flex gap-2">
-            <button onClick={downloadQR}
-              className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#1A1A18] rounded-full px-4 py-2 hover:bg-black transition-colors">
-              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download QR
-            </button>
-            <button onClick={() => copy(guestUrl, setCopied)}
-              className="text-xs font-bold text-[#1A1A18] border border-[#E0D8C6] rounded-full px-4 py-2 hover:bg-[#F4F3F0] transition-colors">
-              Copy link
-            </button>
-          </div>
-          <p className="text-[10px] text-[#B0AFA5] text-center">Links to: {guestUrl}</p>
-        </div>
-      </Card>
-
-      {/* Share options */}
-      <Card className="p-5">
-        <SectionLabel>Share Invitation</SectionLabel>
-        <div className="mt-3 space-y-2">
-
-          <a href={mailtoHref}
-            className="flex items-center gap-3 w-full rounded-xl border border-[#E0D8C6] px-4 py-3 text-sm font-bold text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors">
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-            </svg>
-            Open email draft
-            <span className="ml-auto text-[10px] text-[#88887E] font-bold uppercase tracking-widest">via your email app</span>
-          </a>
-
-          {typeof navigator !== 'undefined' && navigator.share && (
-            <button onClick={nativeShare}
-              className="flex items-center gap-3 w-full rounded-xl border border-[#E0D8C6] px-4 py-3 text-sm font-bold text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors">
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-              </svg>
-              Share invitation
-            </button>
-          )}
-
-          <button onClick={() => copy(inviteText, setTextCopied)}
-            className="flex items-center gap-3 w-full rounded-xl border border-[#E0D8C6] px-4 py-3 text-sm font-bold text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors">
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-            </svg>
-            {textCopied ? '✓ Copied!' : 'Copy invitation text'}
-            <span className="ml-auto text-[10px] text-[#88887E] font-bold uppercase tracking-widest">for texting</span>
-          </button>
-        </div>
-        <p className="text-[10px] text-[#B0AFA5] mt-3 leading-relaxed">
-          You review and send through your own apps. No messages are sent automatically by Vantge.
-        </p>
-      </Card>
-    </div>
-  )
-}
-
 // ── Responses Tab ─────────────────────────────────────────────
 function ResponsesTab({ event }) {
+  const [subTab, setSubTab]       = useState('guests')
   const [responses, setResponses] = useState([])
+  const [foodClaims, setFoodClaims] = useState([])
+  const [foodItems, setFoodItems]   = useState([])
   const [loading, setLoading]     = useState(true)
   const [filter, setFilter]       = useState('all')
 
   const load = useCallback(async () => {
-    const { data } = await supabase
-      .from('rsvp_responses').select('*')
-      .eq('event_id', event.id)
-      .order('created_at', { ascending: false })
-    setResponses(data || [])
+    const [{ data: rData }, { data: cData }, { data: iData }] = await Promise.all([
+      supabase.from('rsvp_responses').select('*').eq('event_id', event.id).order('created_at', { ascending: false }),
+      supabase.from('food_claims').select('*, food_items(name, category)').eq('event_id', event.id).order('created_at', { ascending: false }),
+      supabase.from('food_items').select('*').eq('event_id', event.id).order('sort_order').order('created_at'),
+    ])
+    setResponses(rData || [])
+    setFoodClaims(cData || [])
+    setFoodItems(iData || [])
     setLoading(false)
   }, [event.id])
 
@@ -469,17 +374,23 @@ function ResponsesTab({ event }) {
   const totalAttendees = going.reduce((s, r) => s + r.party_size, 0)
   const filtered = filter === 'all' ? responses : responses.filter(r => r.response === filter)
 
+  // Group food claims by item
+  const claimsByItem = foodItems.map(item => ({
+    item,
+    claims: foodClaims.filter(c => c.food_item_id === item.id),
+  }))
+
   if (loading) return <div className="py-10 text-center text-sm text-[#88887E]">Loading…</div>
 
   return (
     <div className="space-y-4">
 
-      {/* Stats */}
+      {/* Stats row */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Going',       count: going.length,    sub: `${totalAttendees} attending`, color: '#1A1A18' },
-          { label: 'Maybe',       count: maybe.length,    sub: 'responses',                   color: '#B29746' },
-          { label: "Can't attend", count: notGoing.length, sub: 'responses',                  color: '#C84A44' },
+          { label: 'Going',        count: going.length,    sub: `${totalAttendees} attending`, color: '#1A1A18' },
+          { label: 'Maybe',        count: maybe.length,    sub: 'responses',                   color: '#B29746' },
+          { label: "Can't attend", count: notGoing.length, sub: 'responses',                   color: '#C84A44' },
         ].map(s => (
           <Card key={s.label} className="p-4 text-center">
             <p className="text-2xl font-black leading-tight" style={{ color: s.color }}>{s.count}</p>
@@ -489,59 +400,114 @@ function ResponsesTab({ event }) {
         ))}
       </div>
 
-      {/* List */}
-      <Card className="overflow-hidden">
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 flex-wrap gap-2">
-          <SectionLabel>All Responses ({responses.length})</SectionLabel>
-          <div className="flex items-center gap-2">
-            <select value={filter} onChange={e => setFilter(e.target.value)}
-              className="text-xs font-bold border border-[#E0D8C6] rounded-full px-3 py-1.5 bg-white text-[#1A1A18] focus:outline-none">
-              <option value="all">All</option>
-              <option value="going">Going</option>
-              <option value="maybe">Maybe</option>
-              <option value="not_going">Can't attend</option>
-            </select>
-            {responses.length > 0 && (
-              <button onClick={exportCSV}
-                className="text-xs font-bold text-[#1A1A18] border border-[#E0D8C6] rounded-full px-3 py-1.5 hover:bg-[#F4F3F0] transition-colors">
-                Export CSV
-              </button>
-            )}
-          </div>
-        </div>
+      {/* Sub-tab switcher */}
+      <div className="flex gap-1 bg-[#F4F3F0] rounded-xl p-1">
+        {[
+          { id: 'guests', label: 'Guest List' },
+          { id: 'food',   label: 'Food Sign-up' },
+        ].map(t => (
+          <button key={t.id} onClick={() => setSubTab(t.id)}
+            className={`flex-1 text-xs font-bold py-2 rounded-lg transition-all ${
+              subTab === t.id ? 'bg-white text-[#1A1A18] shadow-sm' : 'text-[#88887E] hover:text-[#1A1A18]'
+            }`}>
+            {t.label}
+          </button>
+        ))}
+      </div>
 
-        {filtered.length === 0 ? (
-          <p className="px-5 pb-6 text-sm text-[#88887E]">{responses.length === 0 ? 'No responses yet.' : 'None in this filter.'}</p>
-        ) : (
-          <div className="divide-y divide-[#F4F3F0]">
-            {filtered.map(r => (
-              <div key={r.id} className="px-5 py-3.5 flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-bold text-[#1A1A18]">{r.guest_name}</p>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                      r.response === 'going'    ? 'bg-green-100 text-green-800'  :
-                      r.response === 'maybe'    ? 'bg-yellow-100 text-yellow-800' :
+      {/* Guest List sub-tab */}
+      {subTab === 'guests' && (
+        <Card className="overflow-hidden">
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 flex-wrap gap-2">
+            <SectionLabel>All Responses ({responses.length})</SectionLabel>
+            <div className="flex items-center gap-2">
+              <select value={filter} onChange={e => setFilter(e.target.value)}
+                className="text-xs font-bold border border-[#E0D8C6] rounded-full px-3 py-1.5 bg-white text-[#1A1A18] focus:outline-none">
+                <option value="all">All</option>
+                <option value="going">Going</option>
+                <option value="maybe">Maybe</option>
+                <option value="not_going">Can't attend</option>
+              </select>
+              {responses.length > 0 && (
+                <button onClick={exportCSV}
+                  className="text-xs font-bold text-[#1A1A18] border border-[#E0D8C6] rounded-full px-3 py-1.5 hover:bg-[#F4F3F0] transition-colors">
+                  Export CSV
+                </button>
+              )}
+            </div>
+          </div>
+          {filtered.length === 0 ? (
+            <p className="px-5 pb-6 text-sm text-[#88887E]">{responses.length === 0 ? 'No responses yet.' : 'None in this filter.'}</p>
+          ) : (
+            <div className="divide-y divide-[#F4F3F0]">
+              {filtered.map(r => (
+                <div key={r.id} className="px-5 py-3.5 flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-bold text-[#1A1A18]">{r.guest_name}</p>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                        r.response === 'going'  ? 'bg-green-100 text-green-800' :
+                        r.response === 'maybe'  ? 'bg-yellow-100 text-yellow-800' :
                                                   'bg-red-100 text-red-800'
-                    }`}>
-                      {r.response === 'going' ? 'Going' : r.response === 'maybe' ? 'Maybe' : "Can't attend"}
-                    </span>
-                    {r.party_size > 1 && (
-                      <span className="text-xs text-[#88887E]">+{r.party_size - 1} guest{r.party_size > 2 ? 's' : ''}</span>
+                      }`}>
+                        {r.response === 'going' ? 'Going' : r.response === 'maybe' ? 'Maybe' : "Can't attend"}
+                      </span>
+                      {r.party_size > 1 && (
+                        <span className="text-xs text-[#88887E]">+{r.party_size - 1} guest{r.party_size > 2 ? 's' : ''}</span>
+                      )}
+                    </div>
+                    {r.guest_names && <p className="text-xs text-[#88887E] mt-0.5">{r.guest_names}</p>}
+                    {r.note && <p className="text-xs text-[#5A5A52] italic mt-0.5">"{r.note}"</p>}
+                    <p className="text-[10px] text-[#B0AFA5] mt-1">{new Date(r.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <button onClick={() => remove(r.id)} className="text-[#C84A44] hover:text-red-700 text-xs font-bold shrink-0 transition-colors">
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Food sign-up sub-tab */}
+      {subTab === 'food' && (
+        <Card className="overflow-hidden">
+          <div className="px-5 pt-4 pb-3">
+            <SectionLabel>Who's Bringing What ({foodClaims.length} claim{foodClaims.length !== 1 ? 's' : ''})</SectionLabel>
+          </div>
+          {foodItems.length === 0 ? (
+            <p className="px-5 pb-6 text-sm text-[#88887E]">No food items set up yet. Add items in the Food Sign-up tab.</p>
+          ) : foodClaims.length === 0 ? (
+            <p className="px-5 pb-6 text-sm text-[#88887E]">No one has claimed a food item yet.</p>
+          ) : (
+            <div className="divide-y divide-[#F4F3F0]">
+              {claimsByItem.filter(g => g.claims.length > 0).map(({ item, claims }) => (
+                <div key={item.id} className="px-5 py-3.5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-sm font-bold text-[#1A1A18]">{item.name}</p>
+                    {item.category && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#88887E] border border-[#E0D8C6] rounded-full px-2 py-0.5">{item.category}</span>
                     )}
                   </div>
-                  {r.guest_names && <p className="text-xs text-[#88887E] mt-0.5">{r.guest_names}</p>}
-                  {r.note && <p className="text-xs text-[#5A5A52] italic mt-0.5">"{r.note}"</p>}
-                  <p className="text-[10px] text-[#B0AFA5] mt-1">{new Date(r.created_at).toLocaleDateString()}</p>
+                  <div className="flex flex-col gap-1.5 pl-2">
+                    {claims.map(c => (
+                      <div key={c.id} className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#C9BFA8] mt-1.5 shrink-0" />
+                        <div>
+                          <p className="text-xs font-semibold text-[#1A1A18]">{c.guest_name}</p>
+                          {c.description && <p className="text-xs text-[#88887E]">{c.description}</p>}
+                          {c.quantity > 1 && <p className="text-xs text-[#B0AFA5]">×{c.quantity}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <button onClick={() => remove(r.id)} className="text-[#C84A44] hover:text-red-700 text-xs font-bold shrink-0 transition-colors">
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   )
 }
@@ -1094,6 +1060,23 @@ export default function RSVPDashboard() {
         themeId: event.rsvp_theme || 'warm_editorial',
         fontId:  event.rsvp_font  || DEFAULT_FONT_ID,
       })
+      // Apply admin branding default bg if no custom image set
+      const isCustom = (url) => url && url.includes('/backgrounds/')
+      if (!isCustom(event.background_image) || !isCustom(event.background_image_desktop)) {
+        const brandingKey = event.event_type || 'none'
+        const hardcodedFallback = getEventType(event.event_type)?.defaultBg ?? null
+        supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle().then(({ data }) => {
+          const adminDefault = data?.background_url || hardcodedFallback
+          if (!adminDefault) return
+          const updates = {}
+          if (!isCustom(event.background_image)) updates.background_image = adminDefault
+          if (!isCustom(event.background_image_desktop)) updates.background_image_desktop = adminDefault
+          if (!Object.keys(updates).length) return
+          supabase.from('events').update(updates).eq('id', event.id).then(() => {
+            setLocalEvent(e => ({ ...(e || event), ...updates }))
+          })
+        })
+      }
     }
   }, [event?.id])
 
