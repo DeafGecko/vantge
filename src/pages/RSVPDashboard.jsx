@@ -910,13 +910,19 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
   const bdr   = theme?.colors?.border    || '#E0D8C6'
   const muted = theme?.colors?.textSubtle || '#88887E'
   const showFood = event.rsvp_mode === 'rsvp_and_food' || event.rsvp_mode === 'food_only'
+  const titlePos = Number(event.rsvp_title_position ?? 50)
+  const titlePosD = Number(event.rsvp_title_position_desktop ?? titlePos)
+  const tPos = isDesktop ? titlePosD : titlePos
+  // 0=top → justifyContent flex-start, 100=bottom → flex-end
+  const titleJustify = tPos <= 15 ? 'flex-start' : tPos >= 85 ? 'flex-end' : 'center'
+  const titlePad = tPos <= 15 ? '8px 8px 0' : tPos >= 85 ? '0 8px 8px' : '0 8px'
 
   if (step === 0) return (
     <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <div style={{ position: 'relative', flex: '0 0 55%' }}>
         {bgImage ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.65) 100%)' }} />
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', padding: '0 8px 8px', textAlign: 'center' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: titleJustify, padding: titlePad, textAlign: 'center' }}>
           <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
           <p style={{ fontSize: isDesktop ? 11 : 13, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
           {date && <p style={{ fontSize: 5.5, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{date}</p>}
