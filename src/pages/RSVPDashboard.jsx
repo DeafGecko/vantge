@@ -173,7 +173,7 @@ function SetupTab({ event, onSaved }) {
       <Card className="p-5 space-y-4">
         <SectionLabel>Event Details</SectionLabel>
         <FieldRow label="Host display name">
-          <TextInput value={form.rsvp_host_display_name} onChange={set('rsvp_host_display_name')} placeholder="The Rogers Family" />
+          <TextInput value={form.rsvp_host_display_name} onChange={set('rsvp_host_display_name')} placeholder="e.g. The Johnson Family" />
         </FieldRow>
         <FieldRow label="Description (optional)">
           <TextInput value={form.rsvp_description} onChange={set('rsvp_description')} placeholder="A short note for your guests…" rows={2} />
@@ -677,6 +677,77 @@ function FoodTab({ event }) {
   )
 }
 
+// ── RSVP Live Preview (phone mockup) ─────────────────────────
+function RSVPPreview({ event, bgImage }) {
+  const name  = event.rsvp_host_display_name || event.event_name
+  const date  = event.rsvp_event_date
+    ? new Date(event.rsvp_event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null
+  const loc   = event.rsvp_location
+
+  return (
+    // Phone shell
+    <div className="relative mx-auto"
+      style={{ width: 160, height: 320, background: '#111', borderRadius: 22, boxShadow: '0 0 0 3px #333, 0 8px 32px rgba(0,0,0,0.4)', overflow: 'hidden' }}>
+
+      {/* Hero banner */}
+      <div className="relative w-full" style={{ height: 110 }}>
+        {bgImage ? (
+          <img src={bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />
+        )}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%)' }} />
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-2 px-2 text-center">
+          <p style={{ fontSize: 7, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
+          <p style={{ fontSize: 11, fontWeight: 800, color: 'white', lineHeight: 1.2 }}>{name}</p>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ background: '#F8F5ED', padding: '8px 10px', flex: 1 }}>
+        {/* Meta */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginBottom: 8 }}>
+          {date && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 12, height: 12, background: '#1A1A18', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="7" height="7" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <p style={{ fontSize: 7, color: '#5A5A52', fontWeight: 600 }}>{date}</p>
+            </div>
+          )}
+          {loc && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 12, height: 12, background: '#1A1A18', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="7" height="7" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <p style={{ fontSize: 7, color: '#5A5A52', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 110 }}>{loc}</p>
+            </div>
+          )}
+        </div>
+
+        {/* RSVP buttons */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ background: '#1A1A18', borderRadius: 8, padding: '5px 8px', textAlign: 'center' }}>
+            <p style={{ fontSize: 7, fontWeight: 800, color: 'white', letterSpacing: '0.1em', textTransform: 'uppercase' }}>I'm Going ✓</p>
+          </div>
+          {event.rsvp_allow_maybe !== false && (
+            <div style={{ background: 'white', border: '1px solid #E0D8C6', borderRadius: 8, padding: '5px 8px', textAlign: 'center' }}>
+              <p style={{ fontSize: 7, fontWeight: 700, color: '#88887E' }}>Maybe</p>
+            </div>
+          )}
+          <div style={{ background: 'white', border: '1px solid #E0D8C6', borderRadius: 8, padding: '5px 8px', textAlign: 'center' }}>
+            <p style={{ fontSize: 7, fontWeight: 700, color: '#C84A44' }}>Can't Attend</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Home bar */}
+      <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', width: 40, height: 3, background: 'rgba(255,255,255,0.3)', borderRadius: 2 }} />
+    </div>
+  )
+}
+
 // ── Main RSVPDashboard page ───────────────────────────────────
 export default function RSVPDashboard() {
   const { user, loading: authLoading, signOut } = useAuth()
@@ -684,12 +755,38 @@ export default function RSVPDashboard() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('setup')
   const [localEvent, setLocalEvent] = useState(null)
+  const [bgImage, setBgImage] = useState(null)
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/login')
   }, [authLoading, user, navigate])
 
+  // Restore saved bg from localStorage
+  useEffect(() => {
+    if (event?.id) {
+      const saved = localStorage.getItem(`rsvp_bg_${event.id}`)
+      if (saved) setBgImage(saved)
+    }
+  }, [event?.id])
+
   const ev = localEvent || event
+
+  function handleBgUpload(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev2 => {
+      const url = ev2.target.result
+      setBgImage(url)
+      if (event?.id) localStorage.setItem(`rsvp_bg_${event.id}`, url)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  function clearBg() {
+    setBgImage(null)
+    if (event?.id) localStorage.removeItem(`rsvp_bg_${event.id}`)
+  }
 
   if (authLoading || eventLoading) {
     return (
@@ -717,7 +814,7 @@ export default function RSVPDashboard() {
 
       {/* Header */}
       <header className="bg-[#1A1A18] sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <VantgeLogo size="sm" variant="dark" />
             <div className="w-px h-4 bg-white/20" />
@@ -730,53 +827,112 @@ export default function RSVPDashboard() {
             </Link>
             <a href={`/${ev.event_slug}/rsvp`} target="_blank" rel="noopener noreferrer"
               className="text-xs font-bold border border-white/20 text-white/70 rounded-full px-3 py-1.5 hover:border-white/50 hover:text-white transition-all">
-              Preview page ↗
+              Preview ↗
             </a>
             <button onClick={signOut} className="text-xs text-white/40 hover:text-white/70 transition-colors">Sign out</button>
           </div>
         </div>
       </header>
 
-      {/* Page header */}
-      <div className="max-w-4xl mx-auto px-5 pt-7 pb-5">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+      {/* Body — two-column layout matching Gallery Dashboard */}
+      <div className="max-w-6xl mx-auto px-5 py-6 pb-16">
+
+        {/* Page title */}
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
           <div>
             <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1">RSVP Dashboard</p>
             <h1 className="text-xl font-black text-[#1A1A18]">{ev.event_name}</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full ${
-              ev.rsvp_status === 'published' ? 'bg-green-100 text-green-800' :
-              ev.rsvp_status === 'closed'    ? 'bg-red-100 text-red-800' :
-                                               'bg-[#F4F3F0] text-[#88887E]'
-            }`}>
-              {ev.rsvp_status || 'draft'}
-            </span>
+          <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full ${
+            ev.rsvp_status === 'published' ? 'bg-green-100 text-green-800' :
+            ev.rsvp_status === 'closed'    ? 'bg-red-100 text-red-800' :
+                                             'bg-[#F4F3F0] text-[#88887E]'
+          }`}>
+            {ev.rsvp_status || 'draft'}
+          </span>
+        </div>
+
+        <div className="grid md:grid-cols-12 gap-5 items-start">
+
+          {/* LEFT — preview + bg picker */}
+          <div className="md:col-span-4 flex flex-col gap-3">
+
+            {/* Live Preview card */}
+            <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+              <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Live Preview</p>
+              <div className="flex items-center justify-center" style={{ height: 336 }}>
+                <RSVPPreview event={ev} bgImage={bgImage} />
+              </div>
+            </div>
+
+            {/* Background photo picker */}
+            <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+              <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">Invitation Background</p>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                {/* Default option */}
+                <button onClick={clearBg}
+                  className={`relative rounded-xl overflow-hidden border-2 transition-all ${!bgImage ? 'border-[#1A1A18]' : 'border-transparent hover:border-[#E0D8C6]'}`}
+                  style={{ height: 72 }}>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1"
+                    style={{ background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }}>
+                    <p className="text-white font-black text-[9px] tracking-widest uppercase">Default</p>
+                  </div>
+                  {!bgImage && <div className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-white flex items-center justify-center">
+                    <svg width="8" height="8" fill="#1A1A18" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                  </div>}
+                </button>
+
+                {/* Upload option */}
+                <label className={`relative rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${bgImage ? 'border-[#1A1A18]' : 'border-dashed border-[#D4CFBC] hover:border-[#1A1A18]'}`}
+                  style={{ height: 72 }}>
+                  <input type="file" accept="image/*" className="sr-only" onChange={handleBgUpload} />
+                  {bgImage ? (
+                    <>
+                      <img src={bgImage} alt="" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/20" />
+                      <div className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-white flex items-center justify-center">
+                        <svg width="8" height="8" fill="#1A1A18" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#F8F5ED]">
+                      <svg width="16" height="16" fill="none" stroke="#B0AFA5" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                      <p className="text-[9px] font-bold text-[#B0AFA5] uppercase tracking-wider">Upload</p>
+                    </div>
+                  )}
+                </label>
+              </div>
+              <p className="text-[10px] text-[#B0AFA5] leading-relaxed">
+                Shows behind your event name on the invitation page.
+              </p>
+            </div>
+
           </div>
-        </div>
-      </div>
 
-      {/* Tab bar */}
-      <div className="max-w-4xl mx-auto px-5">
-        <div className="flex border-b border-[#E0D8C6] overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          {TABS.map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)}
-              className={`pb-3 pt-1 mr-5 text-sm font-bold transition-all relative whitespace-nowrap shrink-0 ${
-                activeTab === t.id ? 'text-[#1A1A18]' : 'text-[#B0AFA5] hover:text-[#5A5A52]'
-              }`}>
-              {t.label}
-              {activeTab === t.id && <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-[#1A1A18] rounded-full" />}
-            </button>
-          ))}
-        </div>
-      </div>
+          {/* RIGHT — tabs + content */}
+          <div className="md:col-span-8">
 
-      {/* Tab content */}
-      <div className="max-w-4xl mx-auto px-5 py-5 pb-16">
-        {activeTab === 'setup'       && <SetupTab       event={ev} onSaved={u => setLocalEvent(e => ({ ...e, ...u }))} />}
-        {activeTab === 'invitations' && <InvitationsTab event={ev} />}
-        {activeTab === 'responses'   && <ResponsesTab   event={ev} />}
-        {activeTab === 'food'        && <FoodTab        event={ev} />}
+            {/* Tab bar */}
+            <div className="flex border-b border-[#E0D8C6] overflow-x-auto mb-5" style={{ scrollbarWidth: 'none' }}>
+              {TABS.map(t => (
+                <button key={t.id} onClick={() => setActiveTab(t.id)}
+                  className={`pb-3 pt-1 mr-5 text-sm font-bold transition-all relative whitespace-nowrap shrink-0 ${
+                    activeTab === t.id ? 'text-[#1A1A18]' : 'text-[#B0AFA5] hover:text-[#5A5A52]'
+                  }`}>
+                  {t.label}
+                  {activeTab === t.id && <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-[#1A1A18] rounded-full" />}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab content */}
+            {activeTab === 'setup'       && <SetupTab       event={ev} onSaved={u => setLocalEvent(e => ({ ...e, ...u }))} />}
+            {activeTab === 'invitations' && <InvitationsTab event={ev} />}
+            {activeTab === 'responses'   && <ResponsesTab   event={ev} />}
+            {activeTab === 'food'        && <FoodTab        event={ev} />}
+          </div>
+
+        </div>
       </div>
     </div>
   )
