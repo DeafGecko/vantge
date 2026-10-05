@@ -285,6 +285,9 @@ export default function Home() {
         {/* ══ FEATURES GRID ══════════════════════════════════ */}
         <FeaturesGrid />
 
+        {/* ══ TOOLS OVERVIEW ═════════════════════════════════ */}
+        <ToolsOverview />
+
         {/* ══ TESTIMONIAL ════════════════════════════════════ */}
         <Testimonial />
 
@@ -772,6 +775,86 @@ function FeaturesGrid() {
 }
 
 /* ─── TESTIMONIAL ─────────────────────────────────────────────── */
+function ToolsOverview() {
+  const [ref, inView] = useInView(0.1)
+  return (
+    <section className="max-w-7xl mx-auto px-6 py-24 md:py-32" ref={ref}>
+      <div className="text-center mb-14">
+        <p className="text-[11px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">What We Offer</p>
+        <h2
+          className={`text-4xl md:text-5xl font-bold vantge-reveal ${inView ? 'vantge-visible' : ''}`}
+          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+        >
+          Two tools, one event
+        </h2>
+        <p className="text-[#6B6B63] mt-4 text-lg max-w-xl mx-auto">
+          Start with photo sharing. Add RSVP whenever you're ready. Same account, no extra setup.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+
+        {/* Gallery — primary */}
+        <article className={`relative rounded-3xl overflow-hidden vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-1`}
+          style={{ background: '#1A1A18', minHeight: 320 }}>
+          <div className="absolute inset-0 opacity-20"
+            style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=60)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(26,26,24,0.85) 0%, rgba(26,26,24,0.65) 100%)' }} />
+          <div className="relative z-10 p-8 h-full flex flex-col justify-between" style={{ minHeight: 320 }}>
+            <div>
+              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-6">
+                <svg width="22" height="22" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </div>
+              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-white/40 mb-2">Core Tool</p>
+              <h3 className="text-2xl font-bold text-white mb-3">Event Photo Gallery</h3>
+              <p className="text-white/60 leading-relaxed">
+                Guests scan a QR code and instantly share photos to a live gallery. You approve, curate, and download everything — no app required.
+              </p>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-2">
+              {['QR code sharing', 'Live gallery', 'Host approvals', 'Download all'].map(tag => (
+                <span key={tag} className="text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white/60 rounded-full px-3 py-1.5">{tag}</span>
+              ))}
+            </div>
+          </div>
+        </article>
+
+        {/* RSVP — secondary */}
+        <article className={`relative rounded-3xl overflow-hidden border border-[#E8E4DC] vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-2`}
+          style={{ background: '#F8F5ED', minHeight: 320 }}>
+          <div className="relative z-10 p-8 h-full flex flex-col justify-between" style={{ minHeight: 320 }}>
+            <div>
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6"
+                style={{ background: 'linear-gradient(145deg, #FDF6E3 0%, #F0E8D0 100%)', boxShadow: '0 2px 0 #E8D99A' }}>
+                <svg width="22" height="22" fill="none" stroke="#B29746" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+              </div>
+              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">Free Add-on</p>
+              <h3 className="text-2xl font-bold text-[#1A1A18] mb-3">RSVP & Food Sign-up</h3>
+              <p className="text-[#6B6B63] leading-relaxed">
+                Collect guest responses, track headcount, and coordinate who's bringing what — all from the same event link. Free, no extra account needed.
+              </p>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-2">
+              {['Guest RSVPs', 'Food sign-up', 'Shareable link', 'QR invite'].map(tag => (
+                <span key={tag} className="text-[10px] font-bold uppercase tracking-wider bg-[#E8E4DC] text-[#88887E] rounded-full px-3 py-1.5">{tag}</span>
+              ))}
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+  )
+}
+
 function Testimonial() {
   const [ref, inView] = useInView()
   return (
@@ -851,6 +934,7 @@ function SiteFooter() {
     {
       heading: 'Resources',
       links: [
+        { label: 'Free RSVP & Food Sign-up', href: '/rsvp-dashboard' },
         { label: 'Help Center', comingSoon: true },
         { label: 'Privacy', comingSoon: true },
         { label: 'Terms', comingSoon: true },

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { Images, LogOut, Menu, X, Copy, Check as CheckIcon } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -34,7 +34,7 @@ const categoryLabels = {
       display: 'Display & Bold',
 }
 
-export default function HostDashboard() {
+export default function GalleryDashboard() {
       const { user, loading: authLoading, signOut } = useAuth()
       const navigate = useNavigate()
       const { event, loading: eventLoading } = useHostEvent()
@@ -293,6 +293,11 @@ export default function HostDashboard() {
                                                       </span>
                                                 )}
                                           </button>
+
+                                          <Link to="/rsvp-dashboard"
+                                                className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border border-white/20 text-white/60 hover:border-white/40 hover:text-white transition-all">
+                                                RSVP
+                                          </Link>
 
                                           <button
                                                 onClick={async () => { await signOut(); navigate('/login') }}

@@ -35,7 +35,7 @@ export default function HostLogin() {
                   setError(signInError.message)
                   setSubmitting(false)
             } else {
-                  navigate('/dashboard')
+                  navigate('/hub')
             }
       }
 
@@ -48,7 +48,7 @@ export default function HostLogin() {
                         <p className="text-white/60 text-sm" style={{ marginBottom: 4 }}>You're already signed in as</p>
                         <p className="text-white font-semibold text-sm" style={{ marginBottom: 32, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
                         <button
-                              onClick={() => navigate('/dashboard')}
+                              onClick={() => navigate('/hub')}
                               style={{ width: '100%', marginBottom: 12 }}
                               className="bg-white text-[#1A1A18] font-bold rounded-xl py-3.5 text-sm transition-opacity hover:opacity-90"
                         >
