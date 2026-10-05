@@ -64,29 +64,48 @@ const TABS = [
 
 // ── Setup Tab ─────────────────────────────────────────────────
 function SetupTab({ event, onSaved }) {
-  const [form, setForm] = useState({
-    rsvp_enabled:           event.rsvp_enabled ?? false,
-    rsvp_status:            event.rsvp_status ?? 'draft',
-    rsvp_mode:              event.rsvp_mode ?? 'rsvp_only',
-    rsvp_host_display_name: event.rsvp_host_display_name ?? '',
-    rsvp_description:       event.rsvp_description ?? '',
-    rsvp_location:          event.rsvp_location ?? '',
-    rsvp_event_date:        event.rsvp_event_date ? event.rsvp_event_date.slice(0, 16) : '',
-    rsvp_end_time:          event.rsvp_end_time   ? event.rsvp_end_time.slice(0, 16)   : '',
-    rsvp_timezone:          event.rsvp_timezone ?? 'America/New_York',
-    rsvp_deadline:          event.rsvp_deadline ? event.rsvp_deadline.slice(0, 16) : '',
-    rsvp_attendance_limit:  event.rsvp_attendance_limit ?? '',
-    rsvp_collect_email:     event.rsvp_collect_email ?? false,
-    rsvp_allow_maybe:       event.rsvp_allow_maybe ?? true,
-    rsvp_headcount_mode:    event.rsvp_headcount_mode ?? 'headcount',
-    food_enabled:           event.food_enabled ?? false,
-    food_heading:           event.food_heading ?? 'Food Sign-up',
-    food_allow_suggestions: event.food_allow_suggestions ?? true,
-    food_show_contributors: event.food_show_contributors ?? true,
+  const DRAFT_KEY = `rsvp_setup_draft_${event.id}`
+
+  function baseForm() {
+    return {
+      rsvp_enabled:           event.rsvp_enabled ?? false,
+      rsvp_status:            event.rsvp_status ?? 'draft',
+      rsvp_mode:              event.rsvp_mode ?? 'rsvp_only',
+      rsvp_host_display_name: event.rsvp_host_display_name ?? '',
+      rsvp_description:       event.rsvp_description ?? '',
+      rsvp_location:          event.rsvp_location ?? '',
+      rsvp_event_date:        event.rsvp_event_date ? event.rsvp_event_date.slice(0, 16) : '',
+      rsvp_end_time:          event.rsvp_end_time   ? event.rsvp_end_time.slice(0, 16)   : '',
+      rsvp_timezone:          event.rsvp_timezone ?? 'America/New_York',
+      rsvp_deadline:          event.rsvp_deadline ? event.rsvp_deadline.slice(0, 16) : '',
+      rsvp_attendance_limit:  event.rsvp_attendance_limit ?? '',
+      rsvp_collect_email:     event.rsvp_collect_email ?? false,
+      rsvp_allow_maybe:       event.rsvp_allow_maybe ?? true,
+      rsvp_headcount_mode:    event.rsvp_headcount_mode ?? 'headcount',
+      food_enabled:           event.food_enabled ?? false,
+      food_heading:           event.food_heading ?? 'Food Sign-up',
+      food_allow_suggestions: event.food_allow_suggestions ?? true,
+      food_show_contributors: event.food_show_contributors ?? true,
+    }
+  }
+
+  const [form, setForm] = useState(() => {
+    try {
+      const draft = localStorage.getItem(DRAFT_KEY)
+      if (draft) return { ...baseForm(), ...JSON.parse(draft) }
+    } catch {}
+    return baseForm()
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState(null)
+  const [hasDraft, setHasDraft] = useState(() => !!localStorage.getItem(DRAFT_KEY))
+
+  // Auto-save to localStorage on every change
+  useEffect(() => {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(form))
+    setHasDraft(true)
+  }, [form])
 
   const set = k => v => setForm(f => ({ ...f, [k]: v }))
 
@@ -100,6 +119,8 @@ function SetupTab({ event, onSaved }) {
     const { error: err } = await supabase.from('events').update(u).eq('id', event.id)
     setSaving(false)
     if (err) { setError(err.message); return }
+    localStorage.removeItem(DRAFT_KEY)
+    setHasDraft(false)
     setSaved(true); onSaved?.(u); setTimeout(() => setSaved(false), 2500)
   }
 
@@ -227,6 +248,9 @@ function SetupTab({ event, onSaved }) {
         </Card>
       )}
 
+      {hasDraft && !saved && (
+        <p className="text-xs text-[#88887E] text-center">You have unsaved changes</p>
+      )}
       {error && <p className="text-sm text-[#C84A44] text-center">{error}</p>}
 
       <button onClick={save} disabled={saving}
