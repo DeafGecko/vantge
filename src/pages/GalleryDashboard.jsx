@@ -977,7 +977,7 @@ function ThemeOption({ theme, isActive, onClick }) {
 
 function QRCodeSection({ eventSlug }) {
       const qrRef = useRef(null)
-      const guestUrl = `${window.location.origin}/${eventSlug}`
+      const guestUrl = `https://vantge.app/${eventSlug}`
       const [copied, setCopied] = useState(false)
 
       function copyLink() {

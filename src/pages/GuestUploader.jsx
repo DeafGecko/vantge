@@ -400,7 +400,7 @@ export default function GuestUploader() {
 
                                     {/* Name input */}
                                     <div>
-                                          <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-1.5">Your Name <span className="text-red-400">*</span></p>
+                                          <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-1.5">Your Name <span className="text-[#D4CFC4]">(optional)</span></p>
                                           <input
                                                 type="text"
                                                 value={guestName}
@@ -426,7 +426,7 @@ export default function GuestUploader() {
                                     {/* Send button */}
                                     <button
                                           onClick={files.length > 0 ? handleUpload : () => fileInputRef.current?.click()}
-                                          disabled={files.length > 0 && !guestName.trim()}
+                                          disabled={false}
                                           className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-40"
                                           style={{ backgroundColor: accentColor }}
                                     >
