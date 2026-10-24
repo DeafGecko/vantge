@@ -83,7 +83,7 @@ function UploadSheet({ event, accentColor, onClose, onUploaded }) {
   const cameraRef = useRef(null)
 
   async function handleUpload() {
-    if (!files.length || !guestName.trim()) return
+    if (!files.length) return
     setProgress(0)
     setError(null)
     let completed = 0
@@ -119,9 +119,9 @@ function UploadSheet({ event, accentColor, onClose, onUploaded }) {
           <>
             {/* Name */}
             <div className="mb-3">
-              <label className="block text-[10px] font-black tracking-widest uppercase text-[#9A9A8E] mb-1.5">Your Name <span className="text-red-500">*</span></label>
+              <label className="block text-[10px] font-black tracking-widest uppercase text-[#9A9A8E] mb-1.5">Your Name</label>
               <input type="text" value={guestName} onChange={e => setGuestName(e.target.value)}
-                placeholder="So the host knows it's from you"
+                placeholder="Optional — so the host knows it's from you"
                 className="w-full bg-white border border-[#E0D8C6] rounded-xl px-4 py-3 text-sm text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors placeholder:text-[#C0BFB5]" />
             </div>
 
@@ -176,7 +176,7 @@ function UploadSheet({ event, accentColor, onClose, onUploaded }) {
               By uploading, you agree your photos may be used by the event host for promotional purposes.
             </p>
 
-            <button onClick={handleUpload} disabled={!files.length || !guestName.trim() || progress !== null}
+            <button onClick={handleUpload} disabled={!files.length || progress !== null}
               className="w-full mt-2 py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-[0.98] disabled:opacity-40"
               style={{ backgroundColor: accentColor }}>
               {progress !== null ? 'Uploading…' : `Share ${files.length > 0 ? files.length + ' ' : ''}Photo${files.length !== 1 ? 's' : ''}`}
