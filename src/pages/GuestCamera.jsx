@@ -458,12 +458,12 @@ export default function GuestCamera() {
                                                 >
                                                       {/* Caption input */}
                                                       <div className="mb-2.5">
-                                                            <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Caption <span className="text-red-400">*</span></p>
+                                                            <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1.5">Caption <span className="text-white/30">(optional)</span></p>
                                                             <input
                                                                   type="text"
                                                                   value={caption}
                                                                   onChange={(e) => setCaption(e.target.value)}
-                                                                  placeholder="Required — add a message to your photo"
+                                                                  placeholder="Optional — add a message to your photo"
                                                                   maxLength={200}
                                                                   className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 outline-none border border-white/10 focus:border-white/30 transition-colors"
                                                                   style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}
@@ -498,7 +498,7 @@ export default function GuestCamera() {
                                                             </button>
                                                             <button
                                                                   onClick={handleUpload}
-                                                                  disabled={uploadState === 'uploading' || !caption.trim()}
+                                                                  disabled={uploadState === 'uploading'}
                                                                   className="flex-1 py-3.5 text-white rounded-xl font-bold text-sm disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                                                                   style={{ backgroundColor: c?.accent }}
                                                             >
