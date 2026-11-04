@@ -170,6 +170,8 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       const dragStart = useRef(null)
       const inputRef = useRef(null)
       const savedRef = useRef(false)
+      // Mobile saves to the plain columns; desktop saves to the _desktop columns
+      const sfx = isLandscape ? '_desktop' : ''
 
       const [libraryPhotos, setLibraryPhotos] = useState(LIBRARY[eventTypeId] || LIBRARY.other || [])
 
@@ -184,7 +186,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       // Live preview: push unsaved photo/position/tint to the dashboard preview
       useEffect(() => {
             if (!onPreview) return
-            const fields = { background_position: position, background_tint: tint, background_zoom: zoom }
+            const fields = { [`background_position${sfx}`]: position, [`background_tint${sfx}`]: tint, [`background_zoom${sfx}`]: zoom }
             if (pendingUrl) fields[dbField] = pendingUrl
             onPreview(fields)
       }, [pendingUrl, position, tint, zoom])
@@ -192,7 +194,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       // Closing without saving restores the saved photo in the preview
       useEffect(() => () => {
             if (!savedRef.current && onPreview) {
-                  onPreview({ [dbField]: imageUrl ?? null, background_position: currentPosition, background_tint: currentTint, background_zoom: currentZoom })
+                  onPreview({ [dbField]: imageUrl ?? null, [`background_position${sfx}`]: currentPosition, [`background_tint${sfx}`]: currentTint, [`background_zoom${sfx}`]: currentZoom })
             }
       }, [])
 
@@ -249,9 +251,9 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
 
       async function handleConfirm() {
             const urlToSave = pendingUrl || imageUrl || null
-            const fields = { [dbField]: urlToSave, background_position: position, background_tint: tint }
-            let { error } = await supabase.from('events').update({ ...fields, background_zoom: zoom }).eq('id', eventId)
-            // Until the background_zoom column exists, save everything else rather than failing
+            const fields = { [dbField]: urlToSave, [`background_position${sfx}`]: position, [`background_tint${sfx}`]: tint }
+            let { error } = await supabase.from('events').update({ ...fields, [`background_zoom${sfx}`]: zoom }).eq('id', eventId)
+            // Until the zoom columns exist, save everything else rather than failing
             if (error && /background_zoom/.test(error.message)) {
                   ;({ error } = await supabase.from('events').update(fields).eq('id', eventId))
             }
@@ -497,13 +499,13 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       )
 }
 
-export default function BackgroundUploader({ eventId, currentImageUrl, currentImageDesktopUrl, currentPosition, currentTint, currentZoom, accentColor, eventTypeId, onSaved, onSavedDesktop, onPreview }) {
+export default function BackgroundUploader({ eventId, currentImageUrl, currentImageDesktopUrl, currentPosition, currentTint, currentZoom, currentPositionDesktop, currentTintDesktop, currentZoomDesktop, accentColor, eventTypeId, onSaved, onSavedDesktop, onPreview }) {
       const defaultBg = useDefaultBg(eventTypeId)
       const [activeZone, setActiveZone] = useState(null) // null | 'portrait' | 'landscape'
       const [uploadingPortrait, setUploadingPortrait] = useState(false)
       const [uploadingLandscape, setUploadingLandscape] = useState(false)
 
-      async function handleUpload(file, dbField, isLandscape, setUploading, onSavedFn) {
+      async function handleUpload(file, dbField, isLandscape, setUploading, onSavedFn, vals) {
             setUploading(true)
             const compressed = await compressImage(file)
             const path = `backgrounds/${eventId}/${dbField}-${Date.now()}.jpg`
@@ -511,7 +513,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
             if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
             const { data } = supabase.storage.from('event-media').getPublicUrl(path)
             await supabase.from('events').update({ [dbField]: data.publicUrl }).eq('id', eventId)
-            onSavedFn(data.publicUrl, currentPosition, currentTint, currentZoom)
+            onSavedFn(data.publicUrl, vals.position, vals.tint, vals.zoom)
             setUploading(false)
             setActiveZone(isLandscape ? 'landscape' : 'portrait')
       }
@@ -531,7 +533,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                                     isActive={activeZone === 'portrait'}
                                     uploading={uploadingPortrait}
                                     onEdit={() => setActiveZone(activeZone === 'portrait' ? null : 'portrait')}
-                                    onUpload={(file) => handleUpload(file, 'background_image', false, setUploadingPortrait, onSaved)}
+                                    onUpload={(file) => handleUpload(file, 'background_image', false, setUploadingPortrait, onSaved, { position: currentPosition, tint: currentTint, zoom: currentZoom })}
                               />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -539,11 +541,11 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                                     label="Desktop · Landscape"
                                     imageUrl={currentImageDesktopUrl}
                                     defaultBg={defaultBg}
-                                    currentTint={currentTint}
+                                    currentTint={currentTintDesktop}
                                     isActive={activeZone === 'landscape'}
                                     uploading={uploadingLandscape}
                                     onEdit={() => setActiveZone(activeZone === 'landscape' ? null : 'landscape')}
-                                    onUpload={(file) => handleUpload(file, 'background_image_desktop', true, setUploadingLandscape, onSavedDesktop)}
+                                    onUpload={(file) => handleUpload(file, 'background_image_desktop', true, setUploadingLandscape, onSavedDesktop, { position: currentPositionDesktop, tint: currentTintDesktop, zoom: currentZoomDesktop })}
                               />
                         </div>
                   </div>
@@ -573,9 +575,9 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               isLandscape={true}
                               imageUrl={currentImageDesktopUrl}
                               defaultBg={defaultBg}
-                              currentPosition={currentPosition}
-                              currentTint={currentTint}
-                              currentZoom={currentZoom}
+                              currentPosition={currentPositionDesktop}
+                              currentTint={currentTintDesktop}
+                              currentZoom={currentZoomDesktop}
                               accentColor={accentColor}
                               eventId={eventId}
                               dbField="background_image_desktop"

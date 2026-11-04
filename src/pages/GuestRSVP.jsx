@@ -579,6 +579,18 @@ function ConfirmationScreen({ event, rsvpResult, accentColor, fontFamily, onEdit
   )
 }
 
+// Matches useResponsiveBg's breakpoint so position and image switch together
+function useIsWide() {
+  const [wide, setWide] = useState(() => window.matchMedia('(min-width: 1024px)').matches)
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const handler = (e) => setWide(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return wide
+}
+
 // ── Hero Banner (shared across steps) ────────────────────────
 function HeroBanner({ event, fontFamily, accentColor }) {
   const eventDateStr = fmt(event.rsvp_event_date, event.rsvp_timezone)
@@ -872,6 +884,11 @@ export default function GuestRSVP() {
 
   const { event, loading: eventLoading } = useEvent(eventSlug)
   const bg = useResponsiveBg(event?.background_image, event?.background_image_desktop)
+  const isWide = useIsWide()
+  // Desktop uses its own saved framing and tint, falling back to the mobile values
+  const bgPos  = (isWide ? event?.background_position_desktop ?? event?.background_position : event?.background_position) || '50% 50%'
+  const bgZoom = isWide ? event?.background_zoom_desktop ?? event?.background_zoom : event?.background_zoom
+  const bgTint = (isWide ? event?.background_tint_desktop ?? event?.background_tint : event?.background_tint) ?? 55
 
   // step: 'invite' | 'rsvp' | 'food' | 'done'
   const [step, setStep] = useState('invite')
@@ -960,10 +977,10 @@ export default function GuestRSVP() {
       <FontLoader fontId={event.rsvp_font || event.font_family} />
       {/* Full-screen event photo behind the whole page, no overlay */}
       {bgImage && (
-        <img src={bgImage} alt="" className="fixed inset-0 w-full h-full -z-10" style={bgPhotoStyle(event.background_position, event.background_zoom)} />
+        <img src={bgImage} alt="" className="fixed inset-0 w-full h-full -z-10" style={bgPhotoStyle(bgPos, bgZoom)} />
       )}
       {bgImage && (
-        <div className="fixed inset-0 -z-10" style={{ backgroundColor: `rgba(0,0,0,${((event.background_tint ?? 55) / 100).toFixed(2)})` }} />
+        <div className="fixed inset-0 -z-10" style={{ backgroundColor: `rgba(0,0,0,${(bgTint / 100).toFixed(2)})` }} />
       )}
       <div className={`min-h-screen ${bgImage ? '' : 'bg-[#F4F3F0]'}`}>
         <HeroBanner {...heroProps} />

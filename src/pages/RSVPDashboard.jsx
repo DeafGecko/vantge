@@ -825,6 +825,9 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
           currentImageDesktopUrl={localBgDesktop}
           currentPosition={localBgPosition}
           currentTint={localBgTint}
+          currentPositionDesktop={event.background_position_desktop ?? event.background_position ?? '50% 50%'}
+          currentTintDesktop={event.background_tint_desktop ?? event.background_tint ?? 55}
+          currentZoomDesktop={event.background_zoom_desktop ?? 100}
           currentZoom={event.background_zoom ?? 100}
           accentColor={currentTheme?.colors?.accent}
           eventTypeId={localType}
@@ -832,9 +835,9 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
             setLocalBgMobile(url); setLocalBgPosition(pos); setLocalBgTint(tint)
             onLocalUpdate?.({ background_image: url, background_position: pos, background_tint: tint, background_zoom: zoom })
           }}
-          onSavedDesktop={(url) => {
+          onSavedDesktop={(url, pos, tint, zoom) => {
             setLocalBgDesktop(url)
-            onLocalUpdate?.({ background_image_desktop: url })
+            onLocalUpdate?.({ background_image_desktop: url, background_position_desktop: pos, background_tint_desktop: tint, background_zoom_desktop: zoom })
           }}
           onPreview={(fields) => onLocalUpdate?.(fields)}
         />
@@ -916,6 +919,10 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
   const titlePos = Number(event.rsvp_title_position ?? 50)
   const titlePosD = Number(event.rsvp_title_position_desktop ?? titlePos)
   const tPos = isDesktop ? titlePosD : titlePos
+  // Photo framing: desktop uses its own saved values, falling back to the mobile ones
+  const bgPos  = (isDesktop ? event.background_position_desktop ?? event.background_position : event.background_position) || '50% 50%'
+  const bgZoom = isDesktop ? event.background_zoom_desktop ?? event.background_zoom : event.background_zoom
+  const bgTint = (isDesktop ? event.background_tint_desktop ?? event.background_tint : event.background_tint) ?? 55
   // continuous: paddingTop drives smooth vertical position, 0=top 100=bottom maps to 0%–70% of container
   // top % is measured against the screen height (padding % is measured against width, which pushed the title too high)
   const titleTopPct = `${(tPos / 100) * 70}%`
@@ -923,8 +930,8 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
   if (step === 0) return (
     <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', background: bgImage ? 'transparent' : 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }}>
       {/* Event photo fills the whole screen, top to bottom, no overlay */}
-      {bgImage && <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...bgPhotoStyle(event.background_position, event.background_zoom) }} />}
-      {bgImage && <div style={{ position: 'absolute', inset: 0, background: `rgba(0,0,0,${((event.background_tint ?? 55) / 100).toFixed(2)})` }} />}
+      {bgImage && <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...bgPhotoStyle(bgPos, bgZoom) }} />}
+      {bgImage && <div style={{ position: 'absolute', inset: 0, background: `rgba(0,0,0,${(bgTint / 100).toFixed(2)})` }} />}
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', top: titleTopPct, padding: '0 8px', textAlign: 'center', transition: 'top 0.15s ease' }}>
         <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.15em', color: 'white', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
         <p style={{ fontSize: isDesktop ? 11 : 13, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
@@ -948,7 +955,7 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
   if (step === 1) return (
     <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <div style={{ position: 'relative', flex: '0 0 30%' }}>
-        {bgImage ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...bgPhotoStyle(event.background_position, event.background_zoom) }} /> :<div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />}
+        {bgImage ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...bgPhotoStyle(bgPos, bgZoom) }} /> :<div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%)' }} />
         <div style={{ position: 'absolute', bottom: 5, left: 0, right: 0, textAlign: 'center' }}>
           <p style={{ fontSize: isDesktop ? 8 : 9, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit' }}>{name}</p>
