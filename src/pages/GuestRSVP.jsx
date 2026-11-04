@@ -366,13 +366,17 @@ function FoodSignup({ event, accentColor }) {
       )}
 
       <div className="flex flex-col divide-y divide-[#F4F3F0]">
-        {items.map(item => {
+        {[...items].sort((a, b) => Number(isFilled(a)) - Number(isFilled(b))).map((item, idx, arr) => {
           const left = spotsLeft(item)
           const filled = isFilled(item)
           const isOpen = claiming === item.id
 
           return (
-            <div key={item.id} className="py-3.5 first:pt-0 last:pb-0">
+            <div key={item.id}>
+              {(idx === 0 || isFilled(arr[idx - 1]) !== filled) && (
+                <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#88887E] pt-2 pb-1">{filled ? 'Already covered' : 'Still needed'}</p>
+              )}
+            <div className={`py-3.5 first:pt-0 last:pb-0 ${filled ? 'opacity-60' : ''}`}>
               <div className="flex items-center gap-3">
                 {/* Icon placeholder */}
                 <div className="w-12 h-12 rounded-xl bg-[#F4F3F0] flex items-center justify-center shrink-0">
@@ -389,7 +393,7 @@ function FoodSignup({ event, accentColor }) {
                   <p className="text-sm font-bold text-[#1A1A18]">{item.name}</p>
                   {item.notes && <p className="text-xs text-[#88887E] mt-0.5">{item.notes}</p>}
                   <p className="text-xs text-[#88887E] mt-0.5">
-                    {filled ? 'Filled' : left !== null ? `${left} spot${left !== 1 ? 's' : ''} left` : 'Open'}
+                    {filled ? 'Covered, thank you!' : left !== null ? `${left} spot${left !== 1 ? 's' : ''} left` : 'Open'}
                   </p>
                 </div>
                 <div className="shrink-0">
@@ -433,6 +437,7 @@ function FoodSignup({ event, accentColor }) {
                   Claimed!
                 </div>
               )}
+            </div>
             </div>
           )
         })}

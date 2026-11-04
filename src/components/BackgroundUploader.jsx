@@ -253,9 +253,12 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
             const urlToSave = pendingUrl || imageUrl || null
             const fields = { [dbField]: urlToSave, [`background_position${sfx}`]: position, [`background_tint${sfx}`]: tint }
             let { error } = await supabase.from('events').update({ ...fields, [`background_zoom${sfx}`]: zoom }).eq('id', eventId)
-            // Until the zoom columns exist, save everything else rather than failing
-            if (error && /background_zoom/.test(error.message)) {
-                  ;({ error } = await supabase.from('events').update(fields).eq('id', eventId))
+            if (error && /background_(zoom|position|tint)/.test(error.message)) {
+                  // A framing column is missing from the database. Save the photo (and the mobile framing, which exists) so Save still works.
+                  const fallback = { [dbField]: urlToSave }
+                  if (!isLandscape) Object.assign(fallback, { background_position: position, background_tint: tint })
+                  ;({ error } = await supabase.from('events').update(fallback).eq('id', eventId))
+                  if (!error) alert('Photo saved, but the position, zoom and tint were not stored. Run the SQL in supabase/migrations/20261104_background_zoom.sql in Supabase, then save again.')
             }
             if (error) { alert('Could not save: ' + error.message); return }
             savedRef.current = true
