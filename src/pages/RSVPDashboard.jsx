@@ -834,6 +834,7 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
             setLocalBgDesktop(url)
             onLocalUpdate?.({ background_image_desktop: url })
           }}
+          onPreview={(fields) => onLocalUpdate?.(fields)}
         />
       </div>
 
@@ -920,6 +921,7 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
     <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', background: bgImage ? 'transparent' : 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }}>
       {/* Event photo fills the whole screen, top to bottom, no overlay */}
       {bgImage && <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />}
+      {bgImage && <div style={{ position: 'absolute', inset: 0, background: `rgba(0,0,0,${((event.background_tint ?? 55) / 100).toFixed(2)})` }} />}
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: `${titleTopPct} 8px 0`, textAlign: 'center', transition: 'padding-top 0.15s ease' }}>
         <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.15em', color: 'white', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
         <p style={{ fontSize: isDesktop ? 11 : 13, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>

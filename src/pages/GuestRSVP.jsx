@@ -962,6 +962,9 @@ export default function GuestRSVP() {
       {bgImage && (
         <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
       )}
+      {bgImage && (
+        <div className="fixed inset-0 -z-10" style={{ backgroundColor: `rgba(0,0,0,${((event.background_tint ?? 55) / 100).toFixed(2)})` }} />
+      )}
       <div className={`min-h-screen ${bgImage ? '' : 'bg-[#F4F3F0]'}`}>
         <HeroBanner {...heroProps} />
 

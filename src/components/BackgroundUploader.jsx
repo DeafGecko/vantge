@@ -157,7 +157,7 @@ function ZoneThumb({ label, imageUrl, defaultBg, currentTint, isActive, uploadin
 }
 
 // Full-screen modal editor — aspect-ratio preview left, tools right
-function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, currentTint, accentColor, eventId, dbField, eventTypeId, onSaved, onClose }) {
+function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, currentTint, accentColor, eventId, dbField, eventTypeId, onSaved, onPreview, onClose }) {
       const [position, setPosition] = useState(currentPosition || '50% 50%')
       const [zoom, setZoom] = useState(100) // percent, 100 = fit
       const [tint, setTint] = useState(currentTint ?? 55)
@@ -169,6 +169,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       const frameRef = useRef(null)
       const dragStart = useRef(null)
       const inputRef = useRef(null)
+      const savedRef = useRef(false)
 
       const [libraryPhotos, setLibraryPhotos] = useState(LIBRARY[eventTypeId] || LIBRARY.other || [])
 
@@ -179,6 +180,21 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                         if (data && data.length > 0) setLibraryPhotos(data.map(r => r.photo_url))
                   })
       }, [eventTypeId])
+
+      // Live preview: push unsaved photo/position/tint to the dashboard preview
+      useEffect(() => {
+            if (!onPreview) return
+            const fields = { background_position: position, background_tint: tint }
+            if (pendingUrl) fields[dbField] = pendingUrl
+            onPreview(fields)
+      }, [pendingUrl, position, tint])
+
+      // Closing without saving restores the saved photo in the preview
+      useEffect(() => () => {
+            if (!savedRef.current && onPreview) {
+                  onPreview({ [dbField]: imageUrl ?? null, background_position: currentPosition, background_tint: currentTint })
+            }
+      }, [])
 
       const activeUrl = pendingUrl || imageUrl || defaultBg
       const tintAlpha = (tint / 100).toFixed(2)
@@ -239,6 +255,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                   background_tint: tint,
             }).eq('id', eventId)
             if (error) { alert('Could not save: ' + error.message); return }
+            savedRef.current = true
             onSaved(urlToSave, position, tint)
             onClose()
       }
@@ -479,7 +496,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       )
 }
 
-export default function BackgroundUploader({ eventId, currentImageUrl, currentImageDesktopUrl, currentPosition, currentTint, accentColor, eventTypeId, onSaved, onSavedDesktop }) {
+export default function BackgroundUploader({ eventId, currentImageUrl, currentImageDesktopUrl, currentPosition, currentTint, accentColor, eventTypeId, onSaved, onSavedDesktop, onPreview }) {
       const defaultBg = useDefaultBg(eventTypeId)
       const [activeZone, setActiveZone] = useState(null) // null | 'portrait' | 'landscape'
       const [uploadingPortrait, setUploadingPortrait] = useState(false)
@@ -544,6 +561,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               dbField="background_image"
                               eventTypeId={eventTypeId}
                               onSaved={onSaved}
+                              onPreview={onPreview}
                               onClose={() => setActiveZone(null)}
                         />
                   )}
@@ -560,6 +578,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               dbField="background_image_desktop"
                               eventTypeId={eventTypeId}
                               onSaved={onSavedDesktop}
+                              onPreview={onPreview}
                               onClose={() => setActiveZone(null)}
                         />
                   )}
