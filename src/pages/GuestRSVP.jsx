@@ -8,6 +8,7 @@ import { getEventType } from '../lib/eventTypes'
 import { useResponsiveBg } from '../hooks/useResponsiveBg'
 import FontLoader from '../components/FontLoader'
 import VantgeLogo from '../components/VantgeLogo'
+import { bgPhotoStyle } from '../lib/bgPhoto'
 import { supabase } from '../lib/supabase'
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -938,7 +939,6 @@ export default function GuestRSVP() {
   const fontFamily = resolveFontFamily(event.rsvp_font || event.font_family)
   const eventType = getEventType(event.event_type)
   const bgImage = bg || eventType.defaultBg
-  const bgPosition = event.background_position || '50% 50%'
   const accentColor = c.accent
 
   const showFood = event.food_enabled && (event.rsvp_mode === 'food_only' || event.rsvp_mode === 'rsvp_and_food')
@@ -960,7 +960,7 @@ export default function GuestRSVP() {
       <FontLoader fontId={event.rsvp_font || event.font_family} />
       {/* Full-screen event photo behind the whole page, no overlay */}
       {bgImage && (
-        <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+        <img src={bgImage} alt="" className="fixed inset-0 w-full h-full -z-10" style={bgPhotoStyle(event.background_position, event.background_zoom)} />
       )}
       {bgImage && (
         <div className="fixed inset-0 -z-10" style={{ backgroundColor: `rgba(0,0,0,${((event.background_tint ?? 55) / 100).toFixed(2)})` }} />

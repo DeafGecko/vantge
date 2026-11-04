@@ -157,9 +157,9 @@ function ZoneThumb({ label, imageUrl, defaultBg, currentTint, isActive, uploadin
 }
 
 // Full-screen modal editor — aspect-ratio preview left, tools right
-function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, currentTint, accentColor, eventId, dbField, eventTypeId, onSaved, onPreview, onClose }) {
+function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, currentTint, currentZoom, accentColor, eventId, dbField, eventTypeId, onSaved, onPreview, onClose }) {
       const [position, setPosition] = useState(currentPosition || '50% 50%')
-      const [zoom, setZoom] = useState(100) // percent, 100 = fit
+      const [zoom, setZoom] = useState(currentZoom ?? 100) // percent, 100 = fit
       const [tint, setTint] = useState(currentTint ?? 55)
       const [pendingUrl, setPendingUrl] = useState(null)
       const [uploading, setUploading] = useState(false)
@@ -184,15 +184,15 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       // Live preview: push unsaved photo/position/tint to the dashboard preview
       useEffect(() => {
             if (!onPreview) return
-            const fields = { background_position: position, background_tint: tint }
+            const fields = { background_position: position, background_tint: tint, background_zoom: zoom }
             if (pendingUrl) fields[dbField] = pendingUrl
             onPreview(fields)
-      }, [pendingUrl, position, tint])
+      }, [pendingUrl, position, tint, zoom])
 
       // Closing without saving restores the saved photo in the preview
       useEffect(() => () => {
             if (!savedRef.current && onPreview) {
-                  onPreview({ [dbField]: imageUrl ?? null, background_position: currentPosition, background_tint: currentTint })
+                  onPreview({ [dbField]: imageUrl ?? null, background_position: currentPosition, background_tint: currentTint, background_zoom: currentZoom })
             }
       }, [])
 
@@ -249,21 +249,22 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
 
       async function handleConfirm() {
             const urlToSave = pendingUrl || imageUrl || null
-            const { error } = await supabase.from('events').update({
-                  [dbField]: urlToSave,
-                  background_position: position,
-                  background_tint: tint,
-            }).eq('id', eventId)
+            const fields = { [dbField]: urlToSave, background_position: position, background_tint: tint }
+            let { error } = await supabase.from('events').update({ ...fields, background_zoom: zoom }).eq('id', eventId)
+            // Until the background_zoom column exists, save everything else rather than failing
+            if (error && /background_zoom/.test(error.message)) {
+                  ;({ error } = await supabase.from('events').update(fields).eq('id', eventId))
+            }
             if (error) { alert('Could not save: ' + error.message); return }
             savedRef.current = true
-            onSaved(urlToSave, position, tint)
+            onSaved(urlToSave, position, tint, zoom)
             onClose()
       }
 
       async function handleRemove() {
             const { error } = await supabase.from('events').update({ [dbField]: null }).eq('id', eventId)
             if (error) { alert('Could not remove: ' + error.message) }
-            else { onSaved(null, currentPosition, currentTint); setShowChangePanel(true) }
+            else { onSaved(null, currentPosition, currentTint, currentZoom); setShowChangePanel(true) }
       }
 
       const tools = [
@@ -496,7 +497,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       )
 }
 
-export default function BackgroundUploader({ eventId, currentImageUrl, currentImageDesktopUrl, currentPosition, currentTint, accentColor, eventTypeId, onSaved, onSavedDesktop, onPreview }) {
+export default function BackgroundUploader({ eventId, currentImageUrl, currentImageDesktopUrl, currentPosition, currentTint, currentZoom, accentColor, eventTypeId, onSaved, onSavedDesktop, onPreview }) {
       const defaultBg = useDefaultBg(eventTypeId)
       const [activeZone, setActiveZone] = useState(null) // null | 'portrait' | 'landscape'
       const [uploadingPortrait, setUploadingPortrait] = useState(false)
@@ -510,7 +511,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
             if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
             const { data } = supabase.storage.from('event-media').getPublicUrl(path)
             await supabase.from('events').update({ [dbField]: data.publicUrl }).eq('id', eventId)
-            onSavedFn(data.publicUrl, currentPosition, currentTint)
+            onSavedFn(data.publicUrl, currentPosition, currentTint, currentZoom)
             setUploading(false)
             setActiveZone(isLandscape ? 'landscape' : 'portrait')
       }
@@ -556,6 +557,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               defaultBg={defaultBg}
                               currentPosition={currentPosition}
                               currentTint={currentTint}
+                              currentZoom={currentZoom}
                               accentColor={accentColor}
                               eventId={eventId}
                               dbField="background_image"
@@ -573,6 +575,7 @@ export default function BackgroundUploader({ eventId, currentImageUrl, currentIm
                               defaultBg={defaultBg}
                               currentPosition={currentPosition}
                               currentTint={currentTint}
+                              currentZoom={currentZoom}
                               accentColor={accentColor}
                               eventId={eventId}
                               dbField="background_image_desktop"
