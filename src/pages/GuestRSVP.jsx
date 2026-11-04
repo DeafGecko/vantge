@@ -579,15 +579,10 @@ function ConfirmationScreen({ event, rsvpResult, accentColor, fontFamily, onEdit
 }
 
 // ── Hero Banner (shared across steps) ────────────────────────
-function HeroBanner({ event, bgImage, bgPosition, tintAlpha, fontFamily, accentColor }) {
+function HeroBanner({ event, fontFamily, accentColor }) {
   const eventDateStr = fmt(event.rsvp_event_date, event.rsvp_timezone)
   return (
     <div className="relative w-full" style={{ height: 'clamp(240px, 40vw, 360px)' }}>
-      {bgImage && (
-        <div className="absolute inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
-      )}
-      <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-      <div className="absolute inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)' }} />
       <div className="absolute top-4 left-4">
         <a href="/"><VantgeLogo size="sm" monoWhite /></a>
       </div>
@@ -833,15 +828,9 @@ function RSVPStep({ event, accentColor, existingResponse, onSuccess, onBack }) {
 }
 
 // ── Step 3: Food list ─────────────────────────────────────────
-function FoodStep({ event, accentColor, bgImage, bgPosition, rsvpResult, onBack, onDone }) {
+function FoodStep({ event, accentColor, rsvpResult, onBack, onDone }) {
   return (
     <div className="relative min-h-screen">
-      {/* Background photo at 75% opacity */}
-      {bgImage && (
-        <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition, opacity: 0.25 }} />
-      )}
-      <div className="fixed inset-0 -z-10 bg-[#F4F3F0]/80" />
-
       <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-5">
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-[#E0D8C6] px-5 py-4">
           <div className="flex items-center gap-2 mb-1">
@@ -951,7 +940,6 @@ export default function GuestRSVP() {
   const bgImage = bg || eventType.defaultBg
   const bgPosition = event.background_position || '50% 50%'
   const accentColor = c.accent
-  const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
 
   const showFood = event.food_enabled && (event.rsvp_mode === 'food_only' || event.rsvp_mode === 'rsvp_and_food')
   const deadlineStr = fmtDeadline(event.rsvp_deadline, event.rsvp_timezone)
@@ -965,12 +953,16 @@ export default function GuestRSVP() {
     }
   }
 
-  const heroProps = { event, bgImage, bgPosition, tintAlpha, fontFamily, accentColor }
+  const heroProps = { event, fontFamily, accentColor }
 
   return (
     <>
       <FontLoader fontId={event.rsvp_font || event.font_family} />
-      <div className="min-h-screen bg-[#F4F3F0]">
+      {/* Full-screen event photo behind the whole page, no overlay */}
+      {bgImage && (
+        <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+      )}
+      <div className={`min-h-screen ${bgImage ? '' : 'bg-[#F4F3F0]'}`}>
         <HeroBanner {...heroProps} />
 
         {step === 'invite' && (
@@ -997,8 +989,6 @@ export default function GuestRSVP() {
           <FoodStep
             event={event}
             accentColor={accentColor}
-            bgImage={bgImage}
-            bgPosition={bgPosition}
             rsvpResult={rsvpResult}
             onBack={() => setStep('rsvp')}
             onDone={() => setStep('done')}

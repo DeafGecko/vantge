@@ -388,9 +388,9 @@ function ResponsesTab({ event }) {
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Going',        count: going.length,    sub: `${totalAttendees} attending`, color: '#1A1A18' },
-          { label: 'Maybe',        count: maybe.length,    sub: 'responses',                   color: '#B29746' },
-          { label: "Can't attend", count: notGoing.length, sub: 'responses',                   color: '#C84A44' },
+          { label: 'Going',        count: totalAttendees,  sub: `${going.length} response${going.length !== 1 ? 's' : ''}`, color: '#1A1A18' },
+          { label: 'Maybe',        count: maybe.length,    sub: 'responses',                                              color: '#B29746' },
+          { label: "Can't attend", count: notGoing.length, sub: 'responses',                                              color: '#C84A44' },
         ].map(s => (
           <Card key={s.label} className="p-4 text-center">
             <p className="text-2xl font-black leading-tight" style={{ color: s.color }}>{s.count}</p>
@@ -913,23 +913,20 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
   const titlePos = Number(event.rsvp_title_position ?? 50)
   const titlePosD = Number(event.rsvp_title_position_desktop ?? titlePos)
   const tPos = isDesktop ? titlePosD : titlePos
-  // 0=top → justifyContent flex-start, 100=bottom → flex-end
-  const titleJustify = tPos <= 15 ? 'flex-start' : tPos >= 85 ? 'flex-end' : 'center'
-  const titlePad = tPos <= 15 ? '8px 8px 0' : tPos >= 85 ? '0 8px 8px' : '0 8px'
+  // continuous: paddingTop drives smooth vertical position, 0=top 100=bottom maps to 0%–70% of container
+  const titleTopPct = `${(tPos / 100) * 70}%`
 
   if (step === 0) return (
-    <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <div style={{ position: 'relative', flex: '0 0 55%' }}>
-        {bgImage ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.65) 100%)' }} />
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: titleJustify, padding: titlePad, textAlign: 'center' }}>
-          <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
-          <p style={{ fontSize: isDesktop ? 11 : 13, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
-          {date && <p style={{ fontSize: 5.5, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{date}</p>}
-        </div>
+    <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', background: bgImage ? 'transparent' : 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }}>
+      {/* Event photo fills the whole screen, top to bottom, no overlay */}
+      {bgImage && <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: `${titleTopPct} 8px 0`, textAlign: 'center', transition: 'padding-top 0.15s ease' }}>
+        <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.15em', color: 'white', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
+        <p style={{ fontSize: isDesktop ? 11 : 13, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
+        {date && <p style={{ fontSize: 5.5, color: 'white', marginTop: 2 }}>{date}</p>}
       </div>
-      <div style={{ flex: 1, background: bg, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '6px 10px', gap: 5 }}>
-        {event.rsvp_description && <p style={{ fontSize: 5, color: muted, lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{event.rsvp_description}</p>}
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', gap: 5, padding: '6px 10px 14px' }}>
+        {event.rsvp_description && <p style={{ fontSize: 5, color: 'white', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{event.rsvp_description}</p>}
         {loc && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'white', border: `1px solid ${bdr}`, borderRadius: 5, padding: '3px 6px' }}>
             <svg width="7" height="7" fill="none" stroke={acc} strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -1281,13 +1278,13 @@ export default function RSVPDashboard() {
               <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col items-center gap-4">
                 <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] self-start">Scan to Share</p>
                 <div ref={qrRef} className="bg-[#F7F5F0] p-4 rounded-2xl">
-                  <QRCodeSVG value={`${window.location.origin}/${ev.event_slug}/rsvp`} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
+                  <QRCodeSVG value={`https://vantge.app/${ev.event_slug}/rsvp`} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
                 </div>
                 <div className="w-full flex items-center gap-2 bg-[#F7F5F0] border border-[#E8E4DA] rounded-xl px-3 py-2.5">
                   <span className="flex-1 text-[10px] text-[#6B6B63] truncate font-mono">
-                    {window.location.origin}/{ev.event_slug}/rsvp
+                    https://vantge.app/{ev.event_slug}/rsvp
                   </span>
-                  <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/${ev.event_slug}/rsvp`); setQrCopied(true); setTimeout(() => setQrCopied(false), 2000) }}
+                  <button onClick={() => { navigator.clipboard.writeText(`https://vantge.app/${ev.event_slug}/rsvp`); setQrCopied(true); setTimeout(() => setQrCopied(false), 2000) }}
                     aria-label="Copy link" className="shrink-0 text-[#B0AFA5] hover:text-[#1A1A18] transition-colors">
                     {qrCopied
                       ? <svg width="14" height="14" fill="none" stroke="#22c55e" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
