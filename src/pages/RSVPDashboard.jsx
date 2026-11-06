@@ -668,9 +668,15 @@ function FoodTab({ event }) {
                       {item.spots_total ? `${claimed} / ${item.spots_total} spots claimed` : `${claimed} claimed · unlimited spots`}
                     </p>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    <button onClick={() => startEdit(item)} className="text-[#1A1A18] text-xs font-bold hover:text-black shrink-0 transition-colors">Edit</button>
-                    <button onClick={() => deleteItem(item.id)} className="text-[#C84A44] text-xs font-bold hover:text-red-700 shrink-0 transition-colors">Remove</button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => startEdit(item)} aria-label="Edit item" title="Edit"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-[#5A5A52] hover:text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors">
+                      <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                    </button>
+                    <button onClick={() => deleteItem(item.id)} aria-label="Remove item" title="Remove"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-[#C84A44] hover:text-red-700 hover:bg-[#FEF2F2] transition-colors">
+                      <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                    </button>
                   </div>
                 </div>
                 )}
