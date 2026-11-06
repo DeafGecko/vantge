@@ -1032,28 +1032,6 @@ export default function GuestRSVP() {
           </div>
         )}
 
-        {/* ── Vantge promo footer ──────────────────────────────── */}
-        <div className="max-w-lg mx-auto px-4 pb-10 mt-4">
-          <div className="flex items-center justify-between bg-white rounded-2xl border border-[#E0D8C6] px-5 py-4 flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <VantgeLogo size="xs" />
-              <div>
-                <p className="text-sm font-bold text-[#1A1A18]">Your next gathering starts here.</p>
-                <p className="text-xs text-[#88887E]">Create a free RSVP and food sign-up with Vantge.</p>
-              </div>
-            </div>
-            <Link
-              to="/signup"
-              className="text-sm font-bold text-white rounded-full px-5 py-2.5 transition-all active:scale-[0.98]"
-              style={{ backgroundColor: accentColor }}
-            >
-              Create a free event
-            </Link>
-          </div>
-          <p className="text-center text-[10px] text-[#B0AFA5] mt-3 tracking-widest uppercase">
-            Powered by Vantge · vantge.app
-          </p>
-        </div>
       </div>
     </>
   )
