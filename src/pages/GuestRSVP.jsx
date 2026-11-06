@@ -628,20 +628,11 @@ function HeroBanner({ event, fontFamily, accentColor }) {
   )
 }
 
-// ── Step 1: Event details / advertisement ────────────────────
-function InviteStep({ event, accentColor, fontFamily, deadlineStr, onNext }) {
+// ── Step 1: Bottom actions (location, deadline, RSVP button) ─
+function InviteActions({ event, accentColor, deadlineStr, onNext }) {
   const pastDeadline = isPastDeadline(event.rsvp_deadline)
   return (
-    <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-5 min-h-[60vh]">
-      {/* Description card */}
-      {event.rsvp_description && (
-        <div className="bg-white rounded-2xl border border-[#E0D8C6] px-5 py-4">
-          <p className="text-sm text-[#5A5A52] leading-relaxed">{event.rsvp_description}</p>
-        </div>
-      )}
-
-      {/* Location, deadline and RSVP button sit at the bottom of the page */}
-      <div className="mt-auto flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {/* Details card */}
       <div className="bg-white rounded-2xl border border-[#E0D8C6] divide-y divide-[#F4F3F0]">
         {event.rsvp_location && (
@@ -689,6 +680,39 @@ function InviteStep({ event, accentColor, fontFamily, deadlineStr, onNext }) {
           RSVP Now →
         </button>
       )}
+    </div>
+  )
+}
+
+// ── Step 1: First screen, laid out like the dashboard preview ─
+function InviteHero({ event, fontFamily, accentColor, deadlineStr, onNext, titleTop }) {
+  const eventDateStr = fmt(event.rsvp_event_date, event.rsvp_timezone)
+  return (
+    <div className="relative w-full" style={{ minHeight: '100svh' }}>
+      <div className="absolute top-4 left-0 right-0 flex justify-center z-10">
+        <a href="/"><VantgeLogo size="sm" monoWhite /></a>
+      </div>
+      <div className="absolute left-0 right-0 px-6 max-w-lg mx-auto" style={{ top: titleTop }}>
+        <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/60 mb-1">You're Invited</p>
+        <h1 className="font-extrabold text-white leading-tight mb-2" style={{ fontFamily, fontSize: 'clamp(1.6rem, 5vw, 2.5rem)' }}>
+          {event.rsvp_host_display_name || event.event_name}
+        </h1>
+        <div className="flex flex-col gap-1">
+          {eventDateStr && (
+            <div className="flex items-center gap-2 text-sm text-white/85">
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {eventDateStr}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="absolute left-0 right-0 bottom-0 max-w-lg mx-auto px-4 pb-8">
+        {event.rsvp_description && (
+          <div className="bg-white/95 rounded-2xl border border-[#E0D8C6] px-5 py-4 mb-4">
+            <p className="text-sm text-[#5A5A52] leading-relaxed">{event.rsvp_description}</p>
+          </div>
+        )}
+        <InviteActions event={event} accentColor={accentColor} deadlineStr={deadlineStr} onNext={onNext} />
       </div>
     </div>
   )
@@ -979,6 +1003,9 @@ export default function GuestRSVP() {
   }
 
   const heroProps = { event, fontFamily, accentColor }
+  // Title position uses the same mapping as the dashboard preview (mobile and desktop slider)
+  const tPosGuest = Number((isWide ? event.rsvp_title_position_desktop ?? event.rsvp_title_position : event.rsvp_title_position) ?? 50)
+  const titleTop = `${(tPosGuest / 100) * 45}%`
 
   return (
     <>
@@ -991,16 +1018,17 @@ export default function GuestRSVP() {
         <div className="fixed inset-0 -z-10" style={{ backgroundColor: `rgba(0,0,0,${(bgTint / 100).toFixed(2)})` }} />
       )}
       <div className={`min-h-screen ${bgImage ? '' : 'bg-[#F4F3F0]'}`}>
-        <HeroBanner {...heroProps} />
-
-        {step === 'invite' && (
-          <InviteStep
+        {step === 'invite' ? (
+          <InviteHero
             event={event}
             accentColor={accentColor}
             fontFamily={fontFamily}
             deadlineStr={deadlineStr}
             onNext={() => setStep('rsvp')}
+            titleTop={titleTop}
           />
+        ) : (
+          <HeroBanner {...heroProps} />
         )}
 
         {step === 'rsvp' && (

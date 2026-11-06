@@ -952,14 +952,17 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
               {dateLong}
             </p>
           )}
-          {loc && (
-            <p style={{ fontSize: 5.5, color: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-              <svg width="6" height="6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              {loc}
-            </p>
-          )}
         </div>
         <div style={{ position: 'absolute', left: '6%', right: '6%', bottom: '4%', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {loc && (
+            <div style={{ background: 'white', borderRadius: 6, border: `1px solid ${bdr}`, padding: '4px 7px', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <svg width="7" height="7" fill="none" stroke="#C84A44" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <div>
+                <p style={{ fontSize: 4, fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', color: muted }}>Location</p>
+                <p style={{ fontSize: 5.5, color: txt, fontWeight: 700 }}>{loc}</p>
+              </div>
+            </div>
+          )}
           {deadlineLong && (
             <div style={{ background: 'white', borderRadius: 6, border: `1px solid ${bdr}`, padding: '4px 7px', display: 'flex', alignItems: 'center', gap: 4 }}>
               <svg width="7" height="7" fill="none" stroke="#5A5A52" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
