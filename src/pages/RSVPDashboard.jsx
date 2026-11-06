@@ -925,32 +925,57 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
   const bgTint = (isDesktop ? event.background_tint_desktop ?? event.background_tint : event.background_tint) ?? 55
   // continuous: paddingTop drives smooth vertical position, 0=top 100=bottom maps to 0%–70% of container
   // top % is measured against the screen height (padding % is measured against width, which pushed the title too high)
-  const titleTopPct = `${(tPos / 100) * 70}%`
+  const titleTopPct = `${(tPos / 100) * 45}%`
 
-  if (step === 0) return (
-    <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', background: bgImage ? 'transparent' : 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }}>
-      {/* Event photo fills the whole screen, top to bottom, no overlay */}
-      {bgImage && <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...bgPhotoStyle(bgPos, bgZoom) }} />}
-      {bgImage && <div style={{ position: 'absolute', inset: 0, background: `rgba(0,0,0,${(bgTint / 100).toFixed(2)})` }} />}
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', top: titleTopPct, padding: '0 8px', textAlign: 'center', transition: 'top 0.15s ease' }}>
-        <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.15em', color: 'white', textTransform: 'uppercase', marginBottom: 2 }}>You're Invited</p>
-        <p style={{ fontSize: isDesktop ? 11 : 13, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.2 }}>{name}</p>
-        {date && <p style={{ fontSize: 5.5, color: 'white', marginTop: 2 }}>{date}</p>}
-      </div>
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', gap: 5, padding: '6px 10px 14px' }}>
-        {event.rsvp_description && <p style={{ fontSize: 5, color: 'white', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{event.rsvp_description}</p>}
-        {loc && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'white', border: `1px solid ${bdr}`, borderRadius: 5, padding: '3px 6px' }}>
-            <svg width="7" height="7" fill="none" stroke={acc} strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <p style={{ fontSize: 5.5, color: txt, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{loc}</p>
+  if (step === 0) {
+    // Mirrors the guest page: logo at top, title block, then location, deadline and RSVP button at the bottom
+    const tz = event.rsvp_timezone || undefined
+    const dateLong = event.rsvp_event_date
+      ? new Date(event.rsvp_event_date).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: tz })
+      : null
+    const deadlineLong = event.rsvp_deadline
+      ? new Date(event.rsvp_deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: tz })
+      : null
+    return (
+      <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', background: bgImage ? 'transparent' : 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }}>
+        {bgImage && <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...bgPhotoStyle(bgPos, bgZoom) }} />}
+        {bgImage && <div style={{ position: 'absolute', inset: 0, background: `rgba(0,0,0,${(bgTint / 100).toFixed(2)})` }} />}
+        <div style={{ position: 'absolute', top: '4%', left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
+          <VantgeLogo size="sm" monoWhite />
+        </div>
+        <div style={{ position: 'absolute', left: '6%', right: '6%', top: titleTopPct }}>
+          <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.25em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 3 }}>You're Invited</p>
+          <p style={{ fontSize: isDesktop ? 11 : 13, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.15, marginBottom: 3 }}>{name}</p>
+          {dateLong && (
+            <p style={{ fontSize: 5.5, color: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
+              <svg width="6" height="6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {dateLong}
+            </p>
+          )}
+          {loc && (
+            <p style={{ fontSize: 5.5, color: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
+              <svg width="6" height="6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {loc}
+            </p>
+          )}
+        </div>
+        <div style={{ position: 'absolute', left: '6%', right: '6%', bottom: '4%', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {deadlineLong && (
+            <div style={{ background: 'white', borderRadius: 6, border: `1px solid ${bdr}`, padding: '4px 7px', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <svg width="7" height="7" fill="none" stroke="#5A5A52" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <div>
+                <p style={{ fontSize: 4, fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', color: muted }}>RSVP Deadline</p>
+                <p style={{ fontSize: 5.5, color: txt, fontWeight: 700 }}>{deadlineLong}</p>
+              </div>
+            </div>
+          )}
+          <div style={{ background: acc, borderRadius: 6, padding: '5px 8px', textAlign: 'center' }}>
+            <p style={{ fontSize: 7, fontWeight: 800, color: 'white' }}>RSVP Now →</p>
           </div>
-        )}
-        <div style={{ background: acc, borderRadius: 6, padding: '5px 8px', textAlign: 'center', marginTop: 2 }}>
-          <p style={{ fontSize: 7, fontWeight: 800, color: 'white' }}>RSVP Now →</p>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   if (step === 1) return (
     <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>

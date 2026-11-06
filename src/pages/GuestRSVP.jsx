@@ -601,7 +601,7 @@ function HeroBanner({ event, fontFamily, accentColor }) {
   const eventDateStr = fmt(event.rsvp_event_date, event.rsvp_timezone)
   return (
     <div className="relative w-full" style={{ height: 'clamp(240px, 40vw, 360px)' }}>
-      <div className="absolute top-4 left-4">
+      <div className="absolute top-4 left-0 right-0 flex justify-center">
         <a href="/"><VantgeLogo size="sm" monoWhite /></a>
       </div>
       <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
@@ -632,7 +632,7 @@ function HeroBanner({ event, fontFamily, accentColor }) {
 function InviteStep({ event, accentColor, fontFamily, deadlineStr, onNext }) {
   const pastDeadline = isPastDeadline(event.rsvp_deadline)
   return (
-    <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-5">
+    <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-5 min-h-[60vh]">
       {/* Description card */}
       {event.rsvp_description && (
         <div className="bg-white rounded-2xl border border-[#E0D8C6] px-5 py-4">
@@ -640,6 +640,8 @@ function InviteStep({ event, accentColor, fontFamily, deadlineStr, onNext }) {
         </div>
       )}
 
+      {/* Location, deadline and RSVP button sit at the bottom of the page */}
+      <div className="mt-auto flex flex-col gap-5">
       {/* Details card */}
       <div className="bg-white rounded-2xl border border-[#E0D8C6] divide-y divide-[#F4F3F0]">
         {event.rsvp_location && (
@@ -687,6 +689,7 @@ function InviteStep({ event, accentColor, fontFamily, deadlineStr, onNext }) {
           RSVP Now →
         </button>
       )}
+      </div>
     </div>
   )
 }
