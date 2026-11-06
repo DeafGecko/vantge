@@ -521,6 +521,8 @@ function FoodTab({ event }) {
   const [adding, setAdding]  = useState(false)
   const [newItem, setNewItem] = useState({ name: '', category: '', notes: '', spots_total: '' })
   const [saving, setSaving]  = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [editDraft, setEditDraft] = useState({ name: '', category: '', notes: '', spots_total: '' })
 
   const load = useCallback(async () => {
     const [{ data: i }, { data: c }] = await Promise.all([
@@ -545,6 +547,23 @@ function FoodTab({ event }) {
     })
     setNewItem({ name: '', category: '', notes: '', spots_total: '' })
     setAdding(false); setSaving(false); load()
+  }
+
+  function startEdit(item) {
+    setEditingId(item.id)
+    setEditDraft({ name: item.name ?? '', category: item.category ?? '', notes: item.notes ?? '', spots_total: item.spots_total ?? '' })
+  }
+
+  async function saveEdit(id) {
+    if (!editDraft.name.trim()) return
+    setSaving(true)
+    await supabase.from('food_items').update({
+      name: editDraft.name.trim(),
+      category: editDraft.category.trim() || null,
+      notes: editDraft.notes.trim() || null,
+      spots_total: editDraft.spots_total === '' || editDraft.spots_total == null ? null : parseInt(editDraft.spots_total),
+    }).eq('id', id)
+    setEditingId(null); setSaving(false); load()
   }
 
   async function deleteItem(id) {
@@ -606,6 +625,35 @@ function FoodTab({ event }) {
             const claimed = itemClaims.reduce((s, c) => s + c.quantity, 0)
             return (
               <div key={item.id} className="px-5 py-3.5">
+                {editingId === item.id ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="col-span-2">
+                        <FieldRow label="Item name *">
+                          <TextInput value={editDraft.name} onChange={v => setEditDraft(f => ({ ...f, name: v }))} />
+                        </FieldRow>
+                      </div>
+                      <FieldRow label="Category">
+                        <TextInput value={editDraft.category} onChange={v => setEditDraft(f => ({ ...f, category: v }))} />
+                      </FieldRow>
+                      <FieldRow label="Spots (blank = unlimited)">
+                        <TextInput type="number" value={editDraft.spots_total} onChange={v => setEditDraft(f => ({ ...f, spots_total: v }))} />
+                      </FieldRow>
+                      <div className="col-span-2">
+                        <FieldRow label="Notes">
+                          <TextInput value={editDraft.notes} onChange={v => setEditDraft(f => ({ ...f, notes: v }))} />
+                        </FieldRow>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => saveEdit(item.id)} disabled={saving || !editDraft.name.trim()}
+                        className="flex-1 bg-[#1A1A18] text-white text-xs font-bold uppercase tracking-widest rounded-full py-2.5 disabled:opacity-50 hover:bg-black transition-all">
+                        {saving ? 'Saving…' : 'Save changes'}
+                      </button>
+                      <button onClick={() => setEditingId(null)} className="px-4 text-xs font-bold text-[#88887E] hover:text-[#1A1A18]">Cancel</button>
+                    </div>
+                  </div>
+                ) : (
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -620,8 +668,12 @@ function FoodTab({ event }) {
                       {item.spots_total ? `${claimed} / ${item.spots_total} spots claimed` : `${claimed} claimed · unlimited spots`}
                     </p>
                   </div>
-                  <button onClick={() => deleteItem(item.id)} className="text-[#C84A44] text-xs font-bold hover:text-red-700 shrink-0 transition-colors">Remove</button>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <button onClick={() => startEdit(item)} className="text-[#1A1A18] text-xs font-bold hover:text-black shrink-0 transition-colors">Edit</button>
+                    <button onClick={() => deleteItem(item.id)} className="text-[#C84A44] text-xs font-bold hover:text-red-700 shrink-0 transition-colors">Remove</button>
+                  </div>
                 </div>
+                )}
                 {itemClaims.length > 0 && (
                   <div className="mt-2 space-y-1 pl-2 border-l-2 border-[#E0D8C6]">
                     {itemClaims.map(c => (
