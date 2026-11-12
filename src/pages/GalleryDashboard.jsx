@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
-import { Images, LogOut, Menu, X, Copy, Check as CheckIcon } from 'lucide-react'
+import { Images, LogOut, Menu, X, Copy, Check as CheckIcon, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
+import DashboardHeader from '../components/DashboardHeader'
+import Dropdown from '../components/Dropdown'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
@@ -41,11 +43,15 @@ export default function GalleryDashboard() {
       const [toggling, setToggling] = useState(false)
       const [localUnlocked, setLocalUnlocked] = useState(null)
       const [activeTab, setActiveTab] = useState(0)
+      const [dashTab, setDashTab] = useState('event')
       const [localTheme, setLocalTheme] = useState(null)
       const [localFont, setLocalFont] = useState(null)
+      const [localTitleAlign, setLocalTitleAlign] = useState(null)
       const [localBgImage, setLocalBgImage] = useState(undefined)
       const [localBgImageDesktop, setLocalBgImageDesktop] = useState(undefined)
       const [localEventName, setLocalEventName] = useState(null)
+      const [pending, setPending] = useState({}) // changes waiting for the Save bar
+      const [savedEventName, setSavedEventName] = useState(null) // last name saved on this screen
       const [savingName, setSavingName] = useState(false)
       const [savingSettings, setSavingSettings] = useState(false)
       const [pendingCount, setPendingCount] = useState(0)
@@ -194,12 +200,31 @@ export default function GalleryDashboard() {
             setToggling(false)
       }
 
-      async function updateEventSettings(updates) {
-            if (!event) return
+      const baseEventName = savedEventName ?? event?.event_name ?? ''
+      const hasUnsavedName = currentEventName !== baseEventName
+
+      async function saveEventName() {
+            if (!event || !hasUnsavedName) return
+            setSavingName(true)
+            const { error } = await supabase.from('events').update({ event_name: currentEventName }).eq('id', event.id)
+            setSavingName(false)
+            if (error) { alert("Could not save: " + error.message); return }
+            setSavedEventName(currentEventName)
+      }
+
+      // Settings are held here until the Save bar is pressed
+      function updateEventSettings(updates) {
+            setPending(p => ({ ...p, ...updates }))
+      }
+
+      async function saveAll() {
+            if (!event || Object.keys(pending).length === 0) return
             setSavingSettings(true)
-            const { error } = await supabase.from('events').update(updates).eq('id', event.id)
-            if (error) alert("Error saving settings: " + error.message)
+            const { error } = await supabase.from('events').update(pending).eq('id', event.id)
             setSavingSettings(false)
+            if (error) { alert("Could not save: " + error.message); return }
+            if ('event_name' in pending) setSavedEventName(pending.event_name)
+            setPending({})
       }
 
       if (eventLoading) return (
@@ -223,7 +248,9 @@ export default function GalleryDashboard() {
             setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
       }
 
+      const currentTitleAlign = localTitleAlign ?? event?.title_align ?? 'center'
       const sharedPreviewProps = {
+            titleAlign: currentTitleAlign,
             theme: currentTheme,
             eventName: currentEventName,
             font: currentFont,
@@ -250,139 +277,38 @@ export default function GalleryDashboard() {
                   <div className="min-h-screen bg-[#F7F5F0]">
 
                         {/* HEADER */}
-                        <header className="bg-ink sticky top-0 z-50">
-                              <div className="max-w-6xl mx-auto px-5 md:px-8 h-14 flex items-center justify-between gap-4">
+                        <DashboardHeader active="event" onSignOut={async () => { await signOut(); navigate('/login') }} />
 
-                                    <div className="shrink-0">
-                                          <VantgeLogo size="sm" variant="dark" />
-                                    </div>
-
-                                    {/* Desktop controls */}
-                                    <div className="hidden md:flex items-center gap-2">
-                                          <button
-                                                onClick={toggleGallery}
-                                                disabled={toggling}
-                                                className={"px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all border " +
-                                                      (isUnlocked
-                                                            ? "bg-white text-ink border-white hover:bg-white/90"
-                                                            : "border-white/20 text-white/60 hover:border-white/40 hover:text-white")}
-                                          >
-                                                {toggling ? "..." : isUnlocked ? (
-                                                      <span style={{display:'flex',alignItems:'center',gap:6}}>
-                                                            <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24" style={{flexShrink:0}}><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h4v-2H6V5h12v13h-3v2h4a1 1 0 001-1V4a1 1 0 00-1-1z"/><path d="M11 7l-4 4 4 4v-3h5v-2h-5V7z"/></svg>
-                                                            Gallery Open
-                                                      </span>
-                                                ) : (
-                                                      <span style={{display:'flex',alignItems:'center',gap:6}}>
-                                                            <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24" style={{flexShrink:0}}><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h14a1 1 0 001-1V4a1 1 0 00-1-1zm-2 15H7V5h10v13zm-4-6a1 1 0 100-2 1 1 0 000 2z"/></svg>
-                                                            Gallery Closed
-                                                      </span>
-                                                )}
-                                          </button>
-
-                                          <button
-                                                onClick={scrollToPhotos}
-                                                className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
-                                                aria-label={`Review pending photos${pendingCount > 0 ? ` (${pendingCount})` : ''}`}
-                                                title="Pending reviews"
-                                          >
-                                                <Images size={18} className="text-white/70" />
-                                                {pendingCount > 0 && (
-                                                      <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 rounded-full bg-coral-text text-white text-[10px] font-bold flex items-center justify-center px-1">
-                                                            {pendingCount > 99 ? '99+' : pendingCount}
-                                                      </span>
-                                                )}
-                                          </button>
-
-                                          <Link to="/rsvp-dashboard"
-                                                className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border border-white/20 text-white/60 hover:border-white/40 hover:text-white transition-all">
-                                                RSVP
-                                          </Link>
-
-                                          <button
-                                                onClick={async () => { await signOut(); navigate('/login') }}
-                                                aria-label="Sign out"
-                                                title="Sign out"
-                                                className="p-2 rounded-full hover:bg-white/10 transition-colors text-white/50 hover:text-white"
-                                          >
-                                                <LogOut size={18} />
-                                          </button>
-                                    </div>
-
-                                    {/* Mobile burger */}
-                                    <div className="relative md:hidden shrink-0">
-                                          <button onClick={() => setMenuOpen(o => !o)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} className="relative p-2 rounded-full hover:bg-white/10 transition-colors text-white">
-                                                {menuOpen ? <X size={20} /> : <Menu size={20} />}
-                                                {!menuOpen && pendingCount > 0 && (
-                                                      <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 rounded-full bg-coral-text text-white text-[9px] font-bold flex items-center justify-center px-0.5">
-                                                            {pendingCount > 99 ? '99+' : pendingCount}
-                                                      </span>
-                                                )}
-                                          </button>
-                                          {menuOpen && (
-                                                <>
-                                                      <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
-                                                      <div className="absolute right-0 top-11 z-40 w-56 bg-white rounded-2xl border border-[#E8E4DA] shadow-2xl overflow-hidden">
-                                                            <button
-                                                                  onClick={() => { toggleGallery(); setMenuOpen(false) }}
-                                                                  disabled={toggling}
-                                                                  className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-ink hover:bg-[#F7F5F0] transition-colors border-b border-[#E8E4DA]"
-                                                            >
-                                                                  {isUnlocked
-                                                                        ? <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" className="shrink-0 text-[#16A34A]"><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h4v-2H6V5h12v13h-3v2h4a1 1 0 001-1V4a1 1 0 00-1-1z"/><path d="M11 7l-4 4 4 4v-3h5v-2h-5V7z"/></svg>
-                                                                        : <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" className="shrink-0 text-[#B0AFA5]"><path d="M19 3H5a1 1 0 00-1 1v16a1 1 0 001 1h14a1 1 0 001-1V4a1 1 0 00-1-1zm-2 15H7V5h10v13zm-4-6a1 1 0 100-2 1 1 0 000 2z"/></svg>
-                                                                  }
-                                                                  {toggling ? "Updating..." : isUnlocked ? "Gallery Open" : "Gallery Closed"}
-                                                            </button>
-                                                            <button
-                                                                  onClick={() => { scrollToPhotos(); setMenuOpen(false) }}
-                                                                  className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold text-ink hover:bg-[#F7F5F0] transition-colors border-b border-[#E8E4DA]"
-                                                            >
-                                                                  <span className="relative">
-                                                                        <Images size={16} />
-                                                                        {pendingCount > 0 && (
-                                                                              <span className="absolute -top-1 -right-1 min-w-3.5 h-3.5 rounded-full bg-coral-text text-white text-[8px] font-bold flex items-center justify-center">
-                                                                                    {pendingCount}
-                                                                              </span>
-                                                                        )}
-                                                                  </span>
-                                                                  Pending Reviews
-                                                                  {pendingCount > 0 && <span className="ml-auto text-coral-text text-xs font-bold">{pendingCount}</span>}
-                                                            </button>
-                                                            <button
-                                                                  onClick={async () => { await signOut(); navigate('/login') }}
-                                                                  className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-medium text-ink-muted hover:bg-[#F7F5F0] transition-colors"
-                                                            >
-                                                                  <LogOut size={16} />
-                                                                  Sign Out
-                                                            </button>
-                                                      </div>
-                                                </>
-                                          )}
-                                    </div>
-                              </div>
-                        </header>
-
-                        <div className="max-w-6xl mx-auto px-4 md:px-6 py-5 md:py-7">
+                        <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-9 pb-20">
 
                               {/* PAGE TITLE */}
-                              <div className="mb-5 flex items-end justify-between">
+                              <div className="mb-8 flex items-end justify-between gap-6">
                                     <div>
                                           <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#B0AFA5] mb-0.5">Event Dashboard</p>
-                                          <h2 className="text-xl md:text-2xl font-black tracking-tight text-ink">{event.event_name}</h2>
+                                          <h2 className="text-xl md:text-2xl font-black tracking-tight text-ink">{currentEventName}</h2>
                                     </div>
-                                    {savingSettings && (
-                                          <span className="text-[10px] font-bold text-coral-text animate-pulse tracking-widest uppercase">Saving…</span>
-                                    )}
+                        {/* Dashboard tabs — same style as RSVP: Event Setup · Design · Gallery */}
+                        <div className="flex gap-6 items-end">
+                              {[{ id: 'event', label: 'Event' }, { id: 'gallery', label: 'Gallery' }].map(t => (
+                                    <button key={t.id} onClick={() => setDashTab(t.id)}
+                                          className={`relative pb-1 text-sm font-bold transition-colors ${dashTab === t.id ? 'text-[#1A1A18]' : 'text-[#B0AFA5] hover:text-[#5A5A52]'}`}>
+                                          {t.label}
+                                          {dashTab === t.id && <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-[#1A1A18] rounded-full" />}
+                                    </button>
+                              ))}
+                        </div>
                               </div>
 
+
                               {/* BENTO GRID */}
-                              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mb-7">
+                              {dashTab !== 'gallery' && (
+                              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-10 items-start">
 
                                     {/* LEFT — preview + QR */}
-                                    <div className="md:col-span-4 flex flex-col gap-3">
+                                    <div className="md:col-span-4 flex flex-col gap-6">
 
                                           {/* Live Preview */}
+                                          {dashTab === 'event' && (
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
                                                 <div className="flex items-center justify-between mb-4">
                                                       <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Live Preview</p>
@@ -443,165 +369,15 @@ export default function GalleryDashboard() {
                                                             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
                                                       </button>
                                                 </div>
-                                          </div>
-
-                                          {/* QR code */}
-                                          <QRCodeSection eventSlug={event.event_slug} />
-
-                                          {/* Guest Controls */}
-                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] shadow-sm flex flex-col flex-1">
-                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-5 pt-5 pb-4">Guest Controls</p>
-
-                                                {/* Section 1 — Toggles */}
-                                                <div className="px-5 pb-5 flex flex-col gap-4 border-b-2 border-[#F0EDE6]">
-                                                      {[
-                                                            { label: 'Allow Downloads', sub: 'Guests can save photos', value: allowDownloads, toggle: toggleAllowDownloads },
-                                                            { label: 'Allow Sharing', sub: 'Guests can share photos', value: allowSharing, toggle: toggleAllowSharing },
-                                                            { label: 'Require Approval', sub: 'You approve each photo before it appears', value: requireApproval, toggle: toggleRequireApproval },
-                                                      ].map(({ label, sub, value, toggle }) => (
-                                                            <div key={label} className="flex items-center justify-between gap-3">
-                                                                  <div>
-                                                                        <p className="text-sm font-semibold text-ink">{label}</p>
-                                                                        <p className="text-[11px] text-ink-muted">{sub}</p>
-                                                                  </div>
-                                                                  <button
-                                                                        onClick={toggle}
-                                                                        aria-label={label}
-                                                                        className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-ink' : 'bg-border'}`}
-                                                                  >
-                                                                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0'}`} />
-                                                                  </button>
-                                                            </div>
-                                                      ))}
-                                                </div>
-
-                                                {/* Section 2 — Upload Limit */}
-                                                <div className="px-5 py-5 border-b-2 border-[#F0EDE6]">
-                                                      <p className="text-sm font-semibold text-ink mb-0.5">Upload Limit per Guest</p>
-                                                      <p className="text-[11px] text-ink-muted mb-3">Max photos a guest can submit</p>
-                                                      <div className="flex gap-2 flex-wrap">
-                                                            {[null, 5, 10, 20, 30].map((v) => (
-                                                                  <button
-                                                                        key={v ?? 'unlimited'}
-                                                                        onClick={() => saveUploadLimit(v)}
-                                                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${uploadLimit === v ? 'bg-ink text-white border-ink' : 'bg-white text-ink border-[#E8E4DA] hover:border-ink'}`}
-                                                                  >
-                                                                        {v === null ? 'Unlimited' : v}
-                                                                  </button>
-                                                            ))}
-                                                      </div>
-                                                </div>
-
-                                                {/* Section 3 — Passcode */}
-                                                <div className="px-5 py-5 flex-1">
-                                                      <p className="text-sm font-semibold text-ink mb-0.5">Guest Passcode</p>
-                                                      <p className="text-[11px] text-ink-muted mb-3">Guests must enter this to access the event</p>
-                                                      <div className="flex gap-2">
-                                                            <input
-                                                                  type="text"
-                                                                  value={passcode}
-                                                                  onChange={(e) => setLocalPasscode(e.target.value)}
-                                                                  onBlur={(e) => savePasscode(e.target.value)}
-                                                                  placeholder="No passcode"
-                                                                  maxLength={20}
-                                                                  className="flex-1 border border-[#E8E4DA] rounded-xl px-3 py-2 text-sm text-ink placeholder-[#B0AFA5] focus:outline-none focus:border-ink transition-colors"
-                                                            />
-                                                            {passcode ? (
-                                                                  <button
-                                                                        onClick={() => savePasscode('')}
-                                                                        className="px-3 py-2 rounded-xl border border-[#E8E4DA] text-[11px] font-bold text-[#C84A44] hover:border-[#C84A44] transition-colors"
-                                                                  >
-                                                                        Clear
-                                                                  </button>
-                                                            ) : null}
-                                                      </div>
-                                                      {savingPasscode && <p className="text-[10px] text-ink-muted mt-1 animate-pulse">Saving…</p>}
-                                                </div>
-                                          </div>
-                                    </div>
-
-                                    {/* RIGHT — controls */}
-                                    <div className="md:col-span-8 flex flex-col gap-3">
-
-                                          {/* Logo | Display Name | Event Type */}
-                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
-
-                                                {/* Row 1 — Logo + stacked Name/Type */}
-                                                <div className="flex items-start gap-4">
-
-                                                      {/* Logo */}
-                                                      <div className="shrink-0 flex flex-col items-center gap-1.5">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Logo</p>
-                                                            <LogoUploader
-                                                                  eventId={event.id}
-                                                                  currentLogoUrl={currentLogoUrl}
-                                                                  onSaved={(url) => setLocalLogoUrl(url)}
-                                                            />
-                                                      </div>
-
-                                                      {/* Display Name + Event Type */}
-                                                      <div className="flex-1 min-w-0 flex flex-col gap-3">
-
-                                                            <div>
-                                                                  <div className="flex items-center justify-between mb-1.5">
-                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Display Name</p>
-                                                                        {savingName && <span className="text-[10px] font-bold text-coral-text animate-pulse">Saving…</span>}
-                                                                  </div>
-                                                                  <textarea
-                                                                        value={currentEventName}
-                                                                        onChange={(e) => setLocalEventName(e.target.value)}
-                                                                        onBlur={async () => {
-                                                                              if (currentEventName === event.event_name) return
-                                                                              setSavingName(true)
-                                                                              await updateEventSettings({ event_name: currentEventName })
-                                                                              setSavingName(false)
-                                                                        }}
-                                                                        placeholder="e.g. Columbia Deaf Church"
-                                                                        style={{ height: 68 }}
-                                                                        className="w-full bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-ink focus:outline-none focus:border-ink transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal resize-none leading-snug"
-                                                                  />
-                                                            </div>
-
-                                                            <div>
-                                                                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Event Type</p>
-                                                                  <div className="relative">
-                                                                        <select
-                                                                              value={currentEventTypeId}
-                                                                              onChange={async (e) => {
-                                                                                    const val = e.target.value
-                                                                                    setLocalEventType(val)
-                                                                                    const updates = { event_type: val || null }
-                                                                                    const brandingKey = val || 'none'
-                                                                                    const { data } = await supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle()
-                                                                                    const newDefault = data?.background_url || getEventType(val)?.defaultBg || null
-                                                                                    updates.background_image = newDefault
-                                                                                    updates.background_image_desktop = newDefault
-                                                                                    setLocalBgImage(newDefault)
-                                                                                    setLocalBgImageDesktop(newDefault)
-                                                                                    await updateEventSettings(updates)
-                                                                              }}
-                                                                              className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-ink focus:outline-none focus:border-ink transition-colors pr-8 cursor-pointer"
-                                                                        >
-                                                                              <option value="">— None —</option>
-                                                                              {EVENT_TYPES.map((t) => (
-                                                                                    <option key={t.id} value={t.id}>{t.label}</option>
-                                                                              ))}
-                                                                        </select>
-                                                                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B0AFA5]" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                                                                  </div>
-                                                            </div>
-
-                                                      </div>
-                                                </div>
-
-                                                {/* Row 2 — Title Position (mobile + desktop separate) */}
+                                                {/* Title position — sits with the preview it changes */}
+                                                {/* Row 2 — Title place (mobile + desktop separate) */}
                                                 <div className="mt-3 border-t border-[#F0EDE6] pt-3 flex flex-col gap-2">
                                                       {/* Mobile */}
                                                       <div>
                                                             <div className="flex items-center justify-between mb-1">
                                                                   <div className="flex items-center gap-1">
                                                                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
-                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
+                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title place</p>
                                                                   </div>
                                                                   <span className="text-[9px] font-bold text-ink-soft">{currentTitlePosition === 0 ? 'Top' : currentTitlePosition === 100 ? 'Bottom' : currentTitlePosition === 50 ? 'Center' : `${currentTitlePosition}%`}</span>
                                                             </div>
@@ -625,7 +401,7 @@ export default function GalleryDashboard() {
                                                             <div className="flex items-center justify-between mb-1">
                                                                   <div className="flex items-center gap-1">
                                                                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
-                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
+                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title place</p>
                                                                   </div>
                                                                   <span className="text-[9px] font-bold text-ink-soft">{currentTitlePositionDesktop === 0 ? 'Top' : currentTitlePositionDesktop === 100 ? 'Bottom' : currentTitlePositionDesktop === 50 ? 'Center' : `${currentTitlePositionDesktop}%`}</span>
                                                             </div>
@@ -646,8 +422,171 @@ export default function GalleryDashboard() {
                                                       </div>
                                                 </div>
                                           </div>
+                                          )}
+
+                                          {/* QR code */}
+                                          {dashTab === 'event' && (
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm p-6">
+                                                <div className="flex items-start justify-between gap-4 flex-wrap">
+                                                      <div>
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Gallery</p>
+                                                            <p className="text-sm text-[#5A5A52] mt-1">{isUnlocked ? 'Open — guests can view and upload.' : 'Closed — guests see "not open yet".'}</p>
+                                                      </div>
+                                                      <div className="flex gap-2 flex-wrap">
+                                                            {[{ v: true, label: 'Open' }, { v: false, label: 'Closed' }].map(({ v, label }) => (
+                                                                  <button key={label} disabled={toggling || isUnlocked === v}
+                                                                        onClick={() => { if (isUnlocked !== v) toggleGallery() }}
+                                                                        className={`text-[10px] font-bold uppercase tracking-widest rounded-full px-3.5 py-1.5 border transition-all disabled:cursor-default ${
+                                                                              isUnlocked === v ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'border-[#E0D8C6] text-[#88887E] hover:border-[#1A1A18] hover:text-[#1A1A18]'
+                                                                        }`}>
+                                                                        {label}
+                                                                  </button>
+                                                            ))}
+                                                      </div>
+                                                </div>
+                                          </div>
+                                          )}
+                                          {dashTab === 'event' && <QRCodeSection eventSlug={event.event_slug} />}
+
+                                          {/* Guest Controls */}
+                                          {dashTab === 'event' && (
+                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] shadow-sm flex flex-col flex-1">
+                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-5 pt-5 pb-4">Guest Controls</p>
+
+                                                {/* Section 1 — Toggles */}
+                                                <div className="px-5 pb-5 flex flex-col gap-4 border-b-2 border-[#F0EDE6]">
+                                                      {[
+                                                            { label: 'Allow downloads', sub: 'Guests can save photos', value: allowDownloads, toggle: toggleAllowDownloads },
+                                                            { label: 'Allow sharing', sub: 'Guests can share photos', value: allowSharing, toggle: toggleAllowSharing },
+                                                            { label: 'Check photos first', sub: 'You check each photo before guests see it', value: requireApproval, toggle: toggleRequireApproval },
+                                                      ].map(({ label, sub, value, toggle }) => (
+                                                            <div key={label} className="flex items-center justify-between gap-3">
+                                                                  <div>
+                                                                        <p className="text-sm font-semibold text-ink">{label}</p>
+                                                                        <p className="text-[11px] text-ink-muted">{sub}</p>
+                                                                  </div>
+                                                                  <button
+                                                                        onClick={toggle}
+                                                                        aria-label={label}
+                                                                        className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-ink' : 'bg-border'}`}
+                                                                  >
+                                                                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                                  </button>
+                                                            </div>
+                                                      ))}
+                                                </div>
+
+                                                {/* Section 2 — Upload Limit */}
+                                                <div className="px-5 py-5 border-b-2 border-[#F0EDE6]">
+                                                      <p className="text-sm font-semibold text-ink mb-0.5">Photo limit per guest</p>
+                                                      <p className="text-[11px] text-ink-muted mb-3">Max photos a guest can submit</p>
+                                                      <div className="flex gap-2 flex-wrap">
+                                                            {[null, 5, 10, 20, 30].map((v) => (
+                                                                  <button
+                                                                        key={v ?? 'unlimited'}
+                                                                        onClick={() => saveUploadLimit(v)}
+                                                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${uploadLimit === v ? 'bg-ink text-white border-ink' : 'bg-white text-ink border-[#E8E4DA] hover:border-ink'}`}
+                                                                  >
+                                                                        {v === null ? 'Unlimited' : v}
+                                                                  </button>
+                                                            ))}
+                                                      </div>
+                                                </div>
+
+                                                {/* Section 3 — Passcode */}
+                                                <div className="px-5 py-5 flex-1">
+                                                      <p className="text-sm font-semibold text-ink mb-0.5">Passcode</p>
+                                                      <p className="text-[11px] text-ink-muted mb-3">Guests type this to open the event</p>
+                                                      <div className="flex gap-2">
+                                                            <input
+                                                                  type="text"
+                                                                  value={passcode}
+                                                                  onChange={(e) => setLocalPasscode(e.target.value)}
+                                                                  onBlur={(e) => savePasscode(e.target.value)}
+                                                                  placeholder="No passcode"
+                                                                  maxLength={20}
+                                                                  className="flex-1 border border-[#E8E4DA] rounded-xl px-3 py-2 text-sm text-ink placeholder-[#B0AFA5] focus:outline-none focus:border-ink transition-colors"
+                                                            />
+                                                            {passcode ? (
+                                                                  <button
+                                                                        onClick={() => savePasscode('')}
+                                                                        className="px-3 py-2 rounded-xl border border-[#E8E4DA] text-[11px] font-bold text-[#C84A44] hover:border-[#C84A44] transition-colors"
+                                                                  >
+                                                                        Clear
+                                                                  </button>
+                                                            ) : null}
+                                                      </div>
+                                                </div>
+                                          </div>
+                                          )}
+                                    </div>
+
+                                    {/* RIGHT — controls */}
+                                    <div className="md:col-span-8 flex flex-col gap-6">
+
+                                          {/* Logo | Display Name | Event Type */}
+                                          {dashTab === 'event' && (
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+
+                                                {/* Row 1 — Logo + stacked Name/Type */}
+                                                <div className="flex items-start gap-4">
+
+                                                      {/* Logo */}
+                                                      <div className="shrink-0 flex flex-col items-center gap-1.5">
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Logo</p>
+                                                            <LogoUploader
+                                                                  eventId={event.id}
+                                                                  currentLogoUrl={currentLogoUrl}
+                                                                  onSaved={(url) => setLocalLogoUrl(url)}
+                                                            />
+                                                      </div>
+
+                                                      {/* Display Name + Event Type */}
+                                                      <div className="flex-1 min-w-0 flex flex-col gap-3">
+
+                                                            <div>
+                                                                  <div className="flex items-center justify-between mb-1.5">
+                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Display Name</p>
+                                                                  </div>
+                                                                  <textarea
+                                                                        value={currentEventName}
+                                                                        onChange={(e) => { setLocalEventName(e.target.value); updateEventSettings({ event_name: e.target.value }) }}
+                                                                        onBlur={async () => {
+                                                                              await saveEventName()
+                                                                        }}
+                                                                        placeholder="e.g. Columbia Deaf Church"
+                                                                        style={{ height: 68 }}
+                                                                        className="w-full bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-ink focus:outline-none focus:border-ink transition-colors placeholder:text-[#C0BFB5] placeholder:font-normal resize-none leading-snug"
+                                                                  />
+                                                            </div>
+
+                                                            <div>
+                                                                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Event Type</p>
+                                                                  <Dropdown value={currentEventTypeId} className="bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-ink"
+                                                                        options={[{ value: '', label: '— None —' }, ...EVENT_TYPES.map(t => ({ value: t.id, label: t.label }))]}
+                                                                        onChange={async (val) => {
+                                                                              setLocalEventType(val)
+                                                                              const updates = { event_type: val || null }
+                                                                              const brandingKey = val || 'none'
+                                                                              const { data } = await supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle()
+                                                                              const newDefault = data?.background_url || getEventType(val)?.defaultBg || null
+                                                                              updates.background_image = newDefault
+                                                                              updates.background_image_desktop = newDefault
+                                                                              setLocalBgImage(newDefault)
+                                                                              setLocalBgImageDesktop(newDefault)
+                                                                              await updateEventSettings(updates)
+                                                                        }} />
+                                                            </div>
+
+                                                      </div>
+                                                </div>
+
+                                          </div>
+                                          )}
 
                                           {/* Background photo */}
+                                          {dashTab === 'event' && (
+                                          <>
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm overflow-hidden">
                                                 <BackgroundUploader
                                                       eventId={event.id}
@@ -666,7 +605,18 @@ export default function GalleryDashboard() {
                                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
                                                 <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm overflow-hidden flex flex-col">
-                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-4 pt-4 pb-3 shrink-0">Title Font</p>
+                                                      <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Font</p>
+                                                            <div className="flex items-center gap-1">
+                                                                  {[{ v: 'left', Icon: AlignLeft }, { v: 'center', Icon: AlignCenter }, { v: 'right', Icon: AlignRight }].map(({ v, Icon }) => (
+                                                                        <button key={v} onClick={() => { setLocalTitleAlign(v); updateEventSettings({ title_align: v }) }}
+                                                                              aria-label={`Align title ${v}`} title={`Align ${v}`}
+                                                                              className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${currentTitleAlign === v ? 'bg-[#1A1A18] text-white' : 'text-[#88887E] hover:bg-[#F4F3F0]'}`}>
+                                                                              <Icon size={15} />
+                                                                        </button>
+                                                                  ))}
+                                                            </div>
+                                                      </div>
                                                       <div className="flex flex-col divide-y-2 divide-[#F0EDE6]">
                                                             {Object.entries(fontCategories).map(([catKey, fonts], idx) => (
                                                                   <div key={catKey} className={`px-4 py-3${idx > 0 ? ' pt-[22px]' : ''}`}>
@@ -708,14 +658,33 @@ export default function GalleryDashboard() {
                                                       </div>
                                                 </div>
                                           </div>
-
-                                          {/* Host uploader */}
-                                          <HostUploader eventId={event.id} refreshKey={preloadRefreshKey} />
+                                          </>
+                                          )}
                                     </div>
+                              </div>
+                              )}
+
+                              {/* Sticky save bar: only appears when the name has changes that are not saved yet */}
+                              {dashTab !== 'gallery' && Object.keys(pending).length > 0 && (
+                                    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-[#E8E4DA] shadow-lg">
+                                          <div className="max-w-6xl mx-auto px-4 md:px-8 py-2 flex items-center justify-between gap-4">
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#88887E]">Unsaved changes</p>
+                                                <button onClick={saveAll} disabled={savingSettings}
+                                                      className="text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-1.5 bg-[#1A1A18] text-white hover:bg-black transition-all disabled:opacity-50">
+                                                      {savingSettings ? 'Saving…' : 'Save'}
+                                                </button>
+                                          </div>
+                                    </div>
+                              )}
+
+                              {dashTab === 'gallery' && (
+                              <>
+                              <div className="mb-6">
+                                    <HostUploader eventId={event.id} refreshKey={preloadRefreshKey} />
                               </div>
 
                               {/* APPROVED STATS */}
-                              <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm px-5 py-4 flex items-center gap-4">
+                              <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm px-6 py-5 flex items-center gap-4">
                                     <div className="flex-1 flex items-center gap-3">
                                           <div className="w-8 h-8 rounded-lg bg-[#F4F3F0] flex items-center justify-center shrink-0">
                                                 <svg width="15" height="15" fill="none" stroke="#1A1A18" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
@@ -775,6 +744,8 @@ export default function GalleryDashboard() {
                                           <PhotoManager key={activeTab} eventId={event.id} status={activeTab} onAdminPhotoDeleted={() => setPreloadRefreshKey(k => k + 1)} />
                                     </div>
                               </div>
+                              </>
+                              )}
 
                         </div>
                   </div>
@@ -794,7 +765,7 @@ function themeColors(theme, hasBg) {
       }
 }
 
-function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked, titlePosition = 100 }) {
+function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked, titlePosition = 100, titleAlign = 'center' }) {
       const hasBg = !!bgImage
       const { c, txt, txtMuted, txtSubtle, cardBg, cardBorder } = themeColors(theme, hasBg)
       const tintStyle = { backgroundColor: `rgba(0,0,0,${((bgTint ?? 55) / 100).toFixed(2)})` }
@@ -810,12 +781,13 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
             <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
       ))
 
+      const alignSide = titleAlign === 'left' ? 'mr-auto' : titleAlign === 'right' ? 'ml-auto' : 'mx-auto'
       const titleBlock = (
-            <div className={`text-center ${isMobile ? 'px-4 py-2' : 'px-8 py-2'}`}>
+            <div className={`${isMobile ? 'px-4 py-2' : 'px-8 py-2'}`} style={{ textAlign: titleAlign }}>
                   {logoUrl && (
                         <img
                               src={logoUrl} alt="Logo"
-                              className={`mx-auto object-contain ${isMobile ? 'mb-1.5 max-h-8 max-w-20' : 'mb-2 max-h-10 max-w-25'}`}
+                              className={`${alignSide} object-contain ${isMobile ? 'mb-1.5 max-h-8 max-w-20' : 'mb-2 max-h-10 max-w-25'}`}
                               style={{ filter: hasBg ? 'brightness(0) invert(1)' : 'none' }}
                         />
                   )}
@@ -1009,7 +981,7 @@ function QRCodeSection({ eventSlug }) {
 
       return (
             <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm flex flex-col items-center gap-4">
-                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] self-start">Scan to Share</p>
+                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] self-start">Scan to open</p>
                   <div ref={qrRef} className="bg-[#F7F5F0] p-4 rounded-2xl">
                         <QRCodeSVG value={guestUrl} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
                   </div>

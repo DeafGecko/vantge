@@ -65,7 +65,7 @@ function ResponseButton({ label, value, selected, accentColor, onChange }) {
   return (
     <button
       onClick={() => onChange(value)}
-      className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold border-2 transition-all ${
+      className={`flex items-center gap-2 rounded-xl px-5 py-3.5 text-base font-bold border-2 transition-all ${
         selected
           ? 'text-white border-transparent'
           : 'bg-white text-[#5A5A52] border-[#E0D8C6] hover:border-[#C9BFA8]'
@@ -85,7 +85,7 @@ function ResponseButton({ label, value, selected, accentColor, onChange }) {
 function FieldInput({ label, type = 'text', value, onChange, placeholder, required, error }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-[#1A1A18] mb-1.5">
+      <label className="block text-base font-bold text-[#1A1A18] mb-2">
         {label}{required && <span className="text-[#C84A44] ml-0.5">*</span>}
       </label>
       <input
@@ -93,7 +93,7 @@ function FieldInput({ label, type = 'text', value, onChange, placeholder, requir
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full rounded-xl border px-4 py-3 text-sm text-[#1A1A18] placeholder-[#B0AFA5] focus:outline-none transition-colors ${
+        className={`w-full rounded-xl border px-4 py-3 text-base text-[#1A1A18] placeholder-[#B0AFA5] focus:outline-none transition-colors ${
           error ? 'border-[#C84A44] bg-[#FEF2F2]' : 'border-[#E0D8C6] bg-white focus:border-[#C9BFA8]'
         }`}
       />
@@ -105,7 +105,7 @@ function FieldInput({ label, type = 'text', value, onChange, placeholder, requir
 function HeadcountStepper({ value, onChange }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm font-semibold text-[#1A1A18]">Number attending</span>
+      <span className="text-sm font-semibold text-[#1A1A18]">How many are coming</span>
       <div className="flex items-center gap-3">
         <button
           onClick={() => onChange(Math.max(1, value - 1))}
@@ -187,16 +187,16 @@ function RSVPForm({ event, accentColor, existingResponse, onSuccess }) {
   if (pastDeadline && !isEdit) {
     return (
       <div className="bg-white rounded-2xl border border-[#E0D8C6] p-6 text-center">
-        <p className="text-sm font-bold text-[#1A1A18] mb-1">RSVP deadline has passed</p>
-        <p className="text-xs text-[#88887E]">This event is no longer accepting new RSVPs.</p>
+        <p className="text-sm font-bold text-[#1A1A18] mb-1">The reply date has passed</p>
+        <p className="text-xs text-[#88887E]">This event is no longer taking replies.</p>
       </div>
     )
   }
 
   return (
     <div className="bg-white rounded-2xl border border-[#E0D8C6] p-6">
-      <h2 className="text-xl font-black text-[#1A1A18] mb-1">Will you join us?</h2>
-      <p className="text-sm text-[#88887E] mb-5">Let us know if you can make it.</p>
+      <h2 className="text-2xl font-black text-[#1A1A18] mb-2">Will you come?</h2>
+      <p className="text-sm text-[#88887E] mb-5">Let us know if you can come.</p>
 
       {/* Response buttons */}
       <div className="flex gap-2 flex-wrap mb-5">
@@ -204,7 +204,7 @@ function RSVPForm({ event, accentColor, existingResponse, onSuccess }) {
         {event.rsvp_allow_maybe !== false && (
           <ResponseButton label="Maybe" value="maybe" selected={response === 'maybe'} accentColor={accentColor} onChange={setResponse} />
         )}
-        <ResponseButton label="Can't attend" value="not_going" selected={response === 'not_going'} accentColor={accentColor} onChange={setResponse} />
+        <ResponseButton label="Can't come" value="not_going" selected={response === 'not_going'} accentColor={accentColor} onChange={setResponse} />
       </div>
 
       <div className="flex flex-col gap-4">
@@ -234,7 +234,7 @@ function RSVPForm({ event, accentColor, existingResponse, onSuccess }) {
               <textarea
                 value={guestNames}
                 onChange={e => setGuestNames(e.target.value)}
-                placeholder="One name per line"
+                placeholder="One name on each line"
                 rows={3}
                 className="mt-2 w-full rounded-xl border border-[#E0D8C6] px-4 py-3 text-sm text-[#1A1A18] placeholder-[#B0AFA5] focus:outline-none focus:border-[#C9BFA8] resize-none"
               />
@@ -243,7 +243,7 @@ function RSVPForm({ event, accentColor, existingResponse, onSuccess }) {
         )}
 
         <div>
-          <label className="block text-sm font-semibold text-[#1A1A18] mb-1.5">Note <span className="text-[#88887E] font-normal">(optional)</span></label>
+          <label className="block text-base font-bold text-[#1A1A18] mb-2">Note <span className="text-[#88887E] font-normal">(optional)</span></label>
           <textarea
             value={note}
             onChange={e => setNote(e.target.value)}
@@ -303,7 +303,7 @@ function FoodSignup({ event, accentColor }) {
     return item.spots_total - used
   }
 
-  function isFilled(item) {
+  function isFull(item) {
     const left = spotsLeft(item)
     return left !== null && left <= 0
   }
@@ -353,30 +353,71 @@ function FoodSignup({ event, accentColor }) {
 
   if (loading) return <div className="py-8 text-center text-sm text-[#88887E]">Loading…</div>
 
+  // Add-your-own-item block, placed between 'Still needed' and 'Already covered'
+  const neededCount = items.filter(it => !isFull(it)).length
+  const suggestBlock = event.food_allow_suggestions ? (
+          <div className="mt-6 pt-6 border-t-2 border-[#E8E4DA]">
+            {!showSuggest ? (
+              <button
+                onClick={() => setShowSuggest(true)}
+                className="flex items-center gap-2 text-sm font-bold transition-colors"
+                style={{ color: accentColor }}
+              >
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="16"/>
+                  <line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                Add your own item
+              </button>
+            ) : (
+              <div className="flex flex-col gap-4 bg-[#F8F5ED] rounded-xl p-5">
+                <p className="text-sm font-bold text-[#1A1A18]">Add an idea</p>
+                <FieldInput label="What to bring" value={suggestion.name} onChange={v => setSuggestion(s => ({ ...s, name: v }))} placeholder="e.g. Potato salad" required />
+                <FieldInput label="Type (optional)" value={suggestion.category} onChange={v => setSuggestion(s => ({ ...s, category: v }))} placeholder="e.g. Side dish" />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSuggest}
+                    disabled={suggestSubmitting || !suggestion.name.trim()}
+                    className="flex-1 rounded-xl py-3 text-base font-bold text-white disabled:opacity-50 transition-all"
+                    style={{ backgroundColor: accentColor }}
+                  >
+                    {suggestSubmitting ? 'Submitting…' : 'Submit suggestion'}
+                  </button>
+                  <button onClick={() => setShowSuggest(false)} className="px-4 text-sm font-bold text-[#88887E]">Cancel</button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : null
+
   return (
-    <div className="bg-white rounded-2xl border border-[#E0D8C6] p-6">
-      <div className="flex items-center gap-3 mb-1">
-        <h2 className="text-xl font-black text-[#1A1A18]">{event.food_heading || 'Food Sign-up'}</h2>
+    <div className="bg-white rounded-2xl border border-[#E0D8C6] p-6 md:p-8">
+      <div className="flex items-center gap-3 mb-2">
+        <h2 className="text-2xl font-black text-[#1A1A18]">{event.food_heading || 'Food Sign-up'}</h2>
         <span className="text-xs font-bold text-[#88887E] border border-[#E0D8C6] rounded-full px-2.5 py-0.5">Optional</span>
       </div>
-      <p className="text-sm text-[#88887E] mb-5">Choose something to bring, or suggest your own.</p>
+      <p className="text-base text-[#4A4A44] mb-6">Pick something to bring, or add your own idea.</p>
+
+      {neededCount === items.length && suggestBlock}
 
       {items.length === 0 && (
-        <p className="text-sm text-[#88887E] text-center py-4">No items yet.</p>
+        <p className="text-base text-[#4A4A44] text-center py-6">Nothing to bring yet.</p>
       )}
 
-      <div className="flex flex-col divide-y divide-[#F4F3F0]">
-        {[...items].sort((a, b) => Number(isFilled(a)) - Number(isFilled(b))).map((item, idx, arr) => {
+      <div className="flex flex-col divide-y-2 divide-[#E8E4DA]">
+        {[...items].sort((a, b) => Number(isFull(a)) - Number(isFull(b))).map((item, idx, arr) => {
           const left = spotsLeft(item)
-          const filled = isFilled(item)
+          const filled = isFull(item)
           const isOpen = claiming === item.id
 
           return (
             <div key={item.id}>
-              {(idx === 0 || isFilled(arr[idx - 1]) !== filled) && (
-                <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#88887E] pt-2 pb-1">{filled ? 'Already covered' : 'Still needed'}</p>
+              {idx === neededCount && suggestBlock}
+              {(idx === 0 || isFull(arr[idx - 1]) !== filled) && (
+                <p className="text-xs font-black tracking-[0.18em] uppercase text-[#4A4A44] pt-4 pb-3">{filled ? 'Already covered' : 'Still needed'}</p>
               )}
-            <div className={`py-3.5 first:pt-0 last:pb-0 ${filled ? 'opacity-60' : ''}`}>
+            <div className="py-5 first:pt-0 last:pb-0">
               <div className="flex items-center gap-3">
                 {/* Icon placeholder */}
                 <div className="w-12 h-12 rounded-xl bg-[#F4F3F0] flex items-center justify-center shrink-0">
@@ -390,19 +431,19 @@ function FoodSignup({ event, accentColor }) {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-[#1A1A18]">{item.name}</p>
-                  {item.notes && <p className="text-xs text-[#88887E] mt-0.5">{item.notes}</p>}
+                  <p className="text-base font-black text-[#1A1A18]">{item.name}</p>
+                  {item.notes && <p className="text-sm text-[#4A4A44] mt-1">{item.notes}</p>}
                   <p className="text-xs text-[#88887E] mt-0.5">
                     {filled ? 'Covered, thank you!' : left !== null ? `${left} spot${left !== 1 ? 's' : ''} left` : 'Open'}
                   </p>
                 </div>
                 <div className="shrink-0">
                   {filled ? (
-                    <span className="text-xs font-bold text-[#88887E] border border-[#E0D8C6] rounded-xl px-4 py-2">Filled</span>
+                    <span className="text-sm font-bold text-[#4A4A44] border-2 border-[#D9D4C5] rounded-xl px-4 py-2.5">Full</span>
                   ) : (
                     <button
                       onClick={() => claiming === item.id ? setClaiming(null) : (setClaiming(item.id), setClaimErrors({}))}
-                      className="text-sm font-bold rounded-xl px-4 py-2 border-2 transition-all"
+                      className="text-base font-bold rounded-xl px-5 py-2.5 border-2 transition-all"
                       style={{ borderColor: accentColor, color: accentColor }}
                     >
                       Choose
@@ -413,7 +454,7 @@ function FoodSignup({ event, accentColor }) {
 
               {/* Inline claim form */}
               {isOpen && (
-                <div className="mt-3 bg-[#F8F5ED] rounded-xl p-4 flex flex-col gap-3">
+                <div className="mt-4 bg-[#F8F5ED] rounded-xl p-5 flex flex-col gap-4">
                   <FieldInput label="Your name" value={claimForm.guestName} onChange={v => setClaimForm(f => ({ ...f, guestName: v }))} placeholder="Jordan Taylor" required error={claimErrors.guestName} />
                   <FieldInput label="What will you bring?" value={claimForm.description} onChange={v => setClaimForm(f => ({ ...f, description: v }))} placeholder="My famous mac & cheese…" />
                   {claimErrors.submit && <p className="text-xs text-[#C84A44]">{claimErrors.submit}</p>}
@@ -421,7 +462,7 @@ function FoodSignup({ event, accentColor }) {
                     <button
                       onClick={() => handleClaim(item)}
                       disabled={!!claiming && claiming !== item.id}
-                      className="flex-1 rounded-xl py-2.5 text-sm font-bold text-white transition-all"
+                      className="flex-1 rounded-xl py-3 text-base font-bold text-white transition-all"
                       style={{ backgroundColor: accentColor }}
                     >
                       {claiming === item.id ? 'Claiming…' : 'Confirm'}
@@ -443,41 +484,6 @@ function FoodSignup({ event, accentColor }) {
         })}
       </div>
 
-      {event.food_allow_suggestions && (
-        <div className="mt-4 pt-4 border-t border-[#F4F3F0]">
-          {!showSuggest ? (
-            <button
-              onClick={() => setShowSuggest(true)}
-              className="flex items-center gap-2 text-sm font-bold transition-colors"
-              style={{ color: accentColor }}
-            >
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="16"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
-              </svg>
-              Add your own item
-            </button>
-          ) : (
-            <div className="flex flex-col gap-3 bg-[#F8F5ED] rounded-xl p-4">
-              <p className="text-sm font-bold text-[#1A1A18]">Suggest an item</p>
-              <FieldInput label="Item name" value={suggestion.name} onChange={v => setSuggestion(s => ({ ...s, name: v }))} placeholder="e.g. Potato salad" required />
-              <FieldInput label="Category (optional)" value={suggestion.category} onChange={v => setSuggestion(s => ({ ...s, category: v }))} placeholder="e.g. Side dish" />
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSuggest}
-                  disabled={suggestSubmitting || !suggestion.name.trim()}
-                  className="flex-1 rounded-xl py-2.5 text-sm font-bold text-white disabled:opacity-50 transition-all"
-                  style={{ backgroundColor: accentColor }}
-                >
-                  {suggestSubmitting ? 'Submitting…' : 'Submit suggestion'}
-                </button>
-                <button onClick={() => setShowSuggest(false)} className="px-4 text-sm font-bold text-[#88887E]">Cancel</button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
 }
@@ -500,11 +506,11 @@ function PhotosTab({ event, eventSlug, accentColor }) {
   }, [event.id, event.gallery_unlocked])
 
   return (
-    <div className="bg-white rounded-2xl border border-[#E0D8C6] p-6">
+    <div className="bg-white rounded-2xl border border-[#E0D8C6] p-6 md:p-8">
       <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
         <div>
-          <span className="text-xl font-black text-[#1A1A18]">Shared photos</span>
-          <span className="text-[#88887E] text-sm ml-2">· Relive the moments! Upload and view photos from this event.</span>
+          <span className="text-xl font-black text-[#1A1A18]">Photos</span>
+          <span className="text-[#88887E] text-sm ml-2">· Add and see photos from this event.</span>
         </div>
         {event.gallery_unlocked && (
           <div className="flex gap-2">
@@ -520,13 +526,13 @@ function PhotosTab({ event, eventSlug, accentColor }) {
       </div>
 
       {!event.gallery_unlocked ? (
-        <p className="text-sm text-[#88887E] mt-3">Photos will be available once the host opens the gallery.</p>
+        <p className="text-sm text-[#88887E] mt-3">Photos will show here once the host opens the gallery.</p>
       ) : loading ? (
         <div className="mt-4 grid grid-cols-4 gap-2">
           {[0,1,2,3].map(i => <div key={i} className="aspect-square rounded-xl bg-[#F4F3F0] animate-pulse" />)}
         </div>
       ) : photos.length === 0 ? (
-        <p className="text-sm text-[#88887E] mt-3">No photos yet. Be the first to upload!</p>
+        <p className="text-sm text-[#88887E] mt-3">No photos yet. Be the first to add one!</p>
       ) : (
         <div className="mt-4 grid grid-cols-4 gap-2">
           {photos.map(p => (
@@ -557,7 +563,7 @@ function ConfirmationScreen({ event, rsvpResult, accentColor, fontFamily, onEdit
     : "Sorry you can't make it. You can update your response anytime."
 
   return (
-    <div className="bg-white rounded-2xl border border-[#E0D8C6] p-8 flex flex-col items-center text-center gap-4">
+    <div className="bg-white rounded-3xl border border-[#E0D8C6] p-7 md:p-10 flex flex-col items-center text-center gap-6">
       <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: accentColor + '20' }}>
         {rsvpResult.response === 'going'
           ? <svg width="28" height="28" fill="none" stroke={accentColor} strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -567,18 +573,18 @@ function ConfirmationScreen({ event, rsvpResult, accentColor, fontFamily, onEdit
         }
       </div>
       <div>
-        <h2 className="text-xl font-black text-[#1A1A18]" style={{ fontFamily }}>{label}</h2>
-        <p className="text-sm text-[#88887E] mt-1">{sub}</p>
+        <h2 className="text-3xl font-black text-[#1A1A18]" style={{ fontFamily }}>{label}</h2>
+        <p className="text-lg text-[#4A4A44] mt-2">{sub}</p>
       </div>
-      <div className="w-full bg-[#F8F5ED] rounded-xl p-4 text-left">
-        <p className="text-xs font-bold text-[#88887E] uppercase tracking-widest mb-1">Your edit link</p>
-        <p className="text-xs text-[#5A5A52] break-all mb-2">{editUrl}</p>
-        <button onClick={copy} className="text-xs font-bold transition-colors" style={{ color: accentColor }}>
+      <div className="w-full bg-[#F8F5ED] rounded-2xl p-5 md:p-6 text-left">
+        <p className="text-sm font-bold text-[#4A4A44] mb-2">Your link to change your reply</p>
+        <p className="text-sm text-[#4A4A44] break-all mb-3">{editUrl}</p>
+        <button onClick={copy} className="text-base font-bold transition-colors underline underline-offset-4" style={{ color: accentColor }}>
           {copied ? '✓ Copied!' : 'Copy link'}
         </button>
       </div>
-      <button onClick={onEdit} className="text-sm font-bold text-[#88887E] hover:text-[#1A1A18] transition-colors">
-        Edit my response
+      <button onClick={onEdit} className="text-base font-bold text-[#1A1A18] underline underline-offset-4 hover:opacity-70 transition-opacity">
+        Change my reply
       </button>
     </div>
   )
@@ -607,7 +613,7 @@ function HeroBanner({ event, fontFamily, accentColor }) {
       <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
         <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/60 mb-1">You're Invited</p>
         <h1 className="font-extrabold text-white leading-tight mb-2" style={{ fontFamily, fontSize: 'clamp(1.6rem, 5vw, 2.5rem)' }}>
-          {event.rsvp_host_display_name || event.event_name}
+          {event.rsvp_event_name}
         </h1>
         <div className="flex flex-col gap-1">
           {eventDateStr && (
@@ -658,7 +664,7 @@ function InviteActions({ event, accentColor, deadlineStr, onNext }) {
               <svg width="16" height="16" fill="none" stroke="#5A5A52" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div>
-              <p className="text-xs font-bold text-[#88887E] uppercase tracking-widest">RSVP Deadline</p>
+              <p className="text-xs font-bold text-[#88887E] uppercase tracking-widest">Reply by</p>
               <p className="text-sm font-semibold text-[#1A1A18]">{deadlineStr}</p>
             </div>
           </div>
@@ -668,8 +674,8 @@ function InviteActions({ event, accentColor, deadlineStr, onNext }) {
       {/* CTA */}
       {pastDeadline ? (
         <div className="bg-[#F4F3F0] rounded-2xl px-5 py-4 text-center">
-          <p className="text-sm font-bold text-[#88887E]">RSVP deadline has passed</p>
-          <p className="text-xs text-[#B0AFA5] mt-1">This event is no longer accepting RSVPs.</p>
+          <p className="text-sm font-bold text-[#88887E]">The reply date has passed</p>
+          <p className="text-xs text-[#B0AFA5] mt-1">This event is no longer taking replies.</p>
         </div>
       ) : (
         <button
@@ -692,10 +698,10 @@ function InviteHero({ event, fontFamily, accentColor, deadlineStr, onNext, title
       <div className="absolute top-4 left-0 right-0 flex justify-center z-10">
         <a href="/"><VantgeLogo size="sm" monoWhite /></a>
       </div>
-      <div className="absolute left-0 right-0 px-6 max-w-lg mx-auto" style={{ top: titleTop }}>
+      <div className="absolute left-0 right-0 px-6 max-w-lg mx-auto" style={{ top: titleTop, textAlign: event.rsvp_title_align ?? 'left' }}>
         <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/60 mb-1">You're Invited</p>
         <h1 className="font-extrabold text-white leading-tight mb-2" style={{ fontFamily, fontSize: 'clamp(1.6rem, 5vw, 2.5rem)' }}>
-          {event.rsvp_host_display_name || event.event_name}
+          {event.rsvp_event_name}
         </h1>
         <div className="flex flex-col gap-1">
           {eventDateStr && (
@@ -779,7 +785,7 @@ function RSVPStep({ event, accentColor, existingResponse, onSuccess, onBack }) {
       <div className="bg-white rounded-2xl border border-[#E0D8C6] p-6 flex flex-col gap-5">
         <div>
           <h2 className="text-xl font-black text-[#1A1A18] mb-1">Will you be there?</h2>
-          <p className="text-sm text-[#88887E]">Let the host know if you can make it.</p>
+          <p className="text-base text-[#4A4A44]">Let the host know if you can come.</p>
         </div>
 
         {/* Big response buttons */}
@@ -830,7 +836,7 @@ function RSVPStep({ event, accentColor, existingResponse, onSuccess, onBack }) {
                 <textarea
                   value={guestNames}
                   onChange={e => setGuestNames(e.target.value)}
-                  placeholder="One name per line"
+                  placeholder="One name on each line"
                   rows={3}
                   className="mt-2 w-full rounded-xl border border-[#E0D8C6] px-4 py-3 text-sm text-[#1A1A18] placeholder-[#B0AFA5] focus:outline-none focus:border-[#C9BFA8] resize-none"
                 />
@@ -839,7 +845,7 @@ function RSVPStep({ event, accentColor, existingResponse, onSuccess, onBack }) {
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-[#1A1A18] mb-1.5">Note <span className="text-[#88887E] font-normal">(optional)</span></label>
+            <label className="block text-base font-bold text-[#1A1A18] mb-2">Note <span className="text-[#88887E] font-normal">(optional)</span></label>
             <textarea
               value={note}
               onChange={e => setNote(e.target.value)}
@@ -882,7 +888,7 @@ function FoodStep({ event, accentColor, rsvpResult, onBack, onDone }) {
             <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: accentColor + '20' }}>
               <svg width="12" height="12" fill="none" stroke={accentColor} strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
-            <p className="text-sm font-bold text-[#1A1A18]">RSVP received!</p>
+            <p className="text-sm font-bold text-[#1A1A18]">Thank you! Your reply is in.</p>
           </div>
           <p className="text-xs text-[#88887E]">
             {rsvpResult.response === 'going' ? `See you there, ${rsvpResult.guest_name}.` : `Thanks for letting us know, ${rsvpResult.guest_name}.`}
@@ -915,12 +921,12 @@ export default function GuestRSVP() {
   const editToken = searchParams.get('edit')
 
   const { event, loading: eventLoading } = useEvent(eventSlug)
-  const bg = useResponsiveBg(event?.background_image, event?.background_image_desktop)
+  const bg = useResponsiveBg(event?.rsvp_background_image, event?.rsvp_background_image_desktop)
   const isWide = useIsWide()
   // Desktop uses its own saved framing and tint, falling back to the mobile values
-  const bgPos  = (isWide ? event?.background_position_desktop ?? event?.background_position : event?.background_position) || '50% 50%'
-  const bgZoom = isWide ? event?.background_zoom_desktop ?? event?.background_zoom : event?.background_zoom
-  const bgTint = (isWide ? event?.background_tint_desktop ?? event?.background_tint : event?.background_tint) ?? 55
+  const bgPos  = (isWide ? event?.rsvp_background_position_desktop ?? event?.rsvp_background_position : event?.rsvp_background_position) || '50% 50%'
+  const bgZoom = isWide ? event?.rsvp_background_zoom_desktop ?? event?.rsvp_background_zoom : event?.rsvp_background_zoom
+  const bgTint = (isWide ? event?.rsvp_background_tint_desktop ?? event?.rsvp_background_tint : event?.rsvp_background_tint) ?? 55
 
   // step: 'invite' | 'rsvp' | 'food' | 'done'
   const [step, setStep] = useState('invite')
@@ -965,8 +971,8 @@ export default function GuestRSVP() {
     return (
       <div className="min-h-screen bg-[#F8F5ED] flex items-center justify-center p-8 text-center">
         <div>
-          <p className="text-lg font-black text-[#1A1A18] mb-2">Invitation not available yet</p>
-          <p className="text-sm text-[#88887E]">The host hasn't published this invitation yet.</p>
+          <p className="text-lg font-black text-[#1A1A18] mb-2">Invitation not ready yet</p>
+          <p className="text-sm text-[#88887E]">The host has not shared this invitation yet.</p>
         </div>
       </div>
     )
@@ -976,8 +982,8 @@ export default function GuestRSVP() {
     return (
       <div className="min-h-screen bg-[#F8F5ED] flex items-center justify-center p-8 text-center">
         <div>
-          <p className="text-lg font-black text-[#1A1A18] mb-2">Invitations closed</p>
-          <p className="text-sm text-[#88887E]">This event is no longer accepting RSVPs.</p>
+          <p className="text-lg font-black text-[#1A1A18] mb-2">Replies are closed</p>
+          <p className="text-sm text-[#88887E]">This event is no longer taking replies.</p>
         </div>
       </div>
     )
@@ -986,7 +992,7 @@ export default function GuestRSVP() {
   const theme = getTheme(event.rsvp_theme || event.theme)
   const c = theme.colors
   const fontFamily = resolveFontFamily(event.rsvp_font || event.font_family)
-  const eventType = getEventType(event.event_type)
+  const eventType = getEventType(event.rsvp_event_type)
   const bgImage = bg || eventType.defaultBg
   const accentColor = c.accent
 

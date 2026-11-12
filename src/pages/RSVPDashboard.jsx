@@ -2,14 +2,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
+import { LogOut, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
 import { supabase } from '../lib/supabase'
 import VantgeLogo from '../components/VantgeLogo'
+import DashboardHeader from '../components/DashboardHeader'
 import { getAllThemes } from '../lib/themes'
 import { getFontsByCategory, getFont, getAllFonts, getGoogleFontsUrl, DEFAULT_FONT_ID } from '../lib/fonts'
 import { EVENT_TYPES, getEventType } from '../lib/eventTypes'
 import BackgroundUploader from '../components/BackgroundUploader'
+import Dropdown from '../components/Dropdown'
+import DateTimeField from '../components/DateTimeField'
 import LogoUploader from '../components/LogoUploader'
 import { bgPhotoStyle } from '../lib/bgPhoto'
 
@@ -38,7 +42,7 @@ function Toggle({ checked, onChange, label, sublabel }) {
   )
 }
 function TextInput({ value, onChange, placeholder, type = 'text', rows }) {
-  const cls = "w-full rounded-xl border border-[#E0D8C6] px-4 py-2.5 text-sm text-[#1A1A18] placeholder-[#B0AFA5] focus:outline-none focus:border-[#C9BFA8] bg-white"
+  const cls = "w-full rounded-xl border-2 border-[#D9D4C5] bg-white px-4 py-3 text-base text-[#1A1A18] placeholder-[#7A7A72] hover:border-[#1A1A18] focus:outline-none focus:border-[#1A1A18] focus-visible:ring-2 focus-visible:ring-[#1A1A18]"
   if (rows) return <textarea value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows} className={cls + ' resize-none'} />
   return <input type={type} value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={cls} />
 }
@@ -81,16 +85,14 @@ function FieldRow({ label, children, info }) {
 }
 function Sel({ value, onChange, options }) {
   return (
-    <select value={value ?? ''} onChange={e => onChange(e.target.value)}
-      className="w-full rounded-xl border border-[#E0D8C6] px-4 py-2.5 text-sm text-[#1A1A18] bg-white focus:outline-none focus:border-[#C9BFA8]">
-      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-    </select>
+    <Dropdown value={value} onChange={onChange} options={options}
+      className="rounded-xl border-2 border-[#D9D4C5] bg-white px-4 py-3 text-base text-[#1A1A18] hover:border-[#1A1A18]" />
   )
 }
 
 // ── Tabs ─────────────────────────────────────────────────────
 const TABS = [
-  { id: 'setup',     label: 'Event Setup' },
+  { id: 'event',     label: 'Event' },
   { id: 'design',    label: 'Design' },
   { id: 'food',      label: 'Food Sign-up' },
   { id: 'responses', label: 'Responses' },
@@ -109,7 +111,16 @@ getAllFonts().forEach((font) => {
 })
 
 // ── Setup Tab ─────────────────────────────────────────────────
-function SetupTab({ event, onSaved }) {
+// Turn a saved (UTC) date into the local text a date box shows, so the form compares like with like
+function toInputValue(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d)) return ''
+  const p = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
+}
+
+function SetupTab({ event, onSaved, registerSave, onDirty, onNameInput, onStatusInput }) {
   const DRAFT_KEY = `rsvp_setup_draft_${event.id}`
 
   function baseForm() {
@@ -117,13 +128,13 @@ function SetupTab({ event, onSaved }) {
       rsvp_enabled:           event.rsvp_enabled ?? false,
       rsvp_status:            event.rsvp_status ?? 'draft',
       rsvp_mode:              event.rsvp_mode ?? 'rsvp_only',
-      rsvp_host_display_name: event.rsvp_host_display_name ?? '',
+      rsvp_event_name:        event.rsvp_event_name ?? '',
       rsvp_description:       event.rsvp_description ?? '',
       rsvp_location:          event.rsvp_location ?? '',
-      rsvp_event_date:        event.rsvp_event_date ? event.rsvp_event_date.slice(0, 16) : '',
-      rsvp_end_time:          event.rsvp_end_time   ? event.rsvp_end_time.slice(0, 16)   : '',
+      rsvp_event_date:        toInputValue(event.rsvp_event_date),
+      rsvp_end_time:          toInputValue(event.rsvp_end_time),
       rsvp_timezone:          event.rsvp_timezone ?? 'America/New_York',
-      rsvp_deadline:          event.rsvp_deadline ? event.rsvp_deadline.slice(0, 16) : '',
+      rsvp_deadline:          toInputValue(event.rsvp_deadline),
       rsvp_attendance_limit:  event.rsvp_attendance_limit ?? '',
       rsvp_collect_email:     event.rsvp_collect_email ?? false,
       rsvp_allow_maybe:       event.rsvp_allow_maybe ?? true,
@@ -159,7 +170,7 @@ function SetupTab({ event, onSaved }) {
     setSaving(true); setError(null)
     const u = { ...form }
     u.rsvp_event_date       = u.rsvp_event_date  ? new Date(u.rsvp_event_date).toISOString()  : null
-    u.rsvp_end_time         = u.rsvp_end_time    ? new Date(u.rsvp_end_time).toISOString()    : null
+    u.rsvp_end_time         = u.rsvp_end_time?.trim() ? new Date(u.rsvp_end_time).toISOString() : null
     u.rsvp_deadline         = u.rsvp_deadline    ? new Date(u.rsvp_deadline).toISOString()    : null
     u.rsvp_attendance_limit = u.rsvp_attendance_limit ? parseInt(u.rsvp_attendance_limit) : null
     const { error: err } = await supabase.from('events').update(u).eq('id', event.id)
@@ -169,6 +180,10 @@ function SetupTab({ event, onSaved }) {
     setHasDraft(false)
     setSaved(true); onSaved?.(u); setTimeout(() => setSaved(false), 2500)
   }
+  useEffect(() => { registerSave?.(save) })
+  // Tell the top Save button whether this tab has changes that aren't saved yet
+  const isDirty = JSON.stringify(form) !== JSON.stringify(baseForm())
+  useEffect(() => { onDirty?.(isDirty) })
 
   const timezones = [
     { value: 'America/New_York',    label: 'Eastern (ET)' },
@@ -183,22 +198,22 @@ function SetupTab({ event, onSaved }) {
   const showFood = form.rsvp_mode === 'food_only' || form.rsvp_mode === 'rsvp_and_food'
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
       {/* Status banner */}
-      <Card className="p-5">
+      <Card className="p-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <SectionLabel>Invitation Status</SectionLabel>
+            <SectionLabel>Status</SectionLabel>
             <p className="text-sm text-[#5A5A52] mt-1">
-              {form.rsvp_status === 'draft'     && 'Draft — not visible to guests yet.'}
-              {form.rsvp_status === 'published' && 'Published — guests can RSVP.'}
-              {form.rsvp_status === 'closed'    && 'Closed — no new RSVPs accepted.'}
+              {form.rsvp_status === 'draft'     && 'Draft — guests cannot see it yet.'}
+              {form.rsvp_status === 'published' && 'Live — guests can reply.'}
+              {form.rsvp_status === 'closed'    && 'Closed — no new replies.'}
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
             {['draft','published','closed'].map(s => (
-              <button key={s} onClick={() => set('rsvp_status')(s)}
+              <button key={s} onClick={() => { set('rsvp_status')(s); onStatusInput?.(s) }}
                 className={`text-[10px] font-bold uppercase tracking-widest rounded-full px-3.5 py-1.5 border transition-all ${
                   form.rsvp_status === s
                     ? 'bg-[#1A1A18] text-white border-[#1A1A18]'
@@ -210,18 +225,18 @@ function SetupTab({ event, onSaved }) {
           </div>
         </div>
         <div className="mt-4 pt-4 border-t border-[#F4F3F0]">
-          <Toggle label="Enable RSVP feature" sublabel="Must be on for the invitation page to work"
+          <Toggle label="Turn on RSVP" sublabel="Needs to be on for guests to reply"
             checked={form.rsvp_enabled} onChange={set('rsvp_enabled')} />
         </div>
       </Card>
 
       {/* Event details */}
-      <Card className="p-5 space-y-4">
+      <Card className="p-6 space-y-5">
         <SectionLabel>Event Details</SectionLabel>
-        <FieldRow label="Host display name">
-          <TextInput value={form.rsvp_host_display_name} onChange={set('rsvp_host_display_name')} placeholder="e.g. The Johnson Family" />
+        <FieldRow label="Display name">
+          <TextInput value={form.rsvp_event_name} onChange={v => { set('rsvp_event_name')(v); onNameInput?.(v) }} placeholder="e.g. The Johnson Family" />
         </FieldRow>
-        <FieldRow label="Description (optional)" info="This message appears on your invitation page — use it to greet guests, share dress code, parking notes, or anything they need to know before RSVPing.">
+        <FieldRow label="Message (optional)" info="A short note shown on the invitation. Use it for a welcome, dress code, or parking.ing.">
           <TextInput value={form.rsvp_description} onChange={set('rsvp_description')} placeholder="A short note for your guests…" rows={2} />
         </FieldRow>
         <FieldRow label="Location">
@@ -230,30 +245,24 @@ function SetupTab({ event, onSaved }) {
       </Card>
 
       {/* Date & time */}
-      <Card className="p-5 space-y-4">
+      <Card className="p-6 space-y-5">
         <SectionLabel>Date & Time</SectionLabel>
 
         {/* Row 1 — Start + End time */}
         <div className="grid grid-cols-2 gap-3">
           <FieldRow label="Start time">
-            <input type="datetime-local" value={form.rsvp_event_date} onChange={e => set('rsvp_event_date')(e.target.value)}
-              className="w-full rounded-xl border border-[#E0D8C6] px-3 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C9BFA8]" />
+            <DateTimeField value={form.rsvp_event_date} onChange={set('rsvp_event_date')} />
           </FieldRow>
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <input type="checkbox" id="show_end_time"
                 checked={!!form.rsvp_end_time}
-                onChange={e => { if (!e.target.checked) set('rsvp_end_time')('') }}
+                onChange={e => set('rsvp_end_time')(e.target.checked ? ' ' : '')}
                 className="w-3.5 h-3.5 rounded accent-[#1A1A18] cursor-pointer" />
               <label htmlFor="show_end_time" className="text-xs font-bold text-[#88887E] uppercase tracking-widest cursor-pointer">End time</label>
             </div>
-            {form.rsvp_end_time !== undefined && (
-              <input type="datetime-local" value={form.rsvp_end_time}
-                onChange={e => set('rsvp_end_time')(e.target.value)}
-                disabled={!form.rsvp_end_time && form.rsvp_end_time !== ' '}
-                onClick={() => { if (!form.rsvp_end_time) set('rsvp_end_time')(' ') }}
-                className="w-full rounded-xl border border-[#E0D8C6] px-3 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C9BFA8] disabled:opacity-40 disabled:bg-[#F4F3F0]" />
-            )}
+            <DateTimeField value={form.rsvp_end_time?.trim() ? form.rsvp_end_time : ''} onChange={set('rsvp_end_time')}
+              disabled={!form.rsvp_end_time} placeholder="Pick an end time" />
           </div>
         </div>
 
@@ -263,66 +272,58 @@ function SetupTab({ event, onSaved }) {
             <Sel value={form.rsvp_timezone} onChange={set('rsvp_timezone')} options={timezones} />
           </FieldRow>
           <FieldRow label="RSVP deadline (optional)">
-            <input type="datetime-local" value={form.rsvp_deadline} onChange={e => set('rsvp_deadline')(e.target.value)}
-              className="w-full rounded-xl border border-[#E0D8C6] px-3 py-2.5 text-sm text-[#1A1A18] focus:outline-none focus:border-[#C9BFA8]" />
+            <DateTimeField value={form.rsvp_deadline} onChange={set('rsvp_deadline')} placeholder="Optional" />
           </FieldRow>
         </div>
       </Card>
 
       {/* RSVP options */}
-      <Card className="p-5 space-y-4">
+      <Card className="p-6 space-y-5">
         <SectionLabel>RSVP Options</SectionLabel>
-        <FieldRow label="What to collect">
+        <FieldRow label="What to ask">
           <Sel value={form.rsvp_mode} onChange={set('rsvp_mode')} options={[
             { value: 'rsvp_only',      label: 'RSVP only' },
-            { value: 'food_only',      label: 'Food sign-up only' },
-            { value: 'rsvp_and_food',  label: 'RSVP + Food sign-up' },
+            { value: 'food_only',      label: 'Food only' },
+            { value: 'rsvp_and_food',  label: 'Reply and food' },
           ]} />
         </FieldRow>
-        <FieldRow label="Attendance limit (optional)">
+        <FieldRow label="Most guests allowed (optional)">
           <TextInput type="number" value={form.rsvp_attendance_limit} onChange={set('rsvp_attendance_limit')} placeholder="Leave blank for unlimited" />
         </FieldRow>
-        <FieldRow label="Headcount style">
+        <FieldRow label="How to count guests">
           <Sel value={form.rsvp_headcount_mode} onChange={set('rsvp_headcount_mode')} options={[
             { value: 'headcount', label: 'Number only' },
             { value: 'names',     label: 'Guest names only' },
-            { value: 'both',      label: 'Number + guest names' },
+            { value: 'both',      label: 'Number and names' },
           ]} />
         </FieldRow>
         <div className="space-y-3 pt-1">
-          <Toggle label="Collect email address" checked={form.rsvp_collect_email} onChange={set('rsvp_collect_email')} />
-          <Toggle label='Allow "Maybe" response' checked={form.rsvp_allow_maybe} onChange={set('rsvp_allow_maybe')} />
+          <Toggle label="Ask for email" checked={form.rsvp_collect_email} onChange={set('rsvp_collect_email')} />
+          <Toggle label='Allow "Maybe"' checked={form.rsvp_allow_maybe} onChange={set('rsvp_allow_maybe')} />
         </div>
       </Card>
 
       {/* Food sign-up */}
       {showFood && (
-        <Card className="p-5 space-y-4">
+        <Card className="p-6 space-y-5">
           <SectionLabel>Food Sign-up</SectionLabel>
-          <Toggle label="Enable food sign-up section" checked={form.food_enabled} onChange={set('food_enabled')} />
+          <Toggle label="Turn on food sign-up" checked={form.food_enabled} onChange={set('food_enabled')} />
           {form.food_enabled && (
             <>
-              <FieldRow label="Section heading">
+              <FieldRow label="Heading">
                 <TextInput value={form.food_heading} onChange={set('food_heading')} placeholder="Food Sign-up" />
               </FieldRow>
               <div className="space-y-3">
-                <Toggle label="Allow guests to suggest items" checked={form.food_allow_suggestions} onChange={set('food_allow_suggestions')} />
-                <Toggle label="Show contributor names to guests" checked={form.food_show_contributors} onChange={set('food_show_contributors')} />
+                <Toggle label="Guests can add items" checked={form.food_allow_suggestions} onChange={set('food_allow_suggestions')} />
+                <Toggle label="Show who brought each item" checked={form.food_show_contributors} onChange={set('food_show_contributors')} />
               </div>
             </>
           )}
         </Card>
       )}
 
-      {hasDraft && !saved && (
-        <p className="text-xs text-[#88887E] text-center">You have unsaved changes</p>
-      )}
       {error && <p className="text-sm text-[#C84A44] text-center">{error}</p>}
 
-      <button onClick={save} disabled={saving}
-        className="w-full bg-[#1A1A18] text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3.5 hover:bg-black transition-all disabled:opacity-50">
-        {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save settings'}
-      </button>
     </div>
   )
 }
@@ -335,6 +336,60 @@ function ResponsesTab({ event }) {
   const [foodItems, setFoodItems]   = useState([])
   const [loading, setLoading]     = useState(true)
   const [filter, setFilter]       = useState('all')
+  const [editing, setEditing]     = useState(null)   // the response being edited
+  const [draft, setDraft]         = useState({ guest_name: '', response: 'going', party_size: 1, guest_names: '', note: '' })
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [editingClaim, setEditingClaim] = useState(null)
+  const [claimDraft, setClaimDraft] = useState({ guest_name: '', description: '', quantity: 1 })
+
+  function startEditClaim(c) {
+    setEditingClaim(c)
+    setClaimDraft({ guest_name: c.guest_name ?? '', description: c.description ?? '', quantity: c.quantity ?? 1 })
+  }
+
+  async function saveClaim() {
+    if (!editingClaim || !claimDraft.guest_name.trim()) return
+    setSavingEdit(true)
+    const fields = {
+      guest_name: claimDraft.guest_name.trim(),
+      description: claimDraft.description.trim() || null,
+      quantity: Math.max(1, parseInt(claimDraft.quantity) || 1),
+    }
+    const { error } = await supabase.from('food_claims').update(fields).eq('id', editingClaim.id)
+    setSavingEdit(false)
+    if (error) { alert('Could not save: ' + error.message); return }
+    setFoodClaims(list => list.map(x => x.id === editingClaim.id ? { ...x, ...fields } : x))
+    setEditingClaim(null)
+  }
+
+  async function removeClaim(c) {
+    if (!window.confirm(`Remove ${c.guest_name}'s food item?`)) return
+    const { error } = await supabase.from('food_claims').delete().eq('id', c.id)
+    if (error) { alert('Could not remove: ' + error.message); return }
+    setFoodClaims(list => list.filter(x => x.id !== c.id))
+  }
+
+  function startEdit(r) {
+    setEditing(r)
+    setDraft({ guest_name: r.guest_name ?? '', response: r.response ?? 'going', party_size: r.party_size ?? 1, guest_names: r.guest_names ?? '', note: r.note ?? '' })
+  }
+
+  async function saveEdit() {
+    if (!editing || !draft.guest_name.trim()) return
+    setSavingEdit(true)
+    const fields = {
+      guest_name: draft.guest_name.trim(),
+      response: draft.response,
+      party_size: Math.max(1, parseInt(draft.party_size) || 1),
+      guest_names: draft.guest_names.trim() || null,
+      note: draft.note.trim() || null,
+    }
+    const { error } = await supabase.from('rsvp_responses').update(fields).eq('id', editing.id)
+    setSavingEdit(false)
+    if (error) { alert('Could not save: ' + error.message); return }
+    setResponses(list => list.map(x => x.id === editing.id ? { ...x, ...fields } : x))
+    setEditing(null)
+  }
 
   const load = useCallback(async () => {
     const [{ data: rData }, { data: cData }, { data: iData }] = await Promise.all([
@@ -384,7 +439,7 @@ function ResponsesTab({ event }) {
   if (loading) return <div className="py-10 text-center text-sm text-[#88887E]">Loading…</div>
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-3">
@@ -402,14 +457,14 @@ function ResponsesTab({ event }) {
       </div>
 
       {/* Sub-tab switcher */}
-      <div className="flex gap-1 bg-[#F4F3F0] rounded-xl p-1">
+      <div className="flex gap-3 bg-[#F4F3F0] rounded-xl p-2">
         {[
           { id: 'guests', label: 'Guest List' },
           { id: 'food',   label: 'Food Sign-up' },
         ].map(t => (
           <button key={t.id} onClick={() => setSubTab(t.id)}
-            className={`flex-1 text-xs font-bold py-2 rounded-lg transition-all ${
-              subTab === t.id ? 'bg-white text-[#1A1A18] shadow-sm' : 'text-[#88887E] hover:text-[#1A1A18]'
+            className={`flex-1 text-sm font-bold py-2.5 rounded-lg border-2 transition-all focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A1A18] ${
+              subTab === t.id ? 'bg-[#1A1A18] border-[#1A1A18] text-white' : 'bg-[#E8E4DA] border-[#D9D4C5] text-[#3D3D38] hover:bg-[#DDD8CB]'
             }`}>
             {t.label}
           </button>
@@ -419,16 +474,12 @@ function ResponsesTab({ event }) {
       {/* Guest List sub-tab */}
       {subTab === 'guests' && (
         <Card className="overflow-hidden">
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 flex-wrap gap-2">
+          <div className="flex items-center justify-between px-6 pt-5 pb-4 flex-wrap gap-3">
             <SectionLabel>All Responses ({responses.length})</SectionLabel>
             <div className="flex items-center gap-2">
-              <select value={filter} onChange={e => setFilter(e.target.value)}
-                className="text-xs font-bold border border-[#E0D8C6] rounded-full px-3 py-1.5 bg-white text-[#1A1A18] focus:outline-none">
-                <option value="all">All</option>
-                <option value="going">Going</option>
-                <option value="maybe">Maybe</option>
-                <option value="not_going">Can't attend</option>
-              </select>
+              <Dropdown value={filter} onChange={setFilter} wrapClassName="relative w-36"
+                className="text-xs font-bold border border-[#E0D8C6] rounded-full px-3 py-1.5 bg-white text-[#1A1A18]"
+                options={[{ value: 'all', label: 'All' }, { value: 'going', label: 'Going' }, { value: 'maybe', label: 'Maybe' }, { value: 'not_going', label: "Can't attend" }]} />
               {responses.length > 0 && (
                 <button onClick={exportCSV}
                   className="text-xs font-bold text-[#1A1A18] border border-[#E0D8C6] rounded-full px-3 py-1.5 hover:bg-[#F4F3F0] transition-colors">
@@ -438,14 +489,14 @@ function ResponsesTab({ event }) {
             </div>
           </div>
           {filtered.length === 0 ? (
-            <p className="px-5 pb-6 text-sm text-[#88887E]">{responses.length === 0 ? 'No responses yet.' : 'None in this filter.'}</p>
+            <p className="px-6 pb-6 text-sm text-[#5A5A52]">{responses.length === 0 ? 'No responses yet.' : 'None in this filter.'}</p>
           ) : (
-            <div className="divide-y divide-[#F4F3F0]">
+            <div className="divide-y-2 divide-[#D9D4C5]">
               {filtered.map(r => (
-                <div key={r.id} className="px-5 py-3.5 flex items-start justify-between gap-3">
+                <div key={r.id} className="px-6 py-5 flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-bold text-[#1A1A18]">{r.guest_name}</p>
+                      <p className="text-base font-black text-[#1A1A18]">{r.guest_name}</p>
                       <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                         r.response === 'going'  ? 'bg-green-100 text-green-800' :
                         r.response === 'maybe'  ? 'bg-yellow-100 text-yellow-800' :
@@ -454,16 +505,25 @@ function ResponsesTab({ event }) {
                         {r.response === 'going' ? 'Going' : r.response === 'maybe' ? 'Maybe' : "Can't attend"}
                       </span>
                       {r.party_size > 1 && (
-                        <span className="text-xs text-[#88887E]">+{r.party_size - 1} guest{r.party_size > 2 ? 's' : ''}</span>
+                        <span className="text-sm font-semibold text-[#1A1A18]">+{r.party_size - 1} guest{r.party_size > 2 ? 's' : ''}</span>
                       )}
                     </div>
-                    {r.guest_names && <p className="text-xs text-[#88887E] mt-0.5">{r.guest_names}</p>}
-                    {r.note && <p className="text-xs text-[#5A5A52] italic mt-0.5">"{r.note}"</p>}
-                    <p className="text-[10px] text-[#B0AFA5] mt-1">{new Date(r.created_at).toLocaleDateString()}</p>
+                    {r.guest_names && <p className="text-sm text-[#5A5A52] mt-1">{r.guest_names}</p>}
+                    {r.note && <p className="text-sm text-[#5A5A52] italic mt-1">"{r.note}"</p>}
+                    <p className="text-xs text-[#5A5A52] mt-2">{new Date(r.created_at).toLocaleDateString()}</p>
                   </div>
-                  <button onClick={() => remove(r.id)} className="text-[#C84A44] hover:text-red-700 text-xs font-bold shrink-0 transition-colors">
-                    Remove
+                  <div className="flex items-center gap-1 shrink-0">
+                  <button onClick={() => startEdit(r)} aria-label="Edit response" title="Edit"
+                    className="w-10 h-10 flex items-center justify-center rounded-lg text-[#5A5A52] hover:text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
                   </button>
+                  <button onClick={() => remove(r.id)} aria-label="Remove response" title="Remove"
+                    className="w-10 h-10 flex items-center justify-center rounded-lg text-[#C84A44] hover:text-red-700 hover:bg-[#FEF2F2] transition-colors">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                    </svg>
+                  </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -471,34 +531,110 @@ function ResponsesTab({ event }) {
         </Card>
       )}
 
+      {/* Edit popup — dark tint behind it */}
+      {editing && (
+        <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-5" onClick={() => setEditing(null)}>
+          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <p className="text-base font-black text-[#1A1A18]">Edit response</p>
+              <button onClick={() => setEditing(null)} aria-label="Close" className="text-[#5A5A52] hover:text-[#1A1A18] text-2xl leading-none">×</button>
+            </div>
+            <FieldRow label="Name">
+              <TextInput value={draft.guest_name} onChange={v => setDraft(d => ({ ...d, guest_name: v }))} />
+            </FieldRow>
+            <FieldRow label="Reply">
+              <Dropdown value={draft.response} onChange={v => setDraft(d => ({ ...d, response: v }))}
+                options={[{ value: 'going', label: 'Going' }, { value: 'maybe', label: 'Maybe' }, { value: 'not_going', label: "Can't come" }]}
+                className="rounded-xl border-2 border-[#D9D4C5] bg-white px-4 py-3 text-base text-[#1A1A18]" />
+            </FieldRow>
+            <FieldRow label="Number of guests">
+              <TextInput type="number" value={draft.party_size} onChange={v => setDraft(d => ({ ...d, party_size: v }))} />
+            </FieldRow>
+            <FieldRow label="Guest names (optional)">
+              <TextInput value={draft.guest_names} onChange={v => setDraft(d => ({ ...d, guest_names: v }))} placeholder="One name on each line" />
+            </FieldRow>
+            <FieldRow label="Note (optional)">
+              <TextInput value={draft.note} onChange={v => setDraft(d => ({ ...d, note: v }))} />
+            </FieldRow>
+            <div className="flex gap-2 pt-1">
+              <button onClick={saveEdit} disabled={savingEdit || !draft.guest_name.trim()}
+                className="flex-1 bg-[#1A1A18] text-white text-sm font-bold uppercase tracking-widest rounded-full py-3.5 disabled:opacity-50 hover:bg-black transition-all">
+                {savingEdit ? 'Saving…' : 'Save changes'}
+              </button>
+              <button onClick={() => setEditing(null)} className="px-5 text-sm font-bold text-[#5A5A52] hover:text-[#1A1A18]">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit food item popup — dark tint behind it */}
+      {editingClaim && (
+        <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-5" onClick={() => setEditingClaim(null)}>
+          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <p className="text-base font-black text-[#1A1A18]">Edit food item</p>
+              <button onClick={() => setEditingClaim(null)} aria-label="Close" className="text-[#5A5A52] hover:text-[#1A1A18] text-2xl leading-none">×</button>
+            </div>
+            <FieldRow label="Name">
+              <TextInput value={claimDraft.guest_name} onChange={v => setClaimDraft(d => ({ ...d, guest_name: v }))} />
+            </FieldRow>
+            <FieldRow label="What they bring">
+              <TextInput value={claimDraft.description} onChange={v => setClaimDraft(d => ({ ...d, description: v }))} />
+            </FieldRow>
+            <FieldRow label="How many">
+              <TextInput type="number" value={claimDraft.quantity} onChange={v => setClaimDraft(d => ({ ...d, quantity: v }))} />
+            </FieldRow>
+            <div className="flex gap-2 pt-1">
+              <button onClick={saveClaim} disabled={savingEdit || !claimDraft.guest_name.trim()}
+                className="flex-1 bg-[#1A1A18] text-white text-sm font-bold uppercase tracking-widest rounded-full py-3.5 disabled:opacity-50 hover:bg-black transition-all">
+                {savingEdit ? 'Saving…' : 'Save changes'}
+              </button>
+              <button onClick={() => setEditingClaim(null)} className="px-5 text-sm font-bold text-[#5A5A52] hover:text-[#1A1A18]">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Food sign-up sub-tab */}
       {subTab === 'food' && (
         <Card className="overflow-hidden">
-          <div className="px-5 pt-4 pb-3">
+          <div className="px-6 pt-5 pb-4">
             <SectionLabel>Who's Bringing What ({foodClaims.length} claim{foodClaims.length !== 1 ? 's' : ''})</SectionLabel>
           </div>
           {foodItems.length === 0 ? (
-            <p className="px-5 pb-6 text-sm text-[#88887E]">No food items set up yet. Add items in the Food Sign-up tab.</p>
+            <p className="px-6 pb-6 text-sm text-[#5A5A52]">No food items set up yet. Add items in the Food Sign-up tab.</p>
           ) : foodClaims.length === 0 ? (
-            <p className="px-5 pb-6 text-sm text-[#88887E]">No one has claimed a food item yet.</p>
+            <p className="px-6 pb-6 text-sm text-[#5A5A52]">No one has claimed a food item yet.</p>
           ) : (
-            <div className="divide-y divide-[#F4F3F0]">
+            <div className="divide-y-2 divide-[#D9D4C5]">
               {claimsByItem.filter(g => g.claims.length > 0).map(({ item, claims }) => (
-                <div key={item.id} className="px-5 py-3.5">
+                <div key={item.id} className="px-6 py-5">
                   <div className="flex items-center gap-2 mb-2">
-                    <p className="text-sm font-bold text-[#1A1A18]">{item.name}</p>
+                    <p className="text-base font-black text-[#1A1A18]">{item.name}</p>
                     {item.category && (
                       <span className="text-[10px] font-bold uppercase tracking-wider text-[#88887E] border border-[#E0D8C6] rounded-full px-2 py-0.5">{item.category}</span>
                     )}
                   </div>
-                  <div className="flex flex-col gap-1.5 pl-2">
+                  <div className="flex flex-col gap-2.5 pl-2">
                     {claims.map(c => (
-                      <div key={c.id} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#C9BFA8] mt-1.5 shrink-0" />
-                        <div>
-                          <p className="text-xs font-semibold text-[#1A1A18]">{c.guest_name}</p>
-                          {c.description && <p className="text-xs text-[#88887E]">{c.description}</p>}
-                          {c.quantity > 1 && <p className="text-xs text-[#B0AFA5]">×{c.quantity}</p>}
+                      <div key={c.id} className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-2 min-w-0">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#C9BFA8] mt-2 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-[#1A1A18]">{c.guest_name}</p>
+                            {c.description && <p className="text-sm text-[#5A5A52]">{c.description}</p>}
+                            {c.quantity > 1 && <p className="text-sm text-[#5A5A52]">×{c.quantity}</p>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button onClick={() => startEditClaim(c)} aria-label="Edit food item" title="Edit"
+                            className="w-10 h-10 flex items-center justify-center rounded-lg text-[#5A5A52] hover:text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                          </button>
+                          <button onClick={() => removeClaim(c)} aria-label="Remove food item" title="Remove"
+                            className="w-10 h-10 flex items-center justify-center rounded-lg text-[#C84A44] hover:text-red-700 hover:bg-[#FEF2F2] transition-colors">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -522,6 +658,18 @@ function FoodTab({ event }) {
   const [newItem, setNewItem] = useState({ name: '', category: '', notes: '', spots_total: '' })
   const [saving, setSaving]  = useState(false)
   const [editingId, setEditingId] = useState(null)
+  // Removed item waits here for 20 seconds, so it can be put back with Undo
+  const [pendingDelete, setPendingDelete] = useState(null)
+  const pendingRef = useRef(null)
+  const timerRef = useRef(null)
+
+  async function commitDelete(item) {
+    clearTimeout(timerRef.current)
+    pendingRef.current = null
+    setPendingDelete(null)
+    await supabase.from('food_items').delete().eq('id', item.id)
+    load()
+  }
   const [editDraft, setEditDraft] = useState({ name: '', category: '', notes: '', spots_total: '' })
 
   const load = useCallback(async () => {
@@ -566,11 +714,28 @@ function FoodTab({ event }) {
     setEditingId(null); setSaving(false); load()
   }
 
-  async function deleteItem(id) {
-    if (!window.confirm('Remove this item and all its claims?')) return
-    await supabase.from('food_items').delete().eq('id', id)
-    load()
+  function deleteItem(id) {
+    const item = items.find(it => it.id === id)
+    if (!item) return
+    if (pendingRef.current) commitDelete(pendingRef.current) // finish any earlier removal first
+    pendingRef.current = item
+    setPendingDelete(item)
+    timerRef.current = setTimeout(() => commitDelete(item), 20000)
   }
+
+  function undoDelete() {
+    clearTimeout(timerRef.current)
+    pendingRef.current = null
+    setPendingDelete(null)
+  }
+
+  // If the page closes during the 20 seconds, finish the removal
+  useEffect(() => () => {
+    if (pendingRef.current) {
+      clearTimeout(timerRef.current)
+      supabase.from('food_items').delete().eq('id', pendingRef.current.id)
+    }
+  }, [])
 
   function exportCSV() {
     const rows = [['Item', 'Category', 'Spots', 'Claimed by', 'Description', 'Date']]
@@ -603,87 +768,66 @@ function FoodTab({ event }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Card className="overflow-hidden">
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 flex-wrap gap-2">
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 flex-wrap gap-3">
           <SectionLabel>{event.food_heading || 'Food Items'} ({items.length})</SectionLabel>
-          {items.length > 0 && (
-            <button onClick={exportCSV}
-              className="text-xs font-bold text-[#1A1A18] border border-[#E0D8C6] rounded-full px-3 py-1.5 hover:bg-[#F4F3F0] transition-colors">
-              Export CSV
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {!adding && (
+              <button onClick={() => setAdding(true)}
+                className="text-xs font-bold text-[#1A1A18] border border-[#1A1A18] rounded-full px-3 py-1.5 hover:bg-[#1A1A18] hover:text-white transition-colors">
+                + Add item
+              </button>
+            )}
+            {items.length > 0 && (
+              <button onClick={exportCSV}
+                className="text-xs font-bold text-[#1A1A18] border border-[#E0D8C6] rounded-full px-3 py-1.5 hover:bg-[#F4F3F0] transition-colors">
+                Export CSV
+              </button>
+            )}
+          </div>
         </div>
 
         {items.length === 0 && !adding && (
           <p className="px-5 pb-4 text-sm text-[#88887E]">No items yet. Add items for guests to claim.</p>
         )}
 
-        <div className="divide-y divide-[#F4F3F0]">
-          {items.map(item => {
+        <div className="divide-y-2 divide-[#D9D4C5]">
+          {items.filter(it => it.id !== pendingDelete?.id).map(item => {
             const itemClaims = claims.filter(c => c.food_item_id === item.id)
             const claimed = itemClaims.reduce((s, c) => s + c.quantity, 0)
             return (
-              <div key={item.id} className="px-5 py-3.5">
-                {editingId === item.id ? (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="col-span-2">
-                        <FieldRow label="Item name *">
-                          <TextInput value={editDraft.name} onChange={v => setEditDraft(f => ({ ...f, name: v }))} />
-                        </FieldRow>
-                      </div>
-                      <FieldRow label="Category">
-                        <TextInput value={editDraft.category} onChange={v => setEditDraft(f => ({ ...f, category: v }))} />
-                      </FieldRow>
-                      <FieldRow label="Spots (blank = unlimited)">
-                        <TextInput type="number" value={editDraft.spots_total} onChange={v => setEditDraft(f => ({ ...f, spots_total: v }))} />
-                      </FieldRow>
-                      <div className="col-span-2">
-                        <FieldRow label="Notes">
-                          <TextInput value={editDraft.notes} onChange={v => setEditDraft(f => ({ ...f, notes: v }))} />
-                        </FieldRow>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => saveEdit(item.id)} disabled={saving || !editDraft.name.trim()}
-                        className="flex-1 bg-[#1A1A18] text-white text-xs font-bold uppercase tracking-widest rounded-full py-2.5 disabled:opacity-50 hover:bg-black transition-all">
-                        {saving ? 'Saving…' : 'Save changes'}
-                      </button>
-                      <button onClick={() => setEditingId(null)} className="px-4 text-xs font-bold text-[#88887E] hover:text-[#1A1A18]">Cancel</button>
-                    </div>
-                  </div>
-                ) : (
+              <div key={item.id} className="px-6 py-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-bold text-[#1A1A18]">{item.name}</p>
+                      <p className="text-base font-black text-[#1A1A18]">{item.name}</p>
                       {item.is_suggestion && (
                         <span className="text-[10px] font-bold bg-[#FEF9EC] text-[#8B7224] border border-[#F5D97A] rounded-full px-2 py-0.5">Guest suggestion</span>
                       )}
                     </div>
-                    {item.category && <p className="text-xs text-[#88887E]">{item.category}</p>}
-                    {item.notes    && <p className="text-xs text-[#88887E] italic">{item.notes}</p>}
-                    <p className="text-xs text-[#88887E] mt-0.5">
+                    {item.category && <p className="text-sm text-[#5A5A52] mt-0.5">{item.category}</p>}
+                    {item.notes    && <p className="text-sm text-[#5A5A52] italic mt-0.5">{item.notes}</p>}
+                    <p className="text-sm font-semibold text-[#1A1A18] mt-2">
                       {item.spots_total ? `${claimed} / ${item.spots_total} spots claimed` : `${claimed} claimed · unlimited spots`}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEdit(item)} aria-label="Edit item" title="Edit"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-[#5A5A52] hover:text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors">
+                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#5A5A52] hover:text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors">
                       <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
                     </button>
                     <button onClick={() => deleteItem(item.id)} aria-label="Remove item" title="Remove"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-[#C84A44] hover:text-red-700 hover:bg-[#FEF2F2] transition-colors">
+                      className="w-10 h-10 flex items-center justify-center rounded-lg text-[#C84A44] hover:text-red-700 hover:bg-[#FEF2F2] transition-colors">
                       <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
                     </button>
                   </div>
                 </div>
-                )}
                 {itemClaims.length > 0 && (
-                  <div className="mt-2 space-y-1 pl-2 border-l-2 border-[#E0D8C6]">
+                  <div className="mt-4 space-y-2.5">
                     {itemClaims.map(c => (
-                      <p key={c.id} className="text-xs text-[#5A5A52]">
+                      <p key={c.id} className="text-sm text-[#1A1A18] flex items-center gap-2.5 leading-normal">
+                        <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-[#1A1A18] shrink-0" />
                         <span className="font-semibold">{c.guest_name}</span>
                         {c.description ? ` — ${c.description}` : ''}
                       </p>
@@ -695,8 +839,57 @@ function FoodTab({ event }) {
           })}
         </div>
 
+        {/* Undo bar — shows for 20 seconds after a removal */}
+        {pendingDelete && (
+          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[65] bg-[#1A1A18] text-white rounded-full pl-5 pr-2 py-2 shadow-2xl flex items-center gap-4">
+            <p className="text-xs font-bold">"{pendingDelete.name}" removed</p>
+            <button onClick={undoDelete} className="text-xs font-bold uppercase tracking-widest bg-white text-[#1A1A18] rounded-full px-4 py-1.5 hover:bg-[#F4F3F0] transition-colors">Undo</button>
+          </div>
+        )}
+
+        {/* Edit popup — dark tint behind it */}
+        {editingId && (() => {
+          const item = items.find(it => it.id === editingId)
+          if (!item) return null
+          return (
+            <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-5" onClick={() => setEditingId(null)}>
+              <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 space-y-4" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-black text-[#1A1A18]">Edit item</p>
+                  <button onClick={() => setEditingId(null)} aria-label="Close" className="text-[#88887E] hover:text-[#1A1A18] text-lg leading-none">×</button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <FieldRow label="Item name *">
+                      <TextInput value={editDraft.name} onChange={v => setEditDraft(f => ({ ...f, name: v }))} />
+                    </FieldRow>
+                  </div>
+                  <FieldRow label="Type">
+                    <TextInput value={editDraft.category} onChange={v => setEditDraft(f => ({ ...f, category: v }))} />
+                  </FieldRow>
+                  <FieldRow label="How many (blank = no limit)">
+                    <TextInput type="number" value={editDraft.spots_total} onChange={v => setEditDraft(f => ({ ...f, spots_total: v }))} />
+                  </FieldRow>
+                  <div className="col-span-2">
+                    <FieldRow label="Note">
+                      <TextInput value={editDraft.notes} onChange={v => setEditDraft(f => ({ ...f, notes: v }))} />
+                    </FieldRow>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button onClick={() => saveEdit(item.id)} disabled={saving || !editDraft.name.trim()}
+                    className="flex-1 bg-[#1A1A18] text-white text-xs font-bold uppercase tracking-widest rounded-full py-3 disabled:opacity-50 hover:bg-black transition-all">
+                    {saving ? 'Saving…' : 'Save changes'}
+                  </button>
+                  <button onClick={() => setEditingId(null)} className="px-5 text-xs font-bold text-[#88887E] hover:text-[#1A1A18]">Cancel</button>
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
         {/* Add item form */}
-        {adding ? (
+        {adding && (
           <div className="px-5 pb-5 pt-3 border-t border-[#F4F3F0] space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
@@ -724,14 +917,6 @@ function FoodTab({ event }) {
               <button onClick={() => setAdding(false)} className="px-4 text-xs font-bold text-[#88887E] hover:text-[#1A1A18]">Cancel</button>
             </div>
           </div>
-        ) : (
-          <div className="px-5 pb-4 pt-2 border-t border-[#F4F3F0]">
-            <button onClick={() => setAdding(true)}
-              className="flex items-center gap-1.5 text-xs font-bold text-[#1A1A18] hover:text-black transition-colors">
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Add item
-            </button>
-          </div>
         )}
       </Card>
     </div>
@@ -739,17 +924,66 @@ function FoodTab({ event }) {
 }
 
 // ── Design Tab ────────────────────────────────────────────────
-function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
+// Title position sliders, shown under the live preview they change
+function TitlePositionControls({ event, onLocalUpdate }) {
+  const [pos, setPos]   = useState(event.rsvp_title_position ?? 50)
+  const [posD, setPosD] = useState(event.rsvp_title_position_desktop ?? 50)
+  async function save(fields) {
+    await supabase.from('events').update(fields).eq('id', event.id)
+    onLocalUpdate?.(fields)
+  }
+  return (
+    <div className="mt-4 pt-4 border-t border-[#F0EDE6] flex flex-col gap-3">
+          {/* Mobile */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-1">
+              <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
+              <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title place</p>
+            </div>
+            <span className="text-[9px] font-bold text-[#88887E]">{pos == 0 ? 'Top' : pos == 100 ? 'Bottom' : pos == 50 ? 'Center' : `${pos}%`}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[8px] text-[#B0AFA5]">Top</span>
+            <input type="range" min={0} max={100} step={1} value={pos}
+              onChange={async (e) => { const val = e.target.value; setPos(val); await save({ rsvp_title_position: val }) }}
+              className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
+            />
+            <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
+          </div>
+        </div>
+        {/* Desktop */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-1">
+              <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
+              <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title place</p>
+            </div>
+            <span className="text-[9px] font-bold text-[#88887E]">{posD == 0 ? 'Top' : posD == 100 ? 'Bottom' : posD == 50 ? 'Center' : `${posD}%`}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[8px] text-[#B0AFA5]">Top</span>
+            <input type="range" min={0} max={100} step={1} value={posD}
+              onChange={async (e) => { const val = e.target.value; setPosD(val); await save({ rsvp_title_position_desktop: val }) }}
+              className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
+            />
+            <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
+          </div>
+        </div>
+    </div>
+  )
+}
+
+function DesignTab({ event, design, onChange, onSaved, onLocalUpdate, registerSave, onDirty, onNameInput }) {
   const [savingName, setSavingName]   = useState(false)
-  const [localName,  setLocalName]    = useState(event.event_name ?? '')
-  const [localType,  setLocalType]    = useState(event.event_type ?? '')
-  const [localBgMobile,   setLocalBgMobile]   = useState(event.background_image ?? null)
-  const [localBgDesktop,  setLocalBgDesktop]  = useState(event.background_image_desktop ?? null)
-  const [localBgPosition, setLocalBgPosition] = useState(event.background_position ?? 50)
-  const [localBgTint,     setLocalBgTint]     = useState(event.background_tint ?? 0)
-  const [localLogoUrl,    setLocalLogoUrl]    = useState(event.logo_url ?? null)
-  const [localTitlePos,   setLocalTitlePos]   = useState(event.rsvp_title_position ?? 50)
-  const [localTitlePosD,  setLocalTitlePosD]  = useState(event.rsvp_title_position_desktop ?? 50)
+  const [localName,  setLocalName]    = useState(event.rsvp_event_name ?? '')
+  const [localType,  setLocalType]    = useState(event.rsvp_event_type ?? '')
+  const [localBgMobile,   setLocalBgMobile]   = useState(event.rsvp_background_image ?? null)
+  const [localBgDesktop,  setLocalBgDesktop]  = useState(event.rsvp_background_image_desktop ?? null)
+  const [localBgPosition, setLocalBgPosition] = useState(event.rsvp_background_position ?? 50)
+  const [localBgTint,     setLocalBgTint]     = useState(event.rsvp_background_tint ?? 0)
+  const [localLogoUrl,    setLocalLogoUrl]    = useState(event.rsvp_logo_url ?? null)
+  const [localTitleAlign, setLocalTitleAlign] = useState(event.rsvp_title_align ?? 'left')
   const [saving, setSaving]     = useState(false)
   const [saved,  setSaved]      = useState(false)
 
@@ -771,23 +1005,27 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
       setSaved(true); setTimeout(() => setSaved(false), 2500)
     }
   }
+  useEffect(() => { registerSave?.(saveDesign) })
+  const designDirty = design?.themeId !== event.rsvp_theme || design?.fontId !== event.rsvp_font
+  useEffect(() => { onDirty?.(designDirty) })
 
   const catLabels = { elegant: 'Elegant & Script', modern: 'Modern & Clean', display: 'Display & Bold' }
   const currentTheme = ALL_THEMES.find(t => t.id === design.themeId)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
-      {/* Logo | Display Name | Event Type | Title Position */}
+      {/* Logo | Display Name | Event Type | Title place */}
       <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
         <div className="flex items-start gap-4">
           {/* Logo */}
           <div className="shrink-0 flex flex-col items-center gap-1.5">
             <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Logo</p>
             <LogoUploader
+          field="rsvp_logo_url"
               eventId={event.id}
               currentLogoUrl={localLogoUrl}
-              onSaved={(url) => { setLocalLogoUrl(url); onLocalUpdate?.({ logo_url: url }) }}
+              onSaved={(url) => { setLocalLogoUrl(url); onLocalUpdate?.({ rsvp_logo_url: url }) }}
             />
           </div>
           {/* Display Name + Event Type */}
@@ -799,11 +1037,11 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
               </div>
               <textarea
                 value={localName}
-                onChange={(e) => setLocalName(e.target.value)}
+                onChange={(e) => { setLocalName(e.target.value); onNameInput?.(e.target.value) }}
                 onBlur={async () => {
-                  if (localName === event.event_name) return
+                  if (localName === (event.rsvp_event_name ?? '')) return
                   setSavingName(true)
-                  await saveField({ event_name: localName })
+                  await saveField({ rsvp_event_name: localName })
                   setSavingName(false)
                 }}
                 placeholder="e.g. The Johnson Family"
@@ -813,89 +1051,37 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
             </div>
             <div>
               <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Event Type</p>
-              <div className="relative">
-                <select
-                  value={localType}
-                  onChange={async (e) => {
-                    const val = e.target.value
-                    setLocalType(val)
-                    await saveField({ event_type: val || null })
-                  }}
-                  className="w-full appearance-none bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18] focus:outline-none focus:border-[#1A1A18] transition-colors pr-8 cursor-pointer"
-                >
-                  <option value="">— None —</option>
-                  {EVENT_TYPES.map((t) => (
-                    <option key={t.id} value={t.id}>{t.label}</option>
-                  ))}
-                </select>
-                <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B0AFA5]" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
+              <Dropdown value={localType} className="bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-[#1A1A18]"
+                options={[{ value: '', label: '— None —' }, ...EVENT_TYPES.map(t => ({ value: t.id, label: t.label }))]}
+                onChange={async (val) => { setLocalType(val); await saveField({ rsvp_event_type: val || null }) }} />
             </div>
           </div>
         </div>
 
-        {/* Title Position sliders */}
-        <div className="mt-3 border-t border-[#F0EDE6] pt-3 flex flex-col gap-2">
-          {/* Mobile */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-1">
-                <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
-                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
-              </div>
-              <span className="text-[9px] font-bold text-[#88887E]">{localTitlePos == 0 ? 'Top' : localTitlePos == 100 ? 'Bottom' : localTitlePos == 50 ? 'Center' : `${localTitlePos}%`}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[8px] text-[#B0AFA5]">Top</span>
-              <input type="range" min={0} max={100} step={1} value={localTitlePos}
-                onChange={async (e) => { const val = e.target.value; setLocalTitlePos(val); await saveField({ rsvp_title_position: val }) }}
-                className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
-              />
-              <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
-            </div>
-          </div>
-          {/* Desktop */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-1">
-                <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
-                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Position</p>
-              </div>
-              <span className="text-[9px] font-bold text-[#88887E]">{localTitlePosD == 0 ? 'Top' : localTitlePosD == 100 ? 'Bottom' : localTitlePosD == 50 ? 'Center' : `${localTitlePosD}%`}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[8px] text-[#B0AFA5]">Top</span>
-              <input type="range" min={0} max={100} step={1} value={localTitlePosD}
-                onChange={async (e) => { const val = e.target.value; setLocalTitlePosD(val); await saveField({ rsvp_title_position_desktop: val }) }}
-                className="flex-1 accent-[#1A1A18] h-1.5 rounded-full cursor-pointer"
-              />
-              <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Background Photo — Mobile Portrait + Desktop Landscape */}
       <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm overflow-hidden">
         <BackgroundUploader
+          dbPrefix="rsvp_background"
           eventId={event.id}
           currentImageUrl={localBgMobile}
           currentImageDesktopUrl={localBgDesktop}
           currentPosition={localBgPosition}
           currentTint={localBgTint}
-          currentPositionDesktop={event.background_position_desktop ?? event.background_position ?? '50% 50%'}
-          currentTintDesktop={event.background_tint_desktop ?? event.background_tint ?? 55}
-          currentZoomDesktop={event.background_zoom_desktop ?? 100}
-          currentZoom={event.background_zoom ?? 100}
+          currentPositionDesktop={event.rsvp_background_position_desktop ?? event.rsvp_background_position ?? '50% 50%'}
+          currentTintDesktop={event.rsvp_background_tint_desktop ?? event.rsvp_background_tint ?? 55}
+          currentZoomDesktop={event.rsvp_background_zoom_desktop ?? 100}
+          currentZoom={event.rsvp_background_zoom ?? 100}
           accentColor={currentTheme?.colors?.accent}
           eventTypeId={localType}
           onSaved={(url, pos, tint, zoom) => {
             setLocalBgMobile(url); setLocalBgPosition(pos); setLocalBgTint(tint)
-            onLocalUpdate?.({ background_image: url, background_position: pos, background_tint: tint, background_zoom: zoom })
+            onLocalUpdate?.({ rsvp_background_image: url, rsvp_background_position: pos, rsvp_background_tint: tint, rsvp_background_zoom: zoom })
           }}
           onSavedDesktop={(url, pos, tint, zoom) => {
             setLocalBgDesktop(url)
-            onLocalUpdate?.({ background_image_desktop: url, background_position_desktop: pos, background_tint_desktop: tint, background_zoom_desktop: zoom })
+            onLocalUpdate?.({ rsvp_background_image_desktop: url, rsvp_background_position_desktop: pos, rsvp_background_tint_desktop: tint, rsvp_background_zoom_desktop: zoom })
           }}
           onPreview={(fields) => onLocalUpdate?.(fields)}
         />
@@ -905,7 +1091,18 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
         <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm overflow-hidden flex flex-col">
-          <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-4 pt-4 pb-3 shrink-0">Title Font</p>
+          <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
+            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Font</p>
+            <div className="flex items-center gap-1">
+              {[{ v: 'left', Icon: AlignLeft }, { v: 'center', Icon: AlignCenter }, { v: 'right', Icon: AlignRight }].map(({ v, Icon }) => (
+                <button key={v} onClick={() => { setLocalTitleAlign(v); saveField({ rsvp_title_align: v }) }}
+                  aria-label={`Align title ${v}`} title={`Align ${v}`}
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${localTitleAlign === v ? 'bg-[#1A1A18] text-white' : 'text-[#88887E] hover:bg-[#F4F3F0]'}`}>
+                  <Icon size={15} />
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="flex flex-col divide-y-2 divide-[#F0EDE6]">
             {Object.entries(FONT_CATEGORIES).map(([catKey, fonts], idx) => (
               <div key={catKey} className={`px-4 py-3${idx > 0 ? ' pt-[22px]' : ''}`}>
@@ -953,17 +1150,13 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate }) {
 
       </div>
 
-      <button onClick={saveDesign} disabled={saving}
-        className="w-full bg-[#1A1A18] text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3.5 hover:bg-black transition-all disabled:opacity-50">
-        {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save design'}
-      </button>
     </div>
   )
 }
 
 // ── Shared preview screen renderer ───────────────────────────
 function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }) {
-  const name  = event.rsvp_host_display_name || event.event_name
+  const name  = event.rsvp_event_name
   const date  = event.rsvp_event_date
     ? new Date(event.rsvp_event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null
@@ -978,9 +1171,9 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
   const titlePosD = Number(event.rsvp_title_position_desktop ?? titlePos)
   const tPos = isDesktop ? titlePosD : titlePos
   // Photo framing: desktop uses its own saved values, falling back to the mobile ones
-  const bgPos  = (isDesktop ? event.background_position_desktop ?? event.background_position : event.background_position) || '50% 50%'
-  const bgZoom = isDesktop ? event.background_zoom_desktop ?? event.background_zoom : event.background_zoom
-  const bgTint = (isDesktop ? event.background_tint_desktop ?? event.background_tint : event.background_tint) ?? 55
+  const bgPos  = (isDesktop ? event.rsvp_background_position_desktop ?? event.rsvp_background_position : event.rsvp_background_position) || '50% 50%'
+  const bgZoom = isDesktop ? event.rsvp_background_zoom_desktop ?? event.rsvp_background_zoom : event.rsvp_background_zoom
+  const bgTint = (isDesktop ? event.rsvp_background_tint_desktop ?? event.rsvp_background_tint : event.rsvp_background_tint) ?? 55
   // continuous: paddingTop drives smooth vertical position, 0=top 100=bottom maps to 0%–70% of container
   // top % is measured against the screen height (padding % is measured against width, which pushed the title too high)
   const titleTopPct = `${(tPos / 100) * 45}%`
@@ -1001,7 +1194,7 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
         <div style={{ position: 'absolute', top: '4%', left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
           <VantgeLogo size="sm" monoWhite />
         </div>
-        <div style={{ position: 'absolute', left: '6%', right: '6%', top: titleTopPct }}>
+        <div style={{ position: 'absolute', left: '6%', right: '6%', top: titleTopPct, textAlign: event.rsvp_title_align ?? 'left' }}>
           <p style={{ fontSize: 5, fontWeight: 900, letterSpacing: '0.25em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 3 }}>You're Invited</p>
           <p style={{ fontSize: isDesktop ? 11 : 13, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit', lineHeight: 1.15, marginBottom: 3 }}>{name}</p>
           {dateLong && (
@@ -1164,7 +1357,19 @@ export default function RSVPDashboard() {
   const { user, loading: authLoading, signOut } = useAuth()
   const { event, loading: eventLoading } = useHostEvent()
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('setup')
+  const [activeTab, setActiveTab] = useState('event')
+  const saveRef = useRef(null)
+  const [saveState, setSaveState] = useState('idle') // idle | saving | saved
+  const [dirty, setDirty] = useState(false)
+  const [liveName, setLiveName] = useState(null) // name as it is being typed, shown under RSVP Dashboard
+  const [liveStatus, setLiveStatus] = useState(null) // status as it is being picked, shown next to the name
+  const registerSave = (fn) => { saveRef.current = fn }
+  async function handleTopSave() {
+    setSaveState('saving')
+    await saveRef.current?.()   // Food and Responses save as they go, so there is nothing to run
+    setSaveState('saved')
+    setTimeout(() => setSaveState('idle'), 2000)
+  }
   const [localEvent, setLocalEvent] = useState(null)
   const [design, setDesign] = useState({ themeId: 'warm_editorial', fontId: DEFAULT_FONT_ID, eventId: null })
   const [previewDevice, setPreviewDevice] = useState('mobile')
@@ -1194,15 +1399,15 @@ export default function RSVPDashboard() {
       })
       // Apply admin branding default bg if no custom image set
       const isCustom = (url) => url && url.includes('/backgrounds/')
-      if (!isCustom(event.background_image) || !isCustom(event.background_image_desktop)) {
-        const brandingKey = event.event_type || 'none'
-        const hardcodedFallback = getEventType(event.event_type)?.defaultBg ?? null
+      if (!isCustom(event.rsvp_background_image) || !isCustom(event.rsvp_background_image_desktop)) {
+        const brandingKey = event.rsvp_event_type || 'none'
+        const hardcodedFallback = getEventType(event.rsvp_event_type)?.defaultBg ?? null
         supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle().then(({ data }) => {
           const adminDefault = data?.background_url || hardcodedFallback
           if (!adminDefault) return
           const updates = {}
-          if (!isCustom(event.background_image)) updates.background_image = adminDefault
-          if (!isCustom(event.background_image_desktop)) updates.background_image_desktop = adminDefault
+          if (!isCustom(event.rsvp_background_image)) updates.rsvp_background_image = adminDefault
+          if (!isCustom(event.rsvp_background_image_desktop)) updates.rsvp_background_image_desktop = adminDefault
           if (!Object.keys(updates).length) return
           supabase.from('events').update(updates).eq('id', event.id).then(() => {
             setLocalEvent(e => ({ ...(e || event), ...updates }))
@@ -1288,58 +1493,54 @@ export default function RSVPDashboard() {
     <div className="min-h-screen bg-[#F7F5F0]">
 
       {/* Header */}
-      <header className="bg-[#1A1A18] sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <VantgeLogo size="sm" variant="dark" />
-            <div className="w-px h-4 bg-white/20" />
-            <span className="text-xs font-bold text-white/60 uppercase tracking-widest">RSVP</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link to="/dashboard"
-              className="text-xs font-bold text-white/60 hover:text-white transition-colors hidden sm:block">
-              Gallery Dashboard
-            </Link>
-            <a href={`/${ev.event_slug}/rsvp`} target="_blank" rel="noopener noreferrer"
-              className="text-xs font-bold border border-white/20 text-white/70 rounded-full px-3 py-1.5 hover:border-white/50 hover:text-white transition-all">
-              Preview ↗
-            </a>
-            <button onClick={signOut} className="text-xs text-white/40 hover:text-white/70 transition-colors">Sign out</button>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader active="rsvp" onSignOut={signOut} />
 
       {/* Body — two-column layout matching Gallery Dashboard */}
-      <div className="max-w-6xl mx-auto px-5 py-6 pb-16">
+      <div className="max-w-6xl mx-auto px-5 md:px-8 py-8 pb-20">
 
-        {/* Page title */}
-        <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+        {/* Page title + tabs — same row as the Event dashboard */}
+        <div className="flex items-end justify-between mb-8 flex-wrap gap-6">
           <div>
             <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1">RSVP Dashboard</p>
-            <h1 className="text-xl font-black text-[#1A1A18]">{ev.event_name}</h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-xl font-black text-[#1A1A18]">{liveName ?? ev.rsvp_event_name}</h1>
+            </div>
           </div>
-          <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full ${
-            ev.rsvp_status === 'published' ? 'bg-green-100 text-green-800' :
-            ev.rsvp_status === 'closed'    ? 'bg-red-100 text-red-800' :
-                                             'bg-[#F4F3F0] text-[#88887E]'
-          }`}>
-            {ev.rsvp_status || 'draft'}
-          </span>
+          <div className="flex gap-6 items-end">
+            {TABS.map(t => (
+              <button key={t.id} onClick={() => { setActiveTab(t.id); setDirty(false) }}
+                className={`relative pb-1 text-sm font-bold transition-colors whitespace-nowrap ${
+                  activeTab === t.id ? 'text-[#1A1A18]' : 'text-[#B0AFA5] hover:text-[#5A5A52]'
+                }`}>
+                {t.label}
+                {activeTab === t.id && <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-[#1A1A18] rounded-full" />}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-12 gap-5 items-start">
+        <div className="grid md:grid-cols-12 gap-6 md:gap-8 items-start">
 
           {/* LEFT — preview + bg picker */}
-          <div className="md:col-span-4 flex flex-col gap-3">
+          <div className="md:col-span-4 flex flex-col gap-6">
 
             {/* Live Preview card */}
             <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
-              <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Live Preview</p>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Live Preview</p>
+                <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full ${
+                    (liveStatus ?? ev.rsvp_status) === 'published' ? 'bg-green-100 text-green-800' :
+                    (liveStatus ?? ev.rsvp_status) === 'closed'    ? 'bg-red-100 text-red-800' :
+                                                     'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {liveStatus ?? ev.rsvp_status ?? 'draft'}
+                  </span>
+              </div>
               <div className="flex items-center justify-center" style={{ height: 336 }}>
                 {previewDevice === 'desktop' ? (
                   <div className="flex flex-col items-center gap-1">
                     <div className="rounded-lg overflow-hidden border-4 border-[#1A1A18] shadow-xl relative" style={{ width: 300, height: 188 }}>
-                      <RSVPPreviewDesktop event={ev} bgImage={ev?.background_image_desktop || ev?.background_image}
+                      <RSVPPreviewDesktop event={ev} bgImage={ev?.rsvp_background_image_desktop || ev?.rsvp_background_image}
                         theme={ALL_THEMES.find(t => t.id === design.themeId)}
                         fontCssFamily={getFont(design.fontId)?.cssFamily}
                         previewStep={previewStep}
@@ -1351,7 +1552,7 @@ export default function RSVPDashboard() {
                     </div>
                   </div>
                 ) : (
-                  <RSVPPreview event={ev} bgImage={ev?.background_image}
+                  <RSVPPreview event={ev} bgImage={ev?.rsvp_background_image}
                     theme={ALL_THEMES.find(t => t.id === design.themeId)}
                     fontCssFamily={getFont(design.fontId)?.cssFamily}
                     previewStep={previewStep}
@@ -1369,12 +1570,13 @@ export default function RSVPDashboard() {
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
                 </button>
               </div>
+              <TitlePositionControls event={ev} onLocalUpdate={mergeLocal} />
             </div>
 
             {/* QR code card */}
             {ev && (
               <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col items-center gap-4">
-                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] self-start">Scan to Share</p>
+                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] self-start">Scan to open</p>
                 <div ref={qrRef} className="bg-[#F7F5F0] p-4 rounded-2xl">
                   <QRCodeSVG value={`https://vantge.app/${ev.event_slug}/rsvp`} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
                 </div>
@@ -1405,9 +1607,9 @@ export default function RSVPDashboard() {
                 {/* Toggles */}
                 <div className="px-5 pb-5 flex flex-col gap-4 border-b-2 border-[#F0EDE6]">
                   {[
-                    { label: 'Allow Downloads',  sub: 'Guests can save photos',                      value: allowDownloads,  toggle: toggleAllowDownloads },
-                    { label: 'Allow Sharing',    sub: 'Guests can share photos',                     value: allowSharing,    toggle: toggleAllowSharing },
-                    { label: 'Require Approval', sub: 'You approve each photo before it appears',    value: requireApproval, toggle: toggleRequireApproval },
+                    { label: 'Allow downloads',  sub: 'Guests can save photos',                      value: allowDownloads,  toggle: toggleAllowDownloads },
+                    { label: 'Allow sharing',    sub: 'Guests can share photos',                     value: allowSharing,    toggle: toggleAllowSharing },
+                    { label: 'Check photos first', sub: 'You check each photo before guests see it',    value: requireApproval, toggle: toggleRequireApproval },
                   ].map(({ label, sub, value, toggle }) => (
                     <div key={label} className="flex items-center justify-between gap-3">
                       <div>
@@ -1424,7 +1626,7 @@ export default function RSVPDashboard() {
 
                 {/* Upload Limit */}
                 <div className="px-5 py-5 border-b-2 border-[#F0EDE6]">
-                  <p className="text-sm font-semibold text-[#1A1A18] mb-0.5">Upload Limit per Guest</p>
+                  <p className="text-sm font-semibold text-[#1A1A18] mb-0.5">Photo limit per guest</p>
                   <p className="text-[11px] text-[#88887E] mb-3">Max photos a guest can submit</p>
                   <div className="flex gap-2 flex-wrap">
                     {[null, 5, 10, 20, 30].map((v) => (
@@ -1438,8 +1640,8 @@ export default function RSVPDashboard() {
 
                 {/* Passcode */}
                 <div className="px-5 py-5">
-                  <p className="text-sm font-semibold text-[#1A1A18] mb-0.5">Guest Passcode</p>
-                  <p className="text-[11px] text-[#88887E] mb-3">Guests must enter this to access the event</p>
+                  <p className="text-sm font-semibold text-[#1A1A18] mb-0.5">Passcode</p>
+                  <p className="text-[11px] text-[#88887E] mb-3">Guests type this to open the event</p>
                   <div className="flex gap-2">
                     <input type="text" value={passcode}
                       onChange={(e) => setLocalPasscode(e.target.value)}
@@ -1461,30 +1663,30 @@ export default function RSVPDashboard() {
           </div>
 
           {/* RIGHT — tabs + content */}
-          <div className="md:col-span-8">
-
-            {/* Tab bar */}
-            <div className="flex border-b border-[#E0D8C6] overflow-x-auto mb-5" style={{ scrollbarWidth: 'none' }}>
-              {TABS.map(t => (
-                <button key={t.id} onClick={() => setActiveTab(t.id)}
-                  className={`pb-3 pt-1 mr-5 text-sm font-bold transition-all relative whitespace-nowrap shrink-0 ${
-                    activeTab === t.id ? 'text-[#1A1A18]' : 'text-[#B0AFA5] hover:text-[#5A5A52]'
-                  }`}>
-                  {t.label}
-                  {activeTab === t.id && <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-[#1A1A18] rounded-full" />}
-                </button>
-              ))}
-            </div>
+          <div className="md:col-span-8 space-y-6">
 
             {/* Tab content */}
-            {activeTab === 'setup'       && <SetupTab       event={ev} onSaved={mergeLocal} />}
-            {activeTab === 'design'      && <DesignTab      event={ev} design={design} onChange={setDesign} onSaved={() => mergeLocal({ rsvp_theme: design.themeId, rsvp_font: design.fontId })} onLocalUpdate={mergeLocal} />}
+            {activeTab === 'event'       && <SetupTab       event={ev} onSaved={mergeLocal} registerSave={registerSave} onDirty={setDirty} onNameInput={setLiveName} onStatusInput={setLiveStatus} />}
+            {activeTab === 'design'      && <DesignTab      event={ev} design={design} onChange={setDesign} onSaved={() => mergeLocal({ rsvp_theme: design.themeId, rsvp_font: design.fontId })} onLocalUpdate={mergeLocal} registerSave={registerSave} onDirty={setDirty} onNameInput={setLiveName} />}
             {activeTab === 'responses'   && <ResponsesTab   event={ev} />}
             {activeTab === 'food'        && <FoodTab        event={ev} />}
+
           </div>
 
         </div>
       </div>
+    {/* Bottom save bar — appears only when the Event or Design tab has changes not saved yet */}
+    {(activeTab === 'event' || activeTab === 'design') && dirty && (
+      <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 backdrop-blur border-t border-[#E0D8C6] shadow-lg">
+        <div className="max-w-6xl mx-auto px-5 md:px-8 py-2 flex items-center justify-between gap-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#88887E]">Unsaved changes</p>
+          <button onClick={handleTopSave} disabled={saveState === 'saving'}
+            className="text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-1.5 bg-[#1A1A18] text-white hover:bg-black transition-all disabled:opacity-50">
+            {saveState === 'saving' ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+      </div>
+    )}
     </div>
   )
 }

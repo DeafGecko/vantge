@@ -288,8 +288,7 @@ export default function Home() {
         {/* ══ TOOLS OVERVIEW ═════════════════════════════════ */}
         <ToolsOverview />
 
-        {/* ══ TESTIMONIAL ════════════════════════════════════ */}
-        <Testimonial />
+        {/* ══ TESTIMONIAL — removed for now, add back later ══ */}
 
         {/* ══ FINAL CTA ══════════════════════════════════════ */}
         <FinalCta />
@@ -922,6 +921,7 @@ function SiteFooter() {
         { label: 'Features', href: '#features' },
         { label: 'How It Works', href: '#how-it-works' },
         { label: 'Get Notified', href: '#hero' },
+        { label: 'Free RSVP', href: '#features' },
       ],
     },
     {
@@ -934,7 +934,6 @@ function SiteFooter() {
     {
       heading: 'Resources',
       links: [
-        { label: 'Free RSVP', comingSoon: true },
         { label: 'Help Center', comingSoon: true },
         { label: 'Privacy', comingSoon: true },
         { label: 'Terms', comingSoon: true },

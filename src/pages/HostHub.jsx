@@ -51,7 +51,7 @@ export default function HostHub() {
       <div className="w-full max-w-sm flex flex-col gap-3">
 
         {/* Gallery */}
-        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-white/25 px-1 mb-1">Gallery</p>
+        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-white/25 px-1 mb-1">Event</p>
         <Link to="/dashboard"
           className="group relative bg-white/[0.06] hover:bg-white/[0.10] border border-white/10 hover:border-white/20 rounded-3xl p-6 flex items-center gap-5 transition-all">
           <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/15 transition-colors">
@@ -62,7 +62,7 @@ export default function HostHub() {
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white font-bold text-base leading-tight">Gallery Dashboard</p>
+            <p className="text-white font-bold text-base leading-tight">Event Dashboard</p>
             <p className="text-white/40 text-xs mt-0.5">Photos, QR code, event settings</p>
           </div>
           <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" className="text-white/30 group-hover:text-white/60 transition-colors shrink-0">

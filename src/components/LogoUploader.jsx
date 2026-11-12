@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
-export default function LogoUploader({ eventId, currentLogoUrl, onSaved }) {
+export default function LogoUploader({ eventId, currentLogoUrl, onSaved, field = 'logo_url' }) {
       const inputRef = useRef(null)
       const [uploading, setUploading] = useState(false)
       const [error, setError] = useState(null)
@@ -38,7 +38,7 @@ export default function LogoUploader({ eventId, currentLogoUrl, onSaved }) {
 
             const { error: dbError } = await supabase
                   .from('events')
-                  .update({ logo_url: url })
+                  .update({ [field]: url })
                   .eq('id', eventId)
 
             if (dbError) {
@@ -52,7 +52,7 @@ export default function LogoUploader({ eventId, currentLogoUrl, onSaved }) {
       async function removeLogo() {
             const { error: dbError } = await supabase
                   .from('events')
-                  .update({ logo_url: null })
+                  .update({ [field]: null })
                   .eq('id', eventId)
             if (!dbError) onSaved(null)
       }
