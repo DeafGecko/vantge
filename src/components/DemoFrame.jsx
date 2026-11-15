@@ -26,13 +26,13 @@ export default function DemoFrame({ children }) {
 
   return (
     <>
-      {children}
+      <main className="contents">{children}</main>
       {showQr && (
         <div className="fixed bottom-16 right-4 z-[100] w-64 bg-white text-[#1A1A18] rounded-2xl border border-[#E0D8C6] shadow-lg p-4 text-xs">
           <p className="font-bold text-sm">Open on your phone</p>
           <p className="text-[#5A5448] mt-1">Scan with the phone camera. Phone and computer must be on the same Wi-Fi.</p>
           <div className="flex justify-center my-3">
-            <QRCodeSVG value={phoneUrl} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
+            <QRCodeSVG title="Phone QR code for the demo" value={phoneUrl} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
           </div>
           <div className="flex items-center gap-2">
             <input readOnly value={phoneUrl} onFocus={e => e.target.select()} className="min-w-0 flex-1 rounded-lg border border-[#E0D8C6] px-2 py-1.5 text-[11px]" />

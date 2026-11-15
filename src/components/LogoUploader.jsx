@@ -87,7 +87,7 @@ export default function LogoUploader({ eventId, currentLogoUrl, onSaved, field =
                               ) : (
                                     <>
                                     <svg width="14" height="14" fill="none" stroke="#B0AFA5" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" strokeLinecap="round" /><polyline points="17 8 12 3 7 8" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="3" x2="12" y2="15" strokeLinecap="round" /></svg>
-                                    <span className="text-[8px] font-bold uppercase tracking-widest text-[#8A7D6A]">Upload</span>
+                                    <span className="text-[8px] font-bold uppercase tracking-widest text-[#5E5A4E]">Upload</span>
                                     </>
                               )}
                               <input type="file" accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp" className="sr-only" disabled={uploading} onChange={handleFile} />

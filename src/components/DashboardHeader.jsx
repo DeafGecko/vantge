@@ -12,7 +12,7 @@ export default function DashboardHeader({ active, onSignOut }) {
   return (
     <header className="bg-ink sticky top-0 z-50">
       <div className="max-w-[1024px] mx-auto px-5 md:px-8 h-14 flex items-center justify-between gap-4">
-        <a href="/" aria-label="Go to home page" className="shrink-0">
+        <a href="/" className="shrink-0">
           <VantgeLogo size="sm" variant="dark" />
         </a>
         <div className="flex items-center gap-2">

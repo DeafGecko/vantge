@@ -129,7 +129,7 @@ export default function Home() {
               {/* Cursive Beta sits to the right, same baseline */}
               <span className="ml-1 text-[#C0392B]" style={{ fontFamily: "'Caveat', cursive", fontSize: '17px', lineHeight: 1, verticalAlign: 'middle' }}>Beta</span>
             </span>
-            <span className="text-sm text-[#6B6B63] cursor-default select-none opacity-40">Contact</span>
+            <span className="text-sm text-[#6B6B63] cursor-default select-none">Contact</span>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
@@ -199,7 +199,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-16 items-center">
 
             <div className="vantge-hero-text">
-              <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#B29746] mb-5">
+              <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7A5F24] mb-5">
                 Event Photography
               </p>
               <h1
@@ -217,7 +217,7 @@ export default function Home() {
               <div className="flex flex-wrap gap-4">
                 {['Create Events', 'Share with Guests', 'Track & Download'].map(pill => (
                   <span key={pill} className="inline-flex items-center gap-1.5 text-sm text-[#6B6B63]">
-                    <Check size={14} className="text-[#B29746]" strokeWidth={2.5} />
+                    <Check size={14} className="text-[#7A5F24]" strokeWidth={2.5} />
                     {pill}
                   </span>
                 ))}
@@ -225,7 +225,7 @@ export default function Home() {
             </div>
 
             {/* Editorial photo stack */}
-            <div className="relative h-120 md:h-135 select-none" aria-hidden="true">
+            <div className="relative h-120 md:h-135 select-none overflow-hidden" aria-hidden="true">
               <div
                 className="absolute w-64 h-80 bg-white rounded-xl border border-[#E8E4DC] shadow-xl overflow-hidden vantge-card-1"
                 style={{ top: '0%', left: '5%', transform: 'rotate(-3deg)' }}
@@ -239,7 +239,7 @@ export default function Home() {
               </div>
               <div
                 className="absolute w-56 h-72 bg-white rounded-xl border border-[#E8E4DC] shadow-xl overflow-hidden vantge-card-2"
-                style={{ top: '12%', left: '38%', transform: 'rotate(2deg)', zIndex: 2 }}
+                style={{ top: '12%', left: 'min(38%, calc(100% - 15rem))', transform: 'rotate(2deg)', zIndex: 2 }}
               >
                 <img
                   src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80"
@@ -449,7 +449,7 @@ function NotifyForm({ dark = false, className = '' }) {
   if (submitted) {
     return (
       <div id="notify" className={`flex items-center gap-2 ${dark ? 'text-white/70' : 'text-[#6B6B63]'} text-sm ${className}`}>
-        <Check size={16} className="text-[#B29746]" strokeWidth={2.5} />
+        <Check size={16} className="text-[#7A5F24]" strokeWidth={2.5} />
         You're on the list — we'll reach out when we launch!
       </div>
     )
@@ -498,12 +498,12 @@ function TrustBar() {
   return (
     <aside aria-label="Trusted by event professionals" className="border-y border-[#E8E4DC]">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <p className="text-center text-xs font-semibold tracking-[0.16em] uppercase text-ink/40 mb-6">
+        <p className="text-center text-xs font-semibold tracking-[0.16em] uppercase text-ink/70 mb-6">
           Perfect for every occasion
         </p>
         <ul ref={ref} className={`flex flex-wrap justify-center gap-8 md:gap-12 list-none p-0 m-0 ${inView ? 'vantge-trust-visible' : ''}`}>
           {items.map(({ icon: Icon, label }) => (
-            <li key={label} className="vantge-trust-item flex items-center gap-2 text-ink/40">
+            <li key={label} className="vantge-trust-item flex items-center gap-2 text-ink/70">
               <Icon size={18} aria-hidden="true" />
               <span className="text-sm font-medium">{label}</span>
             </li>
@@ -555,7 +555,7 @@ function HowItWorks() {
               <div className="flex gap-4 mb-4">
                 {[['428','Photos'],['87','Guests'],['312','Approved']].map(([val, lbl], i) => (
                   <div key={lbl} className="flex-1 bg-[#F7F5F0] rounded-lg p-3 text-center">
-                    <div className={`text-xl font-bold ${i === 2 ? 'text-[#B29746]' : 'text-ink'}`}>{val}</div>
+                    <div className={`text-xl font-bold ${i === 2 ? 'text-[#7A5F24]' : 'text-ink'}`}>{val}</div>
                     <div className="text-xs text-[#6B6B63]">{lbl}</div>
                   </div>
                 ))}
@@ -589,7 +589,7 @@ function HowItWorks() {
 
         {/* Right: steps */}
         <div>
-          <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#B29746] mb-4">
+          <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#7A5F24] mb-4">
             How it works
           </p>
           <h2
@@ -605,7 +605,7 @@ function HowItWorks() {
                 className={`flex gap-5 vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
               >
                 <div className="shrink-0 w-10 h-10 rounded-full bg-[#F0EDE6] border border-[#E8E4DC] flex items-center justify-center" aria-hidden="true">
-                  <span className="text-xs font-bold text-[#B29746]">{step.num}</span>
+                  <span className="text-xs font-bold text-[#7A5F24]">{step.num}</span>
                 </div>
                 <div>
                   <p className="font-semibold text-[#1A1A18] mb-1">{step.title}</p>
@@ -782,7 +782,7 @@ function ToolsOverview() {
   return (
     <section className="max-w-7xl mx-auto px-6 py-24 md:py-32" ref={ref}>
       <div className="text-center mb-14">
-        <p className="text-[11px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3">What We Offer</p>
+        <p className="text-[11px] font-black tracking-[0.25em] uppercase text-[#6E6D66] mb-3">What We Offer</p>
         <h2
           className={`text-4xl md:text-5xl font-bold vantge-reveal ${inView ? 'vantge-visible' : ''}`}
           style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
@@ -811,7 +811,7 @@ function ToolsOverview() {
                   <polyline points="21 15 16 10 5 21"/>
                 </svg>
               </div>
-              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-white/40 mb-2">Core Tool</p>
+              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-white/60 mb-2">Core Tool</p>
               <h3 className="text-2xl font-bold text-white mb-3">Event Photo Gallery</h3>
               <p className="text-white/60 leading-relaxed">
                 Guests scan a QR code and instantly share photos to a live gallery. You approve, curate, and download everything — no app required.
@@ -838,7 +838,7 @@ function ToolsOverview() {
                   <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
                 </svg>
               </div>
-              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">Free Add-on</p>
+              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#6E6D66] mb-2">Free Add-on</p>
               <h3 className="text-2xl font-bold text-[#1A1A18] mb-3">RSVP & Food Sign-up</h3>
               <p className="text-[#6B6B63] leading-relaxed">
                 Collect guest responses, track headcount, and coordinate who's bringing what — all from the same event link. Free, no extra account needed.
@@ -953,14 +953,14 @@ function SiteFooter() {
           </div>
           {cols.map(col => (
             <div key={col.heading}>
-              <div className="text-xs font-semibold tracking-[0.12em] uppercase text-white/40 mb-4">
+              <div className="text-xs font-semibold tracking-[0.12em] uppercase text-white/60 mb-4">
                 {col.heading}
               </div>
               <ul className="space-y-2.5">
                 {col.links.map(link => (
                   <li key={link.label}>
                     {link.comingSoon ? (
-                      <span className="text-sm text-white/20 cursor-default select-none">
+                      <span className="text-sm text-white/50 cursor-default select-none">
                         {link.label}
                       </span>
                     ) : (
@@ -976,15 +976,15 @@ function SiteFooter() {
         </div>
 
         <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/40">© 2025 Vantge. All rights reserved.</p>
+          <p className="text-xs text-white/60">© 2025 Vantge. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <a href="#" aria-label="Vantge on X / Twitter" className="text-white/40 hover:text-white/70 transition-colors">
+            <a href="#" aria-label="Vantge on X / Twitter" className="text-white/60 hover:text-white/70 transition-colors">
               <XIcon size={16} />
             </a>
-            <a href="#" aria-label="Vantge on Instagram" className="text-white/40 hover:text-white/70 transition-colors">
+            <a href="#" aria-label="Vantge on Instagram" className="text-white/60 hover:text-white/70 transition-colors">
               <InstagramIcon size={16} />
             </a>
-            <a href="#" aria-label="Vantge on LinkedIn" className="text-white/40 hover:text-white/70 transition-colors">
+            <a href="#" aria-label="Vantge on LinkedIn" className="text-white/60 hover:text-white/70 transition-colors">
               <LinkedinIcon size={16} />
             </a>
           </div>

@@ -2,19 +2,19 @@
 // Nothing here is real: the names, guests and notes are invented, and the photos are stock images.
 const DEMO_HOST_ID = 'demo-host'
 const DEMO_EVENT_ID = 'demo-event'
-const PARTY_PHOTO = 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&q=80'
+const PARTY_PHOTO = '/demo/sample-8.jpg'
 
 // Sample photos for the demo party. Every link here was checked to load.
 const PHOTOS = [
-  'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=1200&q=80',
-  'https://images.unsplash.com/photo-1464047736614-af63643285bf?w=1200&q=80',
-  'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1200&q=80',
-  'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&q=80',
-  'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80',
-  'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&q=80',
-  'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=1200&q=80',
-  'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&q=80',
-  'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80',
+  '/demo/sample-1.jpg',
+  '/demo/sample-2.jpg',
+  '/demo/sample-3.jpg',
+  '/demo/sample-4.jpg',
+  '/demo/sample-5.jpg',
+  '/demo/sample-6.jpg',
+  '/demo/sample-7.jpg',
+  '/demo/sample-8.jpg',
+  '/demo/sample-9.jpg',
 ]
 
 const GUESTS = ['Sarah Mitchell', 'Tom Chen', 'Maya Patel', 'Grace Owens', 'Alex Kim', 'Jordan Brooks']
@@ -121,8 +121,8 @@ export const DEMO_DATA = {
     event_id: DEMO_EVENT_ID,
     guest_name: 'Jordan Brooks',
     caption: 'Our first dance practice',
-    original_url: 'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=1200&q=80',
-    thumbnail_url: 'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=1200&q=80',
+    original_url: '/demo/sample-7.jpg',
+    thumbnail_url: '/demo/sample-7.jpg',
     storage_path: null,
     is_video: false,
     is_admin_upload: false,

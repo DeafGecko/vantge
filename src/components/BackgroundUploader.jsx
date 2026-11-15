@@ -148,7 +148,7 @@ function ZoneThumb({ label, imageUrl, defaultBg, currentTint, isActive, uploadin
                         ) : (
                               <div className="w-full h-full bg-[#F7F5F0] flex flex-col items-center justify-center gap-2 group-hover:bg-[#EFEDE8] transition-colors">
                                     <svg width="20" height="20" fill="none" stroke="#B0AFA5" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                                    <p className="text-[9px] font-bold text-[#B0AFA5] uppercase tracking-widest">{uploading ? 'Uploading...' : 'Upload photo'}</p>
+                                    <p className="text-[9px] font-bold text-[#6E6D66] uppercase tracking-widest">{uploading ? 'Uploading...' : 'Upload photo'}</p>
                               </div>
                         )}
                   </div>
@@ -411,8 +411,8 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
 
                               {/* Header */}
                               <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E4DA]">
-                                    <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#B0AFA5]">{label}</p>
-                                    <button onClick={onClose} className="text-[#B0AFA5] hover:text-[#1A1A18] transition-colors">
+                                    <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#6E6D66]">{label}</p>
+                                    <button onClick={onClose} className="text-[#6E6D66] hover:text-[#1A1A18] transition-colors">
                                           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
                                     </button>
                               </div>
@@ -451,15 +451,15 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                     {activeToolIndex === 0 && !showChangePanel && (
                                           <div className="flex flex-col gap-5">
                                                 <div>
-                                                      <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">Reposition</p>
-                                                      <p className="text-[10px] text-[#B0AFA5] leading-relaxed">Drag the photo to reposition the focus point.</p>
+                                                      <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#6E6D66] mb-2">Reposition</p>
+                                                      <p className="text-[10px] text-[#6E6D66] leading-relaxed">Drag the photo to reposition the focus point.</p>
                                                 </div>
                                                 <div>
-                                                      <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-3">Zoom</p>
+                                                      <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#6E6D66] mb-3">Zoom</p>
                                                       <div className="flex items-center justify-between mb-2">
-                                                            <span className="text-[9px] text-[#B0AFA5]">Fit</span>
+                                                            <span className="text-[9px] text-[#6E6D66]">Fit</span>
                                                             <span className="text-[11px] font-bold text-[#1A1A18]">{zoom}%</span>
-                                                            <span className="text-[9px] text-[#B0AFA5]">2×</span>
+                                                            <span className="text-[9px] text-[#6E6D66]">2×</span>
                                                       </div>
                                                       <input
                                                             type="range" min={100} max={200} step={1} value={zoom}
@@ -471,11 +471,11 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                     )}
                                     {activeToolIndex === 2 && !showChangePanel && (
                                           <div>
-                                                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-3">Black Tint</p>
+                                                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#6E6D66] mb-3">Black Tint</p>
                                                 <div className="flex items-center justify-between mb-2">
-                                                      <span className="text-[9px] text-[#B0AFA5]">None</span>
+                                                      <span className="text-[9px] text-[#6E6D66]">None</span>
                                                       <span className="text-[11px] font-bold text-[#1A1A18]">{tint}%</span>
-                                                      <span className="text-[9px] text-[#B0AFA5]">Dark</span>
+                                                      <span className="text-[9px] text-[#6E6D66]">Dark</span>
                                                 </div>
                                                 <input
                                                       type="range" min={0} max={90} value={tint}
@@ -486,8 +486,8 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                     )}
                                     {showChangePanel && (
                                           <div>
-                                                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">Photo Source</p>
-                                                <p className="text-[10px] text-[#B0AFA5] leading-relaxed">Select a photo from the library below.</p>
+                                                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#6E6D66] mb-2">Photo Source</p>
+                                                <p className="text-[10px] text-[#6E6D66] leading-relaxed">Select a photo from the library below.</p>
                                           </div>
                                     )}
                               </div>
@@ -526,7 +526,7 @@ export default function BackgroundUploader({ dbPrefix = 'background', eventId, c
 
       return (
             <div>
-                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Background Photo</p>
+                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66] mb-4">Background Photo</p>
                   <p className="text-xs text-[#1A1A18] -mt-2 mb-4">Click a photo to choose one from the gallery or upload your own.</p>
 
                   {/* Side-by-side thumbnails */}

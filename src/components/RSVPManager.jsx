@@ -480,7 +480,8 @@ export function RSVPResponses({ event }) {
 
 // ── Invitations / Sharing ─────────────────────────────────────
 export function InvitationsPanel({ event }) {
-  const guestUrl = `https://vantge.app/${event.event_slug}/rsvp`
+  // The demo event's invitation address is the demo guest page; every other event keeps /<slug>/rsvp
+  const guestUrl = event.event_slug === 'demo' ? 'https://vantge.app/try/demo' : `https://vantge.app/${event.event_slug}/rsvp`
   const [copied, setCopied] = useState(false)
   const [textCopied, setTextCopied] = useState(false)
   const [showQR, setShowQR] = useState(false)
