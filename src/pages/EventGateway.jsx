@@ -7,7 +7,8 @@ import { resolveFontFamily } from '../lib/fonts'
 import { getEventType } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
 import VantgeLogo from '../components/VantgeLogo'
-import { useResponsiveBg } from '../hooks/useResponsiveBg'
+import { useResponsiveBg, useIsWide } from '../hooks/useResponsiveBg'
+import { bgPhotoStyle, bgFraming } from '../lib/bgPhoto'
 
 
 export default function EventGateway() {
@@ -16,6 +17,7 @@ export default function EventGateway() {
       const { event, loading: eventLoading } = useEvent(eventSlug)
       const cameraInputRef = useRef(null)
       const _bgResponsive = useResponsiveBg(event?.background_image, event?.background_image_desktop)
+      const isWide = useIsWide()
       const [passcodeInput, setPasscodeInput] = useState('')
       const [passcodeError, setPasscodeError] = useState(false)
       const [passcodeUnlocked, setPasscodeUnlocked] = useState(false)
@@ -53,9 +55,10 @@ export default function EventGateway() {
       const selectedFontFamily = resolveFontFamily(event.font_family)
       const eventType = getEventType(event.event_type)
       const bgImage = _bgResponsive || eventType.defaultBg
-      const bgPosition = event.background_position || '50% 50%'
+      // Same framing the editor saves: desktop uses its own position, zoom and tint
+      const { position: bgPosition, zoom: bgZoom, tint: bgTint } = bgFraming(event, 'background', isWide)
       const accentColor = c.accent
-      const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
+      const tintAlpha = (bgTint / 100).toFixed(2)
 
       // Passcode gate
       const requiredPasscode = event.guest_passcode?.trim()
@@ -63,9 +66,9 @@ export default function EventGateway() {
             return (
                   <>
                         <FontLoader fontId={event.font_family} />
-                        <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
-                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-                        <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }} />
+                        <img src={bgImage} alt="" className="fixed inset-0 w-full h-full" style={bgPhotoStyle(bgPosition, bgZoom)} />
+                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
+                        <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(26,26,24,0.7) 0%, transparent 100%)' }} />
                         <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6">
                               <a href="/"><VantgeLogo size="sm" monoWhite /></a>
                               <div className="mt-8 w-full max-w-xs flex flex-col items-center gap-4">
@@ -104,9 +107,9 @@ export default function EventGateway() {
       if (!event.gallery_unlocked) return (
             <>
                   <FontLoader fontId={event.font_family} />
-                  <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
-                  <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
-                  <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }} />
+                  <img src={bgImage} alt="" className="fixed inset-0 w-full h-full" style={bgPhotoStyle(bgPosition, bgZoom)} />
+                  <div className="fixed inset-0" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
+                  <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(26,26,24,0.7) 0%, transparent 100%)' }} />
                   <div className="relative z-10 min-h-screen flex flex-col items-center justify-end pb-16 px-6 text-center">
                         <a href="/"><VantgeLogo size="sm" monoWhite /></a>
                         <div className="mt-auto">
@@ -132,10 +135,10 @@ export default function EventGateway() {
                   />
 
                   {/* Uniform tint */}
-                  <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                  <div className="fixed inset-0" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
 
                   {/* Extra gradient at bottom so buttons always pop */}
-                  <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)' }} />
+                  <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(26,26,24,0.6) 0%, transparent 100%)' }} />
 
                   {/* Scroll container */}
                   <div className="relative z-10 flex flex-col" style={{ height: '100dvh', overflow: 'hidden auto' }}>
@@ -170,7 +173,7 @@ export default function EventGateway() {
                                                       style={{
                                                             fontFamily: selectedFontFamily,
                                                             fontSize: 'clamp(1.8rem, 8vw, 3rem)',
-                                                            textShadow: '0 2px 20px rgba(0,0,0,0.6)',
+                                                            textShadow: '0 2px 20px rgba(26,26,24,0.6)',
                                                       }}
                                                 >
                                                       {event.event_name}

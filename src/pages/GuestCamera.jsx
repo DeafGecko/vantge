@@ -232,9 +232,9 @@ export default function GuestCamera() {
             }
       }
 
-      if (eventLoading) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>
+      if (eventLoading) return <div className="min-h-screen bg-[#1A1A18] flex items-center justify-center text-white">Loading...</div>
 
-      if (!event) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Event not found.</div>
+      if (!event) return <div className="min-h-screen bg-[#1A1A18] flex items-center justify-center text-white">Event not found.</div>
 
       const theme = getTheme(event.theme)
       const c = theme.colors
@@ -243,7 +243,7 @@ export default function GuestCamera() {
       return (
             <>
                   <FontLoader fontId={event.font_family} />
-                  <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
+                  <div className="min-h-screen bg-[#1A1A18] flex flex-col relative overflow-hidden">
 
 
                         {/* Top bar with back button, event name, and controls ___________________________________________________*/}
@@ -258,13 +258,13 @@ export default function GuestCamera() {
                               <button
                                     onClick={() => navigate(`/${eventSlug}`)}
                                     aria-label="Back to event"
-                                    className="pointer-events-auto w-10 h-10 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-full text-white"
+                                    className="pointer-events-auto w-10 h-10 flex items-center justify-center bg-[#1A1A18]/40 backdrop-blur-md rounded-full text-white"
                               >
                                     <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
                               </button>
 
                               {/* Event name in the center */}
-                              <div className="bg-black/40 backdrop-blur-md px-6 py-2 rounded-full border border-white/10">
+                              <div className="bg-[#1A1A18]/40 backdrop-blur-md px-6 py-2 rounded-full border border-white/10">
                                     <p className="text-white text-sm font-medium" style={{ fontFamily: selectedFontFamily }}>
                                           {event.event_name}
                                     </p>
@@ -274,7 +274,7 @@ export default function GuestCamera() {
                               {/* Right-side controls: flash, grid toggle */}
                               <div className="flex gap-3 pointer-events-auto">
                                     {/* Flash toggle (placeholder, as browser APIs don't support controlling flash) */}
-                                    <button aria-label="Toggle flash" className="w-10 h-10 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-full text-white">
+                                    <button aria-label="Toggle flash" className="w-10 h-10 flex items-center justify-center bg-[#1A1A18]/40 backdrop-blur-md rounded-full text-white">
                                           <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
                                     </button>
 
@@ -283,7 +283,7 @@ export default function GuestCamera() {
                                           onClick={() => setShowGrid(!showGrid)}
                                           aria-label={showGrid ? 'Hide grid overlay' : 'Show grid overlay'}
                                           aria-pressed={showGrid}
-                                          className={`w-10 h-10 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-full ${showGrid ? 'text-red-500' : 'text-white'}`}
+                                          className={`w-10 h-10 flex items-center justify-center bg-[#1A1A18]/40 backdrop-blur-md rounded-full ${showGrid ? 'text-red-500' : 'text-white'}`}
                                     >
                                           <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 9h18M3 15h18M9 3v18M15 3v18" /></svg>
                                     </button>
@@ -306,7 +306,7 @@ export default function GuestCamera() {
                                     {/* Recording timer */}
                                     {isRecording && (
                                           <div className="absolute top-20 left-0 right-0 z-20 flex justify-center pointer-events-none">
-                                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-full px-4 py-2">
+                                                <div className="flex items-center gap-2 bg-[#1A1A18]/60 backdrop-blur-md rounded-full px-4 py-2">
                                                       <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                                                       <span className="text-white text-sm font-bold tabular-nums">
                                                             {recordingSeconds}s / {VIDEO_LIMIT}s
@@ -327,7 +327,7 @@ export default function GuestCamera() {
                                                       }`} />
                                           </button>
 
-                                          <div className="flex items-center bg-black/40 backdrop-blur-xl rounded-full p-1 border border-white/10">
+                                          <div className="flex items-center bg-[#1A1A18]/40 backdrop-blur-xl rounded-full p-1 border border-white/10">
                                                 <button
                                                       onClick={() => { setMode('photo'); setIsRecording(false) }}
                                                       className={`px-6 py-2 rounded-full text-xs font-bold transition-all ${mode === 'photo' ? 'bg-red-600 text-white' : 'text-white/60'}`}
@@ -354,7 +354,7 @@ export default function GuestCamera() {
                                           />
                                           <button
                                                 onClick={() => galleryInputRef.current?.click()}
-                                                className="w-12 h-12 bg-black/40 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/10"
+                                                className="w-12 h-12 bg-[#1A1A18]/40 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/10"
                                                 aria-label="Open photo gallery"
                                           >
                                                 <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -369,7 +369,7 @@ export default function GuestCamera() {
                                     <div className="absolute bottom-10 right-8 z-20">
                                           <button
                                                 onClick={() => setFacingMode(f => f === 'environment' ? 'user' : 'environment')}
-                                                className="w-12 h-12 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/10"
+                                                className="w-12 h-12 bg-[#1A1A18]/40 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/10"
                                                 aria-label="Flip camera"
                                           >
                                                 <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
@@ -380,14 +380,14 @@ export default function GuestCamera() {
 
                         {/* Video-too-long error banner (shown on camera screen, before capturedPhoto is set) */}
                         {uploadError && !capturedPhoto && (
-                              <div className="absolute bottom-44 left-4 right-4 z-30 bg-black/75 border border-red-500/50 text-red-300 text-sm font-medium rounded-2xl px-4 py-3 text-center">
+                              <div className="absolute bottom-44 left-4 right-4 z-30 bg-[#1A1A18]/75 border border-red-500/50 text-red-300 text-sm font-medium rounded-2xl px-4 py-3 text-center">
                                     {uploadError}
                               </div>
                         )}
 
                         {/* ── Preview / upload screen ──────────────────────────────── */}
                         {capturedPhoto && (
-                              <div className="absolute inset-0 z-40 bg-black flex flex-col">
+                              <div className="absolute inset-0 z-40 bg-[#1A1A18] flex flex-col">
 
                                     {/* Success screen */}
                                     {uploadState === 'success' ? (
@@ -436,7 +436,7 @@ export default function GuestCamera() {
                                                       )}
 
                                                       {/* Media type badge */}
-                                                      <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-black/50 rounded-full px-3 py-1">
+                                                      <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-[#1A1A18]/50 rounded-full px-3 py-1">
                                                             {capturedPhoto.type === 'video' ? (
                                                                   <>
                                                                         <svg width="11" height="11" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>

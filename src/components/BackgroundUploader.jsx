@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useDefaultBg } from '../hooks/useDefaultBg'
+import NoticeDialog from './NoticeDialog'
 
 const MAX_BYTES = 50 * 1024 * 1024
 
@@ -133,13 +134,13 @@ function ZoneThumb({ label, imageUrl, defaultBg, currentTint, isActive, uploadin
                         {displayUrl ? (
                               <>
                                     <img src={displayUrl} alt="Background" className="w-full h-full object-cover" style={{ objectPosition: '50% 50%' }} />
-                                    <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                                    <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
                                     {isDefault && (
                                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:hidden">
                                                 <span className="text-[10px] font-black tracking-[0.2em] uppercase text-white/80 drop-shadow">Default</span>
                                           </div>
                                     )}
-                                    <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="absolute inset-0 bg-[#1A1A18]/40 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                           <svg width="20" height="20" fill="none" stroke="white" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                           <p className="text-[9px] font-bold text-white uppercase tracking-widest">{isDefault ? 'Upload photo' : 'Edit'}</p>
                                     </div>
@@ -157,7 +158,7 @@ function ZoneThumb({ label, imageUrl, defaultBg, currentTint, isActive, uploadin
 }
 
 // Full-screen modal editor — aspect-ratio preview left, tools right
-function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, currentTint, currentZoom, accentColor, eventId, dbField, dbPrefix, eventTypeId, onSaved, onPreview, onClose }) {
+function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, currentTint, currentZoom, accentColor, eventId, dbField, dbPrefix, eventTypeId, onSaved, onPreview, onNotice, onClose }) {
       const [position, setPosition] = useState(currentPosition || '50% 50%')
       const [zoom, setZoom] = useState(currentZoom ?? 100) // percent, 100 = fit
       const [tint, setTint] = useState(currentTint ?? 55)
@@ -233,7 +234,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
             const compressed = await compressImage(file)
             const path = `backgrounds/${eventId}/${dbField}-${Date.now()}.jpg`
             const { error: uploadError } = await supabase.storage.from('event-media').upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
-            if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
+            if (uploadError) { onNotice({ title: 'Upload failed', message: uploadError.message }); setUploading(false); return }
             const { data } = supabase.storage.from('event-media').getPublicUrl(path)
             setPendingUrl(data.publicUrl)
             setPosition('50% 50%')
@@ -259,9 +260,9 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                   const fallback = { [dbField]: urlToSave }
                   if (!isLandscape) Object.assign(fallback, { [`${dbPrefix}_position`]: position, [`${dbPrefix}_tint`]: tint })
                   ;({ error } = await supabase.from('events').update(fallback).eq('id', eventId))
-                  if (!error) alert('Photo saved, but the position, zoom and tint were not stored. Run the SQL in supabase/migrations/20261104_background_zoom.sql in Supabase, then save again.')
+                  if (!error) onNotice({ title: 'Partly saved', message: 'The photo was saved, but the position, zoom and tint were not stored. Run the SQL in supabase/migrations/20261104_background_zoom.sql in Supabase, then save again.' })
             }
-            if (error) { alert('Could not save: ' + error.message); return }
+            if (error) { onNotice({ title: 'Could not save', message: error.message }); return }
             savedRef.current = true
             onSaved(urlToSave, position, tint, zoom)
             onClose()
@@ -269,7 +270,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
 
       async function handleRemove() {
             const { error } = await supabase.from('events').update({ [dbField]: null }).eq('id', eventId)
-            if (error) { alert('Could not remove: ' + error.message) }
+            if (error) { onNotice({ title: 'Could not remove', message: error.message }) }
             else { onSaved(null, currentPosition, currentTint, currentZoom); setShowChangePanel(true) }
       }
 
@@ -281,7 +282,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
       ]
 
       return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1A1A18]/60 backdrop-blur-sm p-4">
                   <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex overflow-hidden">
 
                         {/* LEFT — device frame preview OR photo picker */}
@@ -348,8 +349,8 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                     <div
                                           className={`relative shrink-0 border-[6px] border-white/80 ${isLandscape ? 'rounded-2xl' : 'rounded-[2.5rem]'}`}
                                           style={isLandscape
-                                                ? { width: 'min(100%, 520px)', aspectRatio: '16/9', boxShadow: '0 0 0 2px rgba(255,255,255,0.15), 0 20px 60px rgba(0,0,0,0.6)' }
-                                                : { height: 'min(100%, 480px)', aspectRatio: '9/16', boxShadow: '0 0 0 2px rgba(255,255,255,0.15), 0 20px 60px rgba(0,0,0,0.6)' }
+                                                ? { width: 'min(100%, 520px)', aspectRatio: '16/9', boxShadow: '0 0 0 2px rgba(255,255,255,0.15), 0 20px 60px rgba(26,26,24,0.6)' }
+                                                : { height: 'min(100%, 480px)', aspectRatio: '9/16', boxShadow: '0 0 0 2px rgba(255,255,255,0.15), 0 20px 60px rgba(26,26,24,0.6)' }
                                           }
                                     >
                                           {/* Phone notch */}
@@ -380,14 +381,14 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                                                 }}
                                                 draggable={false}
                                           />
-                                          <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                                          <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
 
                                           {activeToolIndex === 0 && !showChangePanel && (
                                                 <div className="absolute w-6 h-6 rounded-full border-2 border-white shadow-lg pointer-events-none -translate-x-1/2 -translate-y-1/2 z-10" style={{ left: position.split(' ')[0], top: position.split(' ')[1], backgroundColor: `${accentColor}99` }} />
                                           )}
                                           {activeToolIndex === 0 && !showChangePanel && (
                                                 <div className="absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none">
-                                                      <span className="text-[9px] font-bold text-white/60 uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">Drag to reposition</span>
+                                                      <span className="text-[9px] font-bold text-white/60 uppercase tracking-widest bg-[#1A1A18]/40 px-3 py-1 rounded-full">Drag to reposition</span>
                                                 </div>
                                           )}
 
@@ -493,7 +494,7 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
 
                               {/* Save / Cancel */}
                               <div className="p-4 border-t border-[#E8E4DA] flex flex-col gap-2">
-                                    <button onClick={handleConfirm} className="w-full bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-3 hover:bg-black transition-all">Save</button>
+                                    <button onClick={handleConfirm} className="w-full bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-3 hover:bg-[#1A1A18] transition-all">Save</button>
                                     <button onClick={onClose} className="w-full border border-[#E8E4DA] text-[#5A5A52] text-[10px] font-bold uppercase tracking-widest rounded-full py-3 hover:border-[#88887E] transition-all">Cancel</button>
                               </div>
                         </div>
@@ -508,13 +509,14 @@ export default function BackgroundUploader({ dbPrefix = 'background', eventId, c
       const [activeZone, setActiveZone] = useState(null) // null | 'portrait' | 'landscape'
       const [uploadingPortrait, setUploadingPortrait] = useState(false)
       const [uploadingLandscape, setUploadingLandscape] = useState(false)
+      const [notice, setNotice] = useState(null) // { title, message } shown in our own dialog
 
       async function handleUpload(file, dbField, isLandscape, setUploading, onSavedFn, vals) {
             setUploading(true)
             const compressed = await compressImage(file)
             const path = `backgrounds/${eventId}/${dbField}-${Date.now()}.jpg`
             const { error: uploadError } = await supabase.storage.from('event-media').upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
-            if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
+            if (uploadError) { setNotice({ title: 'Upload failed', message: uploadError.message }); setUploading(false); return }
             const { data } = supabase.storage.from('event-media').getPublicUrl(path)
             await supabase.from('events').update({ [dbField]: data.publicUrl }).eq('id', eventId)
             onSavedFn(data.publicUrl, vals.position, vals.tint, vals.zoom)
@@ -571,6 +573,7 @@ export default function BackgroundUploader({ dbPrefix = 'background', eventId, c
                               eventTypeId={eventTypeId}
                               onSaved={onSaved}
                               onPreview={onPreview}
+                              onNotice={setNotice}
                               onClose={() => setActiveZone(null)}
                         />
                   )}
@@ -590,9 +593,11 @@ export default function BackgroundUploader({ dbPrefix = 'background', eventId, c
                               eventTypeId={eventTypeId}
                               onSaved={onSavedDesktop}
                               onPreview={onPreview}
+                              onNotice={setNotice}
                               onClose={() => setActiveZone(null)}
                         />
                   )}
+                  <NoticeDialog open={!!notice} title={notice?.title} message={notice?.message} onClose={() => setNotice(null)} />
             </div>
       )
 }

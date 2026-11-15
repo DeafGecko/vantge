@@ -71,7 +71,7 @@ function UploadModal({ eventId, onClose }) {
 
       return (
             <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={onClose}>
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                  <div className="absolute inset-0 bg-[#1A1A18]/60 backdrop-blur-sm" />
                   <div
                         className="relative w-full max-w-md bg-[#F8F5ED] rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl"
                         style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
@@ -149,7 +149,7 @@ function UploadModal({ eventId, onClose }) {
                                           <button
                                                 onClick={handleUpload}
                                                 disabled={!files.length || uploading}
-                                                className="flex-1 bg-[#1A1A18] text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3.5 disabled:opacity-40 hover:bg-black transition-all"
+                                                className="flex-1 bg-[#1A1A18] text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3.5 disabled:opacity-40 hover:bg-[#1A1A18] transition-all"
                                           >
                                                 {uploading ? `Uploading… ${progress}%` : `Upload ${files.length > 0 ? files.length + ' file' + (files.length !== 1 ? 's' : '') : 'to Gallery'}`}
                                           </button>
@@ -218,7 +218,7 @@ function GalleryModal({ items, onClose, onDeleted, initialId }) {
 
       return (
             <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={onClose}>
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                  <div className="absolute inset-0 bg-[#1A1A18]/60 backdrop-blur-sm" />
                   <div
                         className="relative w-full max-w-md bg-[#F8F5ED] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col"
                         style={{ maxHeight: '90vh', paddingBottom: 'env(safe-area-inset-bottom)' }}
@@ -258,12 +258,12 @@ function GalleryModal({ items, onClose, onDeleted, initialId }) {
                                           <img src={current?.original_url} alt="" className="w-full h-full object-contain" />
                                     )}
                                     {viewIndex > 0 && (
-                                          <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors">
+                                          <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#1A1A18]/40 hover:bg-[#1A1A18]/60 flex items-center justify-center transition-colors">
                                                 <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                           </button>
                                     )}
                                     {viewIndex < items.length - 1 && (
-                                          <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors">
+                                          <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#1A1A18]/40 hover:bg-[#1A1A18]/60 flex items-center justify-center transition-colors">
                                                 <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                           </button>
                                     )}
@@ -313,7 +313,7 @@ function GalleryModal({ items, onClose, onDeleted, initialId }) {
                                                                   <>
                                                                         <img src={item.thumbnail_url || item.original_url} alt="" className="w-full h-full object-cover" />
                                                                         <div className="absolute inset-0 flex items-center justify-center">
-                                                                              <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                              <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(26,26,24,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                                     <svg width="7" height="7" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                                                               </div>
                                                                         </div>
@@ -322,7 +322,7 @@ function GalleryModal({ items, onClose, onDeleted, initialId }) {
                                                                   <img src={item.original_url} alt="" className="w-full h-full object-cover" />
                                                             )}
                                                             {isSelected && (
-                                                                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                                  <div className="absolute inset-0 bg-[#1A1A18]/30 flex items-center justify-center">
                                                                         <div className="w-6 h-6 rounded-full bg-[#1A1A18] flex items-center justify-center">
                                                                               <svg width="12" height="12" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                                                         </div>
@@ -399,7 +399,7 @@ export default function HostUploader({ eventId, refreshKey }) {
                               </div>
                               <button
                                     onClick={() => setOpen(true)}
-                                    className="shrink-0 ml-4 bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-2.5 hover:bg-black transition-all"
+                                    className="shrink-0 ml-4 bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-2.5 hover:bg-[#1A1A18] transition-all"
                               >
                                     Add Photos
                               </button>
@@ -426,7 +426,7 @@ export default function HostUploader({ eventId, refreshKey }) {
                                                                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                                                             />
                                                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(26,26,24,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                         <svg width="7" height="7" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                                                   </div>
                                                             </div>
