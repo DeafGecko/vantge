@@ -294,14 +294,14 @@ export default function GalleryDashboard() {
                               {/* PAGE TITLE */}
                               <div className="mb-8 flex items-end justify-between gap-6">
                                     <div>
-                                          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#B0AFA5] mb-0.5">Event Dashboard</p>
+                                          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#6E6D66] mb-0.5">Event Dashboard</p>
                                           <h2 className="text-xl md:text-2xl font-black tracking-tight text-ink">{currentEventName}</h2>
                                     </div>
                         {/* Dashboard tabs — same style as RSVP: Event Setup · Design · Gallery */}
                         <div className="flex gap-6 items-end">
                               {[{ id: 'event', label: 'Event' }, { id: 'gallery', label: 'Gallery' }].map(t => (
                                     <button key={t.id} onClick={() => setDashTab(t.id)}
-                                          className={`relative pb-1 text-sm font-bold transition-colors ${dashTab === t.id ? 'text-[#1A1A18]' : 'text-[#B0AFA5] hover:text-[#5A5A52]'}`}>
+                                          className={`relative pb-1 text-sm font-bold transition-colors ${dashTab === t.id ? 'text-[#1A1A18]' : 'text-[#6E6D66] hover:text-[#5A5A52]'}`}>
                                           {t.label}
                                           {dashTab === t.id && <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-[#1A1A18] rounded-full" />}
                                     </button>
@@ -321,7 +321,7 @@ export default function GalleryDashboard() {
                                           {dashTab === 'event' && (
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] p-5 shadow-sm">
                                                 <div className="flex items-center justify-between mb-4">
-                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Live Preview</p>
+                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66]">Live Preview</p>
                                                       <button
                                                             onClick={() => setPreviewUnlocked(v => !v)}
                                                             className={"flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border transition-all " +
@@ -367,14 +367,14 @@ export default function GalleryDashboard() {
                                                       <button
                                                             onClick={() => setPreviewDevice('mobile')}
                                                             title="Mobile preview"
-                                                            className={`p-2 rounded-lg transition-colors ${previewDevice === 'mobile' ? 'bg-ink text-white' : 'text-[#B0AFA5] hover:text-ink'}`}
+                                                            className={`p-2 rounded-lg transition-colors ${previewDevice === 'mobile' ? 'bg-ink text-white' : 'text-[#6E6D66] hover:text-ink'}`}
                                                       >
                                                             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
                                                       </button>
                                                       <button
                                                             onClick={() => setPreviewDevice('desktop')}
                                                             title="Desktop preview"
-                                                            className={`p-2 rounded-lg transition-colors ${previewDevice === 'desktop' ? 'bg-ink text-white' : 'text-[#B0AFA5] hover:text-ink'}`}
+                                                            className={`p-2 rounded-lg transition-colors ${previewDevice === 'desktop' ? 'bg-ink text-white' : 'text-[#6E6D66] hover:text-ink'}`}
                                                       >
                                                             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
                                                       </button>
@@ -387,13 +387,13 @@ export default function GalleryDashboard() {
                                                             <div className="flex items-center justify-between mb-1">
                                                                   <div className="flex items-center gap-1">
                                                                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
-                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title place</p>
+                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66]">Title place</p>
                                                                   </div>
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                  <span className="text-[8px] text-[#B0AFA5]">Top</span>
+                                                                  <span className="text-[8px] text-[#6E6D66]">Top</span>
                                                                   <input
-                                                                        type="range" min={0} max={100} step={1}
+                                                                        type="range" aria-label="Title place for phones" min={0} max={100} step={1}
                                                                         value={currentTitlePosition}
                                                                         onChange={async (e) => {
                                                                               const val = e.target.value
@@ -402,7 +402,7 @@ export default function GalleryDashboard() {
                                                                         }}
                                                                         className="flex-1 accent-ink h-1.5 rounded-full cursor-pointer"
                                                                   />
-                                                                  <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
+                                                                  <span className="text-[8px] text-[#6E6D66]">Bottom</span>
                                                             </div>
                                                       </div>
                                                       {/* Desktop */}
@@ -410,13 +410,13 @@ export default function GalleryDashboard() {
                                                             <div className="flex items-center justify-between mb-1">
                                                                   <div className="flex items-center gap-1">
                                                                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
-                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title place</p>
+                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66]">Title place</p>
                                                                   </div>
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                  <span className="text-[8px] text-[#B0AFA5]">Top</span>
+                                                                  <span className="text-[8px] text-[#6E6D66]">Top</span>
                                                                   <input
-                                                                        type="range" min={0} max={100} step={1}
+                                                                        type="range" aria-label="Title place for computers" min={0} max={100} step={1}
                                                                         value={currentTitlePositionDesktop}
                                                                         onChange={async (e) => {
                                                                               const val = e.target.value
@@ -425,7 +425,7 @@ export default function GalleryDashboard() {
                                                                         }}
                                                                         className="flex-1 accent-ink h-1.5 rounded-full cursor-pointer"
                                                                   />
-                                                                  <span className="text-[8px] text-[#B0AFA5]">Bottom</span>
+                                                                  <span className="text-[8px] text-[#6E6D66]">Bottom</span>
                                                             </div>
                                                       </div>
                                                 </div>
@@ -444,7 +444,7 @@ export default function GalleryDashboard() {
                                           <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm p-6">
                                                 <div className="flex items-start justify-between gap-4 flex-wrap">
                                                       <div>
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Gallery</p>
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66]">Gallery</p>
                                                             <p className="text-sm text-[#5A5A52] mt-1">{isUnlocked ? 'Open — guests can view and upload.' : 'Closed — guests see "not open yet".'}</p>
                                                       </div>
                                                       <div className="flex gap-2 flex-wrap">
@@ -452,7 +452,7 @@ export default function GalleryDashboard() {
                                                                   <button key={label} disabled={toggling || isUnlocked === v}
                                                                         onClick={() => { if (isUnlocked !== v) toggleGallery() }}
                                                                         className={`text-[10px] font-bold uppercase tracking-widest rounded-full px-3.5 py-1.5 border transition-all disabled:cursor-default ${
-                                                                              isUnlocked === v ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'border-[#E0D8C6] text-[#88887E] hover:border-[#1A1A18] hover:text-[#1A1A18]'
+                                                                              isUnlocked === v ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'border-[#E0D8C6] text-[#6E6E66] hover:border-[#1A1A18] hover:text-[#1A1A18]'
                                                                         }`}>
                                                                         {label}
                                                                   </button>
@@ -471,7 +471,7 @@ export default function GalleryDashboard() {
 
                                                       {/* Logo */}
                                                       <div className="shrink-0 flex flex-col items-center gap-1.5">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Logo</p>
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66]">Logo</p>
                                                             <LogoUploader
                                                                   eventId={event.id}
                                                                   currentLogoUrl={currentLogoUrl}
@@ -484,7 +484,7 @@ export default function GalleryDashboard() {
 
                                                             <div>
                                                                   <div className="flex items-center justify-between mb-1.5">
-                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Display Name</p>
+                                                                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66]">Display Name</p>
                                                                   </div>
                                                                   <textarea
                                                                         value={currentEventName}
@@ -499,7 +499,7 @@ export default function GalleryDashboard() {
                                                             </div>
 
                                                             <div>
-                                                                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Event Type</p>
+                                                                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66] mb-1.5">Event Type</p>
                                                                   <Dropdown value={currentEventTypeId} className="bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-ink"
                                                                         options={EVENT_TYPES.map(t => ({ value: t.id, label: t.label }))}
                                                                         onChange={async (val) => {
@@ -554,12 +554,12 @@ export default function GalleryDashboard() {
 
                                                 <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm overflow-hidden flex flex-col">
                                                       <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Font</p>
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66]">Title Font</p>
                                                             <div className="flex items-center gap-1">
                                                                   {[{ v: 'left', Icon: AlignLeft }, { v: 'center', Icon: AlignCenter }, { v: 'right', Icon: AlignRight }].map(({ v, Icon }) => (
                                                                         <button key={v} onClick={() => { setLocalTitleAlign(v); updateEventSettings({ title_align: v }) }}
                                                                               aria-label={`Align title ${v}`} title={`Align ${v}`}
-                                                                              className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${currentTitleAlign === v ? 'bg-[#1A1A18] text-white' : 'text-[#88887E] hover:bg-[#F4F3F0]'}`}>
+                                                                              className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${currentTitleAlign === v ? 'bg-[#1A1A18] text-white' : 'text-[#6E6E66] hover:bg-[#F4F3F0]'}`}>
                                                                               <Icon size={15} />
                                                                         </button>
                                                                   ))}
@@ -568,7 +568,7 @@ export default function GalleryDashboard() {
                                                       <div className="flex flex-col divide-y-2 divide-[#F0EDE6]">
                                                             {Object.entries(fontCategories).map(([catKey, fonts], idx) => (
                                                                   <div key={catKey} className={`px-4 py-3${idx > 0 ? ' pt-[22px]' : ''}`}>
-                                                                        <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#B0AFA5] mb-2">
+                                                                        <p className="text-[9px] font-black tracking-[0.2em] uppercase text-[#6E6D66] mb-2">
                                                                               {categoryLabels[catKey]}
                                                                         </p>
                                                                         <div className="grid grid-cols-3 gap-1.5">
@@ -583,7 +583,7 @@ export default function GalleryDashboard() {
                                                                                                       : "border-[#E8E4DA] bg-[#FAFAF8] text-[#1A1A18] hover:border-[#1A1A18]")}
                                                                                     >
                                                                                           <span className="text-lg leading-none" style={{ fontFamily: font.cssFamily }}>Aa</span>
-                                                                                          <span className="text-[8px] font-bold uppercase tracking-wide text-current opacity-40 truncate w-full text-center">{font.name}</span>
+                                                                                          <span className="text-[8px] font-bold uppercase tracking-wide text-current opacity-70 truncate w-full text-center">{font.name}</span>
                                                                                     </button>
                                                                               ))}
                                                                         </div>
@@ -593,7 +593,7 @@ export default function GalleryDashboard() {
                                                 </div>
 
                                                 <div className="bg-white rounded-2xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col">
-                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3 shrink-0">Color Palette</p>
+                                                      <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66] mb-3 shrink-0">Color Palette</p>
                                                       <div className="grid grid-cols-2 gap-2">
                                                             {getAllThemes().map((theme) => (
                                                                   <ThemeOption
@@ -612,7 +612,7 @@ export default function GalleryDashboard() {
                                           {/* Guest Controls */}
                                           {dashTab === 'event' && (
                                           <div className="bg-white rounded-3xl border border-[#E8E4DA] shadow-sm flex flex-col flex-1">
-                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-5 pt-5 pb-4">Guest Controls</p>
+                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66] px-5 pt-5 pb-4">Guest Controls</p>
 
                                                 {/* Section 1 — Toggles */}
                                                 <div className="px-5 pb-5 flex flex-col gap-4 border-b-2 border-[#F0EDE6]">
@@ -692,7 +692,7 @@ export default function GalleryDashboard() {
                               {dashTab !== 'gallery' && Object.keys(pending).length > 0 && (
                                     <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-[#E8E4DA] shadow-lg">
                                           <div className="max-w-[1024px] mx-auto px-4 md:px-8 py-2 flex items-center justify-between gap-4">
-                                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#88887E]">Unsaved changes</p>
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#6E6E66]">Unsaved changes</p>
                                                 <button onClick={saveAll} disabled={savingSettings}
                                                       className="text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-1.5 bg-[#1A1A18] text-white hover:bg-[#1A1A18] transition-all disabled:opacity-50">
                                                       {savingSettings ? 'Saving…' : 'Save'}
@@ -724,7 +724,7 @@ export default function GalleryDashboard() {
                                                 <svg width="15" height="15" fill="none" stroke="#1A1A18" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
                                           </div>
                                           <div>
-                                                <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest">Videos</p>
+                                                <p className="text-[10px] font-bold text-[#6E6E66] uppercase tracking-widest">Videos</p>
                                                 <p className="text-xl font-extrabold text-[#1A1A18] leading-tight">{approvedVideoCount}</p>
                                           </div>
                                     </div>
@@ -734,7 +734,7 @@ export default function GalleryDashboard() {
                                                 <svg width="15" height="15" fill="none" stroke="#1A1A18" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
                                           </div>
                                           <div>
-                                                <p className="text-[10px] font-bold text-[#88887E] uppercase tracking-widest">In Gallery</p>
+                                                <p className="text-[10px] font-bold text-[#6E6E66] uppercase tracking-widest">In Gallery</p>
                                                 <p className="text-xl font-extrabold text-[#1A1A18] leading-tight">{approvedPhotoCount + approvedVideoCount}</p>
                                           </div>
                                     </div>
@@ -752,7 +752,7 @@ export default function GalleryDashboard() {
                                                       key={i}
                                                       onClick={() => setActiveTab(i)}
                                                       className={"pb-3 pt-3.5 mr-5 text-sm font-bold transition-all relative whitespace-nowrap " +
-                                                            (activeTab === i ? "text-[#1A1A18]" : "text-[#B0AFA5] hover:text-[#5A5A52]")}
+                                                            (activeTab === i ? "text-[#1A1A18]" : "text-[#6E6D66] hover:text-[#5A5A52]")}
                                                 >
                                                       {label}
                                                       {count > 0 && (
@@ -1010,20 +1010,20 @@ function QRCodeSection({ eventSlug }) {
       return (
             <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm flex flex-col items-center gap-4">
                   <div className="w-full flex items-center justify-between">
-                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Scan to open</p>
+                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66]">Scan to open</p>
                         <a href={guestUrl} target="_blank" rel="noopener noreferrer" aria-label="Open the guest page" title="Open the guest page"
                               className="p-2 rounded-full text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors focus-visible:outline-2 focus-visible:outline-[#1A1A18]">
                               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
                         </a>
                   </div>
                   <div ref={qrRef} className="bg-[#F7F5F0] p-4 rounded-2xl">
-                        <QRCodeSVG value={guestUrl} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
+                        <QRCodeSVG title="Guest page QR code" value={guestUrl} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
                   </div>
                   <div className="w-full flex items-center gap-2 bg-[#F7F5F0] border border-[#E8E4DA] rounded-xl px-3 py-2.5">
                         <a href={guestUrl} target="_blank" rel="noopener noreferrer" className="flex-1 text-[10px] text-[#6B6B63] truncate hover:text-[#1A1A18] transition-colors">
                               {guestUrl}
                         </a>
-                        <button onClick={copyLink} aria-label="Copy link" className="shrink-0 text-[#B0AFA5] hover:text-[#1A1A18] transition-colors">
+                        <button onClick={copyLink} aria-label="Copy link" className="shrink-0 text-[#6E6D66] hover:text-[#1A1A18] transition-colors">
                               {copied ? <CheckIcon size={14} className="text-green-500" /> : <Copy size={14} />}
                         </button>
                   </div>

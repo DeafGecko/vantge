@@ -1,25 +1,29 @@
 // src/App.jsx
 import { Routes, Route, Navigate } from 'react-router-dom'
 
+import { Suspense, lazy } from 'react'
 import Home           from './pages/Home'
-import EventGateway   from './pages/EventGateway'
-import GuestUploader  from './pages/GuestUploader'
-import Gallery        from './pages/Gallery'
-import HostLogin      from './pages/HostLogin'
-import HostSignup     from './pages/HostSignup'
-import HostHub          from './pages/HostHub'
-import GalleryDashboard from './pages/GalleryDashboard'
-import RSVPDashboard    from './pages/RSVPDashboard'
-import GuestRSVP        from './pages/GuestRSVP'
-import AdminLogin       from './pages/AdminLogin'
-import AdminDashboard   from './pages/AdminDashboard'
-import PendingApproval  from './pages/PendingApproval'
-import DemoFrame        from './components/DemoFrame'
-import DemoStart        from './pages/DemoStart'
+
+// Every other page loads only when it is opened, so the home page stays light
+const EventGateway      = lazy(() => import('./pages/EventGateway'))
+const GuestUploader     = lazy(() => import('./pages/GuestUploader'))
+const Gallery           = lazy(() => import('./pages/Gallery'))
+const HostLogin         = lazy(() => import('./pages/HostLogin'))
+const HostSignup        = lazy(() => import('./pages/HostSignup'))
+const HostHub           = lazy(() => import('./pages/HostHub'))
+const GalleryDashboard  = lazy(() => import('./pages/GalleryDashboard'))
+const RSVPDashboard     = lazy(() => import('./pages/RSVPDashboard'))
+const GuestRSVP         = lazy(() => import('./pages/GuestRSVP'))
+const AdminLogin        = lazy(() => import('./pages/AdminLogin'))
+const AdminDashboard    = lazy(() => import('./pages/AdminDashboard'))
+const PendingApproval   = lazy(() => import('./pages/PendingApproval'))
+const DemoFrame         = lazy(() => import('./components/DemoFrame'))
+const DemoStart         = lazy(() => import('./pages/DemoStart'))
 
 export default function App() {
   return (
     // Removed the <BrowserRouter> from here to fix the conflict
+    <Suspense fallback={<div className="min-h-screen bg-[#F7F5F0]" />}>
     <Routes>
       {/* ── Marketing home ───────────────────────────────────── */}
       <Route path="/"          element={<Home />} />
@@ -55,5 +59,6 @@ export default function App() {
       {/* ── Fallback ─────────────────────────────────────────── */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   )
 }

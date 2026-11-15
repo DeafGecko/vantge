@@ -1375,6 +1375,11 @@ function RSVPPreview({ event, bgImage, theme, fontCssFamily, previewStep, onStep
 }
 
 // ── Main RSVPDashboard page ───────────────────────────────────
+// The demo event's invitation address is the demo guest page; every other event keeps /<slug>/rsvp
+function rsvpUrl(slug) {
+  return slug === 'demo' ? 'https://vantge.app/try/demo' : `https://vantge.app/${slug}/rsvp`
+}
+
 export default function RSVPDashboard() {
   const { user, loading: authLoading, signOut } = useAuth()
   const { event, loading: eventLoading } = useHostEvent()
@@ -1600,19 +1605,19 @@ export default function RSVPDashboard() {
               <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col items-center gap-4">
                 <div className="w-full flex items-center justify-between">
                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Scan to open</p>
-                  <a href={`https://vantge.app/${ev.event_slug}/rsvp`} target="_blank" rel="noopener noreferrer" aria-label="Open the invitation page" title="Open the invitation page"
+                  <a href={rsvpUrl(ev.event_slug)} target="_blank" rel="noopener noreferrer" aria-label="Open the invitation page" title="Open the invitation page"
                     className="p-2 rounded-full text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors focus-visible:outline-2 focus-visible:outline-[#1A1A18]">
                     <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
                   </a>
                 </div>
                 <div ref={qrRef} className="bg-[#F7F5F0] p-4 rounded-2xl">
-                  <QRCodeSVG value={`https://vantge.app/${ev.event_slug}/rsvp`} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
+                  <QRCodeSVG title="Invitation QR code" value={rsvpUrl(ev.event_slug)} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
                 </div>
                 <div className="w-full flex items-center gap-2 bg-[#F7F5F0] border border-[#E8E4DA] rounded-xl px-3 py-2.5">
                   <span className="flex-1 text-[10px] text-[#6B6B63] truncate font-mono">
-                    https://vantge.app/{ev.event_slug}/rsvp
+                    {rsvpUrl(ev.event_slug)}
                   </span>
-                  <button onClick={() => { navigator.clipboard.writeText(`https://vantge.app/${ev.event_slug}/rsvp`); setQrCopied(true); setTimeout(() => setQrCopied(false), 2000) }}
+                  <button onClick={() => { navigator.clipboard.writeText(rsvpUrl(ev.event_slug)); setQrCopied(true); setTimeout(() => setQrCopied(false), 2000) }}
                     aria-label="Copy link" className="shrink-0 text-[#B0AFA5] hover:text-[#1A1A18] transition-colors">
                     {qrCopied
                       ? <svg width="14" height="14" fill="none" stroke="#22c55e" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
