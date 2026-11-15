@@ -205,6 +205,12 @@ export default function HostLogin() {
                                     Create one
                               </a>
                         </p>
+                        <p className="text-xs text-white/30 text-center mt-3">
+                              Just looking?{' '}
+                              <a href="/try" className="text-white/60 hover:text-white underline transition-colors">
+                                    Try the demo
+                              </a>
+                        </p>
                         <p className="text-[10px] text-white/20 text-center mt-4 tracking-widest uppercase">
                               Host access only — guests use your event link
                         </p>

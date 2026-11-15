@@ -1,12 +1,50 @@
 // A stand-in for the Supabase client, used only on the /try/* demo pages.
-// Reads and writes happen in memory in this browser tab. Nothing is sent to the
-// server, so the demo can't change real data. Reloading the page resets it.
+// Reads and writes stay in this browser (localStorage, demo key only). Nothing is
+// sent to the server, so the demo can't change real data. "Reset demo" restores the sample.
 import { DEMO_DATA, DEMO_USER } from './demoData'
 
 // Which column links a joined table, e.g. food_claims -> food_items
 const JOINS = { food_items: 'food_item_id' }
 
-const store = JSON.parse(JSON.stringify(DEMO_DATA))
+const STORAGE_KEY = 'vantge-demo-v1'
+
+function freshData() {
+  return JSON.parse(JSON.stringify(DEMO_DATA))
+}
+
+function loadStore() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch { /* storage blocked or corrupt: fall back to the sample */ }
+  return freshData()
+}
+
+function saveStore() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(store)) } catch { /* private window: keep it in memory */ }
+}
+
+let store = loadStore()
+
+// Keep other tabs on this browser (e.g. a guest RSVP tab) in step with the host dashboard
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORAGE_KEY && e.newValue) store = JSON.parse(e.newValue)
+  })
+}
+
+// Used by the /try start page and the "Reset demo" button
+export function resetDemo(eventName) {
+  store = freshData()
+  const event = store.events[0]
+  if (eventName?.trim()) {
+    event.event_name = eventName.trim()
+    event.rsvp_event_name = eventName.trim()
+    event.rsvp_host_display_name = eventName.trim()
+  }
+  saveStore()
+}
+
 const storageUrls = {}
 let idCounter = 1000
 
@@ -107,6 +145,8 @@ class DemoQuery {
       count = out.length
       data = this.head ? null : out.map(r => this.projectRow(r))
     }
+
+    if (this.mode !== 'select') saveStore()
 
     // Writes return rows only when the caller asked with .select()
     if (this.mode !== 'select' && !this.returning) data = null

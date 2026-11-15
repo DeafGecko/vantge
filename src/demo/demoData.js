@@ -6,11 +6,9 @@ const WEDDING_PHOTO = 'https://images.unsplash.com/photo-1519741497674-611481863
 
 const PHOTOS = [
   'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=1200&q=80',
-  'https://images.unsplash.com/photo-1518568740994-c1de148d8e22?w=1200&q=80',
   'https://images.unsplash.com/photo-1464047736614-af63643285bf?w=1200&q=80',
   'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1200&q=80',
   'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&q=80',
-  'https://images.unsplash.com/photo-1582656447884-de8e48ab5b90?w=1200&q=80',
 ]
 
 const GUESTS = ['Sarah Mitchell', 'Tom Chen', 'Maya Patel', 'Grace Owens', 'Alex Kim', 'Jordan Brooks']

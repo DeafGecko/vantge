@@ -6,6 +6,7 @@ import DashboardHeader from '../components/DashboardHeader'
 import Dropdown from '../components/Dropdown'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
+import { useStickyTall } from '../hooks/useStickyTall'
 import { supabase } from '../lib/supabase'
 import PhotoManager from '../components/PhotoManager'
 import { getAllThemes, getTheme } from '../lib/themes'
@@ -45,6 +46,8 @@ export default function GalleryDashboard() {
       const [localUnlocked, setLocalUnlocked] = useState(null)
       const [activeTab, setActiveTab] = useState(0)
       const [dashTab, setDashTab] = useState('event')
+      const previewColRef = useRef(null)
+      useStickyTall(previewColRef, dashTab !== 'gallery' && !!event)
       const [localTheme, setLocalTheme] = useState(null)
       const [localFont, setLocalFont] = useState(null)
       const [localTitleAlign, setLocalTitleAlign] = useState(null)
@@ -309,10 +312,10 @@ export default function GalleryDashboard() {
 
                               {/* BENTO GRID */}
                               {dashTab !== 'gallery' && (
-                              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-10 items-start">
+                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-10 items-start">
 
                                     {/* LEFT — preview + QR */}
-                                    <div className="md:col-span-4 flex flex-col gap-6 md:sticky md:top-24 md:self-start">
+                                    <div ref={previewColRef} className="lg:col-span-4 flex flex-col gap-6">
 
                                           {/* Live Preview */}
                                           {dashTab === 'event' && (
@@ -529,7 +532,7 @@ export default function GalleryDashboard() {
                                     </div>
 
                                     {/* RIGHT — controls */}
-                                    <div className="md:col-span-8 flex flex-col gap-6">
+                                    <div className="lg:col-span-8 flex flex-col gap-6">
 
                                           {/* Logo | Display Name | Event Type */}
                                           {dashTab === 'event' && (
