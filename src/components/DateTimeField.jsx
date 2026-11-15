@@ -156,7 +156,7 @@ export default function DateTimeField({ value, onChange, disabled = false, place
             <button type="button" onClick={() => { onChange(''); setOpen(false) }}
               className="text-base font-bold text-[#8A1C16] underline underline-offset-4 px-2 py-2">Clear</button>
             <button type="button" onClick={() => setOpen(false)}
-              className="rounded-full bg-[#1A1A18] text-white text-base font-bold px-6 py-2.5 hover:bg-[#1A1A18]">Done</button>
+              className="rounded-full bg-[#1A1A18] text-white text-base font-bold px-6 py-2.5 hover:bg-black">Done</button>
           </div>
         </div>
       )}

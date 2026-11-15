@@ -277,15 +277,15 @@ function MiniCard({ photo, onClick, selectMode, selected }) {
                               className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" loading="lazy" />
                   )}
                   {isVideo && !selectMode && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-[#1A1A18]/20">
-                              <div className="w-6 h-6 rounded-full bg-[#1A1A18]/55 flex items-center justify-center">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                              <div className="w-6 h-6 rounded-full bg-black/55 flex items-center justify-center">
                                     <svg width="8" height="8" fill="white" viewBox="0 0 24 24" style={{ marginLeft: 1 }}><path d="M8 5v14l11-7z"/></svg>
                               </div>
                         </div>
                   )}
                   {/* Select mode overlay */}
                   {selectMode && (
-                        <div className={`absolute inset-0 transition-colors ${selected ? 'bg-[#1A1A18]/30' : 'bg-[#1A1A18]/0 group-hover:bg-[#1A1A18]/10'}`}>
+                        <div className={`absolute inset-0 transition-colors ${selected ? 'bg-black/30' : 'bg-black/0 group-hover:bg-black/10'}`}>
                               <div className={`absolute top-1.5 right-1.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selected ? 'bg-[#1A1A18] border-[#1A1A18]' : 'bg-white/70 border-white'}`}>
                                     {selected && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                               </div>
@@ -293,7 +293,7 @@ function MiniCard({ photo, onClick, selectMode, selected }) {
                   )}
                   {/* Hover zoom hint — only when not selecting */}
                   {!selectMode && (
-                        <div className="absolute inset-0 bg-[#1A1A18]/0 group-hover:bg-[#1A1A18]/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                               <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" strokeLinecap="round"/><path d="M11 8v6M8 11h6" strokeLinecap="round"/></svg>
                         </div>
                   )}
@@ -314,14 +314,14 @@ function PhotoModal({ photo, status, onApprove, onReject, onRemoveFromGallery, o
 
       return (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                  style={{ backgroundColor: 'rgba(26,26,24,0.8)', backdropFilter: 'blur(8px)' }}
+                  style={{ backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}
                   onClick={onClose}>
                   <div className="relative w-full max-w-lg bg-white rounded-3xl overflow-hidden shadow-2xl"
                         onClick={e => e.stopPropagation()}>
 
                         {/* Close button */}
                         <button onClick={onClose} aria-label="Close"
-                              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-[#1A1A18]/10 hover:bg-[#1A1A18]/20 flex items-center justify-center transition-colors">
+                              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors">
                               <svg width="12" height="12" fill="none" stroke="#1A1A18" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
                         </button>
 
@@ -361,7 +361,7 @@ function PhotoModal({ photo, status, onApprove, onReject, onRemoveFromGallery, o
                                                 Reject
                                           </button>
                                           <button onClick={() => run(onApprove)} disabled={processing}
-                                                className="flex-1 flex items-center justify-center gap-1.5 bg-[#1A1A18] hover:bg-[#1A1A18] text-white text-sm font-bold rounded-xl py-3 transition-all disabled:opacity-40">
+                                                className="flex-1 flex items-center justify-center gap-1.5 bg-[#1A1A18] hover:bg-black text-white text-sm font-bold rounded-xl py-3 transition-all disabled:opacity-40">
                                                 <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                                 Approve
                                           </button>
@@ -424,7 +424,7 @@ function Toast({ toast, onUndo, onDismiss }) {
 function ConfirmDeleteModal({ photo, onConfirm, onCancel }) {
       return (
             <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 sm:p-6"
-                  style={{ backgroundColor: 'rgba(26,26,24,0.75)', backdropFilter: 'blur(6px)' }}
+                  style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
                   onClick={onCancel}>
                   <div role="dialog" aria-modal="true" className="w-full max-w-sm rounded-3xl overflow-hidden"
                         style={{ backgroundColor: '#1A1A18', border: '1px solid rgba(255,255,255,0.08)' }}

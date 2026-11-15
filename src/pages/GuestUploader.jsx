@@ -7,8 +7,7 @@ import { resolveFontFamily } from '../lib/fonts'
 import { getEventType } from '../lib/eventTypes'
 import FontLoader from '../components/FontLoader'
 import VantgeLogo from '../components/VantgeLogo'
-import { useResponsiveBg, useIsWide } from '../hooks/useResponsiveBg'
-import { bgPhotoStyle, bgFraming } from '../lib/bgPhoto'
+import { useResponsiveBg } from '../hooks/useResponsiveBg'
 
 const MAX_FILES = 10
 const VIDEO_LIMIT_SECONDS = 30
@@ -30,7 +29,6 @@ export default function GuestUploader() {
       const location = useLocation()
       const { event, loading, error } = useEvent(eventSlug)
       const _bgResponsive = useResponsiveBg(event?.background_image, event?.background_image_desktop)
-      const isWide = useIsWide()
       const fileInputRef = useRef(null)
       const cameraInputRef = useRef(null)
 
@@ -159,16 +157,16 @@ export default function GuestUploader() {
       const selectedFontFamily = resolveFontFamily(event.font_family)
       const eventType = getEventType(event.event_type)
       const bgImage = _bgResponsive || eventType.defaultBg
-      const { position: bgPosition, zoom: bgZoom, tint: bgTint } = bgFraming(event, 'background', isWide)
+      const bgPosition = event.background_position || '50% 50%'
       const accentColor = c.accent
-      const tintAlpha = (bgTint / 100).toFixed(2)
+      const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
 
       if (!event.gallery_unlocked) return (
             <>
                   <FontLoader fontId={event.font_family} />
-                  <img src={bgImage} alt="" className="fixed inset-0 w-full h-full" style={bgPhotoStyle(bgPosition, bgZoom)} />
-                  <div className="fixed inset-0" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
-                  <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(26,26,24,0.7) 0%, transparent 100%)' }} />
+                  <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+                  <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                  <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }} />
                   <div className="relative z-10 min-h-screen flex flex-col items-center justify-end pb-16 px-6 text-center">
                         <a href="/"><VantgeLogo size="sm" monoWhite /></a>
                         <div className="mt-auto">
@@ -192,9 +190,9 @@ export default function GuestUploader() {
             return (
                   <>
                         <FontLoader fontId={event.font_family} />
-                        <img src={bgImage} alt="" className="fixed inset-0 w-full h-full" style={bgPhotoStyle(bgPosition, bgZoom)} />
-                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
-                        <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(26,26,24,0.65) 0%, transparent 100%)' }} />
+                        <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                        <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
 
                         <div className="relative z-10 min-h-screen flex flex-col">
                               <div className="flex justify-center pt-6 pb-2">
@@ -239,8 +237,8 @@ export default function GuestUploader() {
             return (
                   <>
                         <FontLoader fontId={event.font_family} />
-                        <img src={bgImage} alt="" className="fixed inset-0 w-full h-full" style={bgPhotoStyle(bgPosition, bgZoom)} />
-                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
+                        <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
                         <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 text-center">
                               <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest mb-3">{event.event_name}</p>
                               <p className="text-white text-xl font-extrabold mb-1" style={{ fontFamily: selectedFontFamily }}>
@@ -261,8 +259,8 @@ export default function GuestUploader() {
             return (
                   <>
                         <FontLoader fontId={event.font_family} />
-                        <img src={bgImage} alt="" className="fixed inset-0 w-full h-full" style={bgPhotoStyle(bgPosition, bgZoom)} />
-                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
+                        <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+                        <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
                         <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 text-center">
                               <p className="text-white text-xl font-extrabold mb-2" style={{ fontFamily: selectedFontFamily }}>
                                     {uploadState === 'partial' ? `${successCount} of ${files.length} sent` : 'Upload failed'}
@@ -288,9 +286,9 @@ export default function GuestUploader() {
             <>
                   <FontLoader fontId={event.font_family} />
 
-                  <img src={bgImage} alt="" className="fixed inset-0 w-full h-full" style={bgPhotoStyle(bgPosition, bgZoom)} />
-                  <div className="fixed inset-0" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
-                  <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(26,26,24,0.65) 0%, transparent 100%)' }} />
+                  <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+                  <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+                  <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
 
                   <div className="relative z-10 flex flex-col" style={{ height: '100dvh', overflow: 'hidden auto' }}>
 
@@ -378,7 +376,7 @@ export default function GuestUploader() {
                                                                         <>
                                                                               <video src={URL.createObjectURL(file)} className="w-full h-full object-cover" muted playsInline preload="metadata" />
                                                                               <div className="absolute inset-0 flex items-center justify-center">
-                                                                                    <div className="w-6 h-6 rounded-full bg-[#1A1A18]/50 flex items-center justify-center">
+                                                                                    <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
                                                                                           <svg width="9" height="9" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                                                                     </div>
                                                                               </div>

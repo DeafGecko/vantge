@@ -177,7 +177,7 @@ function RSVPForm({ event, accentColor, existingResponse, onSuccess }) {
           await supabase.from('rsvp_contacts').insert({ response_id: result.id, email: email.trim() })
         }
       }
-      onSuccess({ ...result, guest_name: name.trim(), response, party_size: partySize, guest_names: guestNames.trim() || null, note: note.trim() || null })
+      onSuccess({ ...result, guest_name: name.trim(), response, party_size: partySize })
     } catch (err) {
       setErrors({ submit: err.message || 'Something went wrong. Please try again.' })
     }
@@ -395,6 +395,7 @@ function FoodSignup({ event, accentColor }) {
     <div className="bg-white rounded-2xl border border-[#E0D8C6] p-6 md:p-8">
       <div className="flex items-center gap-3 mb-2">
         <h2 className="text-2xl font-black text-[#1A1A18]">{event.food_heading || 'Food Sign-up'}</h2>
+        <span className="text-xs font-bold text-[#88887E] border border-[#E0D8C6] rounded-full px-2.5 py-0.5">Optional</span>
       </div>
       <p className="text-base text-[#4A4A44] mb-6">Pick something to bring, or add your own idea.</p>
 
@@ -416,8 +417,19 @@ function FoodSignup({ event, accentColor }) {
               {(idx === 0 || isFull(arr[idx - 1]) !== filled) && (
                 <p className="text-xs font-black tracking-[0.18em] uppercase text-[#4A4A44] pt-4 pb-3">{filled ? 'Already covered' : 'Still needed'}</p>
               )}
-            <div className="py-7 first:pt-0 last:pb-0">
+            <div className="py-5 first:pt-0 last:pb-0">
               <div className="flex items-center gap-3">
+                {/* Icon placeholder */}
+                <div className="w-12 h-12 rounded-xl bg-[#F4F3F0] flex items-center justify-center shrink-0">
+                  <svg width="20" height="20" fill="none" stroke="#88887E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    {item.category === 'Drinks'
+                      ? <><path d="M8 2h8l-1 7H9L8 2z"/><path d="M9 9c0 5 6 5 6 0"/><path d="M12 14v6"/><path d="M9 20h6"/></>
+                      : item.category === 'Dessert'
+                      ? <><circle cx="12" cy="11" r="5"/><path d="M12 2v2"/><path d="M4.2 7.5l1.7 1"/><path d="M18.1 7.5l-1.7 1"/><path d="M7 20h10"/><path d="M12 16v4"/></>
+                      : <><path d="M3 11l19-9-9 19-2-8-8-2z"/></>
+                    }
+                  </svg>
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-black text-[#1A1A18]">{item.name}</p>
                   {item.notes && <p className="text-sm text-[#4A4A44] mt-1">{item.notes}</p>}
@@ -595,10 +607,10 @@ function HeroBanner({ event, fontFamily, accentColor }) {
   const eventDateStr = fmt(event.rsvp_event_date, event.rsvp_timezone)
   return (
     <div className="relative w-full" style={{ height: 'clamp(240px, 40vw, 360px)' }}>
-      <div className="absolute top-4 left-4">
+      <div className="absolute top-4 left-0 right-0 flex justify-center">
         <a href="/"><VantgeLogo size="sm" monoWhite /></a>
       </div>
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg px-4 pb-8">
+      <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
         <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/60 mb-1">You're Invited</p>
         <h1 className="font-extrabold text-white leading-tight mb-2" style={{ fontFamily, fontSize: 'clamp(1.6rem, 5vw, 2.5rem)' }}>
           {event.rsvp_event_name}
@@ -683,10 +695,10 @@ function InviteHero({ event, fontFamily, accentColor, deadlineStr, onNext, title
   const eventDateStr = fmt(event.rsvp_event_date, event.rsvp_timezone)
   return (
     <div className="relative w-full" style={{ minHeight: '100svh' }}>
-      <div className="absolute top-4 left-4 z-10">
+      <div className="absolute top-4 left-0 right-0 flex justify-center z-10">
         <a href="/"><VantgeLogo size="sm" monoWhite /></a>
       </div>
-      <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-lg px-4" style={{ top: titleTop, textAlign: event.rsvp_title_align ?? 'left' }}>
+      <div className="absolute left-0 right-0 px-6 max-w-lg mx-auto" style={{ top: titleTop, textAlign: event.rsvp_title_align ?? 'left' }}>
         <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/60 mb-1">You're Invited</p>
         <h1 className="font-extrabold text-white leading-tight mb-2" style={{ fontFamily, fontSize: 'clamp(1.6rem, 5vw, 2.5rem)' }}>
           {event.rsvp_event_name}
@@ -700,7 +712,7 @@ function InviteHero({ event, fontFamily, accentColor, deadlineStr, onNext, title
           )}
         </div>
       </div>
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-full max-w-lg px-4 pb-8">
+      <div className="absolute left-0 right-0 bottom-0 max-w-lg mx-auto px-4 pb-8">
         {event.rsvp_description && (
           <div className="bg-white/95 rounded-2xl border border-[#E0D8C6] px-5 py-4 mb-4">
             <p className="text-sm text-[#5A5A52] leading-relaxed">{event.rsvp_description}</p>
@@ -724,13 +736,6 @@ function RSVPStep({ event, accentColor, existingResponse, onSuccess, onBack }) {
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState({})
   const isEdit = !!existingResponse
-
-  // When changing a reply, fill in the email that was saved with it
-  useEffect(() => {
-    if (!existingResponse?.id) return
-    supabase.from('rsvp_contacts').select('email').eq('response_id', existingResponse.id).maybeSingle()
-      .then(({ data }) => { if (data?.email) setEmail(data.email) })
-  }, [existingResponse?.id])
 
   function validate() {
     const e = {}
@@ -768,7 +773,7 @@ function RSVPStep({ event, accentColor, existingResponse, onSuccess, onBack }) {
           await supabase.from('rsvp_contacts').insert({ response_id: result.id, email: email.trim() })
         }
       }
-      onSuccess({ ...result, guest_name: name.trim(), response, party_size: partySize, guest_names: guestNames.trim() || null, note: note.trim() || null })
+      onSuccess({ ...result, guest_name: name.trim(), response, party_size: partySize })
     } catch (err) {
       setErrors({ submit: err.message || 'Something went wrong. Please try again.' })
     }
@@ -865,7 +870,7 @@ function RSVPStep({ event, accentColor, existingResponse, onSuccess, onBack }) {
         </div>
       </div>
 
-      <button onClick={onBack} className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#1A1A18]/50 px-4 py-2 text-base font-bold text-white hover:bg-[#1A1A18]/70 transition-colors focus-visible:outline-2 focus-visible:outline-white">
+      <button onClick={onBack} className="mt-4 flex items-center gap-1.5 text-sm text-[#88887E] hover:text-[#1A1A18] transition-colors">
         <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
         Back to details
       </button>
@@ -1016,7 +1021,7 @@ export default function GuestRSVP() {
         <img src={bgImage} alt="" className="fixed inset-0 w-full h-full -z-10" style={bgPhotoStyle(bgPos, bgZoom)} />
       )}
       {bgImage && (
-        <div className="fixed inset-0 -z-10" style={{ backgroundColor: `rgba(26,26,24,${(bgTint / 100).toFixed(2)})` }} />
+        <div className="fixed inset-0 -z-10" style={{ backgroundColor: `rgba(0,0,0,${(bgTint / 100).toFixed(2)})` }} />
       )}
       <div className={`min-h-screen ${bgImage ? '' : 'bg-[#F4F3F0]'}`}>
         {step === 'invite' ? (

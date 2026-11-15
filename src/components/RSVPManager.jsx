@@ -232,7 +232,7 @@ export function RSVPSetup({ event, onSave }) {
       <button
         onClick={save}
         disabled={saving}
-        className="w-full bg-[#1A1A18] text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3.5 hover:bg-[#1A1A18] transition-all disabled:opacity-50"
+        className="w-full bg-[#1A1A18] text-white text-[11px] font-bold uppercase tracking-widest rounded-full py-3.5 hover:bg-black transition-all disabled:opacity-50"
       >
         {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save settings'}
       </button>
@@ -350,7 +350,7 @@ export function FoodItemsManager({ event }) {
           </div>
         ) : (
           <div className="px-5 pb-4 pt-2 border-t border-[#F4F3F0]">
-            <button onClick={() => setAdding(true)} className="flex items-center gap-1.5 text-xs font-bold text-[#1A1A18] hover:text-[#1A1A18]">
+            <button onClick={() => setAdding(true)} className="flex items-center gap-1.5 text-xs font-bold text-[#1A1A18] hover:text-black">
               <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Add item
             </button>
@@ -480,7 +480,7 @@ export function RSVPResponses({ event }) {
 
 // ── Invitations / Sharing ─────────────────────────────────────
 export function InvitationsPanel({ event }) {
-  const guestUrl = `https://vantge.app/${event.event_slug}/rsvp`
+  const guestUrl = `${window.location.origin}/${event.event_slug}/rsvp`
   const [copied, setCopied] = useState(false)
   const [textCopied, setTextCopied] = useState(false)
   const [showQR, setShowQR] = useState(false)
@@ -506,7 +506,7 @@ export function InvitationsPanel({ event }) {
           <p className="flex-1 text-xs text-[#5A5A52] truncate font-mono">{guestUrl}</p>
           <button
             onClick={() => copy(guestUrl, setCopied)}
-            className="text-xs font-bold text-[#1A1A18] shrink-0 hover:text-[#1A1A18]"
+            className="text-xs font-bold text-[#1A1A18] shrink-0 hover:text-black"
           >
             {copied ? '✓ Copied' : 'Copy'}
           </button>

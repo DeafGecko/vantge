@@ -14,7 +14,6 @@ import { EVENT_TYPES, getEventType } from '../lib/eventTypes'
 import BackgroundUploader from '../components/BackgroundUploader'
 import Dropdown from '../components/Dropdown'
 import DateTimeField from '../components/DateTimeField'
-import ConfirmDialog from '../components/ConfirmDialog'
 import LogoUploader from '../components/LogoUploader'
 import { bgPhotoStyle } from '../lib/bgPhoto'
 
@@ -363,8 +362,11 @@ function ResponsesTab({ event }) {
     setEditingClaim(null)
   }
 
-  function removeClaim(c) {
-    setPendingRemove({ type: 'claim', item: c })
+  async function removeClaim(c) {
+    if (!window.confirm(`Remove ${c.guest_name}'s food item?`)) return
+    const { error } = await supabase.from('food_claims').delete().eq('id', c.id)
+    if (error) { alert('Could not remove: ' + error.message); return }
+    setFoodClaims(list => list.filter(x => x.id !== c.id))
   }
 
   function startEdit(r) {
@@ -403,23 +405,10 @@ function ResponsesTab({ event }) {
 
   useEffect(() => { load() }, [load])
 
-  const [pendingRemove, setPendingRemove] = useState(null) // { type: 'response' | 'claim', item }
-
-  function remove(id) {
-    setPendingRemove({ type: 'response', item: responses.find(x => x.id === id) })
-  }
-
-  async function confirmRemove() {
-    const { type, item } = pendingRemove
-    setPendingRemove(null)
-    if (type === 'response') {
-      await supabase.from('rsvp_responses').delete().eq('id', item.id)
-      setResponses(r => r.filter(x => x.id !== item.id))
-    } else {
-      const { error } = await supabase.from('food_claims').delete().eq('id', item.id)
-      if (error) { alert('Could not remove: ' + error.message); return }
-      setFoodClaims(list => list.filter(x => x.id !== item.id))
-    }
+  async function remove(id) {
+    if (!window.confirm('Remove this RSVP response?')) return
+    await supabase.from('rsvp_responses').delete().eq('id', id)
+    setResponses(r => r.filter(x => x.id !== id))
   }
 
   function exportCSV() {
@@ -542,19 +531,9 @@ function ResponsesTab({ event }) {
         </Card>
       )}
 
-      <ConfirmDialog
-        open={!!pendingRemove}
-        title={pendingRemove?.type === 'claim' ? 'Remove this food item?' : 'Remove this reply?'}
-        message={pendingRemove?.type === 'claim'
-          ? `${pendingRemove?.item?.guest_name ?? 'This person'}'s food item will be removed.`
-          : `${pendingRemove?.item?.guest_name ?? 'This guest'}'s reply will be removed.`}
-        onConfirm={confirmRemove}
-        onCancel={() => setPendingRemove(null)}
-      />
-
       {/* Edit popup — dark tint behind it */}
       {editing && (
-        <div className="fixed inset-0 z-[70] bg-[#1A1A18]/60 flex items-center justify-center p-5" onClick={() => setEditing(null)}>
+        <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-5" onClick={() => setEditing(null)}>
           <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <p className="text-base font-black text-[#1A1A18]">Edit response</p>
@@ -579,7 +558,7 @@ function ResponsesTab({ event }) {
             </FieldRow>
             <div className="flex gap-2 pt-1">
               <button onClick={saveEdit} disabled={savingEdit || !draft.guest_name.trim()}
-                className="flex-1 bg-[#1A1A18] text-white text-sm font-bold uppercase tracking-widest rounded-full py-3.5 disabled:opacity-50 hover:bg-[#1A1A18] transition-all">
+                className="flex-1 bg-[#1A1A18] text-white text-sm font-bold uppercase tracking-widest rounded-full py-3.5 disabled:opacity-50 hover:bg-black transition-all">
                 {savingEdit ? 'Saving…' : 'Save changes'}
               </button>
               <button onClick={() => setEditing(null)} className="px-5 text-sm font-bold text-[#5A5A52] hover:text-[#1A1A18]">Cancel</button>
@@ -590,7 +569,7 @@ function ResponsesTab({ event }) {
 
       {/* Edit food item popup — dark tint behind it */}
       {editingClaim && (
-        <div className="fixed inset-0 z-[70] bg-[#1A1A18]/60 flex items-center justify-center p-5" onClick={() => setEditingClaim(null)}>
+        <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-5" onClick={() => setEditingClaim(null)}>
           <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 space-y-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <p className="text-base font-black text-[#1A1A18]">Edit food item</p>
@@ -607,7 +586,7 @@ function ResponsesTab({ event }) {
             </FieldRow>
             <div className="flex gap-2 pt-1">
               <button onClick={saveClaim} disabled={savingEdit || !claimDraft.guest_name.trim()}
-                className="flex-1 bg-[#1A1A18] text-white text-sm font-bold uppercase tracking-widest rounded-full py-3.5 disabled:opacity-50 hover:bg-[#1A1A18] transition-all">
+                className="flex-1 bg-[#1A1A18] text-white text-sm font-bold uppercase tracking-widest rounded-full py-3.5 disabled:opacity-50 hover:bg-black transition-all">
                 {savingEdit ? 'Saving…' : 'Save changes'}
               </button>
               <button onClick={() => setEditingClaim(null)} className="px-5 text-sm font-bold text-[#5A5A52] hover:text-[#1A1A18]">Cancel</button>
@@ -873,7 +852,7 @@ function FoodTab({ event }) {
           const item = items.find(it => it.id === editingId)
           if (!item) return null
           return (
-            <div className="fixed inset-0 z-[70] bg-[#1A1A18]/60 flex items-center justify-center p-5" onClick={() => setEditingId(null)}>
+            <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-5" onClick={() => setEditingId(null)}>
               <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 space-y-4" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-black text-[#1A1A18]">Edit item</p>
@@ -899,7 +878,7 @@ function FoodTab({ event }) {
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button onClick={() => saveEdit(item.id)} disabled={saving || !editDraft.name.trim()}
-                    className="flex-1 bg-[#1A1A18] text-white text-xs font-bold uppercase tracking-widest rounded-full py-3 disabled:opacity-50 hover:bg-[#1A1A18] transition-all">
+                    className="flex-1 bg-[#1A1A18] text-white text-xs font-bold uppercase tracking-widest rounded-full py-3 disabled:opacity-50 hover:bg-black transition-all">
                     {saving ? 'Saving…' : 'Save changes'}
                   </button>
                   <button onClick={() => setEditingId(null)} className="px-5 text-xs font-bold text-[#88887E] hover:text-[#1A1A18]">Cancel</button>
@@ -932,7 +911,7 @@ function FoodTab({ event }) {
             </div>
             <div className="flex gap-2">
               <button onClick={addItem} disabled={saving || !newItem.name.trim()}
-                className="flex-1 bg-[#1A1A18] text-white text-xs font-bold uppercase tracking-widest rounded-full py-2.5 disabled:opacity-50 hover:bg-[#1A1A18] transition-all">
+                className="flex-1 bg-[#1A1A18] text-white text-xs font-bold uppercase tracking-widest rounded-full py-2.5 disabled:opacity-50 hover:bg-black transition-all">
                 {saving ? 'Adding…' : 'Add item'}
               </button>
               <button onClick={() => setAdding(false)} className="px-4 text-xs font-bold text-[#88887E] hover:text-[#1A1A18]">Cancel</button>
@@ -1001,9 +980,8 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate, registerSa
   const [localType,  setLocalType]    = useState(event.rsvp_event_type ?? '')
   const [localBgMobile,   setLocalBgMobile]   = useState(event.rsvp_background_image ?? null)
   const [localBgDesktop,  setLocalBgDesktop]  = useState(event.rsvp_background_image_desktop ?? null)
-  // Same defaults the guest page uses, so the editor starts where guests will see the photo
-  const [localBgPosition, setLocalBgPosition] = useState(event.rsvp_background_position || '50% 50%')
-  const [localBgTint,     setLocalBgTint]     = useState(event.rsvp_background_tint ?? 55)
+  const [localBgPosition, setLocalBgPosition] = useState(event.rsvp_background_position ?? 50)
+  const [localBgTint,     setLocalBgTint]     = useState(event.rsvp_background_tint ?? 0)
   const [localLogoUrl,    setLocalLogoUrl]    = useState(event.rsvp_logo_url ?? null)
   const [localTitleAlign, setLocalTitleAlign] = useState(event.rsvp_title_align ?? 'left')
   const [saving, setSaving]     = useState(false)
@@ -1160,7 +1138,7 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate, registerSa
                   }`}>
                   <div className="flex gap-1 shrink-0">
                     {[theme.colors.accent, theme.colors.bg, theme.colors.text].map((c, i) => (
-                      <div key={i} className="w-4 h-4 rounded-full border border-[#1A1A18]/10" style={{ background: c }} />
+                      <div key={i} className="w-4 h-4 rounded-full border border-black/10" style={{ background: c }} />
                     ))}
                   </div>
                   <span className="text-[10px] font-black text-[#1A1A18] uppercase tracking-wider leading-tight">{theme.name}</span>
@@ -1212,7 +1190,7 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
     return (
       <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', background: bgImage ? 'transparent' : 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }}>
         {bgImage && <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...bgPhotoStyle(bgPos, bgZoom) }} />}
-        {bgImage && <div style={{ position: 'absolute', inset: 0, background: `rgba(26,26,24,${(bgTint / 100).toFixed(2)})` }} />}
+        {bgImage && <div style={{ position: 'absolute', inset: 0, background: `rgba(0,0,0,${(bgTint / 100).toFixed(2)})` }} />}
         <div style={{ position: 'absolute', top: '4%', left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
           <VantgeLogo size="sm" monoWhite />
         </div>
@@ -1257,7 +1235,7 @@ function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }
     <div style={{ width: '100%', height: '100%', background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <div style={{ position: 'relative', flex: '0 0 30%' }}>
         {bgImage ? <img src={bgImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...bgPhotoStyle(bgPos, bgZoom) }} /> :<div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #2C2C2A 0%, #1A1A18 100%)' }} />}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(26,26,24,0.1) 0%, rgba(26,26,24,0.55) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%)' }} />
         <div style={{ position: 'absolute', bottom: 5, left: 0, right: 0, textAlign: 'center' }}>
           <p style={{ fontSize: isDesktop ? 8 : 9, fontWeight: 800, color: 'white', fontFamily: fontCssFamily || 'inherit' }}>{name}</p>
         </div>
@@ -1354,10 +1332,10 @@ function RSVPPreview({ event, bgImage, theme, fontCssFamily, previewStep, onStep
 
   return (
     <div className="relative mx-auto"
-      style={{ width: 160, height: 320, background: '#111', borderRadius: 22, boxShadow: '0 0 0 3px #333, 0 8px 32px rgba(26,26,24,0.4)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      style={{ width: 160, height: 320, background: '#111', borderRadius: 22, boxShadow: '0 0 0 3px #333, 0 8px 32px rgba(0,0,0,0.4)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
       {/* Step dots at top */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '7px 0 5px', background: stepOnInvite ? 'rgba(26,26,24,0.45)' : 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', flexShrink: 0, zIndex: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '7px 0 5px', background: stepOnInvite ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', flexShrink: 0, zIndex: 10 }}>
         {Array.from({ length: totalSteps }).map((_, i) => (
           <button key={i} onClick={() => onStepChange(i)}
             style={{ width: i === previewStep ? 20 : 6, height: 6, borderRadius: 3, background: i === previewStep ? (stepOnInvite ? 'white' : acc) : (stepOnInvite ? 'rgba(255,255,255,0.4)' : '#D4CFBC'), border: 'none', cursor: 'pointer', transition: 'all 0.2s', padding: 0 }} />
@@ -1369,7 +1347,7 @@ function RSVPPreview({ event, bgImage, theme, fontCssFamily, previewStep, onStep
         <PreviewScreen step={previewStep} event={event} bgImage={bgImage} theme={theme} fontCssFamily={fontCssFamily} isDesktop={false} />
       </div>
 
-      <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', width: 40, height: 3, background: 'rgba(26,26,24,0.15)', borderRadius: 2, zIndex: 10 }} />
+      <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', width: 40, height: 3, background: 'rgba(0,0,0,0.15)', borderRadius: 2, zIndex: 10 }} />
     </div>
   )
 }
@@ -1544,7 +1522,7 @@ export default function RSVPDashboard() {
         <div className="grid md:grid-cols-12 gap-6 md:gap-8 items-start">
 
           {/* LEFT — preview + bg picker */}
-          <div className="md:col-span-4 flex flex-col gap-6 md:sticky md:top-24 md:self-start">
+          <div className="md:col-span-4 flex flex-col gap-6">
 
             {/* Live Preview card */}
             <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
@@ -1598,13 +1576,7 @@ export default function RSVPDashboard() {
             {/* QR code card */}
             {ev && (
               <div className="bg-white rounded-3xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col items-center gap-4">
-                <div className="w-full flex items-center justify-between">
-                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Scan to open</p>
-                  <a href={`https://vantge.app/${ev.event_slug}/rsvp`} target="_blank" rel="noopener noreferrer" aria-label="Open the invitation page" title="Open the invitation page"
-                    className="p-2 rounded-full text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors focus-visible:outline-2 focus-visible:outline-[#1A1A18]">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
-                  </a>
-                </div>
+                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] self-start">Scan to open</p>
                 <div ref={qrRef} className="bg-[#F7F5F0] p-4 rounded-2xl">
                   <QRCodeSVG value={`https://vantge.app/${ev.event_slug}/rsvp`} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
                 </div>
@@ -1621,9 +1593,70 @@ export default function RSVPDashboard() {
                   </button>
                 </div>
                 <button onClick={downloadQR}
-                  className="w-full bg-[#1A1A18] hover:bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-3 transition-all">
+                  className="w-full bg-[#1A1A18] hover:bg-black text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-3 transition-all">
                   Download QR PNG
                 </button>
+              </div>
+            )}
+
+            {/* Guest Controls card */}
+            {ev && (
+              <div className="bg-white rounded-3xl border border-[#E8E4DA] shadow-sm flex flex-col">
+                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-5 pt-5 pb-4">Guest Controls</p>
+
+                {/* Toggles */}
+                <div className="px-5 pb-5 flex flex-col gap-4 border-b-2 border-[#F0EDE6]">
+                  {[
+                    { label: 'Allow downloads',  sub: 'Guests can save photos',                      value: allowDownloads,  toggle: toggleAllowDownloads },
+                    { label: 'Allow sharing',    sub: 'Guests can share photos',                     value: allowSharing,    toggle: toggleAllowSharing },
+                    { label: 'Check photos first', sub: 'You check each photo before guests see it',    value: requireApproval, toggle: toggleRequireApproval },
+                  ].map(({ label, sub, value, toggle }) => (
+                    <div key={label} className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-[#1A1A18]">{label}</p>
+                        <p className="text-[11px] text-[#88887E]">{sub}</p>
+                      </div>
+                      <button onClick={toggle} aria-label={label}
+                        className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-[#1A1A18]' : 'bg-[#E0D8C6]'}`}>
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0'}`} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Upload Limit */}
+                <div className="px-5 py-5 border-b-2 border-[#F0EDE6]">
+                  <p className="text-sm font-semibold text-[#1A1A18] mb-0.5">Photo limit per guest</p>
+                  <p className="text-[11px] text-[#88887E] mb-3">Max photos a guest can submit</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {[null, 5, 10, 20, 30].map((v) => (
+                      <button key={v ?? 'unlimited'} onClick={() => saveUploadLimit(v)}
+                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${uploadLimit === v ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'bg-white text-[#1A1A18] border-[#E8E4DA] hover:border-[#1A1A18]'}`}>
+                        {v === null ? 'Unlimited' : v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Passcode */}
+                <div className="px-5 py-5">
+                  <p className="text-sm font-semibold text-[#1A1A18] mb-0.5">Passcode</p>
+                  <p className="text-[11px] text-[#88887E] mb-3">Guests type this to open the event</p>
+                  <div className="flex gap-2">
+                    <input type="text" value={passcode}
+                      onChange={(e) => setLocalPasscode(e.target.value)}
+                      onBlur={(e) => savePasscode(e.target.value)}
+                      placeholder="No passcode" maxLength={20}
+                      className="flex-1 border border-[#E8E4DA] rounded-xl px-3 py-2 text-sm text-[#1A1A18] placeholder-[#B0AFA5] focus:outline-none focus:border-[#1A1A18] transition-colors" />
+                    {passcode ? (
+                      <button onClick={() => savePasscode('')}
+                        className="px-3 py-2 rounded-xl border border-[#E8E4DA] text-[11px] font-bold text-[#C84A44] hover:border-[#C84A44] transition-colors">
+                        Clear
+                      </button>
+                    ) : null}
+                  </div>
+                  {savingPasscode && <p className="text-[10px] text-[#88887E] mt-1 animate-pulse">Saving…</p>}
+                </div>
               </div>
             )}
 
@@ -1648,7 +1681,7 @@ export default function RSVPDashboard() {
         <div className="max-w-6xl mx-auto px-5 md:px-8 py-2 flex items-center justify-between gap-4">
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#88887E]">Unsaved changes</p>
           <button onClick={handleTopSave} disabled={saveState === 'saving'}
-            className="text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-1.5 bg-[#1A1A18] text-white hover:bg-[#1A1A18] transition-all disabled:opacity-50">
+            className="text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-1.5 bg-[#1A1A18] text-white hover:bg-black transition-all disabled:opacity-50">
             {saveState === 'saving' ? 'Saving…' : 'Save'}
           </button>
         </div>

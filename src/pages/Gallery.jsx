@@ -10,8 +10,7 @@ import { getEventType } from '../lib/eventTypes'
 import { uploadPhoto } from '../lib/uploadPhoto'
 import FontLoader from '../components/FontLoader'
 import VantgeLogo from '../components/VantgeLogo'
-import { useResponsiveBg, useIsWide } from '../hooks/useResponsiveBg'
-import { bgPhotoStyle, bgFraming } from '../lib/bgPhoto'
+import { useResponsiveBg } from '../hooks/useResponsiveBg'
 
 const FAVORITES_KEY = (eventId) => `vantge_favs_${eventId}`
 
@@ -100,7 +99,7 @@ function UploadSheet({ event, accentColor, onClose, onUploaded }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-[#1A1A18]/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div className="relative w-full max-w-md bg-[#F8F5ED] rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl" onClick={e => e.stopPropagation()}
         style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
 
@@ -207,7 +206,7 @@ function ShareSheet({ photo, eventName, onClose, showToast }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-[#1A1A18]/70 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div className="relative w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
 
@@ -305,7 +304,7 @@ function Lightbox({ photos, initialIndex, onClose, allowDownloads, allowSharing,
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-[#1A1A18] flex flex-col select-none"
+      <div className="fixed inset-0 z-50 bg-black flex flex-col select-none"
         onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
 
         {/* Top bar */}
@@ -451,7 +450,7 @@ function PhotoGrid({ photos, selectMode, selected, accentColor, favorites, onTap
 
             {isVid && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(26,26,24,0.52)' }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.52)' }}>
                   <svg width="12" height="12" fill="white" viewBox="0 0 24 24" style={{ marginLeft: 2 }}><path d="M8 5v14l11-7z"/></svg>
                 </div>
               </div>
@@ -465,7 +464,7 @@ function PhotoGrid({ photos, selectMode, selected, accentColor, favorites, onTap
 
             {selectMode && (
               <div className={`absolute top-2 right-2 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-white' : 'border-white/60'}`}
-                style={{ backgroundColor: isSelected ? accentColor : 'rgba(26,26,24,0.35)' }}>
+                style={{ backgroundColor: isSelected ? accentColor : 'rgba(0,0,0,0.35)' }}>
                 {isSelected && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
               </div>
             )}
@@ -499,7 +498,6 @@ export default function Gallery() {
   const [uploadOpen, setUploadOpen] = useState(false)
   const [toast, showToast] = useToast()
   const _bgResponsive = useResponsiveBg(event?.background_image, event?.background_image_desktop)
-  const isWide = useIsWide()
 
   // Load favorites from localStorage
   useEffect(() => {
@@ -599,10 +597,9 @@ export default function Gallery() {
   const selectedFontFamily = resolveFontFamily(event.font_family)
   const eventType = getEventType(event.event_type)
   const bgImage = _bgResponsive || eventType.defaultBg
-  // Same framing the editor saves: desktop uses its own position, zoom and tint
-  const { position: bgPosition, zoom: bgZoom, tint: bgTint } = bgFraming(event, 'background', isWide)
+  const bgPosition = event.background_position || '50% 50%'
   const accentColor = c.accent
-  const tintAlpha = (bgTint / 100).toFixed(2)
+  const tintAlpha = ((event.background_tint ?? 55) / 100).toFixed(2)
 
   const allowDownloads = event.allow_downloads ?? true
   const allowSharing = event.allow_sharing ?? true
@@ -613,9 +610,9 @@ export default function Gallery() {
   if (!event.gallery_unlocked) return (
     <>
       <FontLoader fontId={event.font_family} />
-      <img src={bgImage} alt="" className="fixed inset-0 w-full h-full" style={bgPhotoStyle(bgPosition, bgZoom)} />
-      <div className="fixed inset-0" style={{ backgroundColor: `rgba(26,26,24,${tintAlpha})` }} />
-      <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(26,26,24,0.7) 0%, transparent 100%)' }} />
+      <div className="fixed inset-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition }} />
+      <div className="fixed inset-0" style={{ backgroundColor: `rgba(0,0,0,${tintAlpha})` }} />
+      <div className="fixed inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }} />
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-end pb-16 px-6 text-center">
         <a href="/"><VantgeLogo size="sm" monoWhite /></a>
         <div className="mt-auto">
@@ -700,8 +697,8 @@ export default function Gallery() {
         {/* ── EVENT HERO ── */}
         <div className="relative w-full" style={{ height: 'min(56vw, 340px)' }}>
             <img src={bgImage} alt={event.event_name} className="absolute inset-0 w-full h-full object-cover"
-              style={bgPhotoStyle(bgPosition, bgZoom)} loading="eager" />
-            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(26,26,24,0.15) 0%, rgba(26,26,24,0.6) 100%)` }} />
+              style={{ objectPosition: bgPosition }} loading="eager" />
+            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%)` }} />
 
             {/* Event info — bottom */}
             <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center pb-5 text-center px-6">

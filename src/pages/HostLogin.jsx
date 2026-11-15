@@ -10,19 +10,6 @@ const HERO_PHOTOS = [
       'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&q=80',
 ]
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-// Red message under a field, same look as the box-level error
-function FieldError({ message }) {
-      if (!message) return null
-      return (
-            <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300">
-                  <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="shrink-0"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                  {message}
-            </p>
-      )
-}
-
 export default function HostLogin() {
       const navigate = useNavigate()
       const { user, loading: authLoading, signIn, signOut } = useAuth()
@@ -32,7 +19,6 @@ export default function HostLogin() {
       const [error, setError] = useState(null)
       const [showPassword, setShowPassword] = useState(false)
       const [signingOut, setSigningOut] = useState(false)
-      const [fieldErrors, setFieldErrors] = useState({}) // { email, password } shown under each box
 
       async function handleSignOut() {
             setSigningOut(true)
@@ -40,21 +26,9 @@ export default function HostLogin() {
             setSigningOut(false)
       }
 
-      // Our own checks, so the browser's pop-up never appears
-      function validate() {
-            const errs = {}
-            if (!email.trim()) errs.email = 'Please enter your email address.'
-            else if (!EMAIL_PATTERN.test(email.trim())) errs.email = 'Please enter a valid email, like name@example.com.'
-            if (!password) errs.password = 'Please enter your password.'
-            return errs
-      }
-
       async function handleSubmit(e) {
             e.preventDefault()
             setError(null)
-            const errs = validate()
-            setFieldErrors(errs)
-            if (Object.keys(errs).length > 0) return
             setSubmitting(true)
             const { error: signInError } = await signIn(email, password)
             if (signInError) {
@@ -123,7 +97,7 @@ export default function HostLogin() {
                               <h1 className="text-xl font-black text-white mb-1 tracking-tight">Welcome back</h1>
                               <p className="text-sm text-white/40 mb-6">Sign in to manage your event.</p>
 
-                              <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                              <form onSubmit={handleSubmit} className="space-y-4">
                                     <div>
                                           <label className="block text-[10px] font-bold text-white/40 mb-1.5 tracking-widest uppercase">
                                                 Email
@@ -131,13 +105,12 @@ export default function HostLogin() {
                                           <input
                                                 type="email"
                                                 value={email}
-                                                onChange={(e) => { setEmail(e.target.value); if (fieldErrors.email) setFieldErrors(f => ({ ...f, email: undefined })) }}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                required
                                                 autoComplete="email"
                                                 placeholder="you@example.com"
-                                                aria-invalid={!!fieldErrors.email}
-                                                className={`w-full bg-white/[0.08] border rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-colors ${fieldErrors.email ? 'border-red-400/70' : 'border-white/10'}`}
+                                                className="w-full bg-white/[0.08] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-colors"
                                           />
-                                          <FieldError message={fieldErrors.email} />
                                     </div>
 
                                     <div>
@@ -148,11 +121,11 @@ export default function HostLogin() {
                                                 <input
                                                       type={showPassword ? 'text' : 'password'}
                                                       value={password}
-                                                      onChange={(e) => { setPassword(e.target.value); if (fieldErrors.password) setFieldErrors(f => ({ ...f, password: undefined })) }}
+                                                      onChange={(e) => setPassword(e.target.value)}
+                                                      required
                                                       autoComplete="current-password"
                                                       placeholder="••••••••"
-                                                      aria-invalid={!!fieldErrors.password}
-                                                      className={`w-full bg-white/[0.08] border rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-colors pr-12 ${fieldErrors.password ? 'border-red-400/70' : 'border-white/10'}`}
+                                                      className="w-full bg-white/[0.08] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-colors pr-12"
                                                 />
                                                 <button
                                                       type="button"
@@ -168,7 +141,6 @@ export default function HostLogin() {
                                                       )}
                                                 </button>
                                           </div>
-                                          <FieldError message={fieldErrors.password} />
                                     </div>
 
                                     {error && (
