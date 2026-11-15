@@ -34,7 +34,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Used by the /try start page and the "Reset demo" button.
-// eventType and background are optional; when left out, the sample wedding is kept.
+// eventType and background are optional; when left out, the sample party is kept.
 export function resetDemo(eventName, { eventType, background } = {}) {
   store = freshData()
   const event = store.events[0]
@@ -185,7 +185,13 @@ const demoAuth = {
 const demoStorage = {
   from: () => ({
     upload: async (path, file) => {
-      storageUrls[path] = URL.createObjectURL(file)
+      // Keep the picture itself, so it still shows after a reload (blob links do not survive one)
+      storageUrls[path] = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = () => reject(reader.error)
+        reader.readAsDataURL(file)
+      })
       return { data: { path }, error: null }
     },
     getPublicUrl: (path) => ({ data: { publicUrl: storageUrls[path] || path } }),

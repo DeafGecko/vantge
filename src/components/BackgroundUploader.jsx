@@ -527,6 +527,7 @@ export default function BackgroundUploader({ dbPrefix = 'background', eventId, c
       return (
             <div>
                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-4">Background Photo</p>
+                  <p className="text-xs text-[#1A1A18] -mt-2 mb-4">Click a photo to choose one from the gallery or upload your own.</p>
 
                   {/* Side-by-side thumbnails */}
                   <div className="flex gap-4 items-start">

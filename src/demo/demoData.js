@@ -2,13 +2,19 @@
 // Nothing here is real: the names, guests and notes are invented, and the photos are stock images.
 const DEMO_HOST_ID = 'demo-host'
 const DEMO_EVENT_ID = 'demo-event'
-const WEDDING_PHOTO = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80'
+const PARTY_PHOTO = 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&q=80'
 
+// Sample photos for the demo party. Every link here was checked to load.
 const PHOTOS = [
   'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=1200&q=80',
   'https://images.unsplash.com/photo-1464047736614-af63643285bf?w=1200&q=80',
   'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1200&q=80',
   'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&q=80',
+  'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80',
+  'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&q=80',
+  'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=1200&q=80',
+  'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&q=80',
+  'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80',
 ]
 
 const GUESTS = ['Sarah Mitchell', 'Tom Chen', 'Maya Patel', 'Grace Owens', 'Alex Kim', 'Jordan Brooks']
@@ -17,14 +23,14 @@ export const DEMO_DATA = {
   events: [{
     id: DEMO_EVENT_ID,
     host_id: DEMO_HOST_ID,
-    event_name: 'Emma & Daniel',
+    event_name: "Sam's Birthday Party",
     event_slug: 'demo',
-    event_type: 'wedding',
+    event_type: 'birthday',
     theme: 'terracotta_sunset',
     font_family: 'josefin_sans',
     title_align: 'center',
-    background_image: WEDDING_PHOTO,
-    background_image_desktop: WEDDING_PHOTO,
+    background_image: PARTY_PHOTO,
+    background_image_desktop: PARTY_PHOTO,
     background_position: '50% 88%',
     background_position_desktop: '50% 50%',
     background_tint: 60,
@@ -43,15 +49,15 @@ export const DEMO_DATA = {
     rsvp_enabled: true,
     rsvp_status: 'published',
     rsvp_mode: 'rsvp_and_food',
-    rsvp_event_name: 'Thanksgiving Gather',
-    rsvp_event_type: 'other',
+    rsvp_event_name: "Sam's Birthday Party",
+    rsvp_event_type: 'birthday',
     rsvp_event_date: '2026-11-21T17:00:00Z',
     rsvp_timezone: 'America/Chicago',
     rsvp_deadline: '2026-12-01T00:00:00Z',
     rsvp_attendance_limit: 50,
     rsvp_location: '123 Example Street, Anytown',
-    rsvp_description: 'Come share a Thanksgiving meal with us. Bring a dish if you can!',
-    rsvp_host_display_name: 'Emma & Daniel',
+    rsvp_description: "Come celebrate Sam's birthday with us. Bring a dish if you can!",
+    rsvp_host_display_name: "Sam's Birthday Party",
     rsvp_collect_email: false,
     rsvp_collect_phone: false,
     rsvp_headcount_mode: 'both',
@@ -60,8 +66,8 @@ export const DEMO_DATA = {
     rsvp_font: 'sans_outfit',
     rsvp_title_align: 'left',
     rsvp_logo_url: null,
-    rsvp_background_image: WEDDING_PHOTO,
-    rsvp_background_image_desktop: WEDDING_PHOTO,
+    rsvp_background_image: PARTY_PHOTO,
+    rsvp_background_image_desktop: PARTY_PHOTO,
     rsvp_background_position: '50% 50%',
     rsvp_background_position_desktop: '50% 50%',
     rsvp_background_tint: 55,
@@ -107,7 +113,7 @@ export const DEMO_DATA = {
     storage_path: null,
     is_video: false,
     is_admin_upload: i < 2,
-    status: i < 4 ? 1 : 0,
+    status: 1,
     created_at: `2026-11-1${i}T12:00:00Z`,
   })).concat([{
     // One photo a guest has sent that is still waiting for the host to approve it

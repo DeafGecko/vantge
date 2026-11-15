@@ -389,7 +389,6 @@ export default function GalleryDashboard() {
                                                                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
                                                                         <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title place</p>
                                                                   </div>
-                                                                  <span className="text-[9px] font-bold text-ink-soft">{currentTitlePosition === 0 ? 'Top' : currentTitlePosition === 100 ? 'Bottom' : currentTitlePosition === 50 ? 'Center' : `${currentTitlePosition}%`}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                   <span className="text-[8px] text-[#B0AFA5]">Top</span>
@@ -413,7 +412,6 @@ export default function GalleryDashboard() {
                                                                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
                                                                         <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title place</p>
                                                                   </div>
-                                                                  <span className="text-[9px] font-bold text-ink-soft">{currentTitlePositionDesktop === 0 ? 'Top' : currentTitlePositionDesktop === 100 ? 'Bottom' : currentTitlePositionDesktop === 50 ? 'Center' : `${currentTitlePositionDesktop}%`}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                   <span className="text-[8px] text-[#B0AFA5]">Top</span>
@@ -434,28 +432,6 @@ export default function GalleryDashboard() {
                                           </div>
                                           )}
 
-                                          {/* QR code */}
-                                          {dashTab === 'event' && (
-                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm p-6">
-                                                <div className="flex items-start justify-between gap-4 flex-wrap">
-                                                      <div>
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Gallery</p>
-                                                            <p className="text-sm text-[#5A5A52] mt-1">{isUnlocked ? 'Open — guests can view and upload.' : 'Closed — guests see "not open yet".'}</p>
-                                                      </div>
-                                                      <div className="flex gap-2 flex-wrap">
-                                                            {[{ v: true, label: 'Open' }, { v: false, label: 'Closed' }].map(({ v, label }) => (
-                                                                  <button key={label} disabled={toggling || isUnlocked === v}
-                                                                        onClick={() => { if (isUnlocked !== v) toggleGallery() }}
-                                                                        className={`text-[10px] font-bold uppercase tracking-widest rounded-full px-3.5 py-1.5 border transition-all disabled:cursor-default ${
-                                                                              isUnlocked === v ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'border-[#E0D8C6] text-[#88887E] hover:border-[#1A1A18] hover:text-[#1A1A18]'
-                                                                        }`}>
-                                                                        {label}
-                                                                  </button>
-                                                            ))}
-                                                      </div>
-                                                </div>
-                                          </div>
-                                          )}
                                           {dashTab === 'event' && <QRCodeSection eventSlug={event.event_slug} />}
 
                                           {/* Guest Controls */}
@@ -533,6 +509,29 @@ export default function GalleryDashboard() {
 
                                     {/* RIGHT — controls */}
                                     <div className="lg:col-span-8 min-w-0 flex flex-col gap-6">
+
+                                          {/* Gallery open / closed */}
+                                          {dashTab === 'event' && (
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm p-6">
+                                                <div className="flex items-start justify-between gap-4 flex-wrap">
+                                                      <div>
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Gallery</p>
+                                                            <p className="text-sm text-[#5A5A52] mt-1">{isUnlocked ? 'Open — guests can view and upload.' : 'Closed — guests see "not open yet".'}</p>
+                                                      </div>
+                                                      <div className="flex gap-2 flex-wrap">
+                                                            {[{ v: true, label: 'Open' }, { v: false, label: 'Closed' }].map(({ v, label }) => (
+                                                                  <button key={label} disabled={toggling || isUnlocked === v}
+                                                                        onClick={() => { if (isUnlocked !== v) toggleGallery() }}
+                                                                        className={`text-[10px] font-bold uppercase tracking-widest rounded-full px-3.5 py-1.5 border transition-all disabled:cursor-default ${
+                                                                              isUnlocked === v ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'border-[#E0D8C6] text-[#88887E] hover:border-[#1A1A18] hover:text-[#1A1A18]'
+                                                                        }`}>
+                                                                        {label}
+                                                                  </button>
+                                                            ))}
+                                                      </div>
+                                                </div>
+                                          </div>
+                                          )}
 
                                           {/* Logo | Display Name | Event Type */}
                                           {dashTab === 'event' && (

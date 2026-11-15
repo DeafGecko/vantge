@@ -924,7 +924,7 @@ function SiteFooter() {
         { label: 'Features', href: '#features' },
         { label: 'How It Works', href: '#how-it-works' },
         { label: 'Get Notified', href: '#hero' },
-        { label: 'Free RSVP', href: '#features' },
+        { label: 'Free RSVP', comingSoon: true },
       ],
     },
     {

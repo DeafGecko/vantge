@@ -75,7 +75,7 @@ export default function DemoStart() {
               onClick={() => { resetDemo(''); navigate('/try/event') }}
               className="w-full rounded-xl border border-[#E0D8C6] font-bold py-3 text-sm hover:bg-[#F4F3F0]"
             >
-              Use the sample wedding instead
+              Use the sample party instead
             </button>
           </form>
         )}
