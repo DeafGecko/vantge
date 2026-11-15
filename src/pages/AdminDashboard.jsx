@@ -43,7 +43,7 @@ function StatCard({ label, value, sub, color = 'white', pulse }) {
 // ── ConfirmModal ──────────────────────────────────────────────────────────────
 function ConfirmModal({ title, body, confirmLabel, danger, onConfirm, onCancel }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: 'rgba(26,26,24,0.75)', backdropFilter: 'blur(4px)' }}>
       <div className="bg-[#111110] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
         <h3 className="text-white font-bold text-base mb-2">{title}</h3>
         <p className="text-white/50 text-sm mb-6">{body}</p>
@@ -146,7 +146,7 @@ function LiveEventsTab({ events, onEmergency }) {
     <div className="space-y-4">
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { setDeleteTarget(null); setDeleteInput('') }} />
+          <div className="absolute inset-0 bg-[#1A1A18]/70 backdrop-blur-sm" onClick={() => { setDeleteTarget(null); setDeleteInput('') }} />
           <div className="relative bg-[#1A1A18] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <h3 className="text-white font-bold text-base mb-1">Delete Event?</h3>
             <p className="text-white/50 text-sm mb-4">This permanently deletes <span className="text-white font-semibold">{deleteTarget.event_name}</span> and all its photos. This cannot be undone.</p>
@@ -312,7 +312,7 @@ function PhotosTab({ photos, onAction }) {
 
       {/* Preview modal */}
       {preview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/85" onClick={() => setPreview(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[#1A1A18]/85" onClick={() => setPreview(null)}>
           <div className="relative max-w-3xl w-full" onClick={e => e.stopPropagation()}>
             <button onClick={() => setPreview(null)} className="absolute -top-10 right-0 text-white/60 hover:text-white text-sm">✕ Close</button>
             {preview.is_video
@@ -350,7 +350,7 @@ function PhotosTab({ photos, onAction }) {
 
                   {/* Type badge */}
                   {p.is_video && (
-                    <div className="absolute top-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                    <div className="absolute top-1.5 left-1.5 bg-[#1A1A18]/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
                       <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                       VID
                     </div>
@@ -362,8 +362,8 @@ function PhotosTab({ photos, onAction }) {
                   </div>
 
                   {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-white text-xs font-bold bg-black/60 px-3 py-1.5 rounded-lg">Click to Preview</span>
+                  <div className="absolute inset-0 bg-[#1A1A18]/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-white text-xs font-bold bg-[#1A1A18]/60 px-3 py-1.5 rounded-lg">Click to Preview</span>
                   </div>
                 </div>
               )
@@ -701,7 +701,7 @@ function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
         >
           New Photos
           {inbox.length > 0 && (
-            <span className="text-[10px] font-bold bg-amber-500 text-black px-1.5 py-0.5 rounded-full leading-none">
+            <span className="text-[10px] font-bold bg-amber-500 text-[#1A1A18] px-1.5 py-0.5 rounded-full leading-none">
               {inbox.length}
             </span>
           )}
@@ -755,16 +755,16 @@ function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
                       <div className="w-full h-full bg-white/[0.04]" />
                     )}
                     {p.is_video && (
-                      <div className="absolute top-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <div className="absolute top-1.5 left-1.5 bg-[#1A1A18]/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
                         <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>VID
                       </div>
                     )}
                     {/* Always-visible action buttons at bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 flex gap-1 p-1.5 bg-gradient-to-t from-black/80 to-transparent">
+                    <div className="absolute bottom-0 left-0 right-0 flex gap-1 p-1.5 bg-gradient-to-t from-[#1A1A18]/80 to-transparent">
                       <button
                         onClick={() => addToCollection(p)}
                         disabled={adding[p.id]}
-                        className="flex-1 py-1.5 rounded-lg bg-amber-500/90 text-black text-[10px] font-black hover:bg-amber-400 transition-colors disabled:opacity-40 text-center"
+                        className="flex-1 py-1.5 rounded-lg bg-amber-500/90 text-[#1A1A18] text-[10px] font-black hover:bg-amber-400 transition-colors disabled:opacity-40 text-center"
                       >
                         {adding[p.id] ? '…' : '★'}
                       </button>
@@ -777,7 +777,7 @@ function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
                     </div>
                     {/* Guest name on hover */}
                     <div className="absolute top-0 left-0 right-0 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {p.guest_name && <p className="text-white text-[9px] font-medium bg-black/60 rounded px-1.5 py-0.5 truncate">{p.guest_name}</p>}
+                      {p.guest_name && <p className="text-white text-[9px] font-medium bg-[#1A1A18]/60 rounded px-1.5 py-0.5 truncate">{p.guest_name}</p>}
                     </div>
                   </div>
                 )
@@ -803,13 +803,13 @@ function MarketingTab({ photos, events, onBadgeRefresh, skipped, onSkip }) {
                 return (
                   <div key={c.id} className="relative group rounded-xl overflow-hidden bg-white/[0.04] border border-amber-500/20 aspect-square">
                     {thumb ? <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full bg-white/[0.04]" />}
-                    <div className="absolute top-1.5 right-1.5 bg-amber-500/90 text-black text-[9px] font-black px-1.5 py-0.5 rounded">★</div>
+                    <div className="absolute top-1.5 right-1.5 bg-amber-500/90 text-[#1A1A18] text-[9px] font-black px-1.5 py-0.5 rounded">★</div>
                     {c.is_video && (
-                      <div className="absolute top-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <div className="absolute top-1.5 left-1.5 bg-[#1A1A18]/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
                         <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>VID
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
+                    <div className="absolute inset-0 bg-[#1A1A18]/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
                       <a href={c.original_url} download target="_blank" rel="noopener noreferrer"
                         className="w-full py-1.5 rounded-lg bg-white/20 text-white text-[10px] font-bold hover:bg-white/30 transition-colors text-center">
                         ↓ Download
@@ -987,7 +987,7 @@ function LibraryModal({ typeId, label, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1A1A18]/70 backdrop-blur-sm p-4" onClick={onClose}>
       <div className="bg-[#1A1A18] border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
@@ -1026,7 +1026,7 @@ function LibraryModal({ typeId, label, onClose }) {
                 >
                   <img src={p.photo_url} alt="" className="w-full h-full object-cover" />
                   {isLive && (
-                    <span className="absolute top-1 left-1 bg-amber-400 text-black text-[8px] font-black px-1.5 py-0.5 rounded leading-tight">LIVE</span>
+                    <span className="absolute top-1 left-1 bg-amber-400 text-[#1A1A18] text-[8px] font-black px-1.5 py-0.5 rounded leading-tight">LIVE</span>
                   )}
                   {isSelected && (
                     <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center">
@@ -1035,7 +1035,7 @@ function LibraryModal({ typeId, label, onClose }) {
                   )}
                   <button
                     onClick={e => { e.stopPropagation(); handleDelete(p.id) }}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-[#1A1A18]/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                   >
                     <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
                   </button>
@@ -1063,7 +1063,7 @@ function LibraryModal({ typeId, label, onClose }) {
           <button
             onClick={handleSaveDefault}
             disabled={saving || selectedUrl === liveUrl}
-            className="flex-1 bg-amber-400 text-black text-[11px] font-bold uppercase tracking-widest rounded-full py-3 hover:bg-amber-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            className="flex-1 bg-amber-400 text-[#1A1A18] text-[11px] font-bold uppercase tracking-widest rounded-full py-3 hover:bg-amber-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           >
             {saving ? 'Saving…' : 'Set as Default'}
           </button>
@@ -1236,7 +1236,7 @@ function BrandingTab({ marketingPhotos }) {
                         <button key={p.id} onClick={() => { saveUrl(typeId, p.original_url); setPickingFor(null) }}
                           className="shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 transition-colors relative">
                           <img src={p.thumbnail_url || p.original_url} alt="" className="w-full h-full object-cover" />
-                          {p._isCollection && <span className="absolute bottom-0.5 left-0.5 bg-amber-500/90 text-black text-[7px] font-black px-1 rounded leading-tight">★</span>}
+                          {p._isCollection && <span className="absolute bottom-0.5 left-0.5 bg-amber-500/90 text-[#1A1A18] text-[7px] font-black px-1 rounded leading-tight">★</span>}
                         </button>
                       ))}
                     </div>
@@ -1349,7 +1349,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#0A0A08] flex">
       {/* Sidebar overlay (mobile) */}
-      {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/60 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+      {sidebarOpen && <div className="fixed inset-0 z-20 bg-[#1A1A18]/60 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       {/* Sidebar */}
       <aside className={`fixed top-0 left-0 h-full z-30 w-56 bg-[#0F0F0D] border-r border-white/[0.06] flex flex-col py-6 px-3 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:h-auto lg:min-h-screen`}>
@@ -1378,7 +1378,7 @@ export default function AdminDashboard() {
                 <span className="ml-auto text-[10px] font-bold bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">{stats.pendingUsers}</span>
               )}
               {item.id === 'marketing' && stats.marketingInbox > 0 && (
-                <span className="ml-auto text-[10px] font-bold bg-amber-500 text-black px-1.5 py-0.5 rounded-full">{stats.marketingInbox}</span>
+                <span className="ml-auto text-[10px] font-bold bg-amber-500 text-[#1A1A18] px-1.5 py-0.5 rounded-full">{stats.marketingInbox}</span>
               )}
             </button>
           ))}

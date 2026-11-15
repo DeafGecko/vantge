@@ -133,6 +133,9 @@ export default function Home() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
+            <a href="/try" className="text-sm text-[#6B6B63] hover:text-[#1A1A18] transition-colors duration-200">
+              Try the demo
+            </a>
             <Link
               to="/signup"
               className="group inline-flex items-center gap-2 bg-[#0E0E0C] text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-[#2C2C28] transition-colors duration-200"
@@ -628,7 +631,7 @@ function StoryCinematic() {
         className="absolute inset-0 w-full h-full object-cover"
         loading="lazy"
       />
-      <div className="absolute inset-0 bg-black/55" />
+      <div className="absolute inset-0 bg-[#1A1A18]/55" />
       <div className="relative z-10 px-6 max-w-2xl mx-auto py-28">
         <p className="text-xs font-semibold tracking-[0.18em] uppercase text-white/60 mb-4">
           More than photos
@@ -717,7 +720,7 @@ function FeaturesGrid() {
             <article
               key={f.title}
               className={`relative overflow-hidden rounded-3xl vantge-reveal ${inView ? 'vantge-visible' : ''} vantge-delay-${i + 1}`}
-              style={{ minHeight: 260, boxShadow: '0 4px 32px rgba(0,0,0,0.18)' }}
+              style={{ minHeight: 260, boxShadow: '0 4px 32px rgba(26,26,24,0.18)' }}
             >
               {/* Background photo */}
               <img src={f.photo} alt="" aria-hidden="true"
@@ -729,7 +732,7 @@ function FeaturesGrid() {
               {/* Content */}
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 backdrop-blur-sm"
-                  style={{ backgroundColor: f.iconBg, boxShadow: '0 2px 12px rgba(0,0,0,0.2)' }}>
+                  style={{ backgroundColor: f.iconBg, boxShadow: '0 2px 12px rgba(26,26,24,0.2)' }}>
                   <Icon size={22} color={f.iconColor} strokeWidth={1.8} />
                 </div>
                 <h3 className={`font-bold text-2xl mb-2 ${f.textColor}`}>{f.title}</h3>
@@ -921,7 +924,7 @@ function SiteFooter() {
         { label: 'Features', href: '#features' },
         { label: 'How It Works', href: '#how-it-works' },
         { label: 'Get Notified', href: '#hero' },
-        { label: 'Free RSVP', href: '#features' },
+        { label: 'Free RSVP', comingSoon: true },
       ],
     },
     {

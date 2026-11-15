@@ -5,7 +5,7 @@ export const EVENT_TYPES = [
             icon: '🥂',
             tagline: 'Celebrating a milestone',
             subline: 'Capture the love. Share the joy.',
-            defaultBg: 'https://images.unsplash.com/photo-1470756544705-1ba4b6b3c9d8?w=1600&q=85',
+            defaultBg: 'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=1600&q=85',
       },
       {
             id: 'birthday',
@@ -29,7 +29,7 @@ export const EVENT_TYPES = [
             icon: '🏡',
             tagline: 'Family comes together',
             subline: 'Snap. Share. Remember.',
-            defaultBg: 'https://images.unsplash.com/photo-1511895426328-dc8714191011?w=1600&q=85',
+            defaultBg: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1600&q=85',
       },
       {
             id: 'graduation',
@@ -37,7 +37,7 @@ export const EVENT_TYPES = [
             icon: '🎓',
             tagline: 'Celebrating an achievement',
             subline: 'Capture this moment forever.',
-            defaultBg: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&q=85',
+            defaultBg: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1600&q=85',
       },
       {
             id: 'party',

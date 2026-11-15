@@ -14,6 +14,8 @@ import GuestRSVP        from './pages/GuestRSVP'
 import AdminLogin       from './pages/AdminLogin'
 import AdminDashboard   from './pages/AdminDashboard'
 import PendingApproval  from './pages/PendingApproval'
+import DemoFrame        from './components/DemoFrame'
+import DemoStart        from './pages/DemoStart'
 
 export default function App() {
   return (
@@ -29,11 +31,16 @@ export default function App() {
       <Route path="/dashboard"      element={<GalleryDashboard />} />
       <Route path="/rsvp-dashboard" element={<RSVPDashboard />} />
 
+      {/* ── Browser-only demo dashboards (no login, nothing saved) ── */}
+      <Route path="/try"       element={<DemoStart />} />
+      <Route path="/try/event" element={<DemoFrame><GalleryDashboard /></DemoFrame>} />
+      <Route path="/try/rsvp"  element={<DemoFrame><RSVPDashboard /></DemoFrame>} />
+
       {/* ── Guest routes (all scoped to /:eventSlug) ─────────── */}
       <Route path="/:eventSlug"          element={<EventGateway />} />
       <Route path="/:eventSlug/upload"   element={<GuestUploader />} />
       <Route path="/:eventSlug/gallery"  element={<Gallery />} />
-      <Route path="/:eventSlug/rsvp"     element={<GuestRSVP />} />
+      <Route path="/RSVP/:eventSlug"      element={<GuestRSVP />} />
 
       {/* ── Admin routes ─────────────────────────────────────── */}
       <Route path="/admin/login"  element={<AdminLogin />} />

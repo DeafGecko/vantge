@@ -6,6 +6,7 @@ import DashboardHeader from '../components/DashboardHeader'
 import Dropdown from '../components/Dropdown'
 import { useAuth } from '../hooks/useAuth'
 import { useHostEvent } from '../hooks/useHostEvent'
+import { useStickyTall } from '../hooks/useStickyTall'
 import { supabase } from '../lib/supabase'
 import PhotoManager from '../components/PhotoManager'
 import { getAllThemes, getTheme } from '../lib/themes'
@@ -14,6 +15,7 @@ import { EVENT_TYPES, getEventType, DEFAULT_EVENT_TYPE_ID } from '../lib/eventTy
 import FontLoader from '../components/FontLoader'
 import BackgroundUploader from '../components/BackgroundUploader'
 import { useDefaultBg } from '../hooks/useDefaultBg'
+import { bgPhotoStyle, bgFraming } from '../lib/bgPhoto'
 import HostUploader from '../components/HostUploader'
 import LogoUploader from '../components/LogoUploader'
 import VantgeLogo from '../components/VantgeLogo'
@@ -44,6 +46,8 @@ export default function GalleryDashboard() {
       const [localUnlocked, setLocalUnlocked] = useState(null)
       const [activeTab, setActiveTab] = useState(0)
       const [dashTab, setDashTab] = useState('event')
+      const previewColRef = useRef(null)
+      useStickyTall(previewColRef, dashTab !== 'gallery' && !!event)
       const [localTheme, setLocalTheme] = useState(null)
       const [localFont, setLocalFont] = useState(null)
       const [localTitleAlign, setLocalTitleAlign] = useState(null)
@@ -58,8 +62,8 @@ export default function GalleryDashboard() {
       const [approvedPhotoCount, setApprovedPhotoCount] = useState(0)
       const [approvedVideoCount, setApprovedVideoCount] = useState(0)
       const [menuOpen, setMenuOpen] = useState(false)
-      const [localBgPosition, setLocalBgPosition] = useState(null)
-      const [localBgTint, setLocalBgTint] = useState(null)
+      // Framing saved this session, keyed by column name (background_position, background_zoom_desktop, ...)
+      const [localBgFields, setLocalBgFields] = useState({})
       const [localEventType, setLocalEventType] = useState(null)
       const [localTitlePosition, setLocalTitlePosition] = useState(null)
       const [localTitlePositionDesktop, setLocalTitlePositionDesktop] = useState(null)
@@ -118,8 +122,10 @@ export default function GalleryDashboard() {
       const currentBgImage = localBgImage !== undefined ? localBgImage : event?.background_image ?? null
       const currentBgImageDesktop = localBgImageDesktop !== undefined ? localBgImageDesktop : event?.background_image_desktop ?? null
       const currentEventName = localEventName !== null ? localEventName : event?.event_name ?? ''
-      const currentBgPosition = localBgPosition !== null ? localBgPosition : event?.background_position ?? '50% 50%'
-      const currentBgTint = localBgTint !== null ? localBgTint : event?.background_tint ?? 55
+      // Mobile and desktop framing, as the guest page will show them
+      const bgEvent = { ...event, ...localBgFields }
+      const bgMobile = bgFraming(bgEvent, 'background', false)
+      const bgDesktop = bgFraming(bgEvent, 'background', true)
       const currentEventTypeId = localEventType !== null ? localEventType : event?.event_type ?? ''
       const currentLogoUrl = localLogoUrl !== undefined ? localLogoUrl : event?.logo_url ?? null
       const currentEventType = getEventType(currentEventTypeId)
@@ -141,7 +147,7 @@ export default function GalleryDashboard() {
       }, [user, navigate])
 
       useEffect(() => {
-            if (!event?.id) return
+            if (!event?.id || event.demo_background_locked) return
             const eventType = event.event_type
             const brandingKey = eventType || 'none'
             const hardcodedFallback = getEventType(eventType)?.defaultBg ?? null
@@ -254,8 +260,6 @@ export default function GalleryDashboard() {
             theme: currentTheme,
             eventName: currentEventName,
             font: currentFont,
-            bgPosition: currentBgPosition,
-            bgTint: currentBgTint,
             eventType: currentEventType,
             logoUrl: currentLogoUrl,
             isUnlocked: previewUnlocked,
@@ -263,11 +267,17 @@ export default function GalleryDashboard() {
       const previewProps = {
             ...sharedPreviewProps,
             bgImage: currentBgImage || currentDefaultBg,
+            bgPosition: bgMobile.position,
+            bgZoom: bgMobile.zoom,
+            bgTint: bgMobile.tint,
             titlePosition: currentTitlePosition,
       }
       const previewPropsDesktop = {
             ...sharedPreviewProps,
             bgImage: currentBgImageDesktop || currentDefaultBg,
+            bgPosition: bgDesktop.position,
+            bgZoom: bgDesktop.zoom,
+            bgTint: bgDesktop.tint,
             titlePosition: currentTitlePositionDesktop,
       }
 
@@ -279,7 +289,7 @@ export default function GalleryDashboard() {
                         {/* HEADER */}
                         <DashboardHeader active="event" onSignOut={async () => { await signOut(); navigate('/login') }} />
 
-                        <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-9 pb-20">
+                        <div className="max-w-[1024px] mx-auto px-4 md:px-8 py-6 md:py-9 pb-20">
 
                               {/* PAGE TITLE */}
                               <div className="mb-8 flex items-end justify-between gap-6">
@@ -302,10 +312,10 @@ export default function GalleryDashboard() {
 
                               {/* BENTO GRID */}
                               {dashTab !== 'gallery' && (
-                              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-10 items-start">
+                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-10 items-start">
 
                                     {/* LEFT — preview + QR */}
-                                    <div className="md:col-span-4 flex flex-col gap-6">
+                                    <div ref={previewColRef} className="lg:col-span-4 min-w-0 flex flex-col gap-6">
 
                                           {/* Live Preview */}
                                           {dashTab === 'event' && (
@@ -379,7 +389,6 @@ export default function GalleryDashboard() {
                                                                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeWidth="2.5"/></svg>
                                                                         <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title place</p>
                                                                   </div>
-                                                                  <span className="text-[9px] font-bold text-ink-soft">{currentTitlePosition === 0 ? 'Top' : currentTitlePosition === 100 ? 'Bottom' : currentTitlePosition === 50 ? 'Center' : `${currentTitlePosition}%`}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                   <span className="text-[8px] text-[#B0AFA5]">Top</span>
@@ -403,7 +412,6 @@ export default function GalleryDashboard() {
                                                                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" strokeLinecap="round"/></svg>
                                                                         <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title place</p>
                                                                   </div>
-                                                                  <span className="text-[9px] font-bold text-ink-soft">{currentTitlePositionDesktop === 0 ? 'Top' : currentTitlePositionDesktop === 100 ? 'Bottom' : currentTitlePositionDesktop === 50 ? 'Center' : `${currentTitlePositionDesktop}%`}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                   <span className="text-[8px] text-[#B0AFA5]">Top</span>
@@ -424,28 +432,6 @@ export default function GalleryDashboard() {
                                           </div>
                                           )}
 
-                                          {/* QR code */}
-                                          {dashTab === 'event' && (
-                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm p-6">
-                                                <div className="flex items-start justify-between gap-4 flex-wrap">
-                                                      <div>
-                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Gallery</p>
-                                                            <p className="text-sm text-[#5A5A52] mt-1">{isUnlocked ? 'Open — guests can view and upload.' : 'Closed — guests see "not open yet".'}</p>
-                                                      </div>
-                                                      <div className="flex gap-2 flex-wrap">
-                                                            {[{ v: true, label: 'Open' }, { v: false, label: 'Closed' }].map(({ v, label }) => (
-                                                                  <button key={label} disabled={toggling || isUnlocked === v}
-                                                                        onClick={() => { if (isUnlocked !== v) toggleGallery() }}
-                                                                        className={`text-[10px] font-bold uppercase tracking-widest rounded-full px-3.5 py-1.5 border transition-all disabled:cursor-default ${
-                                                                              isUnlocked === v ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'border-[#E0D8C6] text-[#88887E] hover:border-[#1A1A18] hover:text-[#1A1A18]'
-                                                                        }`}>
-                                                                        {label}
-                                                                  </button>
-                                                            ))}
-                                                      </div>
-                                                </div>
-                                          </div>
-                                          )}
                                           {dashTab === 'event' && <QRCodeSection eventSlug={event.event_slug} />}
 
                                           {/* Guest Controls */}
@@ -522,7 +508,30 @@ export default function GalleryDashboard() {
                                     </div>
 
                                     {/* RIGHT — controls */}
-                                    <div className="md:col-span-8 flex flex-col gap-6">
+                                    <div className="lg:col-span-8 min-w-0 flex flex-col gap-6">
+
+                                          {/* Gallery open / closed */}
+                                          {dashTab === 'event' && (
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] shadow-sm p-6">
+                                                <div className="flex items-start justify-between gap-4 flex-wrap">
+                                                      <div>
+                                                            <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Gallery</p>
+                                                            <p className="text-sm text-[#5A5A52] mt-1">{isUnlocked ? 'Open — guests can view and upload.' : 'Closed — guests see "not open yet".'}</p>
+                                                      </div>
+                                                      <div className="flex gap-2 flex-wrap">
+                                                            {[{ v: true, label: 'Open' }, { v: false, label: 'Closed' }].map(({ v, label }) => (
+                                                                  <button key={label} disabled={toggling || isUnlocked === v}
+                                                                        onClick={() => { if (isUnlocked !== v) toggleGallery() }}
+                                                                        className={`text-[10px] font-bold uppercase tracking-widest rounded-full px-3.5 py-1.5 border transition-all disabled:cursor-default ${
+                                                                              isUnlocked === v ? 'bg-[#1A1A18] text-white border-[#1A1A18]' : 'border-[#E0D8C6] text-[#88887E] hover:border-[#1A1A18] hover:text-[#1A1A18]'
+                                                                        }`}>
+                                                                        {label}
+                                                                  </button>
+                                                            ))}
+                                                      </div>
+                                                </div>
+                                          </div>
+                                          )}
 
                                           {/* Logo | Display Name | Event Type */}
                                           {dashTab === 'event' && (
@@ -563,7 +572,7 @@ export default function GalleryDashboard() {
                                                             <div>
                                                                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Event Type</p>
                                                                   <Dropdown value={currentEventTypeId} className="bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-ink"
-                                                                        options={[{ value: '', label: '— None —' }, ...EVENT_TYPES.map(t => ({ value: t.id, label: t.label }))]}
+                                                                        options={EVENT_TYPES.map(t => ({ value: t.id, label: t.label }))}
                                                                         onChange={async (val) => {
                                                                               setLocalEventType(val)
                                                                               const updates = { event_type: val || null }
@@ -592,12 +601,22 @@ export default function GalleryDashboard() {
                                                       eventId={event.id}
                                                       currentImageUrl={currentBgImage}
                                                       currentImageDesktopUrl={currentBgImageDesktop}
-                                                      currentPosition={currentBgPosition}
-                                                      currentTint={currentBgTint}
+                                                      currentPosition={bgMobile.position}
+                                                      currentTint={bgMobile.tint}
+                                                      currentZoom={bgMobile.zoom}
+                                                      currentPositionDesktop={bgDesktop.position}
+                                                      currentTintDesktop={bgDesktop.tint}
+                                                      currentZoomDesktop={bgDesktop.zoom}
                                                       accentColor={currentTheme.colors.accent}
                                                       eventTypeId={currentEventTypeId}
-                                                      onSaved={(url, pos, tint) => { setLocalBgImage(url); setLocalBgPosition(pos); setLocalBgTint(tint) }}
-                                                      onSavedDesktop={(url) => setLocalBgImageDesktop(url)}
+                                                      onSaved={(url, pos, tint, zoom) => {
+                                                            setLocalBgImage(url)
+                                                            setLocalBgFields(f => ({ ...f, background_position: pos, background_tint: tint, background_zoom: zoom }))
+                                                      }}
+                                                      onSavedDesktop={(url, pos, tint, zoom) => {
+                                                            setLocalBgImageDesktop(url)
+                                                            setLocalBgFields(f => ({ ...f, background_position_desktop: pos, background_tint_desktop: tint, background_zoom_desktop: zoom }))
+                                                      }}
                                                 />
                                           </div>
 
@@ -667,10 +686,10 @@ export default function GalleryDashboard() {
                               {/* Sticky save bar: only appears when the name has changes that are not saved yet */}
                               {dashTab !== 'gallery' && Object.keys(pending).length > 0 && (
                                     <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-[#E8E4DA] shadow-lg">
-                                          <div className="max-w-6xl mx-auto px-4 md:px-8 py-2 flex items-center justify-between gap-4">
+                                          <div className="max-w-[1024px] mx-auto px-4 md:px-8 py-2 flex items-center justify-between gap-4">
                                                 <p className="text-[10px] font-bold uppercase tracking-widest text-[#88887E]">Unsaved changes</p>
                                                 <button onClick={saveAll} disabled={savingSettings}
-                                                      className="text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-1.5 bg-[#1A1A18] text-white hover:bg-black transition-all disabled:opacity-50">
+                                                      className="text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-1.5 bg-[#1A1A18] text-white hover:bg-[#1A1A18] transition-all disabled:opacity-50">
                                                       {savingSettings ? 'Saving…' : 'Save'}
                                                 </button>
                                           </div>
@@ -765,13 +784,13 @@ function themeColors(theme, hasBg) {
       }
 }
 
-function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPosition, bgTint, eventType, logoUrl, isUnlocked, titlePosition = 100, titleAlign = 'center' }) {
+function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPosition, bgZoom, bgTint, eventType, logoUrl, isUnlocked, titlePosition = 100, titleAlign = 'center' }) {
       const hasBg = !!bgImage
       const { c, txt, txtMuted, txtSubtle, cardBg, cardBorder } = themeColors(theme, hasBg)
-      const tintStyle = { backgroundColor: `rgba(0,0,0,${((bgTint ?? 55) / 100).toFixed(2)})` }
-      const bgStyle = hasBg
-            ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: bgPosition || '50% 50%' }
-            : { backgroundColor: c.bg }
+      const tintStyle = { backgroundColor: `rgba(26,26,24,${((bgTint ?? 55) / 100).toFixed(2)})` }
+      // Photo is an img with the same zoom and position the guest page uses
+      const bgStyle = hasBg ? {} : { backgroundColor: c.bg }
+      const bgPhoto = hasBg ? <img src={bgImage} alt="" className="absolute inset-0 w-full h-full" style={bgPhotoStyle(bgPosition, bgZoom)} /> : null
 
       const isMobile = device === 'mobile'
       const MOBILE_W = 176, MOBILE_H = 336
@@ -852,6 +871,7 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
                   <div className="mx-auto relative rounded-[1.2rem] overflow-hidden shadow-2xl border-4 border-ink" style={{ width: MOBILE_W, height: MOBILE_H }}>
                         <div className="absolute top-3 left-1/2 -translate-x-1/2 w-14 h-4 bg-ink rounded-full z-20" />
                         <div className="absolute inset-0" style={bgStyle}>
+                  {bgPhoto}
                               {hasBg && <div className="absolute inset-0 pointer-events-none" style={tintStyle} />}
                               {!hasBg && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: c.accent + '11' }} />}
                               <div className="relative z-10 h-full flex flex-col pt-8">
@@ -878,8 +898,9 @@ function EventPreview({ device = 'mobile', theme, eventName, font, bgImage, bgPo
       // Desktop — same layout as mobile, just 16:9 background
       return (
             <div className="absolute inset-0 overflow-hidden" style={bgStyle}>
+                  {bgPhoto}
                   <div className="absolute inset-0" style={tintStyle} />
-                  <div className="absolute inset-x-0 bottom-0" style={{ height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)' }} />
+                  <div className="absolute inset-x-0 bottom-0" style={{ height: '60%', background: 'linear-gradient(to top, rgba(26,26,24,0.6) 0%, transparent 100%)' }} />
                   {/* Same flex column as mobile, content centered in narrow column */}
                   <div className="absolute inset-0 flex flex-col items-center">
                         {/* Wordmark */}
@@ -938,9 +959,9 @@ function ThemeOption({ theme, isActive, onClick }) {
                         (isActive ? "border-ink bg-[#F7F5F0]" : "border-[#E8E4DA] bg-white hover:border-[#C0BFB5]")}
             >
                   <div className="flex gap-1.5 mb-2">
-                        <span className="w-4 h-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: theme.colors.accent }} />
-                        <span className="w-4 h-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: theme.colors.bg }} />
-                        <span className="w-4 h-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: theme.colors.surface }} />
+                        <span className="w-4 h-4 rounded-full border border-[#1A1A18]/10 shadow-sm" style={{ backgroundColor: theme.colors.accent }} />
+                        <span className="w-4 h-4 rounded-full border border-[#1A1A18]/10 shadow-sm" style={{ backgroundColor: theme.colors.bg }} />
+                        <span className="w-4 h-4 rounded-full border border-[#1A1A18]/10 shadow-sm" style={{ backgroundColor: theme.colors.surface }} />
                   </div>
                   <p className="text-[10px] font-black uppercase tracking-tight text-ink leading-tight">{theme.name}</p>
             </button>
@@ -981,7 +1002,13 @@ function QRCodeSection({ eventSlug }) {
 
       return (
             <div className="bg-white rounded-3xl border border-[#E8E4DA] p-6 shadow-sm flex flex-col items-center gap-4">
-                  <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] self-start">Scan to open</p>
+                  <div className="w-full flex items-center justify-between">
+                        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Scan to open</p>
+                        <a href={guestUrl} target="_blank" rel="noopener noreferrer" aria-label="Open the guest page" title="Open the guest page"
+                              className="p-2 rounded-full text-[#1A1A18] hover:bg-[#F4F3F0] transition-colors focus-visible:outline-2 focus-visible:outline-[#1A1A18]">
+                              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
+                        </a>
+                  </div>
                   <div ref={qrRef} className="bg-[#F7F5F0] p-4 rounded-2xl">
                         <QRCodeSVG value={guestUrl} size={136} level="M" fgColor="#1A1A18" bgColor="#F7F5F0" />
                   </div>
@@ -995,7 +1022,7 @@ function QRCodeSection({ eventSlug }) {
                   </div>
                   <button
                         onClick={downloadQR}
-                        className="w-full bg-[#1A1A18] hover:bg-black text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-3 transition-all"
+                        className="w-full bg-[#1A1A18] hover:bg-[#1A1A18] text-white text-[10px] font-bold uppercase tracking-widest rounded-full py-3 transition-all"
                   >
                         Download QR PNG
                   </button>
