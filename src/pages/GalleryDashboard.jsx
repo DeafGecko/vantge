@@ -289,7 +289,7 @@ export default function GalleryDashboard() {
                         {/* HEADER */}
                         <DashboardHeader active="event" onSignOut={async () => { await signOut(); navigate('/login') }} />
 
-                        <div className="max-w-[1024px] mx-auto px-4 md:px-8 py-6 md:py-9 pb-20">
+                        <div className="max-w-[1024px] mx-auto px-4 md:px-8 py-8 md:py-12 pb-24">
 
                               {/* PAGE TITLE */}
                               <div className="mb-8 flex items-end justify-between gap-6">
@@ -312,14 +312,14 @@ export default function GalleryDashboard() {
 
                               {/* BENTO GRID */}
                               {dashTab !== 'gallery' && (
-                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-10 items-start">
+                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 mb-12 items-start">
 
                                     {/* LEFT — preview + QR */}
-                                    <div ref={previewColRef} className="lg:col-span-4 min-w-0 flex flex-col gap-6">
+                                    <div ref={previewColRef} className="lg:col-span-4 min-w-0 flex flex-col gap-8">
 
                                           {/* Live Preview */}
                                           {dashTab === 'event' && (
-                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-5 shadow-sm">
                                                 <div className="flex items-center justify-between mb-4">
                                                       <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Live Preview</p>
                                                       <button
@@ -508,7 +508,7 @@ export default function GalleryDashboard() {
                                     </div>
 
                                     {/* RIGHT — controls */}
-                                    <div className="lg:col-span-8 min-w-0 flex flex-col gap-6">
+                                    <div className="lg:col-span-8 min-w-0 flex flex-col gap-8">
 
                                           {/* Gallery open / closed */}
                                           {dashTab === 'event' && (
@@ -535,7 +535,7 @@ export default function GalleryDashboard() {
 
                                           {/* Logo | Display Name | Event Type */}
                                           {dashTab === 'event' && (
-                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm">
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-5 shadow-sm">
 
                                                 {/* Row 1 — Logo + stacked Name/Type */}
                                                 <div className="flex items-start gap-4">
@@ -596,7 +596,7 @@ export default function GalleryDashboard() {
                                           {/* Background photo */}
                                           {dashTab === 'event' && (
                                           <>
-                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm overflow-hidden">
+                                          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-5 shadow-sm overflow-hidden">
                                                 <BackgroundUploader
                                                       eventId={event.id}
                                                       currentImageUrl={currentBgImage}
@@ -663,7 +663,7 @@ export default function GalleryDashboard() {
                                                       </div>
                                                 </div>
 
-                                                <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-sm flex flex-col">
+                                                <div className="bg-white rounded-2xl border border-[#E8E4DA] p-5 shadow-sm flex flex-col">
                                                       <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-3 shrink-0">Color Palette</p>
                                                       <div className="grid grid-cols-2 gap-2">
                                                             {getAllThemes().map((theme) => (
