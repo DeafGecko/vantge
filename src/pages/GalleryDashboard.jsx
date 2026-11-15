@@ -434,77 +434,6 @@ export default function GalleryDashboard() {
 
                                           {dashTab === 'event' && <QRCodeSection eventSlug={event.event_slug} />}
 
-                                          {/* Guest Controls */}
-                                          {dashTab === 'event' && (
-                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] shadow-sm flex flex-col flex-1">
-                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-5 pt-5 pb-4">Guest Controls</p>
-
-                                                {/* Section 1 — Toggles */}
-                                                <div className="px-5 pb-5 flex flex-col gap-4 border-b-2 border-[#F0EDE6]">
-                                                      {[
-                                                            { label: 'Allow downloads', sub: 'Guests can save photos', value: allowDownloads, toggle: toggleAllowDownloads },
-                                                            { label: 'Allow sharing', sub: 'Guests can share photos', value: allowSharing, toggle: toggleAllowSharing },
-                                                            { label: 'Check photos first', sub: 'You check each photo before guests see it', value: requireApproval, toggle: toggleRequireApproval },
-                                                      ].map(({ label, sub, value, toggle }) => (
-                                                            <div key={label} className="flex items-center justify-between gap-3">
-                                                                  <div>
-                                                                        <p className="text-sm font-semibold text-ink">{label}</p>
-                                                                        <p className="text-[11px] text-ink-muted">{sub}</p>
-                                                                  </div>
-                                                                  <button
-                                                                        onClick={toggle}
-                                                                        aria-label={label}
-                                                                        className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-ink' : 'bg-border'}`}
-                                                                  >
-                                                                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0'}`} />
-                                                                  </button>
-                                                            </div>
-                                                      ))}
-                                                </div>
-
-                                                {/* Section 2 — Upload Limit */}
-                                                <div className="px-5 py-5 border-b-2 border-[#F0EDE6]">
-                                                      <p className="text-sm font-semibold text-ink mb-0.5">Photo limit per guest</p>
-                                                      <p className="text-[11px] text-ink-muted mb-3">Max photos a guest can submit</p>
-                                                      <div className="flex gap-2 flex-wrap">
-                                                            {[null, 5, 10, 20, 30].map((v) => (
-                                                                  <button
-                                                                        key={v ?? 'unlimited'}
-                                                                        onClick={() => saveUploadLimit(v)}
-                                                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${uploadLimit === v ? 'bg-ink text-white border-ink' : 'bg-white text-ink border-[#E8E4DA] hover:border-ink'}`}
-                                                                  >
-                                                                        {v === null ? 'Unlimited' : v}
-                                                                  </button>
-                                                            ))}
-                                                      </div>
-                                                </div>
-
-                                                {/* Section 3 — Passcode */}
-                                                <div className="px-5 py-5 flex-1">
-                                                      <p className="text-sm font-semibold text-ink mb-0.5">Passcode</p>
-                                                      <p className="text-[11px] text-ink-muted mb-3">Guests type this to open the event</p>
-                                                      <div className="flex gap-2">
-                                                            <input
-                                                                  type="text"
-                                                                  value={passcode}
-                                                                  onChange={(e) => setLocalPasscode(e.target.value)}
-                                                                  onBlur={(e) => savePasscode(e.target.value)}
-                                                                  placeholder="No passcode"
-                                                                  maxLength={20}
-                                                                  className="flex-1 border border-[#E8E4DA] rounded-xl px-3 py-2 text-sm text-ink placeholder-[#B0AFA5] focus:outline-none focus:border-ink transition-colors"
-                                                            />
-                                                            {passcode ? (
-                                                                  <button
-                                                                        onClick={() => savePasscode('')}
-                                                                        className="px-3 py-2 rounded-xl border border-[#E8E4DA] text-[11px] font-bold text-[#C84A44] hover:border-[#C84A44] transition-colors"
-                                                                  >
-                                                                        Clear
-                                                                  </button>
-                                                            ) : null}
-                                                      </div>
-                                                </div>
-                                          </div>
-                                          )}
                                     </div>
 
                                     {/* RIGHT — controls */}
@@ -678,6 +607,82 @@ export default function GalleryDashboard() {
                                                 </div>
                                           </div>
                                           </>
+                                          )}
+
+                                          {/* Guest Controls */}
+                                          {dashTab === 'event' && (
+                                          <div className="bg-white rounded-3xl border border-[#E8E4DA] shadow-sm flex flex-col flex-1">
+                                                <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] px-5 pt-5 pb-4">Guest Controls</p>
+
+                                                {/* Section 1 — Toggles */}
+                                                <div className="px-5 pb-5 flex flex-col gap-4 border-b-2 border-[#F0EDE6]">
+                                                      {[
+                                                            { label: 'Allow downloads', sub: 'Guests can save photos', value: allowDownloads, toggle: toggleAllowDownloads },
+                                                            { label: 'Allow sharing', sub: 'Guests can share photos', value: allowSharing, toggle: toggleAllowSharing },
+                                                            { label: 'Check photos first', sub: 'You check each photo before guests see it', value: requireApproval, toggle: toggleRequireApproval },
+                                                      ].map(({ label, sub, value, toggle }) => (
+                                                            <div key={label} className="flex items-center justify-between gap-3">
+                                                                  <div>
+                                                                        <p className="text-sm font-semibold text-ink">{label}</p>
+                                                                        <p className="text-[11px] text-ink-muted">{sub}</p>
+                                                                  </div>
+                                                                  <button
+                                                                        onClick={toggle}
+                                                                        aria-label={label}
+                                                                        className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${value ? 'bg-ink' : 'bg-border'}`}
+                                                                  >
+                                                                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${value ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                                  </button>
+                                                            </div>
+                                                      ))}
+                                                </div>
+
+                                                {/* Section 2 — Upload Limit */}
+                                                <div className="px-5 py-5 border-b-2 border-[#F0EDE6] flex items-center justify-between gap-4 flex-wrap">
+                                                      <div>
+                                                      <p className="text-sm font-semibold text-ink mb-0.5">Photo limit per guest</p>
+                                                      <p className="text-[11px] text-ink-muted">Max photos a guest can submit</p>
+                                                      </div>
+                                                      <div className="flex gap-2 flex-wrap">
+                                                            {[null, 5, 10, 20, 30].map((v) => (
+                                                                  <button
+                                                                        key={v ?? 'unlimited'}
+                                                                        onClick={() => saveUploadLimit(v)}
+                                                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${uploadLimit === v ? 'bg-ink text-white border-ink' : 'bg-white text-ink border-[#E8E4DA] hover:border-ink'}`}
+                                                                  >
+                                                                        {v === null ? 'Unlimited' : v}
+                                                                  </button>
+                                                            ))}
+                                                      </div>
+                                                </div>
+
+                                                {/* Section 3 — Passcode */}
+                                                <div className="px-5 py-5 flex-1 flex items-center justify-between gap-4 flex-wrap">
+                                                      <div>
+                                                      <p className="text-sm font-semibold text-ink mb-0.5">Passcode</p>
+                                                      <p className="text-[11px] text-ink-muted">Guests type this to open the event</p>
+                                                      </div>
+                                                      <div className="flex gap-2 w-full sm:w-64">
+                                                            <input
+                                                                  type="text"
+                                                                  value={passcode}
+                                                                  onChange={(e) => setLocalPasscode(e.target.value)}
+                                                                  onBlur={(e) => savePasscode(e.target.value)}
+                                                                  placeholder="No passcode"
+                                                                  maxLength={20}
+                                                                  className="flex-1 border border-[#E8E4DA] rounded-xl px-3 py-2 text-sm text-ink placeholder-[#B0AFA5] focus:outline-none focus:border-ink transition-colors"
+                                                            />
+                                                            {passcode ? (
+                                                                  <button
+                                                                        onClick={() => savePasscode('')}
+                                                                        className="px-3 py-2 rounded-xl border border-[#E8E4DA] text-[11px] font-bold text-[#C84A44] hover:border-[#C84A44] transition-colors"
+                                                                  >
+                                                                        Clear
+                                                                  </button>
+                                                            ) : null}
+                                                      </div>
+                                                </div>
+                                          </div>
                                           )}
                                     </div>
                               </div>
