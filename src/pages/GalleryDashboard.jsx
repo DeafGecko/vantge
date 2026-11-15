@@ -975,7 +975,9 @@ function ThemeOption({ theme, isActive, onClick }) {
 
 function QRCodeSection({ eventSlug }) {
       const qrRef = useRef(null)
-      const guestUrl = `https://vantge.app/${eventSlug}`
+      // The demo event's guest page lives under /try/demo; every other event keeps its own address
+      const demoPage = eventSlug === 'demo'
+      const guestUrl = demoPage ? 'https://vantge.app/try/demo' : `https://vantge.app/${eventSlug}`
       const [copied, setCopied] = useState(false)
 
       function copyLink() {

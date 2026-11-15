@@ -12,7 +12,7 @@ export default function DemoFrame({ children }) {
   const [showQr, setShowQr] = useState(false)
   const origin = window.location.origin
   const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-  const phoneUrl = `${origin}/try`
+  const phoneUrl = `${origin}/try/demo`
 
   function reset() {
     resetDemo('')
@@ -54,6 +54,7 @@ export default function DemoFrame({ children }) {
           <ExternalLink size={12} /> Phone view
         </button>
         <Link to="/try/event" className="font-bold underline underline-offset-4 hover:text-white/80">Event dashboard</Link>
+        <Link to="/try/demo" className="font-bold underline underline-offset-4 hover:text-white/80">Guest page</Link>
         <button type="button" onClick={reset} className="text-white/60 hover:text-white underline underline-offset-4">Reset demo</button>
         <Link to="/try" className="text-white/60 hover:text-white">Start again</Link>
       </div>

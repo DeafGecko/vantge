@@ -6,7 +6,8 @@ import { DEMO_DATA, DEMO_USER } from './demoData'
 // Which column links a joined table, e.g. food_claims -> food_items
 const JOINS = { food_items: 'food_item_id' }
 
-const STORAGE_KEY = 'vantge-demo-v1'
+// Bump this when the sample changes, so browsers drop an old saved copy
+const STORAGE_KEY = 'vantge-demo-v2'
 
 function freshData() {
   return JSON.parse(JSON.stringify(DEMO_DATA))

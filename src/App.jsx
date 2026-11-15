@@ -35,6 +35,11 @@ export default function App() {
       <Route path="/try"       element={<DemoStart />} />
       <Route path="/try/event" element={<DemoFrame><GalleryDashboard /></DemoFrame>} />
       <Route path="/try/rsvp"  element={<DemoFrame><RSVPDashboard /></DemoFrame>} />
+      {/* Guest mobile page for the demo event (/try/demo), built from the same demo data */}
+      <Route path="/try/:eventSlug" element={<DemoFrame><EventGateway /></DemoFrame>} />
+
+      {/* /demo opens the guest demo page, so it never shows the saved event with that slug */}
+      <Route path="/demo" element={<Navigate to="/try/demo" replace />} />
 
       {/* ── Guest routes (all scoped to /:eventSlug) ─────────── */}
       <Route path="/:eventSlug"          element={<EventGateway />} />

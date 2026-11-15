@@ -8,6 +8,11 @@ export default function LogoUploader({ eventId, currentLogoUrl, onSaved, field =
       async function handleFile(e) {
             const file = e.target.files?.[0]
             e.target.value = ''
+            await saveFile(file)
+      }
+
+      // Also used for drag and drop, which works even where the file picker is blocked
+      async function saveFile(file) {
             if (!file) return
 
             const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp']
@@ -73,6 +78,8 @@ export default function LogoUploader({ eventId, currentLogoUrl, onSaved, field =
                         </div>
                   ) : (
                         <label
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={(e) => { e.preventDefault(); if (!uploading) saveFile(e.dataTransfer.files?.[0]) }}
                               className="w-16 h-[68px] rounded-xl border-2 border-dashed border-[#E8E4DA] bg-[#F7F5F0] hover:border-[#1A1A18] transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer relative"
                         >
                               {uploading ? (
