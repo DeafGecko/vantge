@@ -1518,7 +1518,7 @@ export default function RSVPDashboard() {
       <DashboardHeader active="rsvp" onSignOut={signOut} />
 
       {/* Body — two-column layout matching Gallery Dashboard */}
-      <div className="max-w-6xl mx-auto px-5 md:px-8 py-8 pb-20">
+      <div className="max-w-[1024px] mx-auto px-5 md:px-8 py-8 pb-20">
 
         {/* Page title + tabs — same row as the Event dashboard */}
         <div className="flex items-end justify-between mb-8 flex-wrap gap-6">
@@ -1645,7 +1645,7 @@ export default function RSVPDashboard() {
     {/* Bottom save bar — appears only when the Event or Design tab has changes not saved yet */}
     {(activeTab === 'event' || activeTab === 'design') && dirty && (
       <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 backdrop-blur border-t border-[#E0D8C6] shadow-lg">
-        <div className="max-w-6xl mx-auto px-5 md:px-8 py-2 flex items-center justify-between gap-4">
+        <div className="max-w-[1024px] mx-auto px-5 md:px-8 py-2 flex items-center justify-between gap-4">
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#88887E]">Unsaved changes</p>
           <button onClick={handleTopSave} disabled={saveState === 'saving'}
             className="text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-1.5 bg-[#1A1A18] text-white hover:bg-[#1A1A18] transition-all disabled:opacity-50">

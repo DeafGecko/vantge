@@ -6,9 +6,11 @@ import { useEffect } from 'react'
 //    attached to the page and slides on with it, so its own bottom comes into view.
 // Below the lg breakpoint the columns stack, so nothing is moved.
 const TOP_GAP = 96 // matches the top-24 offset used before
-const BOTTOM_GAP = 30
+const BAR_CLEARANCE = 56 // room for the demo bar at the bottom of the window
+const BOTTOM_GAP = 30 + BAR_CLEARANCE // 30px margin under the last card, above the bar
 const GRID_MARGIN_BOTTOM = 40 // mb-10 on the grid
 const LG_WIDTH = 1024
+const RIGHT_CLEARANCE = 72 // room above the demo bar, so the last card is never hidden under it
 
 export function useStickyTall(ref, enabled) {
   useEffect(() => {
@@ -36,7 +38,7 @@ export function useStickyTall(ref, enabled) {
       gridTop = grid.getBoundingClientRect().top + window.scrollY
       const rightBottom = rightCol.getBoundingClientRect().bottom + window.scrollY
       // Scroll position where the other column's last card reaches the bottom of the window
-      slideStart = rightBottom - vh
+      slideStart = rightBottom + RIGHT_CLEARANCE - vh
 
       // Give the page enough room below the grid to scroll until the column's bottom is visible
       const docNeeded = slideStart + TOP_GAP + height + BOTTOM_GAP

@@ -11,10 +11,10 @@ export default function DashboardHeader({ active, onSignOut }) {
   const inDemo = typeof window !== 'undefined' && (window.location.pathname === '/try' || window.location.pathname.startsWith('/try/'))
   return (
     <header className="bg-ink sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-5 md:px-8 h-14 flex items-center justify-between gap-4">
-        <Link to="/" aria-label="Go to home page" className="shrink-0">
+      <div className="max-w-[1024px] mx-auto px-5 md:px-8 h-14 flex items-center justify-between gap-4">
+        <a href="/" aria-label="Go to home page" className="shrink-0">
           <VantgeLogo size="sm" variant="dark" />
-        </Link>
+        </a>
         <div className="flex items-center gap-2">
           {!inDemo && <Link to="/dashboard" className={`${pill} ${active === 'event' ? on : off}`}>Event</Link>}
           {!inDemo && <Link to="/rsvp-dashboard" className={`${pill} ${active === 'rsvp' ? on : off}`}>RSVP</Link>}

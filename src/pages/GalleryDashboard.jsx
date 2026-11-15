@@ -147,7 +147,7 @@ export default function GalleryDashboard() {
       }, [user, navigate])
 
       useEffect(() => {
-            if (!event?.id) return
+            if (!event?.id || event.demo_background_locked) return
             const eventType = event.event_type
             const brandingKey = eventType || 'none'
             const hardcodedFallback = getEventType(eventType)?.defaultBg ?? null
@@ -289,7 +289,7 @@ export default function GalleryDashboard() {
                         {/* HEADER */}
                         <DashboardHeader active="event" onSignOut={async () => { await signOut(); navigate('/login') }} />
 
-                        <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-9 pb-20">
+                        <div className="max-w-[1024px] mx-auto px-4 md:px-8 py-6 md:py-9 pb-20">
 
                               {/* PAGE TITLE */}
                               <div className="mb-8 flex items-end justify-between gap-6">
@@ -315,7 +315,7 @@ export default function GalleryDashboard() {
                               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-10 items-start">
 
                                     {/* LEFT — preview + QR */}
-                                    <div ref={previewColRef} className="lg:col-span-4 flex flex-col gap-6">
+                                    <div ref={previewColRef} className="lg:col-span-4 min-w-0 flex flex-col gap-6">
 
                                           {/* Live Preview */}
                                           {dashTab === 'event' && (
@@ -532,7 +532,7 @@ export default function GalleryDashboard() {
                                     </div>
 
                                     {/* RIGHT — controls */}
-                                    <div className="lg:col-span-8 flex flex-col gap-6">
+                                    <div className="lg:col-span-8 min-w-0 flex flex-col gap-6">
 
                                           {/* Logo | Display Name | Event Type */}
                                           {dashTab === 'event' && (
@@ -573,7 +573,7 @@ export default function GalleryDashboard() {
                                                             <div>
                                                                   <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5] mb-1.5">Event Type</p>
                                                                   <Dropdown value={currentEventTypeId} className="bg-[#F7F5F0] border-2 border-[#E8E4DA] rounded-xl px-3 py-2.5 text-sm font-bold text-ink"
-                                                                        options={[{ value: '', label: '— None —' }, ...EVENT_TYPES.map(t => ({ value: t.id, label: t.label }))]}
+                                                                        options={EVENT_TYPES.map(t => ({ value: t.id, label: t.label }))}
                                                                         onChange={async (val) => {
                                                                               setLocalEventType(val)
                                                                               const updates = { event_type: val || null }
@@ -687,7 +687,7 @@ export default function GalleryDashboard() {
                               {/* Sticky save bar: only appears when the name has changes that are not saved yet */}
                               {dashTab !== 'gallery' && Object.keys(pending).length > 0 && (
                                     <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-[#E8E4DA] shadow-lg">
-                                          <div className="max-w-6xl mx-auto px-4 md:px-8 py-2 flex items-center justify-between gap-4">
+                                          <div className="max-w-[1024px] mx-auto px-4 md:px-8 py-2 flex items-center justify-between gap-4">
                                                 <p className="text-[10px] font-bold uppercase tracking-widest text-[#88887E]">Unsaved changes</p>
                                                 <button onClick={saveAll} disabled={savingSettings}
                                                       className="text-[10px] font-bold uppercase tracking-widest rounded-full px-4 py-1.5 bg-[#1A1A18] text-white hover:bg-[#1A1A18] transition-all disabled:opacity-50">

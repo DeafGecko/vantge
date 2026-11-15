@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { resetDemo } from '../demo/demoClient'
 import VantgeLogo from '../components/VantgeLogo'
 
@@ -33,7 +33,7 @@ export default function DemoStart() {
     <div className="min-h-screen bg-[#F7F5F0] text-[#1A1A18] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md bg-white rounded-2xl border border-[#E0D8C6] shadow-sm p-8 text-center">
         <div className="flex flex-col items-center">
-          <Link to="/" aria-label="Vantge home"><VantgeLogo size="lg" variant="light" /></Link>
+          <a href="/" aria-label="Vantge home"><VantgeLogo size="lg" variant="light" /></a>
           <p className="text-[11px] text-[#8A7D6A] tracking-[0.2em] uppercase mt-2">Event Photo Sharing</p>
         </div>
         <p className="text-xs font-bold uppercase tracking-widest text-[#8A7D6A] mt-8">Vantge demo</p>
@@ -43,7 +43,7 @@ export default function DemoStart() {
         </p>
 
         {!codeOk ? (
-          <form onSubmit={checkCode} className="mt-6 space-y-3">
+          <form onSubmit={checkCode} className="mt-6 space-y-3 text-left">
             <label htmlFor="demo-code" className="block text-sm font-bold">Access code</label>
             <input
               id="demo-code"
@@ -80,7 +80,7 @@ export default function DemoStart() {
           </form>
         )}
 
-        <Link to="/" className="block text-center text-xs text-[#8A7D6A] underline underline-offset-4 mt-6">Back to Vantge</Link>
+        <a href="/" className="block text-center text-xs text-[#8A7D6A] underline underline-offset-4 mt-6">Back to Vantge</a>
       </div>
     </div>
   )

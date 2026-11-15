@@ -109,7 +109,20 @@ export const DEMO_DATA = {
     is_admin_upload: i < 2,
     status: i < 4 ? 1 : 0,
     created_at: `2026-11-1${i}T12:00:00Z`,
-  })),
+  })).concat([{
+    // One photo a guest has sent that is still waiting for the host to approve it
+    id: 'm-pending',
+    event_id: DEMO_EVENT_ID,
+    guest_name: 'Jordan Brooks',
+    caption: 'Our first dance practice',
+    original_url: 'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=1200&q=80',
+    thumbnail_url: 'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=1200&q=80',
+    storage_path: null,
+    is_video: false,
+    is_admin_upload: false,
+    status: 0,
+    created_at: '2026-11-15T12:00:00Z',
+  }]),
 
   profiles: [{ id: DEMO_HOST_ID, email: 'demo@example.com', approved: true, rejected: false, created_at: '2026-11-01T12:00:00Z' }],
   admin_branding: [],

@@ -33,14 +33,22 @@ if (typeof window !== 'undefined') {
   })
 }
 
-// Used by the /try start page and the "Reset demo" button
-export function resetDemo(eventName) {
+// Used by the /try start page and the "Reset demo" button.
+// eventType and background are optional; when left out, the sample wedding is kept.
+export function resetDemo(eventName, { eventType, background } = {}) {
   store = freshData()
   const event = store.events[0]
   if (eventName?.trim()) {
     event.event_name = eventName.trim()
     event.rsvp_event_name = eventName.trim()
     event.rsvp_host_display_name = eventName.trim()
+  }
+  if (eventType !== undefined) event.event_type = eventType || null
+  if (background) {
+    event.background_image = background
+    event.background_image_desktop = background
+    // Keeps the dashboard from swapping in the event type's default photo on load
+    event.demo_background_locked = true
   }
   saveStore()
 }
