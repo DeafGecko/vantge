@@ -50,7 +50,8 @@ export default function DemoStart() {
               value={code}
               onChange={e => setCode(e.target.value)}
               autoComplete="off"
-              className="w-full rounded-xl border border-[#E0D8C6] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A1A18]/20"
+              placeholder="Type Demo"
+              className="w-full rounded-xl border border-[#E0D8C6] px-4 py-3 text-sm placeholder:text-[#A8A394] focus:outline-none focus:ring-2 focus:ring-[#1A1A18]/20"
             />
             {codeError && <p className="text-xs text-red-700">{codeError}</p>}
             <button type="submit" className="w-full rounded-xl bg-[#1A1A18] text-white font-bold py-3 text-sm">
