@@ -5,8 +5,8 @@ on:
   push:
   pull_request:
   schedule:
-    # Four runs a day (00:00, 06:00, 12:00, 18:00 Central), offset per project.
-    - cron: '4 0,6,12,18 * * *'
+    # Every 15 minutes, offset per project.
+    - cron: '4,19,34,49 * * * *'
 
 jobs:
   test:
