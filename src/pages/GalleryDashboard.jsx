@@ -56,12 +56,11 @@ export default function GalleryDashboard() {
       const [localEventName, setLocalEventName] = useState(null)
       const [pending, setPending] = useState({}) // changes waiting for the Save bar
       const [savedEventName, setSavedEventName] = useState(null) // last name saved on this screen
-      const [savingName, setSavingName] = useState(false)
+      const [, setSavingName] = useState(false)
       const [savingSettings, setSavingSettings] = useState(false)
       const [pendingCount, setPendingCount] = useState(0)
       const [approvedPhotoCount, setApprovedPhotoCount] = useState(0)
       const [approvedVideoCount, setApprovedVideoCount] = useState(0)
-      const [menuOpen, setMenuOpen] = useState(false)
       // Framing saved this session, keyed by column name (background_position, background_zoom_desktop, ...)
       const [localBgFields, setLocalBgFields] = useState({})
       const [localEventType, setLocalEventType] = useState(null)
@@ -74,7 +73,7 @@ export default function GalleryDashboard() {
       const [localRequireApproval, setLocalRequireApproval] = useState(null)
       const [localUploadLimit, setLocalUploadLimit] = useState(undefined)
       const [localPasscode, setLocalPasscode] = useState(undefined)
-      const [savingPasscode, setSavingPasscode] = useState(false)
+      const [, setSavingPasscode] = useState(false)
       const [previewUnlocked, setPreviewUnlocked] = useState(true)
       const [previewDevice, setPreviewDevice] = useState('mobile')
       const photoSectionRef = useRef(null)
@@ -249,10 +248,6 @@ export default function GalleryDashboard() {
 
       if (!event) return <CreateEventOnboarding onCreated={() => window.location.reload()} signOut={async () => { await signOut(); navigate('/login') }} />
 
-      function scrollToPhotos() {
-            setActiveTab(0)
-            setTimeout(() => photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
-      }
 
       const currentTitleAlign = localTitleAlign ?? event?.title_align ?? 'center'
       const sharedPreviewProps = {
@@ -556,6 +551,7 @@ export default function GalleryDashboard() {
                                                       <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
                                                             <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#6E6D66]">Title Font</p>
                                                             <div className="flex items-center gap-1">
+                                                                  {/* eslint-disable-next-line no-unused-vars -- Icon is used as a JSX tag, which this lint setup does not count */}
                                                                   {[{ v: 'left', Icon: AlignLeft }, { v: 'center', Icon: AlignCenter }, { v: 'right', Icon: AlignRight }].map(({ v, Icon }) => (
                                                                         <button key={v} onClick={() => { setLocalTitleAlign(v); updateEventSettings({ title_align: v }) }}
                                                                               aria-label={`Align title ${v}`} title={`Align ${v}`}

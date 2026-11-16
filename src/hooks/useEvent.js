@@ -7,10 +7,7 @@ export function useEvent(eventSlug) {
       const [error, setError] = useState(null)
 
       useEffect(() => {
-            if (!eventSlug) {
-                  setLoading(false)
-                  return
-            }
+            if (!eventSlug) return
 
             let channel = null
 
@@ -68,5 +65,6 @@ export function useEvent(eventSlug) {
             }
       }, [eventSlug])
 
-      return { event, loading, error }
+      // Without a slug there is nothing to load, so loading is not in progress
+      return { event, loading: eventSlug ? loading : false, error }
 }

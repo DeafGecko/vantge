@@ -151,19 +151,17 @@ function SetupTab({ event, onSaved, registerSave, onDirty, onNameInput, onStatus
     try {
       const draft = localStorage.getItem(DRAFT_KEY)
       if (draft) return { ...baseForm(), ...JSON.parse(draft) }
-    } catch {}
+    } catch { /* a draft that cannot be read is simply not restored */ }
     return baseForm()
   })
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
   const [error, setError] = useState(null)
-  const [hasDraft, setHasDraft] = useState(() => !!localStorage.getItem(DRAFT_KEY))
+  const [, setSaving] = useState(false)
+  const [, setSaved] = useState(false)
 
   // Auto-save to localStorage on every change
   useEffect(() => {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(form))
-    setHasDraft(true)
-  }, [form])
+  }, [form, DRAFT_KEY])
 
   const set = k => v => setForm(f => ({ ...f, [k]: v }))
 
@@ -178,7 +176,6 @@ function SetupTab({ event, onSaved, registerSave, onDirty, onNameInput, onStatus
     setSaving(false)
     if (err) { setError(err.message); return }
     localStorage.removeItem(DRAFT_KEY)
-    setHasDraft(false)
     setSaved(true); onSaved?.(u); setTimeout(() => setSaved(false), 2500)
   }
   useEffect(() => { registerSave?.(save) })
@@ -389,19 +386,23 @@ function ResponsesTab({ event }) {
     setEditing(null)
   }
 
-  const load = useCallback(async () => {
-    const [{ data: rData }, { data: cData }, { data: iData }] = await Promise.all([
+
+  // Load when the event changes; the request runs inside the effect and is ignored after unmount
+  useEffect(() => {
+    let active = true
+    Promise.all([
       supabase.from('rsvp_responses').select('*').eq('event_id', event.id).order('created_at', { ascending: false }),
       supabase.from('food_claims').select('*, food_items(name, category)').eq('event_id', event.id).order('created_at', { ascending: false }),
       supabase.from('food_items').select('*').eq('event_id', event.id).order('sort_order').order('created_at'),
-    ])
-    setResponses(rData || [])
-    setFoodClaims(cData || [])
-    setFoodItems(iData || [])
-    setLoading(false)
+    ]).then(([{ data: rData }, { data: cData }, { data: iData }]) => {
+      if (!active) return
+      setResponses(rData || [])
+      setFoodClaims(cData || [])
+      setFoodItems(iData || [])
+      setLoading(false)
+    })
+    return () => { active = false }
   }, [event.id])
-
-  useEffect(() => { load() }, [load])
 
   const [pendingRemove, setPendingRemove] = useState(null) // { type: 'response' | 'claim', item }
 
@@ -1006,8 +1007,8 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate, registerSa
   const [localBgTint,     setLocalBgTint]     = useState(event.rsvp_background_tint ?? 55)
   const [localLogoUrl,    setLocalLogoUrl]    = useState(event.rsvp_logo_url ?? null)
   const [localTitleAlign, setLocalTitleAlign] = useState(event.rsvp_title_align ?? 'left')
-  const [saving, setSaving]     = useState(false)
-  const [saved,  setSaved]      = useState(false)
+      const [, setSaved] = useState(false)
+      const [, setSaving] = useState(false)
 
   async function saveField(fields) {
     await supabase.from('events').update(fields).eq('id', event.id)
@@ -1116,7 +1117,7 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate, registerSa
           <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
             <p className="text-[9px] font-black tracking-[0.25em] uppercase text-[#B0AFA5]">Title Font</p>
             <div className="flex items-center gap-1">
-              {[{ v: 'left', Icon: AlignLeft }, { v: 'center', Icon: AlignCenter }, { v: 'right', Icon: AlignRight }].map(({ v, Icon }) => (
+              {[{ v: 'left', Icon: AlignLeft }, { v: 'center', Icon: AlignCenter }, { v: 'right', Icon: AlignRight }].map(({ v }) => (
                 <button key={v} onClick={() => { setLocalTitleAlign(v); saveField({ rsvp_title_align: v }) }}
                   aria-label={`Align title ${v}`} title={`Align ${v}`}
                   className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${localTitleAlign === v ? 'bg-[#1A1A18] text-white' : 'text-[#88887E] hover:bg-[#F4F3F0]'}`}>
@@ -1179,7 +1180,6 @@ function DesignTab({ event, design, onChange, onSaved, onLocalUpdate, registerSa
 // ── Shared preview screen renderer ───────────────────────────
 function PreviewScreen({ step, event, bgImage, theme, fontCssFamily, isDesktop }) {
   const name  = event.rsvp_event_name
-  const date  = event.rsvp_event_date
     ? new Date(event.rsvp_event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null
   const loc   = event.rsvp_location
@@ -1403,12 +1403,6 @@ export default function RSVPDashboard() {
   const [previewStep, setPreviewStep] = useState(0)
 
   // Guest controls state
-  const [localAllowDownloads,  setLocalAllowDownloads]  = useState(null)
-  const [localAllowSharing,    setLocalAllowSharing]    = useState(null)
-  const [localRequireApproval, setLocalRequireApproval] = useState(null)
-  const [localUploadLimit,     setLocalUploadLimit]     = useState(undefined)
-  const [localPasscode,        setLocalPasscode]        = useState(undefined)
-  const [savingPasscode,       setSavingPasscode]       = useState(false)
   const [qrCopied,             setQrCopied]             = useState(false)
   const qrRef = useRef(null)
 
@@ -1416,28 +1410,39 @@ export default function RSVPDashboard() {
     if (!authLoading && !user) navigate('/login')
   }, [authLoading, user, navigate])
 
+  // Reset the local copy and design when a different event is shown (done during render, not in an effect)
+  const [localEventFor, setLocalEventFor] = useState(null)
+  if (event?.id && localEventFor !== event.id) {
+    setLocalEventFor(event.id)
+    setLocalEvent(event)
+    setDesign({
+      eventId: event.id,
+      themeId: event.rsvp_theme || 'warm_editorial',
+      fontId:  event.rsvp_font  || DEFAULT_FONT_ID,
+    })
+  }
+
+  // The latest event, read by the branding check without making every event update a dependency
+  const latestEvent = useRef(event)
+  useEffect(() => { latestEvent.current = event })
+
   useEffect(() => {
-    if (event?.id) {
-      setLocalEvent(event)
-      setDesign({
-        eventId: event.id,
-        themeId: event.rsvp_theme || 'warm_editorial',
-        fontId:  event.rsvp_font  || DEFAULT_FONT_ID,
-      })
+    const current = latestEvent.current
+    if (current?.id) {
       // Apply admin branding default bg if no custom image set
       const isCustom = (url) => url && url.includes('/backgrounds/')
-      if (!isCustom(event.rsvp_background_image) || !isCustom(event.rsvp_background_image_desktop)) {
-        const brandingKey = event.rsvp_event_type || 'none'
-        const hardcodedFallback = getEventType(event.rsvp_event_type)?.defaultBg ?? null
+      if (!isCustom(current.rsvp_background_image) || !isCustom(current.rsvp_background_image_desktop)) {
+        const brandingKey = current.rsvp_event_type || 'none'
+        const hardcodedFallback = getEventType(current.rsvp_event_type)?.defaultBg ?? null
         supabase.from('admin_branding').select('background_url').eq('event_type', brandingKey).maybeSingle().then(({ data }) => {
           const adminDefault = data?.background_url || hardcodedFallback
           if (!adminDefault) return
           const updates = {}
-          if (!isCustom(event.rsvp_background_image)) updates.rsvp_background_image = adminDefault
-          if (!isCustom(event.rsvp_background_image_desktop)) updates.rsvp_background_image_desktop = adminDefault
+          if (!isCustom(current.rsvp_background_image)) updates.rsvp_background_image = adminDefault
+          if (!isCustom(current.rsvp_background_image_desktop)) updates.rsvp_background_image_desktop = adminDefault
           if (!Object.keys(updates).length) return
-          supabase.from('events').update(updates).eq('id', event.id).then(() => {
-            setLocalEvent(e => ({ ...(e || event), ...updates }))
+          supabase.from('events').update(updates).eq('id', current.id).then(() => {
+            setLocalEvent(e => ({ ...(e || current), ...updates }))
           })
         })
       }
@@ -1451,28 +1456,7 @@ export default function RSVPDashboard() {
   }
 
   // Derived guest control values (fall back to event DB values)
-  const allowDownloads  = localAllowDownloads  !== null      ? localAllowDownloads  : (ev?.allow_downloads  ?? true)
-  const allowSharing    = localAllowSharing    !== null      ? localAllowSharing    : (ev?.allow_sharing    ?? true)
-  const requireApproval = localRequireApproval !== null      ? localRequireApproval : (ev?.require_approval ?? false)
-  const uploadLimit     = localUploadLimit     !== undefined ? localUploadLimit     : (ev?.guest_upload_limit ?? null)
-  const passcode        = localPasscode        !== undefined ? localPasscode        : (ev?.guest_passcode   ?? '')
 
-  async function saveEventField(fields) {
-    if (!ev?.id) return
-    await supabase.from('events').update(fields).eq('id', ev.id)
-    mergeLocal(fields)
-  }
-  async function toggleAllowDownloads()  { const v = !allowDownloads;  setLocalAllowDownloads(v);  await saveEventField({ allow_downloads: v }) }
-  async function toggleAllowSharing()    { const v = !allowSharing;    setLocalAllowSharing(v);    await saveEventField({ allow_sharing: v }) }
-  async function toggleRequireApproval() { const v = !requireApproval; setLocalRequireApproval(v); await saveEventField({ require_approval: v }) }
-  async function saveUploadLimit(val)    { setLocalUploadLimit(val);    await saveEventField({ guest_upload_limit: val }) }
-  async function savePasscode(val) {
-    const clean = val.trim()
-    setLocalPasscode(clean)
-    setSavingPasscode(true)
-    await saveEventField({ guest_passcode: clean || null })
-    setSavingPasscode(false)
-  }
 
   function downloadQR() {
     const svg = qrRef.current?.querySelector('svg')

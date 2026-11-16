@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useEvent } from '../hooks/useEvent'
 import { uploadPhoto } from '../lib/uploadPhoto'
@@ -34,12 +34,8 @@ export default function GuestUploader() {
       const fileInputRef = useRef(null)
       const cameraInputRef = useRef(null)
 
-      const [files, setFiles] = useState([])
-
-      useEffect(() => {
-            const captured = location.state?.capturedFile
-            if (captured) setFiles([captured])
-      }, [])
+      // A photo taken on the camera page is passed in through the route state
+      const [files, setFiles] = useState(() => (location.state?.capturedFile ? [location.state.capturedFile] : []))
       const [guestName, setGuestName] = useState('')
       const [caption, setCaption] = useState('')
       const [uploadState, setUploadState] = useState('idle')

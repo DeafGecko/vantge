@@ -502,6 +502,7 @@ function TrustBar() {
           Perfect for every occasion
         </p>
         <ul ref={ref} className={`flex flex-wrap justify-center gap-8 md:gap-12 list-none p-0 m-0 ${inView ? 'vantge-trust-visible' : ''}`}>
+          {/* eslint-disable-next-line no-unused-vars -- Icon is used as a JSX tag, which this lint setup does not count */}
           {items.map(({ icon: Icon, label }) => (
             <li key={label} className="vantge-trust-item flex items-center gap-2 text-ink/70">
               <Icon size={18} aria-hidden="true" />

@@ -15,7 +15,6 @@ export default function PhotoManager({ eventId, status, onAdminPhotoDeleted }) {
 
       useEffect(() => {
             if (!eventId) return
-            setLoading(true)
 
             async function fetchInitial() {
                   const { data, error: queryError } = await supabase
@@ -400,7 +399,7 @@ function Toast({ toast, onUndo, onDismiss }) {
       const [timeLeft, setTimeLeft] = useState(6)
 
       useEffect(() => {
-            if (!toast) { setTimeLeft(6); return }
+            if (!toast) return
             const interval = setInterval(() => {
                   const remaining = Math.ceil((toast.expiresAt - Date.now()) / 1000)
                   if (remaining <= 0) { onDismiss() } else { setTimeLeft(remaining) }

@@ -95,7 +95,7 @@ export default function ApprovalQueue({ eventId }) {
             setToast({
                   type: 'approve',
                   photo: photo,
-                  expiresAt: Date.now() + 6000,
+                  duration: 6000,
             })
       }
 
@@ -120,7 +120,7 @@ export default function ApprovalQueue({ eventId }) {
             setToast({
                   type: 'reject',
                   photo: photo,
-                  expiresAt: Date.now() + 6000,
+                  duration: 6000,
             })
       }
 
@@ -266,13 +266,12 @@ function Toast({ toast, onUndo, onDismiss }) {
       const [timeLeft, setTimeLeft] = useState(6)
 
       useEffect(() => {
-            if (!toast) {
-                  setTimeLeft(6)
-                  return
-            }
+            if (!toast) return
 
+            // Count down from when this toast appeared
+            const startedAt = Date.now()
             const interval = setInterval(() => {
-                  const remaining = Math.ceil((toast.expiresAt - Date.now()) / 1000)
+                  const remaining = Math.ceil((toast.duration - (Date.now() - startedAt)) / 1000)
                   if (remaining <= 0) {
                         onDismiss()
                   } else {

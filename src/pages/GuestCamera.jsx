@@ -20,9 +20,6 @@ export default function GuestCamera() {
       const galleryInputRef = useRef(null)
 
       // Camera and media state
-      const [cameraError, setCameraError] = useState(null)
-      const [cameraReady, setCameraReady] = useState(false)
-      const [needsTapToStart, setNeedsTapToStart] = useState(false)
       const [capturedPhoto, setCapturedPhoto] = useState(null)
       const [uploadState, setUploadState] = useState('idle')
       const [uploadError, setUploadError] = useState(null)
@@ -56,8 +53,6 @@ export default function GuestCamera() {
       //Camera setup and teardown ───────────────────────────────────────────
       const startCamera = useCallback(async () => {
             stopStream()
-            setCameraReady(false)
-            setCameraError(null)
 
             try {
                   const stream = await navigator.mediaDevices.getUserMedia({
@@ -74,17 +69,11 @@ export default function GuestCamera() {
                   if (videoRef.current) {
                         videoRef.current.srcObject = stream
                         videoRef.current.onloadedmetadata = () => {
-                              videoRef.current?.play().catch(() => { })
-                              setCameraReady(true)
-                              setNeedsTapToStart(false)
+                              videoRef.current?.play().catch(() => { /* autoplay can be blocked; the frame still shows */ })
                         }
                   }
-            } catch (err) {
-                  if (err.name === 'NotAllowedError' || err.name === 'NotReadableError') {
-                        setNeedsTapToStart(true)
-                  } else {
-                        setCameraError(err.message || 'Could not access camera')
-                  }
+            } catch {
+                  // Permission denied or no camera: the page keeps its normal layout
             }
       }, [stopStream, facingMode, mode])
 

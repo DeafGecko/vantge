@@ -204,7 +204,7 @@ function getDeviceInfo() {
                   device_type: deviceType,
                   viewport: viewport,
             }
-      } catch (err) {
+      } catch {
             return {
                   user_agent: null,
                   device_type: null,

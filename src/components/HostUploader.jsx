@@ -47,7 +47,6 @@ function UploadModal({ eventId, onClose }) {
             setUploading(true)
             setProgress(0)
             setError(null)
-            let succeeded = 0
             let failed = 0
             for (let i = 0; i < files.length; i++) {
                   const file = files[i]
@@ -59,8 +58,7 @@ function UploadModal({ eventId, onClose }) {
                         is_video: file.type.startsWith('video/'),
                         is_admin_upload: true,
                   })
-                  if (result.success) succeeded++
-                  else failed++
+                  if (!result.success) failed++
                   setProgress(Math.round(((i + 1) / files.length) * 100))
             }
             setUploading(false)

@@ -37,7 +37,6 @@ function isPastDeadline(dt) {
 }
 
 // ── Accent helpers ────────────────────────────────────────────
-function accentStyle(c) { return { backgroundColor: c.accent, color: '#fff' } }
 
 // ── Sub-components ────────────────────────────────────────────
 function TabBar({ tabs, active, onChange, accent }) {
@@ -295,7 +294,20 @@ function FoodSignup({ event, accentColor }) {
     setLoading(false)
   }, [event.id])
 
-  useEffect(() => { fetchData() }, [fetchData])
+  // Load when the event changes; the request runs inside the effect and is ignored after unmount
+  useEffect(() => {
+    let active = true
+    Promise.all([
+      supabase.from('food_items').select('*').eq('event_id', event.id).order('sort_order').order('created_at'),
+      supabase.from('food_claims').select('*').eq('event_id', event.id),
+    ]).then(([{ data: itemData }, { data: claimData }]) => {
+      if (!active) return
+      setItems(itemData || [])
+      setClaims(claimData || [])
+      setLoading(false)
+    })
+    return () => { active = false }
+  }, [event.id])
 
   function spotsLeft(item) {
     if (!item.spots_total) return null
@@ -482,7 +494,7 @@ function PhotosTab({ event, eventSlug, accentColor }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!event.gallery_unlocked) { setLoading(false); return }
+    if (!event.gallery_unlocked) return
     supabase
       .from('media_queue')
       .select('id, original_url, thumbnail_url, is_video')
@@ -515,7 +527,7 @@ function PhotosTab({ event, eventSlug, accentColor }) {
 
       {!event.gallery_unlocked ? (
         <p className="text-sm text-[#88887E] mt-3">Photos will show here once the host opens the gallery.</p>
-      ) : loading ? (
+      ) : loading && event.gallery_unlocked ? (
         <div className="mt-4 grid grid-cols-4 gap-2">
           {[0,1,2,3].map(i => <div key={i} className="aspect-square rounded-xl bg-[#F4F3F0] animate-pulse" />)}
         </div>
@@ -591,7 +603,7 @@ function useIsWide() {
 }
 
 // ── Hero Banner (shared across steps) ────────────────────────
-function HeroBanner({ event, fontFamily, accentColor }) {
+function HeroBanner({ event, fontFamily }) {
   const eventDateStr = fmt(event.rsvp_event_date, event.rsvp_timezone)
   return (
     <div className="relative w-full" style={{ height: 'clamp(240px, 40vw, 360px)' }}>
@@ -931,7 +943,6 @@ export default function GuestRSVP() {
 
   useEffect(() => {
     if (!editToken) return
-    setEditLoading(true)
     supabase
       .from('rsvp_responses')
       .select('*')

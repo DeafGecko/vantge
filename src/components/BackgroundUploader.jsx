@@ -185,18 +185,26 @@ function ZoneEditor({ label, isLandscape, imageUrl, defaultBg, currentPosition, 
                   })
       }, [eventTypeId])
 
+      // Always read the latest props from this ref, so the effects below only rerun when their own values change
+      const latest = useRef(null)
+      useEffect(() => {
+            latest.current = { onPreview, col, dbField, imageUrl, currentPosition, currentTint, currentZoom }
+      })
+
       // Live preview: push unsaved photo/position/tint to the dashboard preview
       useEffect(() => {
-            if (!onPreview) return
-            const fields = { [col('position')]: position, [col('tint')]: tint, [col('zoom')]: zoom }
-            if (pendingUrl) fields[dbField] = pendingUrl
-            onPreview(fields)
+            const { onPreview: preview, col: colName, dbField: field } = latest.current
+            if (!preview) return
+            const fields = { [colName('position')]: position, [colName('tint')]: tint, [colName('zoom')]: zoom }
+            if (pendingUrl) fields[field] = pendingUrl
+            preview(fields)
       }, [pendingUrl, position, tint, zoom])
 
       // Closing without saving restores the saved photo in the preview
       useEffect(() => () => {
-            if (!savedRef.current && onPreview) {
-                  onPreview({ [dbField]: imageUrl ?? null, [col('position')]: currentPosition, [col('tint')]: currentTint, [col('zoom')]: currentZoom })
+            const l = latest.current
+            if (!savedRef.current && l.onPreview) {
+                  l.onPreview({ [l.dbField]: l.imageUrl ?? null, [l.col('position')]: l.currentPosition, [l.col('tint')]: l.currentTint, [l.col('zoom')]: l.currentZoom })
             }
       }, [])
 
