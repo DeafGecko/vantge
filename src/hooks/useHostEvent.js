@@ -13,10 +13,7 @@ export function useHostEvent() {
       const [error, setError] = useState(null)
 
       useEffect(() => {
-            if (!user) {
-                  setLoading(false)
-                  return
-            }
+            if (!user) return
 
             async function fetchEvent() {
                   setLoading(true)
@@ -38,5 +35,6 @@ export function useHostEvent() {
             fetchEvent()
       }, [user])
 
-      return { event, loading, error }
+      // Without a signed-in user there is nothing to load, so loading is not in progress
+      return { event, loading: user ? loading : false, error }
 }

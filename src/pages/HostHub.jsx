@@ -30,7 +30,6 @@ export default function HostHub() {
 
   if (!user) return null
 
-  const rsvpEnabled = event?.rsvp_enabled === true
 
   return (
     <div className="min-h-screen bg-[#0E0E0C] flex flex-col items-center justify-center px-5 py-12">
@@ -70,33 +69,6 @@ export default function HostHub() {
           </svg>
         </Link>
 
-        {rsvpEnabled && (
-        <>
-        <div className="h-px bg-white/[0.06] my-3" />
-        <p className="text-[9px] font-black tracking-[0.25em] uppercase text-white/25 px-1 mb-1">RSVP</p>
-        </>
-        )}
-
-        {/* RSVP card — shown once rsvp_enabled */}
-        {rsvpEnabled && (
-          <Link to="/rsvp-dashboard"
-            className="group relative bg-white/[0.06] hover:bg-white/[0.10] border border-white/10 hover:border-white/20 rounded-3xl p-6 flex items-center gap-5 transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/15 transition-colors">
-              <svg width="22" height="22" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white font-bold text-base leading-tight">RSVP Dashboard</p>
-              <p className="text-white/40 text-xs mt-0.5">Responses, food sign-up, invitations</p>
-            </div>
-            <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" className="text-white/30 group-hover:text-white/60 transition-colors shrink-0">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </Link>
-        )}
       </div>
 
       {/* Sign out */}

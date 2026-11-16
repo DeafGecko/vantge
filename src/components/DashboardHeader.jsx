@@ -17,7 +17,6 @@ export default function DashboardHeader({ active, onSignOut }) {
         </a>
         <div className="flex items-center gap-2">
           {!inDemo && <Link to="/dashboard" className={`${pill} ${active === 'event' ? on : off}`}>Event</Link>}
-          {!inDemo && <Link to="/rsvp-dashboard" className={`${pill} ${active === 'rsvp' ? on : off}`}>RSVP</Link>}
           {!inDemo && (
             <button onClick={onSignOut} aria-label="Sign out" title="Sign out"
               className="p-2 rounded-full hover:bg-white/10 transition-colors text-white/50 hover:text-white">

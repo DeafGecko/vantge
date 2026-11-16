@@ -259,7 +259,20 @@ export function FoodItemsManager({ event }) {
     setLoading(false)
   }, [event.id])
 
-  useEffect(() => { fetch() }, [fetch])
+  // Load when the event changes; the request runs inside the effect and is ignored after unmount
+  useEffect(() => {
+    let active = true
+    Promise.all([
+      supabase.from('food_items').select('*').eq('event_id', event.id).order('sort_order').order('created_at'),
+      supabase.from('food_claims').select('*').eq('event_id', event.id),
+    ]).then(([{ data: i }, { data: c }]) => {
+      if (!active) return
+      setItems(i || [])
+      setClaims(c || [])
+      setLoading(false)
+    })
+    return () => { active = false }
+  }, [event.id])
 
   async function addItem() {
     if (!newItem.name.trim()) return
@@ -367,17 +380,21 @@ export function RSVPResponses({ event }) {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
 
-  const fetch = useCallback(async () => {
-    const { data } = await supabase
+  // Load when the event changes; the request runs inside the effect and is ignored after unmount
+  useEffect(() => {
+    let active = true
+    supabase
       .from('rsvp_responses')
       .select('*')
       .eq('event_id', event.id)
       .order('created_at', { ascending: false })
-    setResponses(data || [])
-    setLoading(false)
+      .then(({ data }) => {
+        if (!active) return
+        setResponses(data || [])
+        setLoading(false)
+      })
+    return () => { active = false }
   }, [event.id])
-
-  useEffect(() => { fetch() }, [fetch])
 
   async function deleteResponse(id) {
     if (!window.confirm('Remove this RSVP?')) return

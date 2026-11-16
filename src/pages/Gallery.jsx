@@ -15,6 +15,16 @@ import { bgPhotoStyle, bgFraming } from '../lib/bgPhoto'
 
 const FAVORITES_KEY = (eventId) => `vantge_favs_${eventId}`
 
+// Favourite photo ids saved in this browser for one event
+function loadFavorites(eventId) {
+  try {
+    const raw = localStorage.getItem(FAVORITES_KEY(eventId))
+    return raw ? new Set(JSON.parse(raw)) : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
 function looksLikeVideo(url) {
   if (!url) return false
   return /\.(mp4|mov|webm|avi|mkv|3gp)(\?|$)/i.test(url)
@@ -254,15 +264,22 @@ function Lightbox({ photos, initialIndex, onClose, allowDownloads, allowSharing,
   function next() { setIndex(i => (i + 1) % photos.length) }
   function prev() { setIndex(i => (i - 1 + photos.length) % photos.length) }
 
+  // Keys always use the latest handlers, without rebinding the listener on every render
+  const keyHandlers = useRef({})
+  useEffect(() => {
+    keyHandlers.current = { onClose, next, prev }
+  })
+
   useEffect(() => {
     function onKey(e) {
-      if (e.key === 'Escape') onClose()
-      if (e.key === 'ArrowRight') next()
-      if (e.key === 'ArrowLeft') prev()
+      const h = keyHandlers.current
+      if (e.key === 'Escape') h.onClose()
+      if (e.key === 'ArrowRight') h.next()
+      if (e.key === 'ArrowLeft') h.prev()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [index])
+  }, [])
 
   function onTouchStart(e) { touchStartX.current = e.touches[0].clientX }
   function onTouchEnd(e) {
@@ -501,14 +518,12 @@ export default function Gallery() {
   const _bgResponsive = useResponsiveBg(event?.background_image, event?.background_image_desktop)
   const isWide = useIsWide()
 
-  // Load favorites from localStorage
-  useEffect(() => {
-    if (!event) return
-    try {
-      const raw = localStorage.getItem(FAVORITES_KEY(event.id))
-      setFavorites(raw ? new Set(JSON.parse(raw)) : new Set())
-    } catch { setFavorites(new Set()) }
-  }, [event?.id])
+  // Load this event's favorites when the event first appears or changes
+  const [favoritesEventId, setFavoritesEventId] = useState(null)
+  if (event && favoritesEventId !== event.id) {
+    setFavoritesEventId(event.id)
+    setFavorites(loadFavorites(event.id))
+  }
 
   function toggleFavorite(photoId) {
     setFavorites(prev => {
@@ -524,7 +539,6 @@ export default function Gallery() {
   }, [])
 
   useEffect(() => {
-    let eventId = null
 
     async function fetchData(isInitial = false) {
       if (isInitial) setLoading(true)
@@ -532,7 +546,6 @@ export default function Gallery() {
         .from('events').select('*').eq('event_slug', eventSlug).maybeSingle()
       if (eventError || !eventData) { if (isInitial) { setError('Event not found'); setLoading(false) } return }
       if (isInitial) setEvent(eventData)
-      eventId = eventData.id
       if (!eventData.gallery_unlocked) { if (isInitial) setLoading(false); return }
       const { data: photoData, error: photoError } = await supabase
         .from('media_queue').select('*').eq('event_id', eventData.id).eq('status', 1).eq('is_admin_upload', false)
@@ -637,8 +650,6 @@ export default function Gallery() {
       ? photos.filter(p => p.guest_id === guestId)
       : photos
 
-  const videoCount = photos.filter(p => p.is_video || looksLikeVideo(p.original_url)).length
-  const photoCount = photos.length - videoCount
 
   // ── Main gallery ───────────────────────────────────────────────────────────
   return (
