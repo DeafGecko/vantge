@@ -3,27 +3,20 @@ import { useNavigate } from 'react-router-dom'
 import { resetDemo } from '../demo/demoClient'
 import VantgeLogo from '../components/VantgeLogo'
 
-const ACCESS_CODE = 'demo'
-
-// Start of the browser-only playground: access code, then the event title, then the dashboard
+// Start of the browser-only playground: Demo or Full access, then the dashboard
 export default function DemoStart() {
   const navigate = useNavigate()
-  const [code, setCode] = useState('')
-  const [codeOk, setCodeOk] = useState(false)
-  const [codeError, setCodeError] = useState('')
+  const [choice, setChoice] = useState(null) // null | 'full'
   const [eventName, setEventName] = useState('')
 
-  function checkCode(e) {
-    e.preventDefault()
-    if (code.trim().toLowerCase() === ACCESS_CODE) {
-      setCodeOk(true)
-      setCodeError('')
-    } else {
-      setCodeError('That access code is not right. Try "Demo".')
-    }
+  // Demo: the sample party, ready to look at
+  function openDemo() {
+    resetDemo('')
+    navigate('/try/event')
   }
 
-  function start(e) {
+  // Full access: a new event with your own name, every feature available in this browser
+  function openFull(e) {
     e.preventDefault()
     resetDemo(eventName)
     navigate('/try/event')
@@ -42,24 +35,27 @@ export default function DemoStart() {
           Nothing to sign up for. Your changes stay in this browser, and you can reset at any time.
         </p>
 
-        {!codeOk ? (
-          <form onSubmit={checkCode} className="mt-6 space-y-3 text-left">
-            <label htmlFor="demo-code" className="block text-sm font-bold">Access code</label>
-            <input
-              id="demo-code"
-              value={code}
-              onChange={e => setCode(e.target.value)}
-              autoComplete="off"
-              placeholder="Type Demo"
-              className="w-full rounded-xl border border-[#E0D8C6] px-4 py-3 text-sm placeholder:text-[#A8A394] focus:outline-none focus:ring-2 focus:ring-[#1A1A18]/20"
-            />
-            {codeError && <p className="text-xs text-red-700">{codeError}</p>}
-            <button type="submit" className="w-full rounded-xl bg-[#1A1A18] text-white font-bold py-3 text-sm">
-              Continue
+        {choice === null ? (
+          <div className="mt-6 space-y-3">
+            <button
+              type="button"
+              onClick={openDemo}
+              className="w-full rounded-xl bg-[#1A1A18] text-white font-bold py-3 text-sm"
+            >
+              Demo
+              <span className="block text-xs font-normal opacity-70 mt-0.5">Look at Sam's Birthday Party</span>
             </button>
-          </form>
+            <button
+              type="button"
+              onClick={() => setChoice('full')}
+              className="w-full rounded-xl border border-[#E0D8C6] font-bold py-3 text-sm hover:bg-[#F4F3F0]"
+            >
+              Full access
+              <span className="block text-xs font-normal text-[#5A5448] mt-0.5">Create your own event and try every feature</span>
+            </button>
+          </div>
         ) : (
-          <form onSubmit={start} className="mt-6 space-y-3">
+          <form onSubmit={openFull} className="mt-6 space-y-3 text-left">
             <label htmlFor="demo-event" className="block text-sm font-bold">Name of your party or event</label>
             <input
               id="demo-event"
@@ -73,10 +69,10 @@ export default function DemoStart() {
             </button>
             <button
               type="button"
-              onClick={() => { resetDemo(''); navigate('/try/event') }}
-              className="w-full rounded-xl border border-[#E0D8C6] font-bold py-3 text-sm hover:bg-[#F4F3F0]"
+              onClick={() => setChoice(null)}
+              className="w-full text-xs text-[#8A7D6A] underline underline-offset-4 py-2"
             >
-              Use the sample party instead
+              Back to the two choices
             </button>
           </form>
         )}
